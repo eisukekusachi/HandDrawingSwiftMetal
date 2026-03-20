@@ -47,21 +47,6 @@ class HandDrawingViewController: UIViewController {
         )
     }
 
-    var currentLocalFileItem: LocalFileItem {
-        .init(
-            title: viewModel.project.projectName,
-            createdAt: viewModel.project.createdAt,
-            updatedAt: viewModel.project.updatedAt,
-            image: canvasView.canvasTexture?.uiImage?.resizeWithAspectRatio(
-                height: HandDrawingCanvasView.thumbnailLength,
-                scale: 1.0
-            ),
-            fileURL: URL.documents.appendingPathComponent(
-                viewModel.projectFileName()
-            )
-        )
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -512,9 +497,8 @@ extension HandDrawingViewController {
         )
     }
     private func saveProject() {
-        viewModel.saveProject(
-            action: { [weak self] workingDirectoryURL in
-
+        viewModel.onSaveProject(
+            saveCanvasAction: { [weak self] workingDirectoryURL in
                 try await self?.canvasView.saveFiles(
                     to: workingDirectoryURL
                 )
@@ -522,7 +506,7 @@ extension HandDrawingViewController {
             completion: { [weak self] in
                 guard let `self` else { return }
                 self.viewModel.upsertFileList(
-                    fileItem: currentLocalFileItem
+                    self.viewModel.currentFile(thumbnail: self.canvasView.thumbnail)
                 )
             },
             zipFileURL: zipFileURL

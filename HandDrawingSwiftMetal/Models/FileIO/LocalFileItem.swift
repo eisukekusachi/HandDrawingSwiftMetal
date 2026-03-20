@@ -12,7 +12,7 @@ public class LocalFileItem: Identifiable {
     public var title: String
     public var createdAt: Date
     public var updatedAt: Date
-    public var image: UIImage?
+    public var thumbnail: UIImage?
     public var fileURL: URL {
         _fileURL
     }
@@ -22,13 +22,13 @@ public class LocalFileItem: Identifiable {
         title: String,
         createdAt: Date,
         updatedAt: Date,
-        image: UIImage?,
+        thumbnail: UIImage?,
         fileURL: URL
     ) {
         self.title = title
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.image = image
+        self.thumbnail = thumbnail
         self._fileURL = fileURL
     }
 }

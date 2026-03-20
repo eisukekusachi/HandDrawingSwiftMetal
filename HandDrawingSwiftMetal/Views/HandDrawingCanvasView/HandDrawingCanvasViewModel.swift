@@ -63,58 +63,43 @@ final class HandDrawingCanvasViewModel: ObservableObject {
             device: device
         )
     }
+}
 
+extension HandDrawingCanvasViewModel {
     func onCompleteDrawing(
         texture: MTLTexture,
-        for id: LayerId,
         device: MTLDevice
     ) async throws {
-        guard let dependencies else { return }
+        guard
+            let dependencies,
+            let layerId = self.textureLayersState?.selectedLayer?.id
+        else { return }
+
         try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
             texture: texture,
-            for: id,
+            for: layerId,
             device: device
         )
 
         textureLayersState?.updateThumbnail(
-            id,
+            layerId,
             texture: texture
         )
     }
-}
 
-extension HandDrawingCanvasViewModel {
-    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture? {
-        guard let dependencies else { return nil }
-        return try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
-            id,
-            device: device
-        )
-    }
-
-    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]? {
-        guard let dependencies else { return nil }
-        return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-            ids,
-            device: device
-        )
-    }
-
-    func exportFiles(
-        canvasTexture: MTLTexture?,
-        thumbnailLength: CGFloat = 500,
-        textureLayers: TextureLayersState?,
+    func onSaveFiles(
+        thumbnail: UIImage?,
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
         guard
             let dependencies,
-            let textureLayers
+            let textureLayersState
         else { return }
 
         do {
             // Save the thumbnail image into the working directory
-            try thumbnail(canvasTexture: canvasTexture, length: thumbnailLength)?.pngData()?.write(
+            try thumbnail?.pngData()?.write(
                 to: workingDirectoryURL.appendingPathComponent("thumbnail.png")
             )
         } catch {
@@ -129,7 +114,7 @@ extension HandDrawingCanvasViewModel {
         do {
             // Copy all textures from the textureRepository
             let textures = try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-                textureLayers.layers.map { $0.id },
+                textureLayersState.layers.map { $0.id },
                 device: device
             )
 
@@ -156,9 +141,9 @@ extension HandDrawingCanvasViewModel {
         do {
             // Save the texture layers as JSON
             try TextureLayersArchiveModel(
-                layers: textureLayers.layers.map { .init(item: $0) },
-                layerIndex: textureLayers.selectedIndex ?? 0,
-                textureSize: textureLayers.textureSize
+                layers: textureLayersState.layers.map { .init(item: $0) },
+                layerIndex: textureLayersState.selectedIndex ?? 0,
+                textureSize: textureLayersState.textureSize
             ).write(
                 in: workingDirectoryURL
             )
@@ -171,11 +156,22 @@ extension HandDrawingCanvasViewModel {
             throw error
         }
     }
+}
 
-    func thumbnail(canvasTexture: MTLTexture?, length: CGFloat = 500) -> UIImage? {
-        canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: length,
-            scale: 1.0
+extension HandDrawingCanvasViewModel {
+    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture? {
+        guard let dependencies else { return nil }
+        return try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+            id,
+            device: device
+        )
+    }
+
+    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]? {
+        guard let dependencies else { return nil }
+        return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+            ids,
+            device: device
         )
     }
 }

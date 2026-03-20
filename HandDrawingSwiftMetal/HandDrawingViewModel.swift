@@ -50,6 +50,19 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPalette: BrushPalette
     let eraserPalette: EraserPalette
 
+    /// Current file for displaying in the file list
+    func currentFile(thumbnail: UIImage?) -> LocalFileItem {
+        .init(
+            title: project.projectName,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+            thumbnail: thumbnail,
+            fileURL: URL.documents.appendingPathComponent(
+                projectFileName()
+            )
+        )
+    }
+
     private let projectStorage: CoreDataProjectStorage
     private let drawingToolStorage: CoreDataDrawingToolStorage
     private let brushPaletteStorage: CoreDataBrushPaletteStorage
@@ -223,8 +236,8 @@ extension HandDrawingViewModel {
         }
     }
 
-    func saveProject(
-        action: ((URL) async throws -> Void)?,
+    func onSaveProject(
+        saveCanvasAction: ((URL) async throws -> Void)?,
         completion: (() -> Void)?,
         zipFileURL: URL
     ) {
@@ -241,7 +254,7 @@ extension HandDrawingViewModel {
                 // Create a temporary working directory for saving project files
                 let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
 
-                try await action?(workingDirectoryURL)
+                try await saveCanvasAction?(workingDirectoryURL)
 
                 try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
                 try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
@@ -267,11 +280,11 @@ extension HandDrawingViewModel {
 }
 
 extension HandDrawingViewModel {
-    func upsertFileList(fileItem: LocalFileItem) {
-        if let index = _fileList.firstIndex(where: { $0.title == fileItem.title }) {
-            _fileList[index] = fileItem
+    func upsertFileList(_ file: LocalFileItem) {
+        if let index = _fileList.firstIndex(where: { $0.title == file.title }) {
+            _fileList[index] = file
         } else {
-            _fileList.append(fileItem)
+            _fileList.append(file)
         }
 
         _fileList.sort { $0.updatedAt > $1.updatedAt }
@@ -312,7 +325,7 @@ extension HandDrawingViewModel {
                         title: projectMetaData.projectName,
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
-                        image: UIImage(data: data),
+                        thumbnail: UIImage(data: data),
                         fileURL: zipFileURL
                     )
                 )

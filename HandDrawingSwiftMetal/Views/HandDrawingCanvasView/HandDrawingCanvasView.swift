@@ -36,7 +36,12 @@ import TextureLayerView
 
     private var cancellables = Set<AnyCancellable>()
 
-    public static let thumbnailLength: CGFloat = 500
+    public var thumbnail: UIImage? {
+        canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: 500,
+            scale: 1.0
+        )
+    }
 
     override init() {
         self.textureLayersStorageController = PersistenceController(
@@ -118,14 +123,12 @@ import TextureLayerView
             Task(priority: .utility) { [weak self] in
                 guard
                     let `self`,
-                    let currentTexture = self.currentTexture,
-                    let layerId = self.viewModel.textureLayersState?.selectedLayer?.id
+                    let currentTexture = self.currentTexture
                 else { return }
 
                 do {
                     try await self.viewModel.onCompleteDrawing(
                         texture: currentTexture,
-                        for: layerId,
                         device: self.sharedDevice
                     )
                 } catch {
@@ -280,12 +283,8 @@ extension HandDrawingCanvasView {
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
-        guard let textureLayersState = viewModel.textureLayersState else { return }
-
-        try await viewModel.exportFiles(
-            canvasTexture: canvasTexture,
-            thumbnailLength: 500,
-            textureLayers: textureLayersState,
+        try await viewModel.onSaveFiles(
+            thumbnail: thumbnail,
             device: sharedDevice,
             to: workingDirectoryURL
         )
