@@ -46,11 +46,11 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         device: MTLDevice
     ) async throws
 
-    func removeAll()
-
     func removeTexture(
         _ id: LayerId
     ) throws
+
+    func removeAll()
 
     func writeTextureToDisk(
         texture: MTLTexture,

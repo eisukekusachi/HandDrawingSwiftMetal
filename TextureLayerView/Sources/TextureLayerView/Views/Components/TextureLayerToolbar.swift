@@ -34,7 +34,7 @@ public struct TextureLayerToolbar: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 16) {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
@@ -54,14 +54,16 @@ public struct TextureLayerToolbar: View {
                 }
             )
 
-            Spacer().frame(width: 16)
-
             Button(
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
-                            viewModel.onTapDeleteButton()
-                            onChanged(.removeLayer)
+                            do {
+                                try await viewModel.onTapDeleteButton()
+                                onChanged(.removeLayer)
+                            } catch {
+                                Logger.error(error)
+                            }
                         }
                     }
                 },
@@ -70,8 +72,6 @@ public struct TextureLayerToolbar: View {
                         .buttonModifier(diameter: buttonSize)
                 }
             )
-
-            Spacer().frame(width: 16)
 
             Button(
                 action: {

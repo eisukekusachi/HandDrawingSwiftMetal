@@ -147,17 +147,21 @@ public extension TextureLayerViewModel {
             )
     }
 
-    func onTapDeleteButton() {
+    func onTapDeleteButton() async throws {
         guard
             let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
+            let selectedId = textureLayers.selectedLayer?.id,
             textureLayers.layerCount > 1
         else { return }
 
-        Task {
-            try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
-            // fullCanvasUpdateRequestedSubject.send()
-        }
+        try await textureLayers.removeLayer(
+            layerIndexToDelete: selectedIndex
+        )
+        try dependencies?.textureLayersDocumentsRepository
+            .removeTexture(
+                selectedId
+            )
     }
 
     func onTapTitleButton(_ id: UUID, title: String) {
