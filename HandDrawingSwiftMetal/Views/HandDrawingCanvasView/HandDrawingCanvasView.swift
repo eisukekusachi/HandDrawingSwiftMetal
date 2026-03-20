@@ -18,7 +18,7 @@ import TextureLayerView
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
     var textureLayersState: TextureLayersState? {
-        viewModel.textureLayersState
+        viewModel?.textureLayersState
     }
 
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
@@ -32,7 +32,7 @@ import TextureLayerView
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private let viewModel: HandDrawingCanvasViewModel = .init()
+    private var viewModel: HandDrawingCanvasViewModel?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -50,7 +50,10 @@ import TextureLayerView
 
         super.init()
 
-        self.viewModel.onInit(device: sharedDevice)
+        self.viewModel = .init(
+            device: sharedDevice,
+            dependencies: .init()
+        )
 
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
@@ -58,7 +61,7 @@ import TextureLayerView
 
         self.textureLayerRenderer = .init(renderer: renderer)
 
-        guard let textureLayersState = viewModel.textureLayersState else { return }
+        guard let textureLayersState = viewModel?.textureLayersState else { return }
         self.textureLayerStorage = .init(
             textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
@@ -128,7 +131,7 @@ import TextureLayerView
                 else { return }
 
                 do {
-                    try await self.viewModel.onCompleteDrawing(
+                    try await self.viewModel?.onCompleteDrawing(
                         texture: currentTexture,
                         device: self.sharedDevice
                     )
@@ -141,10 +144,10 @@ import TextureLayerView
 
     func updateFullCanvasTexture() async throws {
         guard
-            let textureLayersState = viewModel.textureLayersState,
+            let textureLayersState = viewModel?.textureLayersState,
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
-            let currentTexture = try await viewModel.duplicatedTexture(
+            let currentTexture = try await viewModel?.duplicatedTexture(
                 selectedLayer.id,
                 device: sharedDevice
             )?.texture
@@ -154,7 +157,7 @@ import TextureLayerView
 
         try setCurrentTexture(currentTexture)
 
-        let textures = try await viewModel.duplicatedTextures(
+        let textures = try await viewModel?.duplicatedTextures(
             textureLayers.layers.map { $0.id },
             device: sharedDevice
         ) ?? []
@@ -198,7 +201,7 @@ import TextureLayerView
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
         guard
-            let selectedLayer = viewModel.textureLayersState?.selectedLayer
+            let selectedLayer = viewModel?.textureLayersState?.selectedLayer
         else {
             return
         }
@@ -233,7 +236,7 @@ extension HandDrawingCanvasView {
             return state
         }()
 
-        let resolvedConfiguration = try await viewModel.onSetup(
+        let resolvedConfiguration = try await viewModel?.onSetup(
             restoredData: restoredData,
             configuration: configuration,
             device: sharedDevice
@@ -243,15 +246,15 @@ extension HandDrawingCanvasView {
     }
 
     func newCanvas() async throws {
-        try await viewModel.onNewCanvas(device: sharedDevice)
-        if let textureSize = viewModel.textureSize {
+        try await viewModel?.onNewCanvas(device: sharedDevice)
+        if let textureSize = viewModel?.textureSize {
             super.resetTransforming()
             try super.createCanvas(textureSize)
         }
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
-        try await viewModel.onSaveFiles(
+        try await viewModel?.onSaveFiles(
             thumbnail: thumbnail,
             device: sharedDevice,
             to: workingDirectoryURL
@@ -259,8 +262,8 @@ extension HandDrawingCanvasView {
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        try await viewModel.onLoadFiles(device: sharedDevice, from: workingDirectoryURL)
-        if let textureSize = viewModel.textureSize {
+        try await viewModel?.onLoadFiles(device: sharedDevice, from: workingDirectoryURL)
+        if let textureSize = viewModel?.textureSize {
             try super.createCanvas(textureSize)
         }
     }

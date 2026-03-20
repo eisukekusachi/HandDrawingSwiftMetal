@@ -17,24 +17,23 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         textureLayersState?.textureSize
     }
 
-    private var dependencies: HandDrawingCanvasViewDependencies?
+    private var dependencies: HandDrawingCanvasViewDependencies
 
     private(set) var textureLayersState: TextureLayersState?
 
     init(
-        dependencies: HandDrawingCanvasViewDependencies? = nil
+        device: MTLDevice,
+        dependencies: HandDrawingCanvasViewDependencies
     ) {
-        self.dependencies = dependencies ?? HandDrawingCanvasViewDependencies()
-    }
-}
+        self.dependencies = dependencies
 
-extension HandDrawingCanvasViewModel {
-    func onInit(device: MTLDevice) {
         self.textureLayersState = TextureLayersState(
             device: device
         )
     }
+}
 
+extension HandDrawingCanvasViewModel {
     func onSetup(
         restoredData: TextureLayersModel?,
         configuration: CanvasConfiguration,
@@ -45,7 +44,7 @@ extension HandDrawingCanvasViewModel {
 
         if let restoredData {
             do {
-                try restoreStorageFromWorkingDirectory(
+                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
                     textureLayers: restoredData,
                     device: device
                 )
@@ -56,7 +55,7 @@ extension HandDrawingCanvasViewModel {
             } catch {
                 // Initialize the storage on error
                 let newData = TextureLayersModel(textureSize: configuration.textureSize)
-                try await initializeStorage(
+                try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newData,
                     device: device
                 )
@@ -66,7 +65,7 @@ extension HandDrawingCanvasViewModel {
 
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
-            try await initializeStorage(
+            try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                 textureLayers: newData,
                 device: device
             )
@@ -84,7 +83,6 @@ extension HandDrawingCanvasViewModel {
         device: MTLDevice
     ) async throws {
         guard
-            let dependencies,
             let layerId = self.textureLayersState?.selectedLayer?.id
         else { return }
 
@@ -106,7 +104,6 @@ extension HandDrawingCanvasViewModel {
         to workingDirectoryURL: URL
     ) async throws {
         guard
-            let dependencies,
             let textureLayersState
         else { return }
 
@@ -182,7 +179,7 @@ extension HandDrawingCanvasViewModel {
         )
         let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
-        try await restoreStorage(
+        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
             url: workingDirectoryURL,
             textureLayers: data,
             device: device
@@ -202,7 +199,7 @@ extension HandDrawingCanvasViewModel {
             textureSize: textureSize
         )
 
-        try await initializeStorage(
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
             textureLayers: data,
             device: device
         )
@@ -213,54 +210,15 @@ extension HandDrawingCanvasViewModel {
 
 extension HandDrawingCanvasViewModel {
     func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture? {
-        guard let dependencies else { return nil }
-        return try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
     }
 
     func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]? {
-        guard let dependencies else { return nil }
-        return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
-            device: device
-        )
-    }
-}
-
-private extension HandDrawingCanvasViewModel {
-    func initializeStorage(
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) async throws {
-        guard let dependencies else { return }
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
-
-    func restoreStorageFromWorkingDirectory(
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) throws {
-        guard let dependencies else { return }
-        try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-            textureLayers: textureLayers,
-            device: device
-        )
-    }
-
-    func restoreStorage(
-        url sourceFolderURL: URL,
-        textureLayers: TextureLayersModel,
-        device: MTLDevice
-    ) async throws {
-        guard let dependencies else { return }
-        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-            url: sourceFolderURL,
-            textureLayers: textureLayers,
             device: device
         )
     }
