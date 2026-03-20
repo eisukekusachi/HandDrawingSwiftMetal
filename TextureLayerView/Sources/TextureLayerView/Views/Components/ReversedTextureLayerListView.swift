@@ -45,7 +45,11 @@ public struct ReversedTextureLayerListView: View {
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                viewModel.onMoveLayer(source: source, destination: destination)
+                viewModel.onMoveLayer(
+                    source: source,
+                    destination: destination
+                )
+                onChanged(.moveLayer)
             })
             .listRowSeparator(.hidden)
         }
