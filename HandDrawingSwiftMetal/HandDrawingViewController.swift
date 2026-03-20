@@ -58,7 +58,7 @@ class HandDrawingViewController: UIViewController {
             ),
             onChanged: { event in
                 switch event {
-                case .addLayer, .removeLayer, .selectLayer:
+                case .addLayer, .removeLayer, .selectLayer, .changeVisibility:
                     Task { [weak self] in
                         try? await self?.canvasView.updateFullCanvasTexture()
                     }

@@ -16,4 +16,6 @@ public enum TextureLayerEvent {
     case selectLayer
 
     case editLayer
+
+    case changeVisibility
 }

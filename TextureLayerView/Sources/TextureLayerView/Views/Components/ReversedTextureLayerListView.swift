@@ -38,6 +38,7 @@ public struct ReversedTextureLayerListView: View {
                             targetLayer.id,
                             isVisible: !targetLayer.isVisible
                         )
+                        onChanged(.changeVisibility)
                     }
                 )
                 .listRowBackground(Color.clear)
