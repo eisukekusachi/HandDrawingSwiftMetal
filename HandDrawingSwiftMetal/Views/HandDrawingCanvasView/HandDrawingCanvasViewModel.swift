@@ -13,17 +13,90 @@ import TextureLayerView
 @MainActor
 final class HandDrawingCanvasViewModel: ObservableObject {
 
+    private var dependencies: HandDrawingCanvasViewDependencies?
+
+    init(
+        dependencies: HandDrawingCanvasViewDependencies? = nil
+    ) {
+        self.dependencies = dependencies ?? HandDrawingCanvasViewDependencies()
+    }
+
+    func initializeStorage(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+
+    func restoreStorage(
+        url sourceFolderURL: URL,
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
+            url: sourceFolderURL,
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+
+    func restoreStorage(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) throws {
+        guard let dependencies else { return }
+        try dependencies.textureLayersDocumentsRepository.restoreStorage(
+            textureLayers: textureLayers,
+            device: device
+        )
+    }
+}
+
+extension HandDrawingCanvasViewModel {
+    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture? {
+        guard let dependencies else { return nil }
+        return try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+            id,
+            device: device
+        )
+    }
+
+    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]? {
+        guard let dependencies else { return nil }
+        return try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+            ids,
+            device: device
+        )
+    }
+
+    func writeTexture(
+        texture: MTLTexture,
+        for id: LayerId,
+        device: MTLDevice
+    ) async throws {
+        guard let dependencies else { return }
+        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+            texture: texture,
+            for: id,
+            device: device
+        )
+    }
+
     func exportFiles(
         canvasTexture: MTLTexture?,
         thumbnailLength: CGFloat = 500,
         textureLayers: TextureLayersState?,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?,
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
         guard
-            let textureLayers,
-            let textureLayersDocumentsRepository
+            let dependencies,
+            let textureLayers
         else { return }
 
         do {
@@ -42,7 +115,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
         do {
             // Copy all textures from the textureRepository
-            let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
+            let textures = try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
                 textureLayers.layers.map { $0.id },
                 device: device
             )

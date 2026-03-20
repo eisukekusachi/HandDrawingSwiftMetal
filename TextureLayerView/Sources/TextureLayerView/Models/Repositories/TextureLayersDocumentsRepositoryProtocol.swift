@@ -19,12 +19,12 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         device: MTLDevice
     ) async throws
 
-    func restoreStorageFromCoreData(
+    func restoreStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws
 
-    func restoreStorageFromSavedData(
+    func restoreStorage(
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice

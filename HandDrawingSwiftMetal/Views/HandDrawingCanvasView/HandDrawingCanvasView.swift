@@ -17,8 +17,6 @@ import TextureLayerView
     }
     private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
 
-    public var textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol?
-
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
     public var textureLayersState: TextureLayersState?
@@ -32,7 +30,7 @@ import TextureLayerView
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private let viewModel = HandDrawingCanvasViewModel()
+    private let viewModel: HandDrawingCanvasViewModel = .init()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -42,9 +40,8 @@ import TextureLayerView
         self.textureLayersStorageController = PersistenceController(
             xcdatamodeldName: "TextureLayerStorage"
         )
-        super.init()
 
-        self.textureLayersDocumentsRepository = TextureLayersDocumentsRepository.shared
+        super.init()
 
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer
@@ -125,7 +122,7 @@ import TextureLayerView
                 else { return }
 
                 do {
-                    try await self.textureLayersDocumentsRepository?.writeTextureToDisk(
+                    try await self.viewModel.writeTexture(
                         texture: currentTexture,
                         for: layerId,
                         device: self.sharedDevice
@@ -145,23 +142,22 @@ import TextureLayerView
     func updateFullCanvasTexture() async throws {
         guard
             let textureLayersState,
-            let textureLayersDocumentsRepository,
             let selectedLayer = textureLayersState.selectedLayer,
-            let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState)
+            let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
+            let currentTexture = try await viewModel.duplicatedTexture(
+                selectedLayer.id,
+                device: sharedDevice
+            )?.texture
         else {
             return
         }
 
-        let currentTexture = try await textureLayersDocumentsRepository.duplicatedTexture(
-            selectedLayer.id,
-            device: sharedDevice
-        ).texture
         try setCurrentTexture(currentTexture)
 
-        let textures = try await textureLayersDocumentsRepository.duplicatedTextures(
+        let textures = try await viewModel.duplicatedTextures(
             textureLayers.layers.map { $0.id },
             device: sharedDevice
-        )
+        ) ?? []
 
         try await textureLayerRenderer?.refreshTextures(
             textureLayers: textureLayers,
@@ -247,7 +243,7 @@ extension HandDrawingCanvasView {
             data = restoredData
             resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
 
-            try textureLayersDocumentsRepository?.restoreStorageFromCoreData(
+            try viewModel.restoreStorage(
                 textureLayers: restoredData,
                 device: sharedDevice
             )
@@ -256,7 +252,7 @@ extension HandDrawingCanvasView {
             data = newData
             resolvedConfiguration = configuration
 
-            try await textureLayersDocumentsRepository?.initializeStorage(
+            try await viewModel.initializeStorage(
                 textureLayers: newData,
                 device: sharedDevice
             )
@@ -276,7 +272,7 @@ extension HandDrawingCanvasView {
             textureSize: textureSize
         )
 
-        try await textureLayersDocumentsRepository?.initializeStorage(
+        try await viewModel.initializeStorage(
             textureLayers: data,
             device: sharedDevice
         )
@@ -292,7 +288,6 @@ extension HandDrawingCanvasView {
             canvasTexture: canvasTexture,
             thumbnailLength: 500,
             textureLayers: textureLayersState,
-            textureLayersDocumentsRepository: textureLayersDocumentsRepository,
             device: sharedDevice,
             to: workingDirectoryURL
         )
@@ -307,7 +302,7 @@ extension HandDrawingCanvasView {
         )
         let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
-        try await textureLayersDocumentsRepository?.restoreStorageFromSavedData(
+        try await viewModel.restoreStorage(
             url: workingDirectoryURL,
             textureLayers: data,
             device: sharedDevice

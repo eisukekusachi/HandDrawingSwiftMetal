@@ -29,6 +29,7 @@
 		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
 		D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */; };
 		D449769D2F658D4D00CE2D2F /* PopupPresenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D449769C2F658D4D00CE2D2F /* PopupPresenterView.swift */; };
+		D44976A12F6C33A000CE2D2F /* HandDrawingCanvasViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44976A02F6C33A000CE2D2F /* HandDrawingCanvasViewDependencies.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
@@ -132,6 +133,7 @@
 		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataDrawingToolStorage.swift; sourceTree = "<group>"; };
 		D449769C2F658D4D00CE2D2F /* PopupPresenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopupPresenterView.swift; path = /Users/eisukekusachi/PopupPresenterView.swift; sourceTree = "<absolute>"; };
+		D44976A02F6C33A000CE2D2F /* HandDrawingCanvasViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HandDrawingCanvasViewDependencies.swift; path = /Users/eisukekusachi/HandDrawingCanvasViewDependencies.swift; sourceTree = "<absolute>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
@@ -426,6 +428,7 @@
 			children = (
 				D49C69102F224F1200B66608 /* HandDrawingCanvasView.swift */,
 				D49C695A2F324E7900B66608 /* HandDrawingCanvasViewModel.swift */,
+				D44976A02F6C33A000CE2D2F /* HandDrawingCanvasViewDependencies.swift */,
 			);
 			path = HandDrawingCanvasView;
 			sourceTree = "<group>";
@@ -753,6 +756,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,
 				D49C695B2F324E7900B66608 /* HandDrawingCanvasViewModel.swift in Sources */,
+				D44976A12F6C33A000CE2D2F /* HandDrawingCanvasViewDependencies.swift in Sources */,
 				D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */,

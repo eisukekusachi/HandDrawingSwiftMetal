@@ -74,9 +74,9 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         self.textureSize = textureSize
     }
 
-    /// Restore the storage from Core Data.
-    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersState`
-    public func restoreStorageFromCoreData(
+    /// Restore the storage
+    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
+    public func restoreStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws {
@@ -123,10 +123,10 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         self.textureSize = textureLayers.textureSize
     }
 
-    /// Restore the storage from the saved data.
-    /// Verify that the textures in `sourceFolderURL` match `TextureLayersState`,
+    /// Restore the storage
+    /// Verify that the textures in `sourceFolderURL` match `TextureLayersModel`,
     /// and if they do, move them to `workingDirectory`
-    public func restoreStorageFromSavedData(
+    public func restoreStorage(
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
