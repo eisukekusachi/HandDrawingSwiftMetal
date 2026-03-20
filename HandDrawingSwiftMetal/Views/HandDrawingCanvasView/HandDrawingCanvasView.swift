@@ -125,14 +125,11 @@ import TextureLayerView
     private func completeDrawing() {
         drawingDebouncer.perform {
             Task(priority: .utility) { [weak self] in
-                guard
-                    let `self`,
-                    let currentTexture = self.currentTexture
-                else { return }
+                guard let `self` else { return }
 
                 do {
                     try await self.viewModel?.onCompleteDrawing(
-                        texture: currentTexture,
+                        texture: self.currentTexture,
                         device: self.sharedDevice
                     )
                 } catch {

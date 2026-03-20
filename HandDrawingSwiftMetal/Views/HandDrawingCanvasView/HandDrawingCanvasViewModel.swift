@@ -79,10 +79,11 @@ extension HandDrawingCanvasViewModel {
     }
 
     func onCompleteDrawing(
-        texture: MTLTexture,
+        texture: MTLTexture?,
         device: MTLDevice
     ) async throws {
         guard
+            let texture,
             let layerId = self.textureLayersState?.selectedLayer?.id
         else { return }
 
