@@ -240,22 +240,21 @@ extension HandDrawingCanvasView {
         let resolvedConfiguration: CanvasConfiguration
 
         if let restoredData {
-            data = restoredData
-            resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
-
-            try viewModel.restoreStorageFromWorkingDirectory(
-                textureLayers: restoredData,
-                device: sharedDevice
-            )
+            do {
+                (data, resolvedConfiguration) = try restoreStorage(
+                    configuration: configuration,
+                    restoredTextureLayers: restoredData
+                )
+            } catch {
+                // Initialize the storage on error
+                (data, resolvedConfiguration) = try await initializedStorage(
+                    configuration: configuration
+                )
+            }
 
         } else {
-            let newData = TextureLayersModel(textureSize: configuration.textureSize)
-            data = newData
-            resolvedConfiguration = configuration
-
-            try await viewModel.initializeStorage(
-                textureLayers: newData,
-                device: sharedDevice
+            (data, resolvedConfiguration) = try await initializedStorage(
+                configuration: configuration
             )
         }
 
@@ -390,5 +389,32 @@ extension HandDrawingCanvasView {
             .init(undoManager)
         )
  */
+    }
+}
+
+private extension HandDrawingCanvasView {
+
+    func restoreStorage(
+        configuration: CanvasConfiguration,
+        restoredTextureLayers: TextureLayersModel
+    ) throws -> (TextureLayersModel, CanvasConfiguration) {
+        try viewModel.restoreStorageFromWorkingDirectory(
+            textureLayers: restoredTextureLayers,
+            device: sharedDevice
+        )
+
+        return (restoredTextureLayers, configuration.newTextureSize(restoredTextureLayers.textureSize))
+    }
+    func initializedStorage(
+        configuration: CanvasConfiguration
+    ) async throws -> (TextureLayersModel, CanvasConfiguration) {
+        let newData = TextureLayersModel(textureSize: configuration.textureSize)
+
+        try await viewModel.initializeStorage(
+            textureLayers: newData,
+            device: sharedDevice
+        )
+
+        return (newData, configuration)
     }
 }
