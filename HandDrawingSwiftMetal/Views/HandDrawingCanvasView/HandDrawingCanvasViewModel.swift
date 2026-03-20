@@ -181,6 +181,25 @@ extension HandDrawingCanvasViewModel {
 
         textureLayersState.update(data)
     }
+
+    func onNewCanvas(
+        device: MTLDevice
+    ) async throws {
+        guard let textureLayersState else { return }
+
+        let textureSize = textureLayersState.textureSize
+
+        let data: TextureLayersModel = .init(
+            textureSize: textureSize
+        )
+
+        try await initializeStorage(
+            textureLayers: data,
+            device: device
+        )
+
+        textureLayersState.update(data)
+    }
 }
 
 extension HandDrawingCanvasViewModel {

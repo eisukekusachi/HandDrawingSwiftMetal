@@ -263,23 +263,11 @@ extension HandDrawingCanvasView {
     }
 
     func newCanvas() async throws {
-        guard let textureLayersState = viewModel.textureLayersState else { return }
-
-        let textureSize = textureLayersState.textureSize
-
-        let data: TextureLayersModel = .init(
-            textureSize: textureSize
-        )
-
-        try await viewModel.initializeStorage(
-            textureLayers: data,
-            device: sharedDevice
-        )
-        textureLayersState.update(data)
-
-        super.resetTransforming()
-
-        try super.createCanvas(textureSize)
+        try await viewModel.onNewCanvas(device: sharedDevice)
+        if let textureSize = viewModel.textureSize {
+            super.resetTransforming()
+            try super.createCanvas(textureSize)
+        }
     }
 
     func saveFiles(to workingDirectoryURL: URL) async throws {
