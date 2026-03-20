@@ -50,7 +50,7 @@ import TextureLayerView
 
         super.init()
 
-        viewModel.setup(device: sharedDevice)
+        self.viewModel.onInit(device: sharedDevice)
 
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer

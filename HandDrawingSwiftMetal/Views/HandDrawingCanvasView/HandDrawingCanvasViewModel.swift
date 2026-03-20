@@ -27,12 +27,6 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         self.dependencies = dependencies ?? HandDrawingCanvasViewDependencies()
     }
 
-    func setup(device: MTLDevice) {
-        self.textureLayersState = TextureLayersState(
-            device: device
-        )
-    }
-
     func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice
@@ -70,6 +64,12 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 }
 
 extension HandDrawingCanvasViewModel {
+    func onInit(device: MTLDevice) {
+        self.textureLayersState = TextureLayersState(
+            device: device
+        )
+    }
+
     func onCompleteDrawing(
         texture: MTLTexture,
         device: MTLDevice
