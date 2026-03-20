@@ -116,22 +116,35 @@ public extension TextureLayerViewModel {
         textureLayers?.selectedLayer?.id == id
     }
 
-    func onTapInsertButton() {
+    func onTapInsertButton(device: MTLDevice?) async throws {
         guard
+            let device,
             let textureLayers,
-            let selectedIndex = textureLayers.selectedIndex
+            let selectedIndex = textureLayers.selectedIndex,
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureLayers.textureSize.width),
+                height: Int(textureLayers.textureSize.height),
+                with: device
+            )
         else { return }
 
-        Task {
-            do {
-                try await textureLayers.addNewLayer(
-                    at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-                )
-                // fullCanvasUpdateRequestedSubject.send()
-            } catch {
-                Logger.error(error)
-            }
-        }
+        let layer: TextureLayerModel = .init(
+            id: LayerId(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
+        try await textureLayers.addLayer(
+            layer: layer,
+            thumbnail: newTexture.makeThumbnail(),
+            at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+        )
+        try await dependencies?.textureLayersDocumentsRepository
+            .addTexture(
+                texture: newTexture,
+                id: layer.id,
+                device: device
+            )
     }
 
     func onTapDeleteButton() {

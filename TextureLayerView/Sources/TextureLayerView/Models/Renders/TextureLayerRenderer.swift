@@ -76,7 +76,7 @@ public class TextureLayerRenderer {
     /// Refreshes `unselectedBottomTexture`, `unselectedTopTexture`.
     /// This textures are pre-merged necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func refreshTextures(
+    public func refreshUnselectedTextures(
         textureLayers: TextureLayersRenderContext,
         textures: [IdentifiedTexture]
     ) async throws {

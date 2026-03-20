@@ -49,12 +49,13 @@ public final class UndoAdditionObject: UndoObject {
                 renderer: renderer
             )
         else { return }
-
+/*
         try await layers.addLayer(
             layer: textureLayer,
             newTexture: newTexture,
             at: insertIndex
         )
+ */
         //layers.requestFullCanvasUpdate()
     }
 }

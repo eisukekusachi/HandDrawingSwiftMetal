@@ -88,7 +88,7 @@ public final class UndoTextureLayers: ObservableObject {
             return
         }
 
-        try await textureLayers.addLayer(layer: layer, newTexture: newTexture, at: index)
+        //try await textureLayers.addLayer(layer: layer, newTexture: newTexture, at: index)
 
         await pushUndoAdditionObject(
             newTexture: undoNewTexture,

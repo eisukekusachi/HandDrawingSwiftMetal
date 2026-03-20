@@ -11,6 +11,7 @@ import MetalKit
 import UIKit
 
 /// A class that manages texture layers
+@MainActor
 public class TextureLayersState: ObservableObject {
 
     public var selectedLayer: TextureLayerItem? {
@@ -54,41 +55,15 @@ public class TextureLayersState: ObservableObject {
         self.device = device
     }
 
-    public func addNewLayer(at index: Int) async throws {
-        guard
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            )
-        else { return }
-
-        try await addLayer(
-            layer: .init(
-                id: LayerId(),
-                title: TimeStampFormatter.currentDate,
-                alpha: 255,
-                isVisible: true
-            ),
-            newTexture: newTexture,
-            at: index
-        )
-    }
-
-    public func addLayer(layer: TextureLayerModel, newTexture: MTLTexture?, at index: Int) async throws {
-        guard
-            // If a texture is provided as an argument, use it. otherwise create a new one.
-            let newTexture: MTLTexture = newTexture ?? MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            )
-        else { return }
-
+    public func addLayer(
+        layer: TextureLayerModel,
+        thumbnail: UIImage?,
+        at index: Int
+    ) async throws {
         self._layers.insert(
             .init(
                 model: layer,
-                thumbnail: newTexture.makeThumbnail()
+                thumbnail: thumbnail
             ),
             at: index
         )

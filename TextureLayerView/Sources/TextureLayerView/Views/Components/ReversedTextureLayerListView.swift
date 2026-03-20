@@ -31,7 +31,7 @@ public struct ReversedTextureLayerListView: View {
                         viewModel.onTapCell(
                             targetLayer.id
                         )
-                        onChanged(.selected)
+                        onChanged(.selectLayer)
                     },
                     didTapVisibleButton: { targetLayer in
                         viewModel.onTapVisibleButton(

@@ -152,17 +152,16 @@ import TextureLayerView
             return
         }
 
-        try setCurrentTexture(currentTexture)
-
         let textures = try await viewModel?.duplicatedTextures(
             textureLayers.layers.map { $0.id },
             device: sharedDevice
         ) ?? []
 
-        try await textureLayerRenderer?.refreshTextures(
+        try await textureLayerRenderer?.refreshUnselectedTextures(
             textureLayers: textureLayers,
             textures: textures
         )
+        try setCurrentTexture(currentTexture)
 
         updateCanvasTextureUsingCurrentTexture()
     }

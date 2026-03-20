@@ -52,17 +52,19 @@ class HandDrawingViewController: UIViewController {
         view.backgroundColor = .white
 
         textureLayerView = TextureLayerView(
+            device: canvasView.sharedDevice,
             viewModel: .init(
                 dependencies: .init()
             ),
             onChanged: { event in
                 switch event {
-                case .selected:
+                case .addLayer, .removeLayer, .selectLayer:
                     Task { [weak self] in
                         try? await self?.canvasView.updateFullCanvasTexture()
                     }
+                default:
+                    break
                 }
-                print("onChanged \(event)")
             }
         )
 

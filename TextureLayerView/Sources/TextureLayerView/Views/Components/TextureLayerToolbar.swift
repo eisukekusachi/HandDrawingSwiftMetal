@@ -10,17 +10,27 @@ import SwiftUI
 
 public struct TextureLayerToolbar: View {
 
+    @ObservedObject private var viewModel: TextureLayerViewModel
+
     private let buttonThrottle = ButtonThrottle()
 
     private let buttonSize: CGFloat = 20
 
-    @ObservedObject private var viewModel: TextureLayerViewModel
+    private let onChanged: ((TextureLayerEvent) -> Void)
+
+    private let device: MTLDevice?
 
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
-    init(viewModel: TextureLayerViewModel) {
+    init(
+        device: MTLDevice?,
+        viewModel: TextureLayerViewModel,
+        onChanged: @escaping ((TextureLayerEvent) -> Void)
+    ) {
+        self.device = device
         self.viewModel = viewModel
+        self.onChanged = onChanged
     }
 
     public var body: some View {
@@ -29,7 +39,12 @@ public struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
                         Task { @MainActor in
-                            viewModel.onTapInsertButton()
+                            do {
+                                try await viewModel.onTapInsertButton(device: device)
+                                onChanged(.addLayer)
+                            } catch {
+                                Logger.error(error)
+                            }
                         }
                     }
                 },
@@ -46,6 +61,7 @@ public struct TextureLayerToolbar: View {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
                             viewModel.onTapDeleteButton()
+                            onChanged(.removeLayer)
                         }
                     }
                 },
@@ -75,6 +91,7 @@ public struct TextureLayerToolbar: View {
                         selectedLayer.id,
                         title: textFieldTitle
                     )
+                    onChanged(.editLayer)
                 })
                 Button("Cancel", action: {})
             }
@@ -118,7 +135,11 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerToolbar(
-            viewModel: viewModel
+            device: nil,
+            viewModel: viewModel,
+            onChanged: { _ in
+                print("onChanged")
+            }
         )
         .frame(width: 320, height: 300)
         .onAppear {

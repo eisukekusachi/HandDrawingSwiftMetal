@@ -8,22 +8,22 @@
 import Combine
 import SwiftUI
 
-public enum TextureLayerEvent {
-    case selected
-}
-
 public struct TextureLayerView: View {
+
+    @ObservedObject private var viewModel: TextureLayerViewModel
 
     private let range: ClosedRange<Int> = 0 ... 255
 
-    @ObservedObject private var viewModel: TextureLayerViewModel
+    private let device: MTLDevice?
 
     private let onChanged: ((TextureLayerEvent) -> Void)
 
     public init(
+        device: MTLDevice?,
         viewModel: TextureLayerViewModel,
         onChanged: @escaping ((TextureLayerEvent) -> Void)
     ) {
+        self.device = device
         self._viewModel = .init(wrappedValue: viewModel)
         self.onChanged = onChanged
     }
@@ -31,7 +31,9 @@ public struct TextureLayerView: View {
     public var body: some View {
         VStack {
             TextureLayerToolbar(
-                viewModel: viewModel
+                device: device,
+                viewModel: viewModel,
+                onChanged: onChanged
             )
 
             ReversedTextureLayerListView(
@@ -104,6 +106,7 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerView(
+            device: nil,
             viewModel: viewModel,
             onChanged: { _ in
                 print("onChanged")
