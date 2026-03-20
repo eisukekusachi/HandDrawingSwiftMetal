@@ -291,22 +291,10 @@ extension HandDrawingCanvasView {
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        guard let textureLayersState = viewModel.textureLayersState else { return }
-
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
-
-        try await viewModel.restoreStorage(
-            url: workingDirectoryURL,
-            textureLayers: data,
-            device: sharedDevice
-        )
-        textureLayersState.update(data)
-
-        try super.createCanvas(data.textureSize)
+        try await viewModel.onLoadFiles(device: sharedDevice, from: workingDirectoryURL)
+        if let textureSize = viewModel.textureSize {
+            try super.createCanvas(textureSize)
+        }
     }
 }
 

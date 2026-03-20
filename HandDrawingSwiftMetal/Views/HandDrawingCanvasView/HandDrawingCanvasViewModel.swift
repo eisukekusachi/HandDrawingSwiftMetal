@@ -13,9 +13,13 @@ import TextureLayerView
 @MainActor
 final class HandDrawingCanvasViewModel: ObservableObject {
 
+    var textureSize: CGSize? {
+        textureLayersState?.textureSize
+    }
+
     private var dependencies: HandDrawingCanvasViewDependencies?
 
-    public var textureLayersState: TextureLayersState?
+    private(set) var textureLayersState: TextureLayersState?
 
     init(
         dependencies: HandDrawingCanvasViewDependencies? = nil
@@ -155,6 +159,27 @@ extension HandDrawingCanvasViewModel {
             Logger.error(error)
             throw error
         }
+    }
+
+    func onLoadFiles(
+        device: MTLDevice,
+        from workingDirectoryURL: URL
+    ) async throws {
+        guard let textureLayersState else { return }
+
+        // Load texture layer data from the JSON file
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+
+        try await restoreStorage(
+            url: workingDirectoryURL,
+            textureLayers: data,
+            device: device
+        )
+
+        textureLayersState.update(data)
     }
 }
 
