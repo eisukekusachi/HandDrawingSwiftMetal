@@ -18,7 +18,7 @@ public struct TextureLayerView: View {
 
     public init(
         viewModel: TextureLayerViewModel,
-        device: MTLDevice?
+        device: MTLDevice? = nil
     ) {
         self._viewModel = .init(wrappedValue: viewModel)
         self.device = device
@@ -52,13 +52,8 @@ public struct TextureLayerView: View {
 
 @MainActor
 private struct PreviewView: View {
-    private var viewModel = TextureLayerViewModel(
-        dependencies: .init(),
-        onChanged: nil
-    )
-
+    private var viewModel = TextureLayerViewModel()
     private let textureLayers = TextureLayersState()
-
     private let data: TextureLayersModel = .init(
         layers: [
             .init(
@@ -98,8 +93,7 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerView(
-            viewModel: viewModel,
-            device: nil
+            viewModel: viewModel
         )
         .frame(width: 320, height: 300)
         .onAppear {

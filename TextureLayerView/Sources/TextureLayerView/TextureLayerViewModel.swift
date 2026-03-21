@@ -15,7 +15,7 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var isAlphaSliderDragging: Bool = false
 
-    public let onChanged: ((TextureLayerEvent) -> Void)?
+    public let onLayersChanged: ((TextureLayerEvent) -> Void)?
 
     public var selectedLayer: TextureLayerItem? {
         textureLayers?.selectedLayer
@@ -32,10 +32,10 @@ public final class TextureLayerViewModel: ObservableObject {
 
     public init(
         dependencies: TextureLayerViewDependencies? = nil,
-        onChanged: ((TextureLayerEvent) -> Void)?
+        onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {
         self.dependencies = dependencies ?? .init()
-        self.onChanged = onChanged
+        self.onLayersChanged = onLayersChanged
     }
 
     public func update(
@@ -106,7 +106,7 @@ public extension TextureLayerViewModel {
                 id: layer.id,
                 device: device
             )
-        onChanged?(.addLayer)
+        onLayersChanged?(.addLayer)
     }
 
     func onTapDeleteButton() async throws {
@@ -124,7 +124,7 @@ public extension TextureLayerViewModel {
             .removeTexture(
                 selectedId
             )
-        onChanged?(.removeLayer)
+        onLayersChanged?(.removeLayer)
     }
 
     func onTapTitleButton(_ id: UUID, title: String) {
@@ -133,13 +133,13 @@ public extension TextureLayerViewModel {
 
     func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
         textureLayers?.updateVisibility(id, isVisible: isVisible)
-        onChanged?(.changeVisibility)
+        onLayersChanged?(.changeVisibility)
     }
 
     func onTapCell(_ id: UUID) {
         textureLayers?.selectLayer(id)
         updateCurrentAlpha()
-        onChanged?(.selectLayer)
+        onLayersChanged?(.selectLayer)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
@@ -149,14 +149,14 @@ public extension TextureLayerViewModel {
                 destinationIndex: destination
             )
         )
-        onChanged?(.moveLayer)
+        onLayersChanged?(.moveLayer)
     }
 
     func onChangeCurrentAlpha(_ alpha: Int) {
         guard let selectedLayerId = textureLayers?.selectedLayer?.id else { return }
         textureLayers?.updateAlpha(selectedLayerId, alpha: alpha)
         updateCurrentAlpha()
-        onChanged?(.changeLayerAlpha)
+        onLayersChanged?(.changeLayerAlpha)
     }
 }
 

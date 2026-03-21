@@ -103,10 +103,7 @@ public struct TwoRowsSliderView: View {
 
 private struct PreviewView: View {
 
-    private let viewModel = TextureLayerViewModel(
-        dependencies: .init(),
-        onChanged: nil
-    )
+    private let viewModel = TextureLayerViewModel()
 
     var body: some View {
         TwoRowsSliderView(

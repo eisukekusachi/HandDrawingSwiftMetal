@@ -14,8 +14,6 @@ public enum TextureLayerEvent {
     case removeLayer
     /// Selects a texture layer
     case selectLayer
-    /// Edits a texture layer
-    case editLayer
     /// Toggles the visibility of a texture layer
     case changeVisibility
     /// Moves a texture layer to a different position

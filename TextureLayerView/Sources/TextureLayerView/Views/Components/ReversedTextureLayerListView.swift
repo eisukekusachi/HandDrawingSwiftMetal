@@ -26,14 +26,12 @@ public struct ReversedTextureLayerListView: View {
                         viewModel.onTapCell(
                             targetLayer.id
                         )
-                        viewModel.onChanged?(.selectLayer)
                     },
                     didTapVisibleButton: { targetLayer in
                         viewModel.onTapVisibleButton(
                             targetLayer.id,
                             isVisible: !targetLayer.isVisible
                         )
-                        viewModel.onChanged?(.changeVisibility)
                     }
                 )
                 .listRowBackground(Color.clear)
@@ -44,7 +42,6 @@ public struct ReversedTextureLayerListView: View {
                     source: source,
                     destination: destination
                 )
-                viewModel.onChanged?(.moveLayer)
             })
             .listRowSeparator(.hidden)
         }
@@ -53,13 +50,8 @@ public struct ReversedTextureLayerListView: View {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel(
-        dependencies: .init(),
-        onChanged: nil
-    )
-
+    private let viewModel = TextureLayerViewModel()
     private let textureLayers = TextureLayersState()
-
     private let data: TextureLayersModel = .init(
         layers: [
             .init(

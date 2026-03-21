@@ -21,7 +21,7 @@ public struct TextureLayerToolbar: View {
     @State private var textFieldTitle: String = ""
 
     init(
-        device: MTLDevice?,
+        device: MTLDevice? = nil,
         viewModel: TextureLayerViewModel
     ) {
         self.device = device
@@ -104,10 +104,7 @@ private extension Image {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel(
-        dependencies: .init(),
-        onChanged: nil
-    )
+    private let viewModel = TextureLayerViewModel()
 
     private let textureLayers = TextureLayersState()
 
@@ -126,7 +123,6 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerToolbar(
-            device: nil,
             viewModel: viewModel
         )
         .frame(width: 320, height: 300)

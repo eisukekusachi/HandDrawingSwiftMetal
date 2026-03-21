@@ -52,6 +52,22 @@ class HandDrawingViewController: UIViewController {
         )
     }
 
+    /// Handles a texture layer event and updates the canvas view accordingly
+    private var handleViewUpdates: (TextureLayerEvent) -> Void {
+        { [weak self] event in
+            switch event {
+            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
+                Task { [weak self] in
+                    try? await self?.canvasView?.updateFullCanvasTexture()
+                }
+            case .changeLayerAlpha:
+                Task { [weak self] in
+                    self?.canvasView?.updateCanvasTextureUsingCurrentTexture()
+                }
+            }
+        }
+    }
+
     override func viewDidLoad() {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
@@ -63,22 +79,7 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice
         )
         textureLayerView = TextureLayerView(
-            viewModel: .init(
-                onChanged: { event in
-                    switch event {
-                    case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
-                        Task { [weak self] in
-                            try? await self?.canvasView?.updateFullCanvasTexture()
-                        }
-                    case .changeLayerAlpha:
-                        Task { [weak self] in
-                            self?.canvasView?.updateCanvasTextureUsingCurrentTexture()
-                        }
-                    default:
-                        break
-                    }
-                }
-            ),
+            viewModel: .init(onLayersChanged: handleViewUpdates),
             device: sharedDevice
         )
         addEvents()
