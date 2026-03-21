@@ -137,11 +137,9 @@ public extension TextureLayersDocumentsRepository {
             throw error
         }
 
-        try await IdentifiedTexture(
+        try await writeTextureToDisk(
             id: id,
-            texture: texture
-        ).write(
-            in: workingDirectoryURL,
+            texture: texture,
             device: device
         )
     }
@@ -230,11 +228,33 @@ public extension TextureLayersDocumentsRepository {
         try FileManager.default.removeItem(at: fileURL)
     }
 
+    func copyTexture(
+        id: LayerId,
+        to destinationURL: URL
+    ) async throws {
+        let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let destinationURL = destinationURL.appendingPathComponent(id.uuidString)
+
+        // If the file exists, copy it
+        guard
+            FileManager.default.fileExists(atPath: sourceURL.path)
+        else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find \(id.uuidString)")
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+    }
+
     /// Writes the texture to disk by duplicating it into the Documents directory.
     /// Since `MTLTexture` is a reference type, the passed instance does not need to be newly created.
     func writeTextureToDisk(
+        id: LayerId,
         texture: MTLTexture,
-        for id: LayerId,
         device: MTLDevice
     ) async throws {
         // If the file exists, update it
@@ -250,10 +270,9 @@ public extension TextureLayersDocumentsRepository {
         }
 
         do {
-            try await IdentifiedTexture(
-                id: id,
-                texture: texture
-            ).write(
+            try await FileManager.saveTexture(
+                fileName: id.uuidString,
+                texture: texture,
                 in: workingDirectoryURL,
                 device: device
             )

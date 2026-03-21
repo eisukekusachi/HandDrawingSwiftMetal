@@ -106,8 +106,8 @@ extension HandDrawingCanvasViewModel {
         else { return }
 
         try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+            id: layerId,
             texture: texture,
-            for: layerId,
             device: device
         )
 
@@ -137,22 +137,12 @@ extension HandDrawingCanvasViewModel {
         }
 
         do {
-            // Copy all textures from the textureRepository
-            let textures = try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-                textureLayersState.layers.map { $0.id },
-                device: device
-            )
-
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for texture in textures {
-                    group.addTask {
-                        try await texture.write(
-                            in: workingDirectoryURL,
-                            device: device
-                        )
-                    }
-                }
-                try await group.waitForAll()
+            // Copy the texture files into the working directory
+            for layer in textureLayersState.layers {
+                try await dependencies.textureLayersDocumentsRepository.copyTexture(
+                    id: layer.id,
+                    to: workingDirectoryURL
+                )
             }
         } catch {
             let error = NSError(

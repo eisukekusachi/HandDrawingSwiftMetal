@@ -513,9 +513,9 @@ extension HandDrawingViewController {
     }
     private func saveProject() {
         viewModel.onSaveProject(
-            saveCanvasAction: { [weak self] workingDirectoryURL in
+            saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
                 try await self?.canvasView?.saveFiles(
-                    to: workingDirectoryURL
+                    to: tmpWorkingDirectoryURL
                 )
             },
             completion: { [weak self] in

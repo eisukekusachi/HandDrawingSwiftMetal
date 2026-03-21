@@ -52,9 +52,14 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     func removeAll()
 
+    func copyTexture(
+        id: LayerId,
+        to: URL
+    ) async throws
+
     func writeTextureToDisk(
+        id: LayerId,
         texture: MTLTexture,
-        for id: LayerId,
         device: MTLDevice
     ) async throws
 }
