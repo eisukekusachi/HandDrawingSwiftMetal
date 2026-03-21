@@ -12,8 +12,6 @@ public struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
-    let onChanged: ((TextureLayerEvent) -> Void)
-
     public var body: some View {
         List {
             ForEach(
@@ -31,14 +29,14 @@ public struct ReversedTextureLayerListView: View {
                         viewModel.onTapCell(
                             targetLayer.id
                         )
-                        onChanged(.selectLayer)
+                        viewModel.onChanged?(.selectLayer)
                     },
                     didTapVisibleButton: { targetLayer in
                         viewModel.onTapVisibleButton(
                             targetLayer.id,
                             isVisible: !targetLayer.isVisible
                         )
-                        onChanged(.changeVisibility)
+                        viewModel.onChanged?(.changeVisibility)
                     }
                 )
                 .listRowBackground(Color.clear)
@@ -49,7 +47,7 @@ public struct ReversedTextureLayerListView: View {
                     source: source,
                     destination: destination
                 )
-                onChanged(.moveLayer)
+                viewModel.onChanged?(.moveLayer)
             })
             .listRowSeparator(.hidden)
         }
@@ -59,7 +57,8 @@ public struct ReversedTextureLayerListView: View {
 
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel(
-        dependencies: .init()
+        dependencies: .init(),
+        onChanged: nil
     )
 
     private let textureLayers = TextureLayersState(
@@ -68,10 +67,7 @@ private struct PreviewView: View {
 
     var body: some View {
         ReversedTextureLayerListView(
-            viewModel: viewModel,
-            onChanged: { _ in
-                print("onChanged")
-            }
+            viewModel: viewModel
         )
         .frame(width: 256, height: 300)
         .onAppear {

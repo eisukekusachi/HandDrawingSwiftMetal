@@ -45,10 +45,6 @@ public class TextureLayersState: ObservableObject {
     // Set a default value to avoid nil
     @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
 
-    @Published private var _alpha: Int = 255
-
-    private var oldAlpha: Int?
-
     public init(
         device: MTLDevice
     ) {
@@ -72,10 +68,7 @@ public class TextureLayersState: ObservableObject {
     }
 
     public func removeLayer(layerIndexToDelete index: Int) async throws {
-        guard
-            let selectedLayerId = selectedLayer?.id,
-            layerCount > 1
-        else {
+        guard layerCount > 1 else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)"))
             return
@@ -175,8 +168,6 @@ public class TextureLayersState: ObservableObject {
             isVisible: layer.isVisible,
             thumbnail: layer.thumbnail
         )
-
-        _alpha = alpha
     }
 
     public func updateLayer(_ layer: TextureLayerItem) {

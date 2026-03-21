@@ -196,11 +196,7 @@ import TextureLayerView
     }
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
-        guard
-            let selectedLayer = viewModel?.textureLayersState?.selectedLayer
-        else {
-            return
-        }
+        guard let selectedLayer = viewModel?.textureLayersState?.selectedLayer else { return }
 
         textureLayerRenderer?.updateCanvasTexture(
             textureLayer: .init(

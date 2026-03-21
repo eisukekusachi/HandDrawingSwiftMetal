@@ -16,8 +16,6 @@ public struct TextureLayerToolbar: View {
 
     private let buttonSize: CGFloat = 20
 
-    private let onChanged: ((TextureLayerEvent) -> Void)
-
     private let device: MTLDevice?
 
     @State private var isTextFieldPresented: Bool = false
@@ -25,12 +23,10 @@ public struct TextureLayerToolbar: View {
 
     init(
         device: MTLDevice?,
-        viewModel: TextureLayerViewModel,
-        onChanged: @escaping ((TextureLayerEvent) -> Void)
+        viewModel: TextureLayerViewModel
     ) {
         self.device = device
         self.viewModel = viewModel
-        self.onChanged = onChanged
     }
 
     public var body: some View {
@@ -41,7 +37,6 @@ public struct TextureLayerToolbar: View {
                         Task { @MainActor in
                             do {
                                 try await viewModel.onTapInsertButton(device: device)
-                                onChanged(.addLayer)
                             } catch {
                                 Logger.error(error)
                             }
@@ -60,7 +55,6 @@ public struct TextureLayerToolbar: View {
                         Task { @MainActor in
                             do {
                                 try await viewModel.onTapDeleteButton()
-                                onChanged(.removeLayer)
                             } catch {
                                 Logger.error(error)
                             }
@@ -91,7 +85,6 @@ public struct TextureLayerToolbar: View {
                         selectedLayer.id,
                         title: textFieldTitle
                     )
-                    onChanged(.editLayer)
                 })
                 Button("Cancel", action: {})
             }
@@ -113,7 +106,8 @@ private extension Image {
 
 private struct PreviewView: View {
     private let viewModel = TextureLayerViewModel(
-        dependencies: .init()
+        dependencies: .init(),
+        onChanged: nil
     )
 
     private let textureLayers = TextureLayersState(
@@ -136,10 +130,7 @@ private struct PreviewView: View {
     var body: some View {
         TextureLayerToolbar(
             device: nil,
-            viewModel: viewModel,
-            onChanged: { _ in
-                print("onChanged")
-            }
+            viewModel: viewModel
         )
         .frame(width: 320, height: 300)
         .onAppear {

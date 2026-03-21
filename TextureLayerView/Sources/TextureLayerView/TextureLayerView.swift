@@ -12,38 +12,31 @@ public struct TextureLayerView: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
-    private let range: ClosedRange<Int> = 0 ... 255
-
     private let device: MTLDevice?
 
-    private let onChanged: ((TextureLayerEvent) -> Void)
+    private let range: ClosedRange<Int> = 0 ... 255
 
     public init(
-        device: MTLDevice?,
         viewModel: TextureLayerViewModel,
-        onChanged: @escaping ((TextureLayerEvent) -> Void)
+        device: MTLDevice?
     ) {
-        self.device = device
         self._viewModel = .init(wrappedValue: viewModel)
-        self.onChanged = onChanged
+        self.device = device
     }
 
     public var body: some View {
         VStack {
             TextureLayerToolbar(
                 device: device,
-                viewModel: viewModel,
-                onChanged: onChanged
+                viewModel: viewModel
             )
 
             ReversedTextureLayerListView(
-                viewModel: viewModel,
-                onChanged: onChanged
+                viewModel: viewModel
             )
 
             TwoRowsSliderView(
-                value: $viewModel.currentAlpha,
-                isDragging: $viewModel.isAlphaSliderDragging,
+                viewModel: viewModel,
                 title: "Alpha",
                 range: range
             )
@@ -60,7 +53,8 @@ public struct TextureLayerView: View {
 @MainActor
 private struct PreviewView: View {
     private var viewModel = TextureLayerViewModel(
-        dependencies: .init()
+        dependencies: .init(),
+        onChanged: nil
     )
 
     private let textureLayers = TextureLayersState(
@@ -106,11 +100,8 @@ private struct PreviewView: View {
 
     var body: some View {
         TextureLayerView(
-            device: nil,
             viewModel: viewModel,
-            onChanged: { _ in
-                print("onChanged")
-            }
+            device: nil
         )
         .frame(width: 320, height: 300)
         .onAppear {

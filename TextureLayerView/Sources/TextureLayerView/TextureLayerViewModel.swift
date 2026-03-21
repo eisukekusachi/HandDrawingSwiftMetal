@@ -16,6 +16,8 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published public var isAlphaSliderDragging: Bool = false
 
+    public let onChanged: ((TextureLayerEvent) -> Void)?
+
     public var selectedLayer: TextureLayerItem? {
         textureLayers?.selectedLayer
     }
@@ -25,21 +27,16 @@ public final class TextureLayerViewModel: ObservableObject {
     private(set) var defaultBackgroundColor: UIColor = .white
     private(set) var selectedBackgroundColor: UIColor = .black
 
-    @Published private var selectedLayerId: UUID? {
-        didSet {
-            // Update the slider value when selectedLayerId changes
-            updateCurrentAlpha()
-        }
-    }
-
     private let dependencies: TextureLayerViewDependencies?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        dependencies: TextureLayerViewDependencies?
+        dependencies: TextureLayerViewDependencies?,
+        onChanged: ((TextureLayerEvent) -> Void)?
     ) {
         self.dependencies = dependencies
+        self.onChanged = onChanged
     }
 
     public func update(
@@ -47,6 +44,21 @@ public final class TextureLayerViewModel: ObservableObject {
         device: MTLDevice
     ) {
         self.textureLayers = textureLayers
+
+        // Update the thumbails
+        Task { [weak self] in
+            for layer in textureLayers.layers {
+                let layerId: LayerId = layer.id
+                let texture = try? await self?.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+                    layerId,
+                    device: device
+                )
+                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
+            }
+        }
+
+        // Update the alpha slider handle position
+        self.updateCurrentAlpha()
 
         // Avoid multiple subscriptions
         cancellables.removeAll()
@@ -56,14 +68,6 @@ public final class TextureLayerViewModel: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-
-        Task {
-            for layer in textureLayers.layers {
-                let layerId: LayerId = layer.id
-                let texture = try? await self.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(layerId, device: device)
-                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
-            }
-        }
     }
 
     public func initialize(
@@ -72,41 +76,6 @@ public final class TextureLayerViewModel: ObservableObject {
         self.textureLayers = textureLayers
 
         updateCurrentAlpha()
-    }
-
-    private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
-
-        // Bind the alpha slider
-        $currentAlpha
-            .sink { [weak self] alpha in
-                guard
-                    let `self`,
-                    self.isAlphaSliderDragging,
-                    let textureLayers = self.textureLayers,
-                    let selectedLayerId = self.selectedLayerId
-                else { return }
-
-                textureLayers.updateAlpha(
-                    selectedLayerId,
-                    alpha: Int(alpha)
-                )
-
-                // Only the alpha of the selected layer can be changed, so other layers will not be updated
-                // textureLayers.requestCanvasUpdate()
-            }
-            .store(in: &cancellables)
-
-        $isAlphaSliderDragging
-            .sink { [weak self] isDragging in
-                if isDragging {
-                    self?.textureLayers?.beginAlphaChange()
-                } else {
-                    self?.textureLayers?.endAlphaChange()
-                }
-            }
-            .store(in: &cancellables)
     }
 }
 
@@ -145,6 +114,7 @@ public extension TextureLayerViewModel {
                 id: layer.id,
                 device: device
             )
+        onChanged?(.addLayer)
     }
 
     func onTapDeleteButton() async throws {
@@ -162,6 +132,7 @@ public extension TextureLayerViewModel {
             .removeTexture(
                 selectedId
             )
+        onChanged?(.removeLayer)
     }
 
     func onTapTitleButton(_ id: UUID, title: String) {
@@ -170,10 +141,13 @@ public extension TextureLayerViewModel {
 
     func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
         textureLayers?.updateVisibility(id, isVisible: isVisible)
+        onChanged?(.changeVisibility)
     }
 
     func onTapCell(_ id: UUID) {
         textureLayers?.selectLayer(id)
+        updateCurrentAlpha()
+        onChanged?(.selectLayer)
     }
 
     func onMoveLayer(source: IndexSet, destination: Int) {
@@ -183,14 +157,26 @@ public extension TextureLayerViewModel {
                 destinationIndex: destination
             )
         )
+        onChanged?(.moveLayer)
+    }
+
+    func onChangeCurrentAlpha(_ alpha: Int) {
+        guard let selectedLayerId = textureLayers?.selectedLayer?.id else { return }
+        textureLayers?.updateAlpha(selectedLayerId, alpha: alpha)
+        updateCurrentAlpha()
+        onChanged?(.changeLayerAlpha)
     }
 }
 
 extension TextureLayerViewModel {
 
     private func updateCurrentAlpha() {
-        if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
-            currentAlpha = layer.alpha
-        }
+        guard
+            let selectedLayerId = textureLayers?.selectedLayer?.id,
+            let layer = textureLayers?.layer(selectedLayerId),
+            currentAlpha != layer.alpha
+        else { return }
+
+        currentAlpha = layer.alpha
     }
 }
