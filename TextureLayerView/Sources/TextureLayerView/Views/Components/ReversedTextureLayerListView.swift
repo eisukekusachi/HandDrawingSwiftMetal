@@ -19,11 +19,9 @@ public struct ReversedTextureLayerListView: View {
                 Array((viewModel.textureLayers?.layers ?? []).reversed()),
                 id: \.id
             ) { layer in
-                TextureLayerRowView(
+                TextureLayerItemView(
                     layer: layer,
                     isSelected: viewModel.isSelected(layer.id),
-                    defaultBackgroundColor: viewModel.defaultBackgroundColor,
-                    selectedBackgroundColor: viewModel.selectedBackgroundColor,
                     didTapRow: { targetLayer in
                         viewModel.onTapCell(
                             targetLayer.id
