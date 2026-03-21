@@ -14,22 +14,17 @@ import TextureLayerView
 final class HandDrawingCanvasViewModel: ObservableObject {
 
     var textureSize: CGSize? {
-        textureLayersState?.textureSize
+        textureLayersState.textureSize
     }
 
     private var dependencies: HandDrawingCanvasViewDependencies
 
-    private(set) var textureLayersState: TextureLayersState?
+    private(set) var textureLayersState: TextureLayersState = TextureLayersState()
 
     init(
-        device: MTLDevice,
         dependencies: HandDrawingCanvasViewDependencies
     ) {
         self.dependencies = dependencies
-
-        self.textureLayersState = TextureLayersState(
-            device: device
-        )
     }
 }
 
@@ -73,7 +68,7 @@ extension HandDrawingCanvasViewModel {
             resolvedConfiguration = configuration
         }
 
-        textureLayersState?.update(data)
+        textureLayersState.update(data)
 
         return resolvedConfiguration
     }
@@ -84,7 +79,7 @@ extension HandDrawingCanvasViewModel {
     ) async throws {
         guard
             let texture,
-            let layerId = self.textureLayersState?.selectedLayer?.id
+            let layerId = self.textureLayersState.selectedLayer?.id
         else { return }
 
         try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
@@ -93,7 +88,7 @@ extension HandDrawingCanvasViewModel {
             device: device
         )
 
-        textureLayersState?.updateThumbnail(
+        textureLayersState.updateThumbnail(
             layerId,
             texture: texture
         )
@@ -104,10 +99,6 @@ extension HandDrawingCanvasViewModel {
         device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
-        guard
-            let textureLayersState
-        else { return }
-
         do {
             // Save the thumbnail image into the working directory
             try thumbnail?.pngData()?.write(
@@ -172,8 +163,6 @@ extension HandDrawingCanvasViewModel {
         device: MTLDevice,
         from workingDirectoryURL: URL
     ) async throws {
-        guard let textureLayersState else { return }
-
         // Load texture layer data from the JSON file
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
@@ -192,8 +181,6 @@ extension HandDrawingCanvasViewModel {
     func onNewCanvas(
         device: MTLDevice
     ) async throws {
-        guard let textureLayersState else { return }
-
         let textureSize = textureLayersState.textureSize
 
         let data: TextureLayersModel = .init(

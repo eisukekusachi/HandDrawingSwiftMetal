@@ -41,13 +41,14 @@ public final class TextureLayerViewModel: ObservableObject {
 
     public func update(
         _ textureLayers: TextureLayersState,
-        device: MTLDevice
+        device: MTLDevice? = nil
     ) {
         self.textureLayers = textureLayers
 
         // Update the thumbails
         Task { [weak self] in
             for layer in textureLayers.layers {
+                guard let device else { return }
                 let layerId: LayerId = layer.id
                 let texture = try? await self?.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
                     layerId,
@@ -68,14 +69,6 @@ public final class TextureLayerViewModel: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-    }
-
-    public func initialize(
-        textureLayers: TextureLayersState
-    ) {
-        self.textureLayers = textureLayers
-
-        updateCurrentAlpha()
     }
 }
 

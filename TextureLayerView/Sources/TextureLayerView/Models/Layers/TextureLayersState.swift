@@ -24,8 +24,6 @@ public class TextureLayersState: ObservableObject {
         return _layers.firstIndex(where: { $0.id == _selectedLayerId })
     }
 
-    public let device: MTLDevice
-
     public var layers: [TextureLayerItem] {
         _layers
     }
@@ -45,13 +43,20 @@ public class TextureLayersState: ObservableObject {
     // Set a default value to avoid nil
     @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
 
-    public init(
-        device: MTLDevice
-    ) {
-        self.device = device
-    }
+    public init() {}
 
-    public func addLayer(
+    public func update(
+        _ textureLayers: TextureLayersModel
+    ) {
+        self._layers = textureLayers.layers.map { .init(model: $0) }
+        self._selectedLayerId = textureLayers.selectedLayerId
+        self._textureSize = textureLayers.textureSize
+    }
+}
+
+public extension TextureLayersState {
+
+    func addLayer(
         layer: TextureLayerModel,
         thumbnail: UIImage?,
         at index: Int
@@ -67,7 +72,7 @@ public class TextureLayersState: ObservableObject {
         _selectedLayerId = layer.id
     }
 
-    public func removeLayer(layerIndexToDelete index: Int) async throws {
+    func removeLayer(layerIndexToDelete index: Int) async throws {
         guard layerCount > 1 else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)"))
@@ -83,7 +88,7 @@ public class TextureLayersState: ObservableObject {
         _selectedLayerId = newLayerId
     }
 
-    public func moveLayer(indices: MoveLayerIndices) {
+    func moveLayer(indices: MoveLayerIndices) {
         // Reverse index to match reversed layer order
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
@@ -96,21 +101,21 @@ public class TextureLayersState: ObservableObject {
         )
     }
 
-    public func selectLayer(_ id: LayerId) {
+    func selectLayer(_ id: LayerId) {
         _selectedLayerId = id
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
-    public func beginAlphaChange() {
+    func beginAlphaChange() {
         // Do nothing
     }
 
     /// Marks the end of an alpha (opacity) change session (e.g. slider drag ended/cancelled).
-    public func endAlphaChange() {
+    func endAlphaChange() {
         // Do nothing
     }
 
-    public func updateTitle(_ id: LayerId, title: String) {
+    func updateTitle(_ id: LayerId, title: String) {
         guard
             let index = index(for: id)
         else {
@@ -130,7 +135,7 @@ public class TextureLayersState: ObservableObject {
         )
     }
 
-    public func updateVisibility(_ id: LayerId, isVisible: Bool) {
+    func updateVisibility(_ id: LayerId, isVisible: Bool) {
         guard
             let index = index(for: id)
         else {
@@ -150,7 +155,7 @@ public class TextureLayersState: ObservableObject {
         )
     }
 
-    public func updateAlpha(_ id: LayerId, alpha: Int) {
+    func updateAlpha(_ id: LayerId, alpha: Int) {
         guard
             let index = index(for: id)
         else {
@@ -170,7 +175,7 @@ public class TextureLayersState: ObservableObject {
         )
     }
 
-    public func updateLayer(_ layer: TextureLayerItem) {
+    func updateLayer(_ layer: TextureLayerItem) {
         guard
             let index = index(for: layer.id)
         else {
@@ -183,24 +188,17 @@ public class TextureLayersState: ObservableObject {
     }
 }
 
-extension TextureLayersState {
-    public func update(
-        _ textureLayers: TextureLayersModel
-    ) {
-        self._layers = textureLayers.layers.map { .init(model: $0) }
-        self._selectedLayerId = textureLayers.selectedLayerId
-        self._textureSize = textureLayers.textureSize
-    }
+public extension TextureLayersState {
 
-    public func index(for id: LayerId) -> Int? {
+    func index(for id: LayerId) -> Int? {
         _layers.firstIndex(where: { $0.id == id })
     }
 
-    public func layer(_ id: LayerId) -> TextureLayerItem? {
+    func layer(_ id: LayerId) -> TextureLayerItem? {
         _layers.first(where: { $0.id == id })
     }
 
-    public func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
+    func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
         guard
             let texture,
             let index = index(for: id)

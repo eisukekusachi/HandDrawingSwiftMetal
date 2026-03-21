@@ -57,9 +57,7 @@ private struct PreviewView: View {
         onChanged: nil
     )
 
-    private let textureLayers = TextureLayersState(
-        device: MTLCreateSystemDefaultDevice()!
-    )
+    private let textureLayers = TextureLayersState()
 
     private let data: TextureLayersModel = .init(
         layers: [
@@ -107,10 +105,7 @@ private struct PreviewView: View {
         .onAppear {
             Task {
                 textureLayers.update(data)
-
-                viewModel.initialize(
-                    textureLayers: textureLayers
-                )
+                viewModel.update(textureLayers)
             }
         }
     }

@@ -61,8 +61,43 @@ private struct PreviewView: View {
         onChanged: nil
     )
 
-    private let textureLayers = TextureLayersState(
-        device: MTLCreateSystemDefaultDevice()!
+    private let textureLayers = TextureLayersState()
+
+    private let data: TextureLayersModel = .init(
+        layers: [
+            .init(
+                id: LayerId(),
+                title: "Layer0",
+                alpha: 255,
+                isVisible: true
+            ),
+            .init(
+                id: LayerId(),
+                title: "Layer1",
+                alpha: 200,
+                isVisible: true
+            ),
+            .init(
+                id: LayerId(),
+                title: "Layer2",
+                alpha: 150,
+                isVisible: true
+            ),
+            .init(
+                id: LayerId(),
+                title: "Layer3",
+                alpha: 100,
+                isVisible: true
+            ),
+            .init(
+                id: LayerId(),
+                title: "Layer4",
+                alpha: 50,
+                isVisible: true
+            )
+        ],
+        layerIndex: 3,
+        textureSize: .zero
     )
 
     var body: some View {
@@ -72,9 +107,8 @@ private struct PreviewView: View {
         .frame(width: 256, height: 300)
         .onAppear {
             Task {
-                viewModel.initialize(
-                    textureLayers: textureLayers
-                )
+                textureLayers.update(data)
+                viewModel.update(textureLayers)
             }
         }
     }

@@ -51,7 +51,6 @@ import TextureLayerView
         super.init()
 
         self.viewModel = .init(
-            device: sharedDevice,
             dependencies: .init()
         )
 
@@ -196,7 +195,7 @@ import TextureLayerView
     }
 
     private func updateCanvasTexture(_ texture: MTLTexture?) {
-        guard let selectedLayer = viewModel?.textureLayersState?.selectedLayer else { return }
+        guard let selectedLayer = viewModel?.textureLayersState.selectedLayer else { return }
 
         textureLayerRenderer?.updateCanvasTexture(
             textureLayer: .init(
