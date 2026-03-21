@@ -45,12 +45,12 @@ import TextureLayerView
         )
     }
 
-    override init() {
+    override init(device: MTLDevice? = nil) {
         self.textureLayersStorageController = PersistenceController(
             xcdatamodeldName: "TextureLayerStorage"
         )
 
-        super.init()
+        super.init(device: device)
 
         self.undoTextureInMemoryRepository = .init(
             renderer: renderer

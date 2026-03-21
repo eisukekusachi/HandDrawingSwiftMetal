@@ -31,10 +31,10 @@ public final class TextureLayerViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        dependencies: TextureLayerViewDependencies?,
+        dependencies: TextureLayerViewDependencies? = nil,
         onChanged: ((TextureLayerEvent) -> Void)?
     ) {
-        self.dependencies = dependencies
+        self.dependencies = dependencies ?? .init()
         self.onChanged = onChanged
     }
 

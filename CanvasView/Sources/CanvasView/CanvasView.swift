@@ -60,11 +60,11 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
-    public init() {
-        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
+    public init(device: MTLDevice? = nil) {
+        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
-        self.sharedDevice = sharedDevice
+        self.sharedDevice = device ?? defaultDevice
         self.renderer = MTLRenderer(device: sharedDevice)
         self.displayView = .init(renderer: renderer)
         self.canvasRenderer = .init(
