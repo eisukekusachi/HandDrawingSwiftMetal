@@ -21,6 +21,8 @@ import TextureLayerView
         viewModel.textureLayersState
     }
 
+    private var undoTextureLayers: UndoTextureLayers?
+
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository = .init()
 
     private var textureLayerRenderer: TextureLayerRenderer?
@@ -43,9 +45,12 @@ import TextureLayerView
 
     override init(device: MTLDevice? = nil) {
         super.init(device: device)
-
         self.textureLayerRenderer = .init(renderer: renderer)
-
+        self.undoTextureLayers = .init(
+            textureLayers: viewModel.textureLayersState,
+            renderer: renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
+        )
         bindData()
     }
 
@@ -61,13 +66,21 @@ import TextureLayerView
     }
 
     private func bindData() {
-
         strokeEvents
-            .filter { $0 == .strokeCompleted }
-            .sink { [weak self] _ in
-                self?.completeDrawing()
+            .sink { [weak self] event in
+                if case .strokeCompleted = event {
+                    self?.completeDrawing()
+                }
+                self?.handleUndoUpdates(event)
             }
             .store(in: &cancellables)
+
+        undoTextureLayers?.didEmitUndoObjectPair
+            .sink { [weak self] undoObjectPair in
+                self?.registerUndoObjectPair(undoObjectPair)
+            }
+            .store(in: &cancellables)
+
         /*
         // Update the current texture
         // Mainly used for undoing alpha changes
@@ -146,7 +159,6 @@ import TextureLayerView
     }
 
     override func completeCanvasCreation(_ textureSize: CGSize) async {
-        /*
         if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
             // Initialize the textures used for Undo
             undoTextureLayers.initializeUndoTextures(
@@ -154,7 +166,6 @@ import TextureLayerView
             )
             resetUndo()
         }
-        */
 
         do {
             try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
@@ -228,6 +239,25 @@ extension HandDrawingCanvasView {
 
 extension HandDrawingCanvasView {
 
+    private func handleUndoUpdates(_ event: StrokeEvent) {
+        switch event {
+        case .fingerStrokeBegan, .pencilStrokeBegan:
+            Task {
+                await undoTextureLayers?.setUndoDrawing(
+                    texture: currentTexture
+                )
+            }
+        case .strokeCompleted:
+            Task {
+                try await undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
+                    texture: currentTexture
+                )
+            }
+        case .strokeCancelled:
+            break
+        }
+    }
+
     func undo() {
         guard let undoManager else { return }
         undoManager.undo()
@@ -255,12 +285,12 @@ extension HandDrawingCanvasView {
         _ undoRedoObject: UndoRedoObjectPair
     ) {
         guard let undoManager else { return }
-/*
+
         undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository?.removeTexture(
+                try? self.undoTextureInMemoryRepository.removeTexture(
                     undoTextureId
                 )
             })
@@ -270,7 +300,7 @@ extension HandDrawingCanvasView {
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
                 // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository?.removeTexture(
+                try? self.undoTextureInMemoryRepository.removeTexture(
                     undoTextureId
                 )
             })
@@ -278,19 +308,30 @@ extension HandDrawingCanvasView {
 
         undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
             Task { [weak self] in
+                guard let `self` else { return }
+
                 guard
-                    let `self`,
-                    let textureLayers = self.textureLayers,
-                    let undoTextureInMemoryRepository
+                    let undoObject = undoRedoObject.undoObject as? UndoDrawingObject,
+                    let undoTextureId = undoObject.undoTextureId,
+                    let newTexture = try await MTLTextureCreator.duplicateTexture(
+                        texture: undoTextureInMemoryRepository.texture(id: undoTextureId),
+                        renderer: renderer
+                    )
                 else { return }
 
-                do {
-                    try await undoRedoObject.undoObject.applyUndo(
-                        layers: undoTextureLayers.textureLayers,
-                        repository: undoTextureInMemoryRepository
+                let textureLayerId = undoObject.textureLayer.id
+
+                try? self.setCurrentTexture(newTexture)
+                self.viewModel.textureLayersState.selectLayer(textureLayerId)
+                self.updateCanvasTextureUsingCurrentTexture()
+
+                Task {
+                    try? await self.viewModel.saveTexture(
+                        layerId: textureLayerId,
+                        texture: newTexture,
+                        device: self.sharedDevice
                     )
-                } catch {
-                    Logger.error(error)
+                    self.viewModel.textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
                 }
             }
 
@@ -301,6 +342,5 @@ extension HandDrawingCanvasView {
         didUndoSubject.send(
             .init(undoManager)
         )
- */
     }
 }

@@ -105,8 +105,8 @@ extension HandDrawingCanvasViewModel {
             let layerId = self.textureLayersState.selectedLayer?.id
         else { return }
 
-        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
-            id: layerId,
+        try await saveTexture(
+            layerId: layerId,
             texture: texture,
             device: device
         )
@@ -114,6 +114,14 @@ extension HandDrawingCanvasViewModel {
         textureLayersState.updateThumbnail(
             layerId,
             texture: texture
+        )
+    }
+
+    func saveTexture(layerId: UUID, texture: MTLTexture, device: MTLDevice) async throws {
+        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+            id: layerId,
+            texture: texture,
+            device: device
         )
     }
 

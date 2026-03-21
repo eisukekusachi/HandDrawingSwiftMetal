@@ -185,60 +185,20 @@ extension HandDrawingViewController {
         canvasView?.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                guard let `self` else { return }
                 switch event {
-                case .fingerStrokeBegan:
-                    self.enableComponentsInteraction(false)
-                    /*
-                    Task {
-                        await self.canvasView.undoTextureLayers?.setUndoDrawing(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-                    */
-                case .pencilStrokeBegan:
-                    self.enableComponentsInteraction(false)
-                    /*
-                    Task {
-                        await self.canvasView.undoTextureLayers?.setUndoDrawing(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-                    */
-                case .strokeCompleted:
-                    /*
-                    Task {
-                        try await self.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-
-                    // Update the project's updatedAt value to the current time
-                    self.viewModel.project.update(
-                        updatedAt: Date()
-                    )
-                    */
-                    self.enableComponentsInteraction(true)
-
-                case .strokeCancelled:
-                    self.enableComponentsInteraction(true)
+                case .fingerStrokeBegan, .pencilStrokeBegan:
+                    self?.enableComponentsInteraction(false)
+                case .strokeCompleted, .strokeCancelled:
+                    self?.enableComponentsInteraction(true)
                 }
             }
             .store(in: &cancellables)
 
-        /*
-        canvasView.undoTextureLayers?.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.canvasView.registerUndoObjectPair(undoObjectPair)
-            }
-            .store(in: &cancellables)
-
-        canvasView.didUndo
+        canvasView?.didUndo
             .sink { [weak self] state in
                 self?.contentView.setUndoRedoButtonState(state)
             }
             .store(in: &cancellables)
-        */
 
         viewModel.activityIndicator
             .map { !$0 }
