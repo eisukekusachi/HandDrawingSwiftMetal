@@ -351,7 +351,6 @@ extension HandDrawingViewController {
                 canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
             ])
 
-            /*
             let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
                 if let view = self?.textureLayerView {
                     AnyView(view)
@@ -364,9 +363,8 @@ extension HandDrawingViewController {
                 to: contentView,
                 dialogWidth: 300
             )
-            */
 
-            textureLayerPopup = UIHostingController(rootView: AnyView(textureLayerView))
+            textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
             textureLayerPopup?.view.backgroundColor = .white
 
             if let popup = textureLayerPopup {
@@ -380,7 +378,7 @@ extension HandDrawingViewController {
                     popup.view.heightAnchor.constraint(equalToConstant: 300)
                 ])
             }
-            // textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
+            textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
         }
 
         addBrushPalette()
