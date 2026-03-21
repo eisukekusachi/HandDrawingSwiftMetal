@@ -95,8 +95,6 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        guard let device else { return }
-
         // Align the size of `_displayTexture` with `drawableSize`
         _displayTexture = renderer.makeTexture(size)
     }
