@@ -13,7 +13,8 @@ import TextureLayerView
 @preconcurrency import CoreData
 
 /// Texture layers managed by Core Data
-@MainActor public final class CoreDataTextureLayerStorage: ObservableObject {
+@MainActor
+public final class CoreDataTextureLayerStorage: ObservableObject {
 
     private var textureLayers: TextureLayersState
 
@@ -27,6 +28,20 @@ import TextureLayerView
     ) {
         self.storage = .init(context: context)
         self.textureLayers = textureLayers
+
+        // Save to Core Data when any of the properties are updated
+        Publishers.Merge3(
+            textureLayers.$layers.map { _ in () }.eraseToAnyPublisher(),
+            textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
+            textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
+        .sink { [weak self] _ in
+            Task {
+                await self?.save()
+            }
+        }
+        .store(in: &cancellables)
     }
 
     public func fetch() throws -> TextureLayerArrayEntity? {
@@ -37,12 +52,7 @@ import TextureLayerView
         try storage?.clearAll()
     }
 
-    /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
-    var textureLayersStateFromCoreDataEntity: TextureLayersModel? {
-        guard
-            let entity = try? storage?.fetch()
-        else { return nil }
-
+    public func textureLayersModel(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }
             .map { layer -> TextureLayerModel in
@@ -55,28 +65,6 @@ import TextureLayerView
             } ?? []
         let layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
         let textureSize: CGSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
-
-        return .init(
-            layers: layers,
-            layerIndex: layerIndex,
-            textureSize: textureSize
-        )
-    }
-
-    func convertData(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
-        let layers: [TextureLayerModel] = entity.textureLayerItems?
-            .compactMap { $0 as? TextureLayerEntity }
-            .map { layer -> TextureLayerModel in
-                .init(
-                    id: layer.id ?? LayerId(),
-                    title: layer.title ?? "",
-                    alpha: Int(layer.alpha),
-                    isVisible: layer.isVisible
-                )
-            } ?? []
-        let layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-        let textureSize: CGSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
-
         return .init(
             layers: layers,
             layerIndex: layerIndex,
@@ -162,7 +150,6 @@ private extension CoreDataTextureLayerStorage {
                 if context.hasChanges {
                     try context.save()
                 }
-
             } catch {
                 Logger.error(error)
             }

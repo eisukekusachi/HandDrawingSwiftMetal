@@ -30,9 +30,9 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     private var restoredDataFromCoreData: TextureLayersModel? {
         guard
             let entity = try? textureLayerStorage?.fetch(),
-            let state = textureLayerStorage?.convertData(from: entity)
+            let model = textureLayerStorage?.textureLayersModel(from: entity)
         else { return nil }
-        return state
+        return model
     }
 
     init(

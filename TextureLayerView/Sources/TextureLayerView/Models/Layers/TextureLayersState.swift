@@ -14,42 +14,34 @@ import UIKit
 public class TextureLayersState: ObservableObject {
 
     public var selectedLayer: TextureLayerItem? {
-        guard let _selectedLayerId else { return nil }
-        return _layers.first(where: { $0.id == _selectedLayerId })
+        guard let selectedLayerId else { return nil }
+        return layers.first(where: { $0.id == selectedLayerId })
     }
 
     public var selectedIndex: Int? {
-        guard let _selectedLayerId else { return nil }
-        return _layers.firstIndex(where: { $0.id == _selectedLayerId })
-    }
-
-    public var layers: [TextureLayerItem] {
-        _layers
+        guard let selectedLayerId else { return nil }
+        return layers.firstIndex(where: { $0.id == selectedLayerId })
     }
 
     public var layerCount: Int {
-        _layers.count
+        layers.count
     }
 
-    public var textureSize: CGSize {
-        _textureSize
-    }
+    @Published public private(set) var layers: [TextureLayerItem] = []
 
-    @Published private var _layers: [TextureLayerItem] = []
-
-    @Published private var _selectedLayerId: LayerId?
+    @Published public private(set) var selectedLayerId: LayerId?
 
     // Set a default value to avoid nil
-    @Published private var _textureSize: CGSize = .init(width: 768, height: 1024)
+    @Published public private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
     public init() {}
 
     public func update(
         _ textureLayers: TextureLayersModel
     ) {
-        self._layers = textureLayers.layers.map { .init(model: $0) }
-        self._selectedLayerId = textureLayers.selectedLayerId
-        self._textureSize = textureLayers.textureSize
+        self.layers = textureLayers.layers.map { .init(model: $0) }
+        self.selectedLayerId = textureLayers.selectedLayerId
+        self.textureSize = textureLayers.textureSize
     }
 }
 
@@ -60,7 +52,7 @@ public extension TextureLayersState {
         thumbnail: UIImage?,
         at index: Int
     ) async throws {
-        self._layers.insert(
+        layers.insert(
             .init(
                 model: layer,
                 thumbnail: thumbnail
@@ -68,7 +60,7 @@ public extension TextureLayersState {
             at: index
         )
 
-        _selectedLayerId = layer.id
+        selectedLayerId = layer.id
     }
 
     func removeLayer(layerIndexToDelete index: Int) async throws {
@@ -78,13 +70,13 @@ public extension TextureLayersState {
             return
         }
 
-        let newLayerId = _layers[
+        let newLayerId = layers[
             RemoveLayerIndex.nextLayerIndexAfterDeletion(index: index)
         ].id
 
-        _layers.remove(at: index)
+        layers.remove(at: index)
 
-        _selectedLayerId = newLayerId
+        selectedLayerId = newLayerId
     }
 
     func moveLayer(indices: MoveLayerIndices) {
@@ -94,14 +86,14 @@ public extension TextureLayersState {
             layerCount: layerCount
         )
 
-        self._layers.move(
+        layers.move(
             fromOffsets: reversedIndices.sourceIndexSet,
             toOffset: reversedIndices.destinationIndex
         )
     }
 
     func selectLayer(_ id: LayerId) {
-        _selectedLayerId = id
+        selectedLayerId = id
     }
 
     /// Marks the beginning of an alpha (opacity) change session (e.g. slider drag began).
@@ -123,9 +115,9 @@ public extension TextureLayersState {
             return
         }
 
-        let layer = _layers[index]
+        let layer = layers[index]
 
-        _layers[index] = .init(
+        layers[index] = .init(
             id: layer.id,
             title: title,
             alpha: layer.alpha,
@@ -143,9 +135,9 @@ public extension TextureLayersState {
             return
         }
 
-        let layer = _layers[index]
+        let layer = layers[index]
 
-        _layers[index] = .init(
+        layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: layer.alpha,
@@ -163,9 +155,9 @@ public extension TextureLayersState {
             return
         }
 
-        let layer = _layers[index]
+        let layer = layers[index]
 
-        _layers[index] = .init(
+        layers[index] = .init(
             id: layer.id,
             title: layer.title,
             alpha: alpha,
@@ -183,18 +175,18 @@ public extension TextureLayersState {
             return
         }
 
-        _layers[index] = layer
+        layers[index] = layer
     }
 }
 
 public extension TextureLayersState {
 
     func index(for id: LayerId) -> Int? {
-        _layers.firstIndex(where: { $0.id == id })
+        layers.firstIndex(where: { $0.id == id })
     }
 
     func layer(_ id: LayerId) -> TextureLayerItem? {
-        _layers.first(where: { $0.id == id })
+        layers.first(where: { $0.id == id })
     }
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
@@ -207,9 +199,9 @@ public extension TextureLayersState {
             return
         }
 
-        let layer = _layers[index]
+        let layer = layers[index]
 
-        self._layers[index] = .init(
+        self.layers[index] = .init(
            id: layer.id,
            title: layer.title,
            alpha: layer.alpha,
