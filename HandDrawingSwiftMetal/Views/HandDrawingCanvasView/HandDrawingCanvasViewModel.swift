@@ -13,7 +13,7 @@ import TextureLayerView
 @MainActor
 final class HandDrawingCanvasViewModel: ObservableObject {
 
-    var textureSize: CGSize? {
+    var textureSize: CGSize {
         textureLayersState.textureSize
     }
 

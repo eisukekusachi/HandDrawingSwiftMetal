@@ -150,10 +150,9 @@ extension HandDrawingViewController {
             }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureSize in
-                guard
-                    let `self`,
-                    let textureLayers = self.canvasView.textureLayersState
-                else { return }
+                guard let `self` else { return }
+
+                let textureLayersState = self.canvasView.textureLayersState
 
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
@@ -162,14 +161,10 @@ extension HandDrawingViewController {
 
                 self.contentView.initialize()
 
-                self.textureLayerView?.update(textureLayers, device: canvasView.sharedDevice)
-
-                // Update the thumbnails
-                Task {
-                    for layer in textureLayers.layers {
-                        //try await layer.updateThumbnail(layer.id, texture: layer.)
-                    }
-                }
+                self.textureLayerView?.update(
+                    textureLayersState,
+                    device: canvasView.sharedDevice
+                )
             }
             .store(in: &cancellables)
 
