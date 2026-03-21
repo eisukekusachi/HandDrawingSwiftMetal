@@ -23,9 +23,6 @@ public final class TextureLayerViewModel: ObservableObject {
 
     @Published private(set) var textureLayers: TextureLayersState?
 
-    private(set) var defaultBackgroundColor: UIColor = .white
-    private(set) var selectedBackgroundColor: UIColor = .black
-
     private let dependencies: TextureLayerViewDependencies?
 
     private var cancellables = Set<AnyCancellable>()
