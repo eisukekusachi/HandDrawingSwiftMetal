@@ -21,34 +21,51 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     private(set) var textureLayersState: TextureLayersState = TextureLayersState()
 
+    private var textureLayerStorage: CoreDataTextureLayerStorage?
+
+    private let textureLayersStorageController: PersistenceController = PersistenceController(
+        xcdatamodeldName: "TextureLayerStorage"
+    )
+
+    private var restoredDataFromCoreData: TextureLayersModel? {
+        guard
+            let entity = try? textureLayerStorage?.fetch(),
+            let state = textureLayerStorage?.convertData(from: entity)
+        else { return nil }
+        return state
+    }
+
     init(
         dependencies: HandDrawingCanvasViewDependencies
     ) {
         self.dependencies = dependencies
+
+        self.textureLayerStorage = .init(
+            textureLayers: textureLayersState,
+            context: textureLayersStorageController.viewContext
+        )
     }
 }
 
 extension HandDrawingCanvasViewModel {
     func onSetup(
-        restoredData: TextureLayersModel?,
         configuration: CanvasConfiguration,
         device: MTLDevice
     ) async throws -> CanvasConfiguration? {
         let data: TextureLayersModel
         let resolvedConfiguration: CanvasConfiguration
 
-        if let restoredData {
+        if let restoredDataFromCoreData {
             do {
                 try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-                    textureLayers: restoredData,
+                    textureLayers: restoredDataFromCoreData,
                     device: device
                 )
-
-                data = restoredData
-                resolvedConfiguration = configuration.newTextureSize(restoredData.textureSize)
+                data = restoredDataFromCoreData
+                resolvedConfiguration = configuration.newTextureSize(restoredDataFromCoreData.textureSize)
 
             } catch {
-                // Initialize the storage on error
+                // Initialize using the configuration values when an error occurs
                 let newData = TextureLayersModel(textureSize: configuration.textureSize)
                 try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newData,
@@ -56,8 +73,14 @@ extension HandDrawingCanvasViewModel {
                 )
                 data = newData
                 resolvedConfiguration = configuration
-            }
 
+                // Initialize the Core Data storage if fetching fails
+                do {
+                    try textureLayerStorage?.clearAll()
+                } catch {
+                    Logger.error("Failed to clear Core Data storage: \(error)")
+                }
+            }
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
             try await dependencies.textureLayersDocumentsRepository.initializeStorage(

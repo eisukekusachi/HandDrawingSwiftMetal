@@ -13,6 +13,7 @@ public protocol CoreDataStorageProtocol {
     var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>?
     func fetch() throws -> Entity?
+    func clearAll() throws
 }
 
 public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
@@ -42,5 +43,16 @@ public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProt
     public func fetch() throws -> Entity? {
         guard let context, let request = fetchRequest() else { return nil }
         return try context.fetch(request).first
+    }
+
+    public func clearAll() throws {
+        guard let context else { return }
+        guard let entityName = Entity.entity().name else { return }
+
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+
+        try context.execute(deleteRequest)
+        context.reset()
     }
 }

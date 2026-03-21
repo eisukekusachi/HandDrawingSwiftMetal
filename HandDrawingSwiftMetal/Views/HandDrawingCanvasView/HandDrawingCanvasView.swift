@@ -23,10 +23,6 @@ import TextureLayerView
 
     public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
 
-    private var textureLayerStorage: CoreDataTextureLayerStorage?
-
-    private let textureLayersStorageController: PersistenceController
-
     private var textureLayerRenderer: TextureLayerRenderer?
 
     /// A debouncer used to prevent continuous input during drawing
@@ -46,10 +42,6 @@ import TextureLayerView
     }
 
     override init(device: MTLDevice? = nil) {
-        self.textureLayersStorageController = PersistenceController(
-            xcdatamodeldName: "TextureLayerStorage"
-        )
-
         super.init(device: device)
 
         self.undoTextureInMemoryRepository = .init(
@@ -58,10 +50,6 @@ import TextureLayerView
 
         self.textureLayerRenderer = .init(renderer: renderer)
 
-        self.textureLayerStorage = .init(
-            textureLayers: textureLayersState,
-            context: textureLayersStorageController.viewContext
-        )
         bindData()
     }
 
@@ -215,20 +203,10 @@ extension HandDrawingCanvasView {
         drawingRenderers: [DrawingRenderer],
         configuration: CanvasConfiguration
     ) async throws {
-        let restoredData: TextureLayersModel? = {
-            guard
-                let entity = try? textureLayerStorage?.fetch(),
-                let state = textureLayerStorage?.convertData(from: entity)
-            else { return nil }
-            return state
-        }()
-
         let resolvedConfiguration = try await viewModel.onSetup(
-            restoredData: restoredData,
             configuration: configuration,
             device: sharedDevice
         )
-
         try super.setup(resolvedConfiguration)
     }
 

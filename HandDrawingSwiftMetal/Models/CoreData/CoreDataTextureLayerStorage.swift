@@ -33,6 +33,10 @@ import TextureLayerView
         try storage?.fetch()
     }
 
+    public func clearAll() throws {
+        try storage?.clearAll()
+    }
+
     /// Fetches `textureLayers` data from Core Data, returns nil if an error occurs.
     var textureLayersStateFromCoreDataEntity: TextureLayersModel? {
         guard
@@ -60,7 +64,6 @@ import TextureLayerView
     }
 
     func convertData(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
-
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }
             .map { layer -> TextureLayerModel in
