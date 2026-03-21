@@ -5,9 +5,9 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
-import CanvasView
 import Foundation
 import TextureLayerView
+
 @preconcurrency import MetalKit
 
 /// A repository that manages textures for undo operations.
@@ -18,14 +18,10 @@ public final class UndoTextureInMemoryRepository {
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]
 
-    private let renderer: MTLRendering
-
     public init(
-        textures: [LayerId: MTLTexture?] = [:],
-        renderer: MTLRendering
+        textures: [LayerId: MTLTexture?] = [:]
     ) {
         self.textures = textures
-        self.renderer = renderer
     }
 
     /// Returns the texture associated with the specified `LayerId`

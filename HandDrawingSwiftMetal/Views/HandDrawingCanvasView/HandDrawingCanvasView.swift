@@ -21,7 +21,7 @@ import TextureLayerView
         viewModel.textureLayersState
     }
 
-    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository?
+    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository = .init()
 
     private var textureLayerRenderer: TextureLayerRenderer?
 
@@ -43,10 +43,6 @@ import TextureLayerView
 
     override init(device: MTLDevice? = nil) {
         super.init(device: device)
-
-        self.undoTextureInMemoryRepository = .init(
-            renderer: renderer
-        )
 
         self.textureLayerRenderer = .init(renderer: renderer)
 
@@ -248,7 +244,7 @@ extension HandDrawingCanvasView {
     }
     func resetUndo() {
         guard let undoManager else { return }
-        undoTextureInMemoryRepository?.removeAll()
+        undoTextureInMemoryRepository.removeAll()
         undoManager.removeAllActions()
         didUndoSubject.send(
             .init(undoManager)
