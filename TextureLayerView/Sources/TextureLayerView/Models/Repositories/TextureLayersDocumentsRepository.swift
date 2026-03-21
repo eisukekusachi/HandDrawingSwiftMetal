@@ -257,18 +257,6 @@ public extension TextureLayersDocumentsRepository {
         texture: MTLTexture,
         device: MTLDevice
     ) async throws {
-        // If the file exists, update it
-        guard
-            FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
-        else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: "\(String(localized: "File not found"))"
-            )
-            Logger.error(error)
-            throw error
-        }
-
         do {
             try await FileManager.saveTexture(
                 fileName: id.uuidString,
@@ -279,7 +267,7 @@ public extension TextureLayersDocumentsRepository {
         } catch {
             let error = NSError(
                 title: String(localized :"Error"),
-                message: String(localized :"Failed to update texture")
+                message: String(localized :"Failed to save the texture")
             )
             Logger.error(error)
             throw error
