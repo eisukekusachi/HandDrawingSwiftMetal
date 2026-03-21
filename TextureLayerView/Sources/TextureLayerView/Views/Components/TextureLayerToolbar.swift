@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/08/09.
 //
 
-import CanvasView
 import SwiftUI
 
 public struct TextureLayerToolbar: View {

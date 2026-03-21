@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MetalKit
 
 @MainActor
 public final class TextureLayerViewDependencies {

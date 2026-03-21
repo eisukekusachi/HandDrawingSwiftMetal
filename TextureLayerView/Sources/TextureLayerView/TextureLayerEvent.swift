@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 public enum TextureLayerEvent {
     /// Adds a new texture layer
     case addLayer

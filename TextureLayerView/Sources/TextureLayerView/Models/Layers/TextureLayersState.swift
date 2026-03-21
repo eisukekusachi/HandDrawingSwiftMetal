@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/04/13.
 //
 
-import CanvasView
 import Combine
 import MetalKit
 import UIKit

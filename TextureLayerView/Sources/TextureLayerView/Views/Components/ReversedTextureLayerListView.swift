@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2023/12/31.
 //
 
-import CanvasView
 import SwiftUI
 
 public struct ReversedTextureLayerListView: View {

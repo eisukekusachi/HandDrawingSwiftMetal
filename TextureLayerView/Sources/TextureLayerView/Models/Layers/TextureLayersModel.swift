@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/08/11.
 //
 
-import CanvasView
 import CoreData
 import UIKit
 
