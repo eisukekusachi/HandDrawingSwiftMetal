@@ -13,7 +13,11 @@ import TextureLayerView
 /// A repository that manages textures for undo operations.
 /// The textures are stored in memory to avoid blocking the main thread.
 @MainActor
-public final class UndoTextureInMemoryRepository {
+public final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
+
+    public static let shared = UndoTextureInMemoryRepository(
+        textures: [:]
+    )
 
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]
@@ -27,24 +31,6 @@ public final class UndoTextureInMemoryRepository {
     /// Returns the texture associated with the specified `LayerId`
     public func texture(id: LayerId) -> MTLTexture? {
         textures[id] as? MTLTexture
-    }
-
-    /// Removes all textures
-    public func removeAll() {
-        textures = [:]
-    }
-
-    /// Removes the texture for the specified `LayerId`
-    public func removeTexture(_ id: LayerId) throws {
-        // If the file exists, delete it
-        guard textures.keys.contains(id) else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to find \(id.uuidString)")
-            )
-            throw error
-        }
-        textures.removeValue(forKey: id)
     }
 
     /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
@@ -72,5 +58,23 @@ public final class UndoTextureInMemoryRepository {
             throw error
         }
         textures[id] = newTexture
+    }
+
+    /// Removes all textures
+    public func removeAll() {
+        textures = [:]
+    }
+
+    /// Removes the texture for the specified `LayerId`
+    public func removeTexture(_ id: LayerId) throws {
+        // If the file exists, delete it
+        guard textures.keys.contains(id) else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find \(id.uuidString)")
+            )
+            throw error
+        }
+        textures.removeValue(forKey: id)
     }
 }

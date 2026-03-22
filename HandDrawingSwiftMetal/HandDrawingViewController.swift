@@ -38,6 +38,9 @@ class HandDrawingViewController: UIViewController {
 
     private var textureLayerView: TextureLayerView?
 
+    /// Executes texture operations
+    private var renderer: MTLRendering?
+
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
         .eraser: EraserDrawingRenderer()
@@ -75,11 +78,15 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         sharedDevice = defaultDevice
+        renderer = MTLRenderer(device: sharedDevice)
         canvasView = HandDrawingCanvasView(
             device: sharedDevice
         )
         textureLayerView = TextureLayerView(
-            viewModel: UndoTextureLayerViewModel.init(onLayersChanged: handleViewUpdates),
+            viewModel: UndoTextureLayerViewModel.init(
+                renderer: renderer,
+                onLayersChanged: handleViewUpdates
+            ),
             device: sharedDevice
         )
         addEvents()

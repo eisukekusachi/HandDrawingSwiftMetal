@@ -29,7 +29,7 @@ public final class UndoTextureLayers: ObservableObject {
 
     /// A repository that stores textures for undo operations.
     /// The textures are stored and managed in memory to avoid blocking the main thread.
-    private var inMemoryRepository: UndoTextureInMemoryRepository? = nil
+    private var inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil
 
     private var renderer: MTLRendering
 
@@ -44,7 +44,7 @@ public final class UndoTextureLayers: ObservableObject {
     public init(
         textureLayers: TextureLayersState,
         renderer: MTLRendering,
-        inMemoryRepository: UndoTextureInMemoryRepository?
+        inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
     ) {
         self.textureLayers = textureLayers
         self.renderer = renderer

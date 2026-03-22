@@ -27,7 +27,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     private let commandQueue: MTLCommandQueue?
 
-    init(device: MTLDevice?) {
+    public init(device: MTLDevice?) {
         guard let device else { fatalError("Device is nil") }
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,

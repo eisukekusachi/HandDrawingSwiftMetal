@@ -23,7 +23,7 @@ import TextureLayerView
 
     private var undoTextureLayers: UndoTextureLayers?
 
-    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepository = .init()
+    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository.shared
 
     private var textureLayerRenderer: TextureLayerRenderer?
 
