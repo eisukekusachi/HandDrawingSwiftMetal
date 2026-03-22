@@ -5,8 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import CanvasView
-import Foundation
+import UIKit
 
 @preconcurrency import MetalKit
 
@@ -46,7 +45,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         let textureSize = textureLayers.textureSize
         guard
             let layerId: LayerId = textureLayers.layers.first?.id,
-            Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
+            Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
@@ -258,11 +257,10 @@ public extension TextureLayersDocumentsRepository {
         device: MTLDevice
     ) async throws {
         do {
-            try await FileManager.saveTexture(
-                fileName: id.uuidString,
-                texture: texture,
-                in: workingDirectoryURL,
-                device: device
+            let data = try texture.data(device: device)
+            try data.write(
+                to: workingDirectoryURL.appendingPathComponent(id.uuidString),
+                options: .atomic
             )
         } catch {
             let error = NSError(
