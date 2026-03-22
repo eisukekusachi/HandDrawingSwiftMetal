@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 @MainActor
-public class TextureLayerViewModel: ObservableObject {
+open class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 

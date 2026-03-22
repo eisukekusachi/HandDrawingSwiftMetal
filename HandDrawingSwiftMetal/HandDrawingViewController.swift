@@ -79,7 +79,7 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice
         )
         textureLayerView = TextureLayerView(
-            viewModel: .init(onLayersChanged: handleViewUpdates),
+            viewModel: UndoTextureLayerViewModel.init(onLayersChanged: handleViewUpdates),
             device: sharedDevice
         )
         addEvents()
