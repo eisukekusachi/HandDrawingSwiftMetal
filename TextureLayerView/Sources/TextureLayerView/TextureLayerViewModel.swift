@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 @MainActor
-public final class TextureLayerViewModel: ObservableObject {
+public class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
@@ -18,10 +18,10 @@ public final class TextureLayerViewModel: ObservableObject {
     public let onLayersChanged: ((TextureLayerEvent) -> Void)?
 
     public var selectedLayer: TextureLayerItem? {
-        textureLayers?.selectedLayer
+        textureLayers.selectedLayer
     }
 
-    @Published private(set) var textureLayers: TextureLayersState?
+    @Published private(set) var textureLayers: TextureLayersState = .init()
 
     private let dependencies: TextureLayerViewDependencies?
 
@@ -35,49 +35,9 @@ public final class TextureLayerViewModel: ObservableObject {
         self.onLayersChanged = onLayersChanged
     }
 
-    public func update(
-        _ textureLayers: TextureLayersState,
-        device: MTLDevice? = nil
-    ) {
-        self.textureLayers = textureLayers
-
-        // Update the thumbails
-        Task { [weak self] in
-            for layer in textureLayers.layers {
-                guard let device else { return }
-                let layerId: LayerId = layer.id
-                let texture = try? await self?.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
-                    layerId,
-                    device: device
-                )
-                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
-            }
-        }
-
-        // Update the alpha slider handle position
-        self.updateCurrentAlpha()
-
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
-
-        self.textureLayers?.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-    }
-}
-
-public extension TextureLayerViewModel {
-
-    func isSelected(_ id: UUID) -> Bool {
-        textureLayers?.selectedLayer?.id == id
-    }
-
-    func onTapInsertButton(device: MTLDevice?) async throws {
+    open func onTapInsertButton(device: MTLDevice?) async throws {
         guard
             let device,
-            let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureLayers.textureSize.width),
@@ -106,9 +66,8 @@ public extension TextureLayerViewModel {
         onLayersChanged?(.addLayer)
     }
 
-    func onTapDeleteButton() async throws {
+    open func onTapDeleteButton() async throws {
         guard
-            let textureLayers,
             let selectedIndex = textureLayers.selectedIndex,
             let selectedId = textureLayers.selectedLayer?.id,
             textureLayers.layerCount > 1
@@ -124,23 +83,23 @@ public extension TextureLayerViewModel {
         onLayersChanged?(.removeLayer)
     }
 
-    func onTapTitleButton(_ id: UUID, title: String) {
-        textureLayers?.updateTitle(id, title: title)
+    open func onTapTitleButton(_ id: UUID, title: String) {
+        textureLayers.updateTitle(id, title: title)
     }
 
-    func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
-        textureLayers?.updateVisibility(id, isVisible: isVisible)
+    open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
+        textureLayers.updateVisibility(id, isVisible: isVisible)
         onLayersChanged?(.changeVisibility)
     }
 
-    func onTapCell(_ id: UUID) {
-        textureLayers?.selectLayer(id)
+    open func onTapCell(_ id: UUID) {
+        textureLayers.selectLayer(id)
         updateCurrentAlpha()
         onLayersChanged?(.selectLayer)
     }
 
-    func onMoveLayer(source: IndexSet, destination: Int) {
-        textureLayers?.moveLayer(
+    open func onMoveLayer(source: IndexSet, destination: Int) {
+        textureLayers.moveLayer(
             indices: .init(
                 sourceIndexSet: source,
                 destinationIndex: destination
@@ -149,11 +108,50 @@ public extension TextureLayerViewModel {
         onLayersChanged?(.moveLayer)
     }
 
-    func onChangeCurrentAlpha(_ alpha: Int) {
-        guard let selectedLayerId = textureLayers?.selectedLayer?.id else { return }
-        textureLayers?.updateAlpha(selectedLayerId, alpha: alpha)
+    open func onChangeCurrentAlpha(_ alpha: Int) {
+        guard let selectedLayerId = selectedLayer?.id else { return }
+        textureLayers.updateAlpha(selectedLayerId, alpha: alpha)
         updateCurrentAlpha()
         onLayersChanged?(.changeLayerAlpha)
+    }
+}
+
+public extension TextureLayerViewModel {
+
+    func update(
+        _ textureLayers: TextureLayersState,
+        device: MTLDevice? = nil
+    ) {
+        self.textureLayers = textureLayers
+
+        // Update the thumbails
+        Task { [weak self] in
+            for layer in textureLayers.layers {
+                guard let device else { return }
+                let layerId: LayerId = layer.id
+                let texture = try? await self?.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+                    layerId,
+                    device: device
+                )
+                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
+            }
+        }
+
+        // Update the alpha slider handle position
+        self.updateCurrentAlpha()
+
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
+
+        self.textureLayers.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+    }
+
+    func isSelected(_ id: UUID) -> Bool {
+        textureLayers.selectedLayer?.id == id
     }
 }
 
@@ -161,8 +159,8 @@ extension TextureLayerViewModel {
 
     private func updateCurrentAlpha() {
         guard
-            let selectedLayerId = textureLayers?.selectedLayer?.id,
-            let layer = textureLayers?.layer(selectedLayerId),
+            let selectedLayerId = selectedLayer?.id,
+            let layer = textureLayers.layer(selectedLayerId),
             currentAlpha != layer.alpha
         else { return }
 
