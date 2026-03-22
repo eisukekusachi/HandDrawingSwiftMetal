@@ -29,7 +29,7 @@ public final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryP
     }
 
     /// Returns the texture associated with the specified `LayerId`
-    public func texture(id: LayerId) -> MTLTexture? {
+    public func texture(_ id: LayerId) -> MTLTexture? {
         textures[id] as? MTLTexture
     }
 

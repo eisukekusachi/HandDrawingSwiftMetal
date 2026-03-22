@@ -12,27 +12,26 @@ import TextureLayerView
 
 @objc final class HandDrawingCanvasView: CanvasView {
 
-    var didUndo: AnyPublisher<UndoRedoButtonState, Never> {
+    var didUndo: AnyPublisher<UndoManager, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
-    private var didUndoSubject = PassthroughSubject<UndoRedoButtonState, Never>()
+    private var didUndoSubject = PassthroughSubject<UndoManager, Never>()
+
+    var didPerformUndo: AnyPublisher<UndoObject, Never> {
+        didPerformUndoSubject.eraseToAnyPublisher()
+    }
+    private var didPerformUndoSubject = PassthroughSubject<UndoObject, Never>()
 
     var textureLayersState: TextureLayersState {
         viewModel.textureLayersState
     }
-
-    private var undoTextureLayers: UndoTextureLayers?
-
-    public var undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository.shared
 
     private var textureLayerRenderer: TextureLayerRenderer?
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private var viewModel: HandDrawingCanvasViewModel = .init(
-        dependencies: .init()
-    )
+    private var viewModel: HandDrawingCanvasViewModel
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -44,14 +43,13 @@ import TextureLayerView
     }
 
     override init(device: MTLDevice? = nil) {
-        super.init(device: device)
-        self.textureLayerRenderer = .init(renderer: renderer)
-        self.undoTextureLayers = .init(
-            textureLayers: viewModel.textureLayersState,
-            renderer: renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+        self.viewModel = .init(
+            device: device
         )
-        bindData()
+        super.init(device: device)
+        self.viewModel.setRenderer(renderer)
+        self.textureLayerRenderer = .init(renderer: renderer)
+        self.bindData()
     }
 
     public required init?(coder: NSCoder) {
@@ -71,48 +69,34 @@ import TextureLayerView
                 if case .strokeCompleted = event {
                     self?.completeDrawing()
                 }
-                self?.handleUndoUpdates(event)
+                self?.registerDrawingUndoObjectAfterCompletion(event)
             }
             .store(in: &cancellables)
 
-        undoTextureLayers?.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.registerUndoObjectPair(undoObjectPair)
+        viewModel.performUndoSubject
+            .sink { [weak self] undoObject in
+                self?.performUndo(undoObject)
             }
             .store(in: &cancellables)
 
-        /*
-        // Update the current texture
-        // Mainly used for undoing alpha changes
-        textureLayersState?.currentLayerUpdateRequested
-            .sink { [weak self] in
-                self?.updateCanvasTextureUsingCurrentTexture()
-            }
-            .store(in: &cancellables)
-
-        // Update the canvas with a new texture
-        // Mainly used for undoing drawing operations
-        textureLayersState?.currentLayerUpdateWithNewCurrentTextureRequested
+        viewModel.updateCanvasTextureSubject
             .sink { [weak self] texture in
-                do {
-                    try self?.setCurrentTexture(texture)
-                    self?.updateCanvasTextureUsingCurrentTexture()
-                } catch {
-                    Logger.error(error)
+                guard let `self` else { return }
+                if let texture {
+                    try? self.setCurrentTexture(texture)
                 }
+                self.updateCanvasTextureUsingCurrentTexture()
             }
             .store(in: &cancellables)
 
-        // Update the entire canvas
-        // Mainly used to undo adding/removing operations
-        textureLayersState?.fullCanvasUpdateRequested
-            .sink { [weak self] in
-                Task {
-                    try? await self?.updateFullCanvasTexture()
+        viewModel.updateFullCanvasTextureSubject
+            .sink {
+                Task { [weak self] in
+                    guard let `self` else { return }
+                    try? await self.updateFullCanvasTexture()
                 }
             }
             .store(in: &cancellables)
-        */
     }
 
     private func completeDrawing() {
@@ -136,7 +120,7 @@ import TextureLayerView
         guard
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
-            let currentTexture = try await viewModel.duplicatedTexture(
+            let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id,
                 device: sharedDevice
             )
@@ -144,7 +128,7 @@ import TextureLayerView
             return
         }
 
-        let textures = try await viewModel.duplicatedTextures(
+        let textures = try await viewModel.duplicateTexturesFromDocumentsDirectory(
             textureLayers.layers.map { $0.id },
             device: sharedDevice
         )
@@ -159,13 +143,11 @@ import TextureLayerView
     }
 
     override func completeCanvasCreation(_ textureSize: CGSize) async {
-        if let undoTextureLayers, undoTextureLayers.isUndoEnabled {
-            // Initialize the textures used for Undo
-            undoTextureLayers.initializeUndoTextures(
-                textureSize: textureSize
-            )
-            resetUndo()
-        }
+        // Initialize the textures used for Undo
+        viewModel.undoDrawing?.initializeUndoTextures(
+            textureSize: textureSize
+        )
+        resetUndo()
 
         do {
             try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
@@ -235,112 +217,83 @@ extension HandDrawingCanvasView {
         try await viewModel.onLoadFiles(device: sharedDevice, from: workingDirectoryURL)
         try super.createCanvas(viewModel.textureSize)
     }
+
+    func undo() {
+        guard let undoManager else { return }
+        undoManager.undo()
+        didUndoSubject.send(undoManager)
+    }
+    func redo() {
+        guard let undoManager else { return }
+        undoManager.redo()
+        didUndoSubject.send(undoManager)
+    }
+    func resetUndo() {
+        guard let undoManager else { return }
+        viewModel.dependencies.undoTextureInMemoryRepository.removeAll()
+        undoManager.removeAllActions()
+        didUndoSubject.send(undoManager)
+    }
+
+    func registerUndoObject(
+        _ undoRedoObject: UndoRedoObjectPair
+    ) {
+        guard let undoManager else { return }
+        viewModel.registerUndoObjectPair(
+            undoManager,
+            undoRedoObject
+        )
+        didUndoSubject.send(undoManager)
+    }
 }
 
 extension HandDrawingCanvasView {
-
-    private func handleUndoUpdates(_ event: StrokeEvent) {
+    private func registerDrawingUndoObjectAfterCompletion(_ event: StrokeEvent) {
         switch event {
         case .fingerStrokeBegan, .pencilStrokeBegan:
             Task {
-                await undoTextureLayers?.setUndoDrawing(
+                await viewModel.undoDrawing?.setUndoDrawing(
                     texture: currentTexture
                 )
             }
         case .strokeCompleted:
             Task {
-                try await undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
-                    texture: currentTexture
-                )
+                guard
+                    let selectedLayer = viewModel.textureLayersState.selectedLayer,
+                    let undoRedoObjectPair = try await viewModel.undoDrawing?.pushUndoDrawingObject(
+                        selectedLayer: selectedLayer,
+                        texture: currentTexture
+                    )
+                 else {
+                    return
+                }
+                registerUndoObject(undoRedoObjectPair)
             }
         case .strokeCancelled:
             break
         }
     }
 
-    func undo() {
-        guard let undoManager else { return }
-        undoManager.undo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    func redo() {
-        guard let undoManager else { return }
-        undoManager.redo()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-    func resetUndo() {
-        guard let undoManager else { return }
-        undoTextureInMemoryRepository.removeAll()
-        undoManager.removeAllActions()
-        didUndoSubject.send(
-            .init(undoManager)
-        )
-    }
-
-    func registerUndoObjectPair(
-        _ undoRedoObject: UndoRedoObjectPair
-    ) {
-        guard let undoManager else { return }
-
-        undoRedoObject.undoObject.deinitSubject
-            .sink(receiveValue: { [weak self] result in
-                guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoRedoObject.redoObject.deinitSubject
-            .sink(receiveValue: { [weak self] result in
-                guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
-            })
-            .store(in: &cancellables)
-
-        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject, undoTextureInMemoryRepository] _ in
-            Task { [weak self] in
-                guard let `self` else { return }
-
-                guard
-                    let undoObject = undoRedoObject.undoObject as? UndoDrawingObject,
-                    let undoTextureId = undoObject.undoTextureId,
-                    let newTexture = try await MTLTextureCreator.duplicateTexture(
-                        texture: undoTextureInMemoryRepository.texture(id: undoTextureId),
-                        renderer: renderer
-                    )
-                else { return }
-
-                let textureLayerId = undoObject.textureLayer.id
-
-                try? self.setCurrentTexture(newTexture)
-                self.viewModel.textureLayersState.selectLayer(textureLayerId)
-                self.updateCanvasTextureUsingCurrentTexture()
-
-                Task {
-                    try? await self.viewModel.saveTexture(
-                        layerId: textureLayerId,
-                        texture: newTexture,
-                        device: self.sharedDevice
-                    )
-                    self.viewModel.textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
-                }
+    private func performUndo(_ undoObject: UndoObject) {
+        Task { [weak self] in
+            if let undoObject = undoObject as? UndoDrawingObject {
+                await self?.viewModel.performDrawingUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoAdditionObject {
+                await self?.viewModel.performAdditionUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoDeletionObject {
+                await self?.viewModel.performDeletionUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoSelectionObject {
+                await self?.viewModel.performSelectUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoMoveObject {
+                self?.viewModel.performMoveUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoAlphaObject {
+                await self?.viewModel.performAlphaUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoVisibilityObject {
+                await self?.viewModel.performVisibilityUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoTitleObject {
+                await self?.viewModel.performTitleUndo(undoObject)
             }
-
-            // Redo Registration
-            self?.registerUndoObjectPair(undoRedoObject.reversed())
+            self?.didPerformUndoSubject.send(undoObject)
         }
-
-        didUndoSubject.send(
-            .init(undoManager)
-        )
     }
 }

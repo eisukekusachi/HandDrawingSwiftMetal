@@ -12,22 +12,17 @@ public struct TextureLayerView: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
-    private let device: MTLDevice?
-
     private let range: ClosedRange<Int> = 0 ... 255
 
     public init(
-        viewModel: TextureLayerViewModel,
-        device: MTLDevice? = nil
+        viewModel: TextureLayerViewModel
     ) {
         self._viewModel = .init(wrappedValue: viewModel)
-        self.device = device
     }
 
     public var body: some View {
         VStack {
             TextureLayerToolbar(
-                device: device,
                 viewModel: viewModel
             )
 
@@ -47,6 +42,10 @@ public struct TextureLayerView: View {
 
     public func update(_ state: TextureLayersState, device: MTLDevice) {
         viewModel.update(state, device: device)
+    }
+
+    public func updateAlpha(_ alpha: Int) {
+        viewModel.currentAlpha = alpha
     }
 }
 

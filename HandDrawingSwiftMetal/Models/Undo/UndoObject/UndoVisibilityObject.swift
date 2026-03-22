@@ -5,34 +5,25 @@
 //  Created by Eisuke Kusachi on 2025/12/21.
 //
 
-import CanvasView
 import Combine
-import Foundation
 import TextureLayerView
 
 /// An undo object for reverting layer visibility
-public final class UndoVisibilityObject: UndoObject {
-    public var undoTextureId: UndoTextureId? = nil
+final class UndoVisibilityObject: UndoObject {
 
-    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    let undoTextureId: UndoTextureId? = nil
 
-    public let textureLayer: TextureLayerModel
+    let textureLayer: TextureLayerModel
+
+    let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
     deinit {
         deinitSubject.send(self)
     }
 
-    public init(
+    init(
         layer: TextureLayerModel,
     ) {
         self.textureLayer = layer
-    }
-
-    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
-        layers.updateVisibility(
-            textureLayer.id,
-            isVisible: textureLayer.isVisible
-        )
-        //layers.requestFullCanvasUpdate()
     }
 }

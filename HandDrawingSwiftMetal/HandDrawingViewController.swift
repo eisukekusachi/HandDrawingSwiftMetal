@@ -71,6 +71,12 @@ class HandDrawingViewController: UIViewController {
         }
     }
 
+    private var registerUndoObject: ((UndoRedoObjectPair) -> Void) {
+        { [weak self] undoObjectPair in
+            self?.canvasView?.registerUndoObject(undoObjectPair)
+        }
+    }
+
     override func viewDidLoad() {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
@@ -83,11 +89,11 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice
         )
         textureLayerView = TextureLayerView(
-            viewModel: UndoTextureLayerViewModel.init(
-                renderer: renderer,
-                onLayersChanged: handleViewUpdates
-            ),
-            device: sharedDevice
+            viewModel: UndoTextureLayerViewModel(
+                device: sharedDevice,
+                onLayersChanged: handleViewUpdates,
+                onRegisterUndoObjectPair: registerUndoObject
+            )
         )
         addEvents()
         bindData()
@@ -202,8 +208,20 @@ extension HandDrawingViewController {
             .store(in: &cancellables)
 
         canvasView?.didUndo
-            .sink { [weak self] state in
-                self?.contentView.setUndoRedoButtonState(state)
+            .sink { [weak self] undoManager in
+                self?.contentView.setUndoRedoButtonState(
+                    .init(undoManager)
+                )
+            }
+            .store(in: &cancellables)
+
+        canvasView?.didPerformUndo
+            .sink { [weak self] undoObject in
+                if let undoObject = undoObject as? UndoAlphaObject {
+                    self?.textureLayerView?.updateAlpha(
+                        undoObject.textureLayer.alpha
+                    )
+                }
             }
             .store(in: &cancellables)
 

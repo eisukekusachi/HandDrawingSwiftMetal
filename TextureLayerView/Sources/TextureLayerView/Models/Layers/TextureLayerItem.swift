@@ -83,6 +83,26 @@ public extension TextureLayerItem {
         )
     }
 
+    func updated(
+        title: String? = nil,
+        alpha: Int? = nil,
+        isVisible: Bool? = nil,
+        thumbnail: UIImage? = nil
+    ) -> Self {
+        .init(
+            id: id,
+            title: title ?? self.title,
+            alpha: alpha ?? self.alpha,
+            isVisible: isVisible ?? self.isVisible,
+            thumbnail: thumbnail ?? self.thumbnail,
+            defaultBackgroundColor: defaultBackgroundColor,
+            selectedBackgroundColor: selectedBackgroundColor,
+            iconSize: iconSize,
+            padding: padding,
+            cornerRadius: cornerRadius
+        )
+    }
+
     func backgroundColor(_ selected: Bool) -> UIColor {
         !selected ? defaultBackgroundColor : selectedBackgroundColor
     }

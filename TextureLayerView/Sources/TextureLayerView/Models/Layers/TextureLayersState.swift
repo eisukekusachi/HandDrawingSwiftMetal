@@ -126,7 +126,25 @@ public extension TextureLayersState {
         )
     }
 
-    func updateVisibility(_ id: LayerId, isVisible: Bool) {
+    func updateLayer(_ layer: TextureLayerItem) {
+        guard
+            let index = index(for: layer.id)
+        else {
+            let value: String = "index: \(String(describing: index))"
+            Logger.error(String(localized: "Unable to find \(value)"))
+            return
+        }
+
+        layers[index] = layer
+    }
+    
+    func update(
+        _ id: LayerId,
+        title: String? = nil,
+        alpha: Int? = nil,
+        isVisible: Bool? = nil,
+        thumbnail: UIImage? = nil
+    ) {
         guard
             let index = index(for: id)
         else {
@@ -136,13 +154,11 @@ public extension TextureLayersState {
         }
 
         let layer = layers[index]
-
-        layers[index] = .init(
-            id: layer.id,
-            title: layer.title,
-            alpha: layer.alpha,
+        layers[index] = layer.updated(
+            title: title,
+            alpha: alpha,
             isVisible: isVisible,
-            thumbnail: layer.thumbnail
+            thumbnail: thumbnail
         )
     }
 
@@ -156,37 +172,7 @@ public extension TextureLayersState {
         }
 
         let layer = layers[index]
-
-        layers[index] = .init(
-            id: layer.id,
-            title: layer.title,
-            alpha: alpha,
-            isVisible: layer.isVisible,
-            thumbnail: layer.thumbnail
-        )
-    }
-
-    func updateLayer(_ layer: TextureLayerItem) {
-        guard
-            let index = index(for: layer.id)
-        else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
-            return
-        }
-
-        layers[index] = layer
-    }
-}
-
-public extension TextureLayersState {
-
-    func index(for id: LayerId) -> Int? {
-        layers.firstIndex(where: { $0.id == id })
-    }
-
-    func layer(_ id: LayerId) -> TextureLayerItem? {
-        layers.first(where: { $0.id == id })
+        layers[index] = layer.updated(alpha: alpha)
     }
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
@@ -200,13 +186,14 @@ public extension TextureLayersState {
         }
 
         let layer = layers[index]
+        self.layers[index] = layer.updated(thumbnail: texture.makeThumbnail())
+    }
 
-        self.layers[index] = .init(
-           id: layer.id,
-           title: layer.title,
-           alpha: layer.alpha,
-           isVisible: layer.isVisible,
-           thumbnail: texture.makeThumbnail()
-       )
+    func index(for id: LayerId) -> Int? {
+        layers.firstIndex(where: { $0.id == id })
+    }
+
+    func layer(_ id: LayerId) -> TextureLayerItem? {
+        layers.first(where: { $0.id == id })
     }
 }

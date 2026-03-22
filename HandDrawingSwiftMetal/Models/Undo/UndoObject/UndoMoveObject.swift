@@ -5,27 +5,25 @@
 //  Created by Eisuke Kusachi on 2025/06/26.
 //
 
-import CanvasView
 import Combine
 import Foundation
-import MetalKit
 import TextureLayerView
 
 /// An undo object for moving a texture layer
-public final class UndoMoveObject: UndoObject {
+final class UndoMoveObject: UndoObject {
 
     /// Not used
-    public let undoTextureId: UndoTextureId? = nil
+    let undoTextureId: UndoTextureId? = nil
 
-    public let textureLayer: TextureLayerModel
+    let textureLayer: TextureLayerModel
 
-    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
-    public let selectedLayerId: LayerId
+    let selectedLayerId: LayerId
 
-    public let indices: MoveLayerIndices
+    let indices: MoveLayerIndices
 
-    public var reversedObject: UndoMoveObject {
+    var reversedObject: UndoMoveObject {
         let sourceIndex = indices.sourceIndex
         let destinationIndex = MoveLayerIndices.arrayDestinationIndex(
             moveLayerSourceIndex: sourceIndex,
@@ -53,7 +51,7 @@ public final class UndoMoveObject: UndoObject {
         deinitSubject.send(self)
     }
 
-    public init(
+    init(
         indices: MoveLayerIndices,
         selectedLayerId: LayerId,
         layer: TextureLayerModel
@@ -61,13 +59,5 @@ public final class UndoMoveObject: UndoObject {
         self.indices = indices
         self.selectedLayerId = selectedLayerId
         self.textureLayer = layer
-    }
-
-    @MainActor
-    public func applyUndo(layers: TextureLayersState, repository: UndoTextureInMemoryRepository) async throws {
-        layers.moveLayer(
-            indices: indices
-        )
-        //layers.requestFullCanvasUpdate()
     }
 }

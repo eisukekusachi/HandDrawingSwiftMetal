@@ -8,20 +8,20 @@
 import Foundation
 
 /// A structure that holds both `undo` and `redo` objects
-public struct UndoRedoObjectPair {
+struct UndoRedoObjectPair {
 
-    public let undoObject: UndoObject
-    public let redoObject: UndoObject
+    let undoObject: UndoObject
+    let redoObject: UndoObject
 
     /// Alternate swapping between `undoObject` and `redoObject`
-    public func reversed() -> Self{
+    func reversed() -> Self{
         .init(
             undoObject: redoObject,
             redoObject: undoObject
         )
     }
 
-    public init(undoObject: UndoObject, redoObject: UndoObject) {
+    init(undoObject: UndoObject, redoObject: UndoObject) {
         self.undoObject = undoObject
         self.redoObject = redoObject
     }

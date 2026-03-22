@@ -15,16 +15,12 @@ public struct TextureLayerToolbar: View {
 
     private let buttonSize: CGFloat = 20
 
-    private let device: MTLDevice?
-
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
     init(
-        device: MTLDevice? = nil,
         viewModel: TextureLayerViewModel
     ) {
-        self.device = device
         self.viewModel = viewModel
     }
 
@@ -35,7 +31,7 @@ public struct TextureLayerToolbar: View {
                     buttonThrottle.throttle(id: "insertLayer") {
                         Task { @MainActor in
                             do {
-                                try await viewModel.onTapInsertButton(device: device)
+                                try await viewModel.onTapInsertButton()
                             } catch {
                                 Logger.error(error)
                             }

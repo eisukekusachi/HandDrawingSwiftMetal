@@ -27,19 +27,23 @@ open class TextureLayerViewModel: ObservableObject {
 
     @Published public private(set) var textureLayers: TextureLayersState = .init()
 
+    private let device: MTLDevice?
+
     private let dependencies: TextureLayerViewDependencies?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
+        device: MTLDevice? = nil,
         dependencies: TextureLayerViewDependencies? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {
+        self.device = device
         self.dependencies = dependencies ?? .init()
         self.onLayersChanged = onLayersChanged
     }
 
-    open func onTapInsertButton(device: MTLDevice?) async throws {
+    open func onTapInsertButton() async throws {
         guard
             let device,
             let selectedIndex = textureLayers.selectedIndex,
@@ -88,11 +92,11 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     open func onTapTitleButton(_ id: UUID, title: String) {
-        textureLayers.updateTitle(id, title: title)
+        textureLayers.update(id, title: title)
     }
 
     open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
-        textureLayers.updateVisibility(id, isVisible: isVisible)
+        textureLayers.update(id, isVisible: isVisible)
         onLayersChanged?(.changeVisibility)
     }
 
@@ -121,7 +125,7 @@ open class TextureLayerViewModel: ObservableObject {
 }
 
 public extension TextureLayerViewModel {
-    func texture(_ id: LayerId, device: MTLDevice?) async throws -> MTLTexture? {
+    func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async throws -> MTLTexture? {
         guard let device else { return nil }
         return try await dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
             id,
@@ -149,12 +153,12 @@ public extension TextureLayerViewModel {
         }
 
         // Update the alpha slider handle position
-        self.updateCurrentAlpha()
+        updateCurrentAlpha()
 
         // Avoid multiple subscriptions
         cancellables.removeAll()
 
-        self.textureLayers.objectWillChange
+        textureLayers.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

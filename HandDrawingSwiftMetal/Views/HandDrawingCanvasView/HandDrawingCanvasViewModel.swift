@@ -6,6 +6,7 @@
 //
 
 import CanvasView
+import Combine
 import Foundation
 import MetalKit
 import TextureLayerView
@@ -17,7 +18,13 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         textureLayersState.textureSize
     }
 
-    private var dependencies: HandDrawingCanvasViewDependencies
+    private(set) var performUndoSubject = PassthroughSubject<UndoObject, Never>()
+
+    private(set) var updateCanvasTextureSubject = PassthroughSubject<MTLTexture?, Never>()
+
+    private(set) var updateFullCanvasTextureSubject = PassthroughSubject<Void, Never>()
+
+    private(set) var dependencies: HandDrawingCanvasViewDependencies
 
     private(set) var textureLayersState: TextureLayersState = TextureLayersState()
 
@@ -27,6 +34,10 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         xcdatamodeldName: "TextureLayerStorage"
     )
 
+    private(set) var undoDrawing: UndoDrawing?
+
+    private var cancellables = Set<AnyCancellable>()
+
     private var restoredDataFromCoreData: TextureLayersModel? {
         guard
             let entity = try? textureLayerStorage?.fetch(),
@@ -35,15 +46,30 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         return model
     }
 
+    private var renderer: MTLRendering?
+
+    private let device: MTLDevice?
+
     init(
-        dependencies: HandDrawingCanvasViewDependencies
+        device: MTLDevice? = nil,
+        dependencies: HandDrawingCanvasViewDependencies? = nil
     ) {
-        self.dependencies = dependencies
+        self.device = device
+        self.dependencies = dependencies ?? .init()
 
         self.textureLayerStorage = .init(
             textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
         )
+
+        self.undoDrawing = .init(
+            renderer: MTLRenderer(device: device),
+            inMemoryRepository: self.dependencies.undoTextureInMemoryRepository
+        )
+    }
+
+    func setRenderer(_ renderer: MTLRendering) {
+        self.renderer = renderer
     }
 }
 
@@ -105,7 +131,7 @@ extension HandDrawingCanvasViewModel {
             let layerId = self.textureLayersState.selectedLayer?.id
         else { return }
 
-        try await saveTexture(
+        try await saveTextureToDocumentsDirectory(
             layerId: layerId,
             texture: texture,
             device: device
@@ -117,7 +143,11 @@ extension HandDrawingCanvasViewModel {
         )
     }
 
-    func saveTexture(layerId: UUID, texture: MTLTexture, device: MTLDevice) async throws {
+    func saveTextureToDocumentsDirectory(
+        layerId: UUID,
+        texture: MTLTexture,
+        device: MTLDevice
+    ) async throws {
         try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
             id: layerId,
             texture: texture,
@@ -218,17 +248,185 @@ extension HandDrawingCanvasViewModel {
 }
 
 extension HandDrawingCanvasViewModel {
-    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
+
+    func performDrawingUndo(
+        _ undoObject: UndoDrawingObject
+    ) async {
+        guard
+            let device,
+            let renderer,
+            let undoTextureId = undoObject.undoTextureId,
+            let newTexture = try? await MTLTextureCreator.duplicateTexture(
+                texture: dependencies.undoTextureInMemoryRepository.texture(undoTextureId),
+                renderer: renderer
+            )
+        else { return }
+
+        do {
+            let textureLayerId = undoObject.textureLayer.id
+            textureLayersState.selectLayer(textureLayerId)
+
+            try await saveTextureToDocumentsDirectory(
+                layerId: textureLayerId,
+                texture: newTexture,
+                device: device
+            )
+            textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
+
+            updateCanvasTextureSubject.send(newTexture)
+
+        } catch {
+            Logger.error(error)
+        }
+    }
+
+    func performAdditionUndo(
+        _ undoObject: UndoAdditionObject
+    ) async {
+        guard
+            let device,
+            let renderer,
+            let undoTextureId = undoObject.undoTextureId,
+            let newTexture = try? await MTLTextureCreator.duplicateTexture(
+                texture: dependencies.undoTextureInMemoryRepository.texture(undoTextureId),
+                renderer: renderer
+            )
+        else { return }
+
+        do {
+            try await saveTextureToDocumentsDirectory(
+                layerId: undoObject.textureLayer.id,
+                texture: newTexture,
+                device: device
+            )
+
+            try await textureLayersState.addLayer(
+                layer: undoObject.textureLayer,
+                thumbnail: newTexture.makeThumbnail(),
+                at: undoObject.insertIndex
+            )
+
+            updateFullCanvasTextureSubject.send()
+
+        } catch {
+            Logger.error(error)
+        }
+    }
+
+    func performDeletionUndo(
+        _ undoObject: UndoDeletionObject
+    ) async {
+        guard
+            let index = textureLayersState.layers.firstIndex(
+                where: { $0.id == undoObject.textureLayer.id }
+            )
+        else {
+           return
+        }
+
+        do {
+            try await textureLayersState.removeLayer(
+                layerIndexToDelete: index
+            )
+            updateFullCanvasTextureSubject.send()
+        } catch {
+            Logger.error(error)
+        }
+    }
+
+    func performMoveUndo(
+        _ undoObject: UndoMoveObject
+    ) {
+        textureLayersState.moveLayer(
+            indices: undoObject.indices
+        )
+        updateFullCanvasTextureSubject.send()
+    }
+
+    func performSelectUndo(
+        _ undoObject: UndoSelectionObject
+    ) async {
+        textureLayersState.selectLayer(
+            undoObject.textureLayer.id
+        )
+        updateFullCanvasTextureSubject.send()
+    }
+
+    func performAlphaUndo(
+        _ undoObject: UndoAlphaObject
+    ) async {
+        textureLayersState.update(
+            undoObject.textureLayer.id,
+            alpha: undoObject.textureLayer.alpha
+        )
+        updateCanvasTextureSubject.send(nil)
+    }
+
+    func performVisibilityUndo(
+        _ undoObject: UndoVisibilityObject
+    ) async {
+        textureLayersState.update(
+            undoObject.textureLayer.id,
+            isVisible: undoObject.textureLayer.isVisible
+        )
+        updateFullCanvasTextureSubject.send()
+    }
+
+    func performTitleUndo(
+        _ undoObject: UndoTitleObject
+    ) async {
+        textureLayersState.update(
+            undoObject.textureLayer.id,
+            title: undoObject.textureLayer.title
+        )
+    }
+}
+
+extension HandDrawingCanvasViewModel {
+
+    func duplicateTextureFromDocumentsDirectory(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
     }
 
-    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
+    func duplicateTexturesFromDocumentsDirectory(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
             device: device
         )
+    }
+
+    func registerUndoObjectPair(
+        _ undoManager: UndoManager,
+        _ undoRedoObject: UndoRedoObjectPair
+    ) {
+        undoRedoObject.undoObject.deinitSubject
+            .sink(receiveValue: { [weak self] result in
+                guard let `self`, let undoTextureId = result.undoTextureId else { return }
+                // Do nothing if an error occurs, since nothing can be done
+                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                    undoTextureId
+                )
+            })
+            .store(in: &cancellables)
+
+        undoRedoObject.redoObject.deinitSubject
+            .sink(receiveValue: { [weak self] result in
+                guard let `self`, let undoTextureId = result.undoTextureId else { return }
+                // Do nothing if an error occurs, since nothing can be done
+                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                    undoTextureId
+                )
+            })
+            .store(in: &cancellables)
+
+        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject] _ in
+            self?.performUndoSubject.send(undoRedoObject.undoObject)
+
+            // Redo Registration
+            self?.registerUndoObjectPair(undoManager, undoRedoObject.reversed())
+        }
     }
 }
