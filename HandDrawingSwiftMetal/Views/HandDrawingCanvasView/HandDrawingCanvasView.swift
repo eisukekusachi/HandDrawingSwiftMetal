@@ -139,7 +139,7 @@ import TextureLayerView
             let currentTexture = try await viewModel.duplicatedTexture(
                 selectedLayer.id,
                 device: sharedDevice
-            )?.texture
+            )
         else {
             return
         }
@@ -147,7 +147,7 @@ import TextureLayerView
         let textures = try await viewModel.duplicatedTextures(
             textureLayers.layers.map { $0.id },
             device: sharedDevice
-        ) ?? []
+        )
 
         try await textureLayerRenderer?.refreshUnselectedTextures(
             textureLayers: textureLayers,

@@ -148,20 +148,25 @@ public extension TextureLayersDocumentsRepository {
     func duplicatedTexture(
         _ id: LayerId,
         device: MTLDevice
-    ) async throws -> IdentifiedTexture {
-        if textureSize == .zero {
+    ) async -> MTLTexture? {
+        guard
+            Int(textureSize.width) >= textureMinimumLength &&
+            Int(textureSize.height) >= textureMinimumLength
+        else {
             let error = NSError(
                 title: String(localized: "Error"),
-                message: String(localized: "Texture size is zero")
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
             )
             Logger.error(error)
-            throw error
+            return nil
         }
 
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
+            let newTexture: MTLTexture = try? MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
                 with: device
@@ -172,31 +177,26 @@ public extension TextureLayersDocumentsRepository {
                 message: "\(String(localized: "File not found")):\(destinationUrl.path)"
             )
             Logger.error(error)
-            throw error
+            return nil
         }
 
-        return .init(id: id, texture: newTexture)
+        return newTexture
     }
 
     /// Copies multiple textures for the given `LayerId`s
     func duplicatedTextures(
         _ ids: [LayerId],
         device: MTLDevice
-    ) async throws -> [IdentifiedTexture] {
-        try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
-            for id in ids {
-                group.addTask { try await self.duplicatedTexture(
-                    id,
-                    device: device
-                ) }
-            }
+    ) async throws -> [(LayerId, MTLTexture)] {
+        var results: [(LayerId, MTLTexture)] = []
 
-            var results: [IdentifiedTexture] = []
-            for try await result in group {
-                results.append(result)
+        for id in ids {
+            if let result = await duplicatedTexture(id, device: device) {
+                results.append((id, result))
             }
-            return results
         }
+
+        return results
     }
 
     /// Recreate the directory

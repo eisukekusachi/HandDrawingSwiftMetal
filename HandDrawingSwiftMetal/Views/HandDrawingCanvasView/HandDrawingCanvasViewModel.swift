@@ -218,14 +218,14 @@ extension HandDrawingCanvasViewModel {
 }
 
 extension HandDrawingCanvasViewModel {
-    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> IdentifiedTexture? {
+    func duplicatedTexture(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
     }
 
-    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [IdentifiedTexture]? {
+    func duplicatedTextures(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
             device: device

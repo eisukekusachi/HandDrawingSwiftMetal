@@ -33,12 +33,12 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     func duplicatedTexture(
         _ id: LayerId,
         device: MTLDevice
-    ) async throws -> IdentifiedTexture
+    ) async throws -> MTLTexture?
 
     func duplicatedTextures(
         _ ids: [LayerId],
         device: MTLDevice
-    ) async throws -> [IdentifiedTexture]
+    ) async throws -> [(LayerId, MTLTexture)]
 
     func addTexture(
         texture: MTLTexture,

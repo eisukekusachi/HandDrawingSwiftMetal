@@ -78,7 +78,7 @@ public class TextureLayerRenderer {
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
     public func refreshUnselectedTextures(
         textureLayers: TextureLayersRenderContext,
-        textures: [IdentifiedTexture]
+        textures: [(LayerId, MTLTexture)]
     ) async throws {
         guard
             let unselectedBottomTexture,
@@ -169,14 +169,12 @@ public class TextureLayerRenderer {
     }
 
     private func drawTextures(
-        repositoryTextures: [IdentifiedTexture],
+        repositoryTextures: [(LayerId, MTLTexture)],
         using layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        let textureDictionary = IdentifiedTexture.dictionary(
-            from: Set(repositoryTextures)
-        )
+        let textureDictionary = Dictionary(uniqueKeysWithValues: repositoryTextures)
 
         for layer in layers {
             if let resultTexture = textureDictionary[layer.id] {

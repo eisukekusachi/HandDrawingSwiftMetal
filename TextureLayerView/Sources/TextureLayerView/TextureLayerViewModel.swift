@@ -21,7 +21,11 @@ open class TextureLayerViewModel: ObservableObject {
         textureLayers.selectedLayer
     }
 
-    @Published private(set) var textureLayers: TextureLayersState = .init()
+    public var textureSize: CGSize {
+        textureLayers.textureSize
+    }
+
+    @Published public private(set) var textureLayers: TextureLayersState = .init()
 
     private let dependencies: TextureLayerViewDependencies?
 
@@ -40,8 +44,8 @@ open class TextureLayerViewModel: ObservableObject {
             let device,
             let selectedIndex = textureLayers.selectedIndex,
             let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureLayers.textureSize.width),
-                height: Int(textureLayers.textureSize.height),
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
                 with: device
             )
         else { return }
@@ -117,6 +121,13 @@ open class TextureLayerViewModel: ObservableObject {
 }
 
 public extension TextureLayerViewModel {
+    func texture(_ id: LayerId, device: MTLDevice?) async throws -> MTLTexture? {
+        guard let device else { return nil }
+        return try await dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+            id,
+            device: device
+        )
+    }
 
     func update(
         _ textureLayers: TextureLayersState,
@@ -133,7 +144,7 @@ public extension TextureLayerViewModel {
                     layerId,
                     device: device
                 )
-                textureLayers.updateThumbnail(layerId, texture: texture?.texture)
+                textureLayers.updateThumbnail(layerId, texture: texture)
             }
         }
 
