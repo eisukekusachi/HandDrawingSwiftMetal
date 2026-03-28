@@ -293,7 +293,7 @@ extension HandDrawingViewController {
             self.textureLayerPopup?.view.isHidden = self.textureLayerPresenter.isHidden
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.saveProject()
+            self?.saveCanvas()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -440,10 +440,8 @@ extension HandDrawingViewController {
         let fileView = FileView(
             list: viewModel.fileList,
             onTapItem: { [weak self] zipFileURL in
-                guard let `self` else { return }
-                self.presentedViewController?.dismiss(animated: true)
-                // self.textureLayerViewPresenter?.hide()
-                self.loadProject(zipFileURL: zipFileURL)
+                self?.presentedViewController?.dismiss(animated: true)
+                self?.loadCanvas(zipFileURL: zipFileURL)
             }
         )
 
@@ -490,8 +488,8 @@ extension HandDrawingViewController {
 
 extension HandDrawingViewController {
 
-    private func loadProject(zipFileURL: URL) {
-        self.viewModel.loadFile(
+    private func loadCanvas(zipFileURL: URL) {
+        self.viewModel.onLoadCanvas(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
                 try await self?.canvasView?.loadFiles(
@@ -503,8 +501,8 @@ extension HandDrawingViewController {
             }
         )
     }
-    private func saveProject() {
-        viewModel.onSaveProject(
+    private func saveCanvas() {
+        viewModel.onSaveCanvas(
             saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
                 try await self?.canvasView?.saveFiles(
                     to: tmpWorkingDirectoryURL

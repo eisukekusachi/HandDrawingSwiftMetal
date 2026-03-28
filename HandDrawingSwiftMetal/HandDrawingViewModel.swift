@@ -189,7 +189,50 @@ extension HandDrawingViewModel {
 }
 
 extension HandDrawingViewModel {
-    func loadFile(
+
+    func onSaveCanvas(
+        saveCanvasAction: ((URL) async throws -> Void)?,
+        completion: (() -> Void)?,
+        zipFileURL: URL
+    ) {
+        Task(priority: .userInitiated) {
+            defer {
+                /// Remove the working space
+                localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
+            activityIndicatorSubject.send(true)
+
+            do {
+                // Create a temporary working directory for saving project files
+                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+
+                try await saveCanvasAction?(workingDirectoryURL)
+
+                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
+                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
+                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
+                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
+
+                // Zip the working directory into a single project file
+                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
+
+                completion?()
+
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
+            } catch {
+                alertSubject.send(error)
+            }
+        }
+    }
+
+    func onLoadCanvas(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?,
         completion: (() -> Void)?
@@ -221,48 +264,6 @@ extension HandDrawingViewModel {
                 try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
                 try? brushPaletteStorage.update(directoryURL: workingDirectoryURL)
                 try? eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
-
-                completion?()
-
-                toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                alertSubject.send(error)
-            }
-        }
-    }
-
-    func onSaveProject(
-        saveCanvasAction: ((URL) async throws -> Void)?,
-        completion: (() -> Void)?,
-        zipFileURL: URL
-    ) {
-        Task(priority: .userInitiated) {
-            defer {
-                /// Remove the working space
-                localFileRepository.removeWorkingDirectory()
-
-                activityIndicatorSubject.send(false)
-            }
-            activityIndicatorSubject.send(true)
-
-            do {
-                // Create a temporary working directory for saving project files
-                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
-
-                try await saveCanvasAction?(workingDirectoryURL)
-
-                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
-                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
-                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
-                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
-
-                // Zip the working directory into a single project file
-                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
 
                 completion?()
 

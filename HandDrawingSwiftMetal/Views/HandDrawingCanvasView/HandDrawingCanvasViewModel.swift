@@ -132,18 +132,6 @@ extension HandDrawingCanvasViewModel {
         )
     }
 
-    func saveTextureToDocumentsDirectory(
-        layerId: UUID,
-        texture: MTLTexture
-    ) async throws {
-        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
-            id: layerId,
-            texture: texture,
-            device: renderer.device,
-            commandQueue: renderer.commandQueue
-        )
-    }
-
     func onSaveFiles(
         thumbnail: UIImage?,
         device: MTLDevice,
@@ -364,23 +352,6 @@ extension HandDrawingCanvasViewModel {
             title: undoObject.textureLayer.title
         )
     }
-}
-
-extension HandDrawingCanvasViewModel {
-
-    func duplicateTextureFromDocumentsDirectory(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
-            id,
-            device: device
-        )
-    }
-
-    func duplicateTexturesFromDocumentsDirectory(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-            ids,
-            device: device
-        )
-    }
 
     func registerUndoObjectPair(
         _ undoManager: UndoManager,
@@ -412,5 +383,34 @@ extension HandDrawingCanvasViewModel {
             // Redo Registration
             self?.registerUndoObjectPair(undoManager, undoRedoObject.reversed())
         }
+    }
+
+    func duplicateTextureFromDocumentsDirectory(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+            id,
+            device: device
+        )
+    }
+
+    func duplicateTexturesFromDocumentsDirectory(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+            ids,
+            device: device
+        )
+    }
+}
+
+private extension HandDrawingCanvasViewModel {
+
+    func saveTextureToDocumentsDirectory(
+        layerId: UUID,
+        texture: MTLTexture
+    ) async throws {
+        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
+            id: layerId,
+            texture: texture,
+            device: renderer.device,
+            commandQueue: renderer.commandQueue
+        )
     }
 }
