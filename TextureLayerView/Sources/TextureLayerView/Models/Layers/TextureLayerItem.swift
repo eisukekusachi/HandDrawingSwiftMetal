@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// Presentaion model for `TextureLayerItemView`
+/// Presentation model for `TextureLayerItemView`
 public struct TextureLayerItem: Identifiable {
     /// The unique identifier for the layer
     public let id: LayerId
