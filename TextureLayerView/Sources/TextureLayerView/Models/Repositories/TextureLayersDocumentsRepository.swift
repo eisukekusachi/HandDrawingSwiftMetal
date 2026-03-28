@@ -13,10 +13,16 @@ import UIKit
 @MainActor
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
 
-    public static let shared = try! TextureLayersDocumentsRepository(
-        storageDirectoryURL: URL.applicationSupport,
-        directoryName: "TextureStorage"
-    )
+    public static let shared: TextureLayersDocumentsRepository = {
+        do {
+            return try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage"
+            )
+        } catch {
+            fatalError("Failed to initialize TextureLayersDocumentsRepository: \(error)")
+        }
+    }()
 
     /// URL of the texture storage
     public let workingDirectoryURL: URL
