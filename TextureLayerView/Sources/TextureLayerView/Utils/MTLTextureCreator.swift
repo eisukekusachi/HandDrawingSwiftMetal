@@ -1,11 +1,10 @@
 //
-//  File.swift
+//  MTLTextureCreator.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2026/03/21.
 //
 
-@preconcurrency import Accelerate
 @preconcurrency import MetalKit
 
 private let bytesPerPixel = 4

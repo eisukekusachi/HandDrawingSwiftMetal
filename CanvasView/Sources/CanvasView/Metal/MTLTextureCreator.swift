@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2023/12/30.
 //
 
-@preconcurrency import Accelerate
 @preconcurrency import MetalKit
 
 private let bytesPerPixel = 4
