@@ -155,7 +155,7 @@ public extension TextureLayerViewModel {
 
         self.textureLayers = textureLayers
 
-        // Update the thumbails
+        // Update the thumbnails
         Task {
             for layer in textureLayers.layers {
                 let layerId: LayerId = layer.id
