@@ -46,37 +46,30 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         return model
     }
 
-    private var renderer: MTLRendering?
-
-    private let device: MTLDevice?
+    private var renderer: MTLRendering
 
     init(
-        device: MTLDevice? = nil,
+        renderer: MTLRenderer,
         dependencies: HandDrawingCanvasViewDependencies? = nil
     ) {
-        self.device = device
         self.dependencies = dependencies ?? .init()
-
         self.textureLayerStorage = .init(
             textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
         )
-
+        self.renderer = renderer
         self.undoDrawing = .init(
-            renderer: MTLRenderer(device: device),
+            renderer: self.renderer,
             inMemoryRepository: self.dependencies.undoTextureInMemoryRepository
         )
-    }
-
-    func setRenderer(_ renderer: MTLRendering) {
-        self.renderer = renderer
     }
 }
 
 extension HandDrawingCanvasViewModel {
     func onSetup(
         configuration: CanvasConfiguration,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws -> CanvasConfiguration? {
         let data: TextureLayersModel
         let resolvedConfiguration: CanvasConfiguration
@@ -95,7 +88,8 @@ extension HandDrawingCanvasViewModel {
                 let newData = TextureLayersModel(textureSize: configuration.textureSize)
                 try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newData,
-                    device: device
+                    device: device,
+                    commandQueue: commandQueue
                 )
                 data = newData
                 resolvedConfiguration = configuration
@@ -107,7 +101,8 @@ extension HandDrawingCanvasViewModel {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
             try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                 textureLayers: newData,
-                device: device
+                device: device,
+                commandQueue: commandQueue
             )
             data = newData
             resolvedConfiguration = configuration
@@ -119,8 +114,7 @@ extension HandDrawingCanvasViewModel {
     }
 
     func onCompleteDrawing(
-        texture: MTLTexture?,
-        device: MTLDevice
+        texture: MTLTexture?
     ) async throws {
         guard
             let texture,
@@ -129,8 +123,7 @@ extension HandDrawingCanvasViewModel {
 
         try await saveTextureToDocumentsDirectory(
             layerId: layerId,
-            texture: texture,
-            device: device
+            texture: texture
         )
 
         textureLayersState.updateThumbnail(
@@ -141,13 +134,13 @@ extension HandDrawingCanvasViewModel {
 
     func saveTextureToDocumentsDirectory(
         layerId: UUID,
-        texture: MTLTexture,
-        device: MTLDevice
+        texture: MTLTexture
     ) async throws {
         try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
             id: layerId,
             texture: texture,
-            device: device
+            device: renderer.device,
+            commandQueue: renderer.commandQueue
         )
     }
 
@@ -238,7 +231,8 @@ extension HandDrawingCanvasViewModel {
 
         guard try await dependencies.textureLayersDocumentsRepository.initializeStorage(
             textureLayers: data,
-            device: device
+            device: renderer.device,
+            commandQueue: renderer.commandQueue
         ) else {
             return
         }
@@ -253,8 +247,6 @@ extension HandDrawingCanvasViewModel {
         _ undoObject: UndoDrawingObject
     ) async {
         guard
-            let device,
-            let renderer,
             let undoTextureId = undoObject.undoTextureId,
             let newTexture = try? await MTLTextureCreator.duplicateTexture(
                 texture: dependencies.undoTextureInMemoryRepository.texture(undoTextureId),
@@ -268,8 +260,7 @@ extension HandDrawingCanvasViewModel {
 
             try await saveTextureToDocumentsDirectory(
                 layerId: textureLayerId,
-                texture: newTexture,
-                device: device
+                texture: newTexture
             )
             textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
 
@@ -284,8 +275,6 @@ extension HandDrawingCanvasViewModel {
         _ undoObject: UndoAdditionObject
     ) async {
         guard
-            let device,
-            let renderer,
             let undoTextureId = undoObject.undoTextureId,
             let newTexture = try? await MTLTextureCreator.duplicateTexture(
                 texture: dependencies.undoTextureInMemoryRepository.texture(undoTextureId),
@@ -296,8 +285,7 @@ extension HandDrawingCanvasViewModel {
         do {
             try await saveTextureToDocumentsDirectory(
                 layerId: undoObject.textureLayer.id,
-                texture: newTexture,
-                device: device
+                texture: newTexture
             )
 
             textureLayersState.addLayer(

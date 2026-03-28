@@ -41,6 +41,7 @@ import Combine
 
     public init(
         device: MTLDevice,
+        commandQueue: MTLCommandQueue,
         displayView: CanvasDisplayable
     ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
@@ -49,7 +50,10 @@ import Combine
         ) else {
             fatalError("Metal is not supported on this device.")
         }
-        self.renderer = MTLRenderer(device: device)
+        self.renderer = MTLRenderer(
+            device: device,
+            commandQueue: commandQueue
+        )
         self.displayView = displayView
         self.flippedTextureBuffers = buffer
     }

@@ -32,14 +32,24 @@ class HandDrawingViewController: UIViewController {
     private let paletteHeight: CGFloat = 44
 
     /// The `MTLDevice` used throughout the app
-    private var sharedDevice: MTLDevice?
+    private lazy var sharedDevice: MTLDevice = {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        return device
+    }()
+
+    /// The `MTLCommandQueue` used throughout the app
+    private lazy var sharedCommandQueue: MTLCommandQueue = {
+        guard let commandQueue = sharedDevice.makeCommandQueue() else {
+            fatalError("Failed to create MTLCommandQueue.")
+        }
+        return commandQueue
+    }()
 
     private var canvasView: HandDrawingCanvasView?
 
     private var textureLayerView: TextureLayerView?
-
-    /// Executes texture operations
-    private var renderer: MTLRendering?
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -84,13 +94,13 @@ class HandDrawingViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         sharedDevice = defaultDevice
-        renderer = MTLRenderer(device: sharedDevice)
         canvasView = HandDrawingCanvasView(
             device: sharedDevice
         )
         textureLayerView = TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
                 device: sharedDevice,
+                commandQueue: sharedCommandQueue,
                 onLayersChanged: handleViewUpdates,
                 onRegisterUndoObjectPair: registerUndoObject
             )
@@ -177,7 +187,6 @@ extension HandDrawingViewController {
             .sink { [weak self] textureSize in
                 guard
                     let `self`,
-                    let sharedDevice = self.sharedDevice,
                     let textureLayersState = self.canvasView?.textureLayersState
                 else { return }
 
@@ -190,7 +199,7 @@ extension HandDrawingViewController {
 
                 self.textureLayerView?.update(
                     textureLayersState,
-                    device: sharedDevice
+                    device: self.sharedDevice
                 )
             }
             .store(in: &cancellables)

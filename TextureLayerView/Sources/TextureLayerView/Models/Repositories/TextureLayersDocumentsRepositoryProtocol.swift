@@ -17,7 +17,8 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     @discardableResult
     func initializeStorage(
         textureLayers: TextureLayersModel,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws -> Bool
 
     func restoreStorageFromWorkingDirectory(
@@ -45,7 +46,8 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     func addTexture(
         texture: MTLTexture,
         id: LayerId,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws -> Bool
 
     @discardableResult
@@ -64,6 +66,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     func writeTextureToDisk(
         id: LayerId,
         texture: MTLTexture,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws
 }

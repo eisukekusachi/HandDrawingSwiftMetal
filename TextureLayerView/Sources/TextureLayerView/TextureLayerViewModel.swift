@@ -29,16 +29,20 @@ open class TextureLayerViewModel: ObservableObject {
 
     private let device: MTLDevice?
 
+    private let commandQueue: MTLCommandQueue?
+
     private let dependencies: TextureLayerViewDependencies?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        device: MTLDevice? = nil,
+        device: MTLDevice?,
+        commandQueue: MTLCommandQueue?,
         dependencies: TextureLayerViewDependencies? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {
         self.device = device
+        self.commandQueue = commandQueue
         self.dependencies = dependencies ?? .init()
         self.onLayersChanged = onLayersChanged
     }
@@ -47,6 +51,7 @@ open class TextureLayerViewModel: ObservableObject {
     open func onTapInsertButton() async throws -> Bool {
         guard
             let device,
+            let commandQueue,
             let selectedIndex = textureLayers.selectedIndex,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
@@ -66,7 +71,8 @@ open class TextureLayerViewModel: ObservableObject {
             .addTexture(
                 texture: newTexture,
                 id: layer.id,
-                device: device
+                device: device,
+                commandQueue: commandQueue
             )
         textureLayers.addLayer(
             layer: layer,

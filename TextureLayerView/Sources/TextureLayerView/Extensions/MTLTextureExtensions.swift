@@ -10,7 +10,8 @@ import MetalKit
 extension MTLTexture {
 
     func data(
-        device: MTLDevice?
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) throws -> Data {
         let width = self.width
         let height = self.height
@@ -19,9 +20,7 @@ extension MTLTexture {
         let dataSize = bytesPerRow * height
 
         guard
-            let device,
             let buffer = device.makeBuffer(length: dataSize, options: [.storageModeShared]),
-            let commandQueue = device.makeCommandQueue(),
             let commandBuffer = commandQueue.makeCommandBuffer(),
             let commandEncoder = commandBuffer.makeBlitCommandEncoder()
         else {

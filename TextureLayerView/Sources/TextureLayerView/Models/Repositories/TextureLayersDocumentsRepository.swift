@@ -46,7 +46,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
     public func initializeStorage(
         textureLayers: TextureLayersModel,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws -> Bool {
         let textureSize = textureLayers.textureSize
 
@@ -75,7 +76,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         try await addTexture(
             texture: newTexture,
             id: layerId,
-            device: device
+            device: device,
+            commandQueue: commandQueue
         )
 
         // Set the texture size after the initialization of this repository is completed
@@ -136,7 +138,8 @@ public extension TextureLayersDocumentsRepository {
     func addTexture(
         texture: MTLTexture,
         id: LayerId,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws -> Bool {
         // If it doesn’t exist, add it
         guard
@@ -149,7 +152,8 @@ public extension TextureLayersDocumentsRepository {
         try await writeTextureToDisk(
             id: id,
             texture: texture,
-            device: device
+            device: device,
+            commandQueue: commandQueue
         )
 
         return true
@@ -255,9 +259,13 @@ public extension TextureLayersDocumentsRepository {
     func writeTextureToDisk(
         id: LayerId,
         texture: MTLTexture,
-        device: MTLDevice
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
     ) async throws {
-        let data = try texture.data(device: device)
+        let data = try texture.data(
+            device: device,
+            commandQueue: commandQueue
+        )
         try data.write(
             to: workingDirectoryURL.appendingPathComponent(id.uuidString),
             options: .atomic

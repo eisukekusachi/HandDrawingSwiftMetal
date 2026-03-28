@@ -50,7 +50,7 @@ public struct ReversedTextureLayerListView: View {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel()
+    private let viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
     private let textureLayers = TextureLayersState()
     private let data: TextureLayersModel = .init(
         layers: [

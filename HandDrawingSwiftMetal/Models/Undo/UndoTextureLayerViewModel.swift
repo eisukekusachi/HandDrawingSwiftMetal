@@ -34,17 +34,19 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        device: MTLDevice?,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue,
         inMemoryRepository: UndoTextureInMemoryRepository? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil,
         onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)? = nil
     ) {
         self.device = device
-        self.renderer = MTLRenderer(device: device)
+        self.renderer = MTLRenderer(device: device, commandQueue: commandQueue)
         self.inMemoryRepository = inMemoryRepository ?? .shared
         self.onRegisterUndoObjectPair = onRegisterUndoObjectPair
         super.init(
             device: device,
+            commandQueue: commandQueue,
             onLayersChanged: onLayersChanged
         )
         self.$isAlphaSliderDragging

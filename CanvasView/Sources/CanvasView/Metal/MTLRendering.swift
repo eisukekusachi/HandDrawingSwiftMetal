@@ -12,6 +12,8 @@ public protocol MTLRendering {
 
     var device: MTLDevice { get }
 
+    var commandQueue: MTLCommandQueue { get }
+
     var newCommandBuffer: MTLCommandBuffer? { get }
 
     func drawGrayPointBuffersWithMaxBlendMode(

@@ -42,12 +42,26 @@ import TextureLayerView
         )
     }
 
-    override init(device: MTLDevice? = nil) {
+    override init(
+        device: MTLDevice? = nil,
+        commandQueue: MTLCommandQueue? = nil
+    ) {
+        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        guard let commandQueue = commandQueue ?? defaultDevice.makeCommandQueue() else {
+            fatalError("Failed to create command queue.")
+        }
         self.viewModel = .init(
-            device: device
+            renderer: .init(
+                device: defaultDevice,
+                commandQueue: commandQueue
+            )
         )
-        super.init(device: device)
-        self.viewModel.setRenderer(renderer)
+        super.init(
+            device: device,
+            commandQueue: commandQueue
+        )
         self.textureLayerRenderer = .init(renderer: renderer)
         self.bindData()
     }
@@ -106,8 +120,7 @@ import TextureLayerView
 
                 do {
                     try await self.viewModel.onCompleteDrawing(
-                        texture: self.currentTexture,
-                        device: self.sharedDevice
+                        texture: self.currentTexture
                     )
                 } catch {
                     Logger.error(error)
@@ -194,7 +207,8 @@ extension HandDrawingCanvasView {
     ) async throws {
         let resolvedConfiguration = try await viewModel.onSetup(
             configuration: configuration,
-            device: sharedDevice
+            device: sharedDevice,
+            commandQueue: renderer.commandQueue
         )
         try super.setup(resolvedConfiguration)
     }

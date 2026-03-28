@@ -60,15 +60,25 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
-    public init(device: MTLDevice? = nil) {
+    public init(
+        device: MTLDevice? = nil,
+        commandQueue: MTLCommandQueue? = nil
+    ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
+        guard let commandQueue = commandQueue ?? defaultDevice.makeCommandQueue() else {
+            fatalError("Failed to create command queue.")
+        }
         self.sharedDevice = device ?? defaultDevice
-        self.renderer = MTLRenderer(device: sharedDevice)
-        self.displayView = .init(device: sharedDevice)
+        self.renderer = MTLRenderer(device: sharedDevice, commandQueue: commandQueue)
+        self.displayView = .init(
+            device: sharedDevice,
+            commandQueue: commandQueue
+        )
         self.canvasRenderer = .init(
             device: sharedDevice,
+            commandQueue: commandQueue,
             displayView: displayView
         )
         self.viewModel = .init(
