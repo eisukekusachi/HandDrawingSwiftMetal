@@ -33,6 +33,11 @@ final class HandDrawingViewModel: ObservableObject {
         50
     ]
 
+    let project: ProjectData = .init()
+    let drawingTool: DrawingTool = .init()
+    let brushPalette: BrushPalette
+    let eraserPalette: EraserPalette
+
     var fileSuffix: String {
         _fileSuffix
     }
@@ -44,11 +49,6 @@ final class HandDrawingViewModel: ObservableObject {
     private var _fileList: [LocalFileItem] = []
 
     private let thumbnailName: String = "thumbnail.png"
-
-    let project: ProjectData = .init()
-    let drawingTool: DrawingTool = .init()
-    let brushPalette: BrushPalette
-    let eraserPalette: EraserPalette
 
     /// Current file for displaying in the file list
     func currentFile(thumbnail: UIImage?) -> LocalFileItem {

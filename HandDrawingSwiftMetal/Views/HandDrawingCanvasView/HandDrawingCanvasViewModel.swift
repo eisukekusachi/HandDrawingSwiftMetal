@@ -18,32 +18,31 @@ final class HandDrawingCanvasViewModel: ObservableObject {
         textureLayersState.textureSize
     }
 
-    private(set) var performUndoSubject = PassthroughSubject<UndoObject, Never>()
+    let performUndoSubject = PassthroughSubject<UndoObject, Never>()
 
-    private(set) var updateCanvasTextureSubject = PassthroughSubject<MTLTexture?, Never>()
+    let updateCanvasTextureSubject = PassthroughSubject<MTLTexture?, Never>()
 
-    private(set) var updateFullCanvasTextureSubject = PassthroughSubject<Void, Never>()
+    let updateFullCanvasTextureSubject = PassthroughSubject<Void, Never>()
 
-    private(set) var dependencies: HandDrawingCanvasViewDependencies
+    let textureLayersState: TextureLayersState = TextureLayersState()
 
-    private(set) var textureLayersState: TextureLayersState = TextureLayersState()
+    let undoDrawing: UndoDrawing?
 
-    private var textureLayerStorage: CoreDataTextureLayerStorage?
+    private let textureLayerStorage: CoreDataTextureLayerStorage
+
+    private let dependencies: HandDrawingCanvasViewDependencies
 
     private let textureLayersStorageController: PersistenceController = PersistenceController(
         xcdatamodeldName: "TextureLayerStorage"
     )
 
-    private(set) var undoDrawing: UndoDrawing?
-
     private var cancellables = Set<AnyCancellable>()
 
     private var restoredDataFromCoreData: TextureLayersModel? {
         guard
-            let entity = textureLayerStorage?.fetch(),
-            let model = textureLayerStorage?.textureLayersModel(from: entity)
+            let entity = textureLayerStorage.fetch()
         else { return nil }
-        return model
+        return textureLayerStorage.textureLayersModel(from: entity)
     }
 
     private var renderer: MTLRendering
@@ -95,7 +94,7 @@ extension HandDrawingCanvasViewModel {
                 resolvedConfiguration = configuration
 
                 // Initialize the Core Data storage if fetching fails
-                textureLayerStorage?.clearAll()
+                textureLayerStorage.clearAll()
             }
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
@@ -383,6 +382,10 @@ extension HandDrawingCanvasViewModel {
             // Redo Registration
             self?.registerUndoObjectPair(undoManager, undoRedoObject.reversed())
         }
+    }
+
+    func clearUndoTextures() {
+        dependencies.undoTextureInMemoryRepository.removeAll()
     }
 
     func duplicateTextureFromDocumentsDirectory(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {

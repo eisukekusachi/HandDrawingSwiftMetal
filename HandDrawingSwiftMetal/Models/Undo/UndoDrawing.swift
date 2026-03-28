@@ -12,7 +12,7 @@ import TextureLayerView
 
 /// A class that manages texture layers with undo functionality
 @MainActor
-public final class UndoDrawing: ObservableObject {
+final class UndoDrawing: ObservableObject {
 
     /// A repository that stores textures for undo operations.
     /// The textures are stored and managed in memory to avoid blocking the main thread.
@@ -28,7 +28,7 @@ public final class UndoDrawing: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         renderer: MTLRendering,
         inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
     ) {
@@ -36,14 +36,14 @@ public final class UndoDrawing: ObservableObject {
         self.inMemoryRepository = inMemoryRepository
     }
 
-    public func initializeUndoTextures(
+    func initializeUndoTextures(
         textureSize: CGSize
     ) {
         // Create a texture for use in drawing undo operations
         previousDrawingTextureForUndo = renderer.makeTexture(textureSize)
     }
 
-    public func setUndoDrawing(
+    func setUndoDrawing(
         texture: MTLTexture?
     ) async {
         await setDrawingUndoObject(texture: texture)

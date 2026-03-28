@@ -14,7 +14,7 @@ import TextureLayerView
 final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
     /// Is the undo feature enabled
-    public var isUndoEnabled: Bool {
+    var isUndoEnabled: Bool {
         inMemoryRepository != nil
     }
 
@@ -27,9 +27,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
     private var previousAlpha: Int?
 
-    private var renderer: MTLRendering?
-
-    private let device: MTLDevice?
+    private let renderer: MTLRendering
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -40,7 +38,6 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil,
         onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)? = nil
     ) {
-        self.device = device
         self.renderer = MTLRenderer(device: device, commandQueue: commandQueue)
         self.inMemoryRepository = inMemoryRepository ?? .shared
         self.onRegisterUndoObjectPair = onRegisterUndoObjectPair
@@ -66,7 +63,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         textureSize: CGSize
     ) {
         // Create a texture for use in drawing undo operations
-        previousDrawingTextureForUndo = renderer?.makeTexture(textureSize)
+        previousDrawingTextureForUndo = renderer.makeTexture(textureSize)
     }
 
     @discardableResult
@@ -80,7 +77,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
         let newTexture = try await textureFromDocumentsRepository(
             layerId,
-            device: device
+            device: renderer.device
         )
 
         // Create a deletion undo object to cancel the addition
@@ -109,7 +106,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             let layerId = textureLayers.selectedLayerId,
             let layerIndex = textureLayers.selectedIndex,
             let layer = textureLayers.selectedLayer,
-            let texture = try await textureFromDocumentsRepository(layerId, device: device),
+            let texture = try await textureFromDocumentsRepository(layerId, device: renderer.device),
             try await super.onTapDeleteButton()
         else { return false }
 
@@ -243,10 +240,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
     func pushUndoDrawingObject(
         texture: MTLTexture?
     ) async throws {
-        guard
-            let renderer,
-            let inMemoryRepository
-        else { return }
+        guard let inMemoryRepository else { return }
 
         guard
             let selectedLayer = textureLayers.selectedLayer

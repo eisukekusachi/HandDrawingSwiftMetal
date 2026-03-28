@@ -9,11 +9,11 @@ import Foundation
 
 /// A struct that manages and configures the display of the Undo/Redo buttons
 @MainActor
-public struct UndoRedoButtonState: Sendable {
-    public let isUndoEnabled: Bool
-    public let isRedoEnabled: Bool
+struct UndoRedoButtonState: Sendable {
+    let isUndoEnabled: Bool
+    let isRedoEnabled: Bool
 
-    public init(_ undoManager: UndoManager) {
+    init(_ undoManager: UndoManager) {
         isUndoEnabled = undoManager.canUndo
         isRedoEnabled = undoManager.canRedo
     }

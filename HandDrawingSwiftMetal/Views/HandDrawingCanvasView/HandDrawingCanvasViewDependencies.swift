@@ -8,13 +8,13 @@
 import TextureLayerView
 
 @MainActor
-public final class HandDrawingCanvasViewDependencies {
+final class HandDrawingCanvasViewDependencies {
 
-    public let undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol
+    let undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol
 
-    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    public init() {
+    init() {
         undoTextureInMemoryRepository = UndoTextureInMemoryRepository.shared
         textureLayersDocumentsRepository = TextureLayersDocumentsRepository.shared
     }

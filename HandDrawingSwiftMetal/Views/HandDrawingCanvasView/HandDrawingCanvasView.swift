@@ -26,16 +26,18 @@ import TextureLayerView
         viewModel.textureLayersState
     }
 
-    private var textureLayerRenderer: TextureLayerRenderer?
-
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private var viewModel: HandDrawingCanvasViewModel
+    private lazy var textureLayerRenderer: TextureLayerRenderer = {
+        .init(renderer: renderer)
+    }()
+
+    private let viewModel: HandDrawingCanvasViewModel
 
     private var cancellables = Set<AnyCancellable>()
 
-    public var thumbnail: UIImage? {
+    var thumbnail: UIImage? {
         canvasTexture?.uiImage?.resizeWithAspectRatio(
             height: 500,
             scale: 1.0
@@ -62,11 +64,10 @@ import TextureLayerView
             device: device,
             commandQueue: commandQueue
         )
-        self.textureLayerRenderer = .init(renderer: renderer)
         self.bindData()
     }
 
-    public required init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -146,7 +147,7 @@ import TextureLayerView
             device: sharedDevice
         )
 
-        try await textureLayerRenderer?.refreshUnselectedTextures(
+        try await textureLayerRenderer.refreshUnselectedTextures(
             textureLayers: textureLayers,
             textures: textures
         )
@@ -163,7 +164,7 @@ import TextureLayerView
         resetUndo()
 
         do {
-            try textureLayerRenderer?.initializeTextures(textureSize: textureSize)
+            try textureLayerRenderer.initializeTextures(textureSize: textureSize)
             try await updateFullCanvasTexture()
         } catch {
             Logger.error(error)
@@ -183,7 +184,7 @@ import TextureLayerView
     private func updateCanvasTexture(_ texture: MTLTexture?) {
         guard let selectedLayer = textureLayersState.selectedLayer else { return }
 
-        textureLayerRenderer?.updateCanvasTexture(
+        textureLayerRenderer.updateCanvasTexture(
             textureLayer: .init(
                 isVisible: selectedLayer.isVisible,
                 alpha: selectedLayer.alpha,
@@ -244,7 +245,7 @@ extension HandDrawingCanvasView {
     }
     func resetUndo() {
         guard let undoManager else { return }
-        viewModel.dependencies.undoTextureInMemoryRepository.removeAll()
+        viewModel.clearUndoTextures()
         undoManager.removeAllActions()
         didUndoSubject.send(undoManager)
     }

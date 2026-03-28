@@ -45,5 +45,4 @@ class DialogPresenter {
 
         viewController.present(alert, animated: true)
     }
-
 }

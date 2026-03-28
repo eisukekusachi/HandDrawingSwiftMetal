@@ -23,7 +23,7 @@ struct EraserPaletteView: View {
 
     @State private var checkeredImage: UIImage? = nil
 
-    public init(
+    init(
         palette: EraserPalette,
         paletteHeight: CGFloat,
         spacing: CGFloat = 2,
@@ -42,7 +42,7 @@ struct EraserPaletteView: View {
         CGFloat(alpha) / 255.0
     }
 
-    public var body: some View {
+    var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
                 ForEach(palette.alphas.indices, id: \.self) { i in

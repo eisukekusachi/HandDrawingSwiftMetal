@@ -16,7 +16,7 @@ struct ColorCircle: View {
 
     let tapCircle: (() -> Void)?
 
-    public init(
+    init(
         color: UIColor,
         checkeredImage: UIImage? = nil,
         size: CGFloat,
@@ -30,7 +30,7 @@ struct ColorCircle: View {
         self.tapCircle = tapCircle
     }
 
-    public var body: some View {
+    var body: some View {
         ZStack {
             if let checkeredImage {
                 Image(uiImage: checkeredImage)

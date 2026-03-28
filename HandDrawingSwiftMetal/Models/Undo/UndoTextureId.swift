@@ -7,4 +7,4 @@
 
 import Foundation
 
-public typealias UndoTextureId = UUID
+typealias UndoTextureId = UUID

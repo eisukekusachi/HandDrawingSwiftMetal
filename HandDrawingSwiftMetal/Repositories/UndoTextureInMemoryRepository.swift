@@ -13,28 +13,28 @@ import TextureLayerView
 /// A repository that manages textures for undo operations.
 /// The textures are stored in memory to avoid blocking the main thread.
 @MainActor
-public final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
+final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
 
-    public static let shared = UndoTextureInMemoryRepository(
+    static let shared = UndoTextureInMemoryRepository(
         textures: [:]
     )
 
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
     private(set) var textures: [LayerId: MTLTexture?] = [:]
 
-    public init(
+    init(
         textures: [LayerId: MTLTexture?] = [:]
     ) {
         self.textures = textures
     }
 
     /// Returns the texture associated with the specified `LayerId`
-    public func texture(_ id: LayerId) -> MTLTexture? {
+    func texture(_ id: LayerId) -> MTLTexture? {
         textures[id] as? MTLTexture
     }
 
     /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
-    public func addTexture(newTexture: MTLTexture, id: LayerId) throws {
+    func addTexture(newTexture: MTLTexture, id: LayerId) throws {
         // If it doesn’t exist, add it
         guard textures[id] == nil else {
             let error = NSError(
@@ -48,7 +48,7 @@ public final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryP
     }
 
     /// Updates the texture. Since `MTLTexture` is a reference type, this texture must be a new instance
-    public func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
+    func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -61,12 +61,12 @@ public final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryP
     }
 
     /// Removes all textures
-    public func removeAll() {
+    func removeAll() {
         textures = [:]
     }
 
     /// Removes the texture for the specified `LayerId`
-    public func removeTexture(_ id: LayerId) throws {
+    func removeTexture(_ id: LayerId) throws {
         // If the file exists, delete it
         guard textures.keys.contains(id) else {
             let error = NSError(

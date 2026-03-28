@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// Manages local file operations
-public final class LocalFileRepository {
+final class LocalFileRepository {
 
     /// URL of the directory for storing files
     private let workingDirectoryURL: URL
@@ -19,7 +19,7 @@ public final class LocalFileRepository {
     }
 }
 
-public extension LocalFileRepository {
+extension LocalFileRepository {
 
     @discardableResult
     func createWorkingDirectory() throws -> URL {

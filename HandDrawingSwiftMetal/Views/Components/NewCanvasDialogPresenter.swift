@@ -21,5 +21,4 @@ final class NewCanvasDialogPresenter: DialogPresenter {
             buttonActions: [1: { [weak self] in self?.onTapButton?() }]
         )
     }
-
 }

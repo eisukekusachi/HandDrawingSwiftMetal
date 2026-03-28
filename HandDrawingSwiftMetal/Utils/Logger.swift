@@ -16,7 +16,7 @@ public enum Logger {
     )
     #endif
 
-    public static func error(
+    static func error(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
@@ -28,7 +28,7 @@ public enum Logger {
         #endif
     }
 
-    public static func error(
+    static func error(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
@@ -40,7 +40,7 @@ public enum Logger {
         #endif
     }
 
-    public static func info(
+    static func info(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
