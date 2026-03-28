@@ -482,7 +482,7 @@ extension HandDrawingViewController {
 
     private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        // textureLayerViewPresenter?.enableComponentInteraction(isUserInteractionEnabled)
+        textureLayerPresenter.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 
