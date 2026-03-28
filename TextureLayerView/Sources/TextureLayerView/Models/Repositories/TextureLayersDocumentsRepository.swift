@@ -41,10 +41,17 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     public func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) async throws {
+    ) async throws -> Bool {
         let textureSize = textureLayers.textureSize
+
         guard
-            let layerId: LayerId = textureLayers.layers.first?.id,
+            let layerId: LayerId = textureLayers.layers.first?.id
+        else {
+            Logger.info("Unable to find layer ID")
+            return false
+        }
+
+        guard
             Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
@@ -52,12 +59,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
                 with: device
             )
         else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
-            )
-            Logger.error(error)
-            throw error
+            Logger.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return false
         }
 
         // Delete all textures in the repository
@@ -71,6 +74,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
         // Set the texture size after the initialization of this repository is completed
         self.textureSize = textureSize
+
+        return true
     }
 
     /// Restore the storage
@@ -95,7 +100,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) async throws {
+    ) async throws -> Bool {
         let textureSize = try validateStorage(
             in: sourceFolderURL,
             textureLayers: textureLayers,
@@ -112,6 +117,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         }
 
         self.textureSize = textureSize
+
+        return true
     }
 }
 
@@ -119,21 +126,18 @@ public extension TextureLayersDocumentsRepository {
 
     /// Adds a texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
     /// so the instance passed as an argument does not need to be a new one
+    @discardableResult
     func addTexture(
         texture: MTLTexture,
         id: LayerId,
         device: MTLDevice
-    ) async throws {
+    ) async throws -> Bool {
         // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "File already exists")
-            )
-            Logger.error(error)
-            throw error
+            Logger.info("File already exists")
+            return false
         }
 
         try await writeTextureToDisk(
@@ -141,6 +145,8 @@ public extension TextureLayersDocumentsRepository {
             texture: texture,
             device: device
         )
+
+        return true
     }
 
     /// Copies a texture for the given `LayerId`
@@ -152,13 +158,7 @@ public extension TextureLayersDocumentsRepository {
             Int(textureSize.width) >= textureMinimumLength &&
             Int(textureSize.height) >= textureMinimumLength
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
-                )
-            )
-            Logger.error(error)
+            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
             return nil
         }
 
@@ -171,11 +171,7 @@ public extension TextureLayersDocumentsRepository {
                 with: device
             )
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: "\(String(localized: "File not found")):\(destinationUrl.path)"
-            )
-            Logger.error(error)
+            Logger.info("File not found: \(destinationUrl.path)")
             return nil
         }
 
@@ -186,7 +182,7 @@ public extension TextureLayersDocumentsRepository {
     func duplicatedTextures(
         _ ids: [LayerId],
         device: MTLDevice
-    ) async throws -> [(LayerId, MTLTexture)] {
+    ) async -> [(LayerId, MTLTexture)] {
         var results: [(LayerId, MTLTexture)] = []
 
         for id in ids {
@@ -210,7 +206,8 @@ public extension TextureLayersDocumentsRepository {
     }
 
     /// Removes the texture for the specified `LayerId` from the Documents directory
-    func removeTexture(_ id: LayerId) throws {
+    @discardableResult
+    func removeTexture(_ id: LayerId) throws -> Bool {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         // If the file exists, delete it
@@ -218,19 +215,19 @@ public extension TextureLayersDocumentsRepository {
             FileManager.default.fileExists(atPath: fileURL.path)
         else {
             // Log the error only, as nothing can be done
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to find \(id.uuidString)")
-            )
-            throw error
+            Logger.info("Unable to find \(id.uuidString)")
+            return false
         }
         try FileManager.default.removeItem(at: fileURL)
+
+        return true
     }
 
+    @discardableResult
     func copyTexture(
         id: LayerId,
         to destinationURL: URL
-    ) async throws {
+    ) async throws -> Bool {
         let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
         let destinationURL = destinationURL.appendingPathComponent(id.uuidString)
 
@@ -238,15 +235,13 @@ public extension TextureLayersDocumentsRepository {
         guard
             FileManager.default.fileExists(atPath: sourceURL.path)
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to find \(id.uuidString)")
-            )
-            Logger.error(error)
-            throw error
+            Logger.info("Unable to find \(id.uuidString)")
+            return false
         }
 
         try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+
+        return true
     }
 
     /// Writes the texture to disk by duplicating it into the Documents directory.
@@ -256,20 +251,11 @@ public extension TextureLayersDocumentsRepository {
         texture: MTLTexture,
         device: MTLDevice
     ) async throws {
-        do {
-            let data = try texture.data(device: device)
-            try data.write(
-                to: workingDirectoryURL.appendingPathComponent(id.uuidString),
-                options: .atomic
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized :"Error"),
-                message: String(localized :"Failed to save the texture")
-            )
-            Logger.error(error)
-            throw error
-        }
+        let data = try texture.data(device: device)
+        try data.write(
+            to: workingDirectoryURL.appendingPathComponent(id.uuidString),
+            options: .atomic
+        )
     }
 }
 
@@ -284,8 +270,8 @@ private extension TextureLayersDocumentsRepository {
             in: FileManager.contentsOfDirectory(directoryURL)
         ) else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Unable to find texture layer files", bundle: .main)
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find texture layer files")
             )
             Logger.error(error)
             throw error

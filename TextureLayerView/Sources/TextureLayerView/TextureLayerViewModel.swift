@@ -43,7 +43,8 @@ open class TextureLayerViewModel: ObservableObject {
         self.onLayersChanged = onLayersChanged
     }
 
-    open func onTapInsertButton() async throws {
+    @discardableResult
+    open func onTapInsertButton() async throws -> Bool {
         guard
             let device,
             let selectedIndex = textureLayers.selectedIndex,
@@ -52,7 +53,7 @@ open class TextureLayerViewModel: ObservableObject {
                 height: Int(textureSize.height),
                 with: device
             )
-        else { return }
+        else { return false }
 
         let layer: TextureLayerModel = .init(
             id: LayerId(),
@@ -60,35 +61,43 @@ open class TextureLayerViewModel: ObservableObject {
             alpha: 255,
             isVisible: true
         )
-        try await textureLayers.addLayer(
-            layer: layer,
-            thumbnail: newTexture.makeThumbnail(),
-            at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        )
+
         try await dependencies?.textureLayersDocumentsRepository
             .addTexture(
                 texture: newTexture,
                 id: layer.id,
                 device: device
             )
+        textureLayers.addLayer(
+            layer: layer,
+            thumbnail: newTexture.makeThumbnail(),
+            at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+        )
+
         onLayersChanged?(.addLayer)
+
+        return true
     }
 
-    open func onTapDeleteButton() async throws {
+    @discardableResult
+    open func onTapDeleteButton() async throws -> Bool {
         guard
+            let dependencies,
             let selectedIndex = textureLayers.selectedIndex,
             let selectedId = textureLayers.selectedLayer?.id,
-            textureLayers.layerCount > 1
-        else { return }
+            textureLayers.layerCount > 1,
+            try dependencies.textureLayersDocumentsRepository
+                .removeTexture(
+                    selectedId
+                )
+        else { return false }
 
-        try await textureLayers.removeLayer(
+        await textureLayers.removeLayer(
             layerIndexToDelete: selectedIndex
         )
-        try dependencies?.textureLayersDocumentsRepository
-            .removeTexture(
-                selectedId
-            )
         onLayersChanged?(.removeLayer)
+
+        return true
     }
 
     open func onTapTitleButton(_ id: UUID, title: String) {

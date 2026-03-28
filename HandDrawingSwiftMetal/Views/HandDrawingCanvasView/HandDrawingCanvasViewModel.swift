@@ -40,7 +40,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     private var restoredDataFromCoreData: TextureLayersModel? {
         guard
-            let entity = try? textureLayerStorage?.fetch(),
+            let entity = textureLayerStorage?.fetch(),
             let model = textureLayerStorage?.textureLayersModel(from: entity)
         else { return nil }
         return model
@@ -101,11 +101,7 @@ extension HandDrawingCanvasViewModel {
                 resolvedConfiguration = configuration
 
                 // Initialize the Core Data storage if fetching fails
-                do {
-                    try textureLayerStorage?.clearAll()
-                } catch {
-                    Logger.error("Failed to clear Core Data storage: \(error)")
-                }
+                textureLayerStorage?.clearAll()
             }
         } else {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
@@ -220,11 +216,13 @@ extension HandDrawingCanvasViewModel {
         )
         let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
-        try await dependencies.textureLayersDocumentsRepository.restoreStorage(
+        guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
             url: workingDirectoryURL,
             textureLayers: data,
             device: device
-        )
+        ) else {
+            return
+        }
 
         textureLayersState.update(data)
     }
@@ -238,10 +236,12 @@ extension HandDrawingCanvasViewModel {
             textureSize: textureSize
         )
 
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+        guard try await dependencies.textureLayersDocumentsRepository.initializeStorage(
             textureLayers: data,
             device: device
-        )
+        ) else {
+            return
+        }
 
         textureLayersState.update(data)
     }
@@ -300,7 +300,7 @@ extension HandDrawingCanvasViewModel {
                 device: device
             )
 
-            try await textureLayersState.addLayer(
+            textureLayersState.addLayer(
                 layer: undoObject.textureLayer,
                 thumbnail: newTexture.makeThumbnail(),
                 at: undoObject.insertIndex
@@ -324,14 +324,10 @@ extension HandDrawingCanvasViewModel {
            return
         }
 
-        do {
-            try await textureLayersState.removeLayer(
-                layerIndexToDelete: index
-            )
-            updateFullCanvasTextureSubject.send()
-        } catch {
-            Logger.error(error)
-        }
+        await textureLayersState.removeLayer(
+            layerIndexToDelete: index
+        )
+        updateFullCanvasTextureSubject.send()
     }
 
     func performMoveUndo(

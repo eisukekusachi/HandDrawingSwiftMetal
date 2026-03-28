@@ -44,12 +44,16 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
         .store(in: &cancellables)
     }
 
-    public func fetch() throws -> TextureLayerArrayEntity? {
-        try storage?.fetch()
+    public func fetch() -> TextureLayerArrayEntity? {
+        try? storage?.fetch()
     }
 
-    public func clearAll() throws {
-        try storage?.clearAll()
+    public func clearAll() {
+        do {
+            try storage?.clearAll()
+        } catch {
+            Logger.error("Failed to clear Core Data storage: \(error)")
+        }
     }
 
     public func textureLayersModel(from entity: TextureLayerArrayEntity) -> TextureLayersModel {

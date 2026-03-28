@@ -51,7 +51,7 @@ public extension TextureLayersState {
         layer: TextureLayerModel,
         thumbnail: UIImage?,
         at index: Int
-    ) async throws {
+    ) {
         layers.insert(
             .init(
                 model: layer,
@@ -63,11 +63,12 @@ public extension TextureLayersState {
         selectedLayerId = layer.id
     }
 
-    func removeLayer(layerIndexToDelete index: Int) async throws {
+    @discardableResult
+    func removeLayer(layerIndexToDelete index: Int) async -> Bool {
         guard layerCount > 1 else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)"))
-            return
+            return false
         }
 
         let newLayerId = layers[
@@ -77,6 +78,8 @@ public extension TextureLayersState {
         layers.remove(at: index)
 
         selectedLayerId = newLayerId
+
+        return true
     }
 
     func moveLayer(indices: MoveLayerIndices) {

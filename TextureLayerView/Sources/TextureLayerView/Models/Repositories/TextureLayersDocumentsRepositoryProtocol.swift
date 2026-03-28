@@ -14,10 +14,11 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     var workingDirectoryURL: URL { get }
 
+    @discardableResult
     func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) async throws
+    ) async throws -> Bool
 
     func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
@@ -28,7 +29,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) async throws
+    ) async throws -> Bool
 
     func duplicatedTexture(
         _ id: LayerId,
@@ -40,22 +41,25 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         device: MTLDevice
     ) async throws -> [(LayerId, MTLTexture)]
 
+    @discardableResult
     func addTexture(
         texture: MTLTexture,
         id: LayerId,
         device: MTLDevice
-    ) async throws
+    ) async throws -> Bool
 
+    @discardableResult
     func removeTexture(
         _ id: LayerId
-    ) throws
+    ) throws -> Bool
 
     func removeAll()
 
+    @discardableResult
     func copyTexture(
         id: LayerId,
         to: URL
-    ) async throws
+    ) async throws -> Bool
 
     func writeTextureToDisk(
         id: LayerId,
