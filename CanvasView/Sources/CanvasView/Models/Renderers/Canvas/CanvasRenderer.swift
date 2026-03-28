@@ -40,16 +40,16 @@ import Combine
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        renderer: MTLRendering,
+        device: MTLDevice,
         displayView: CanvasDisplayable
     ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         ) else {
             fatalError("Metal is not supported on this device.")
         }
-        self.renderer = renderer
+        self.renderer = MTLRenderer(device: device)
         self.displayView = displayView
         self.flippedTextureBuffers = buffer
     }

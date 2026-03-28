@@ -44,17 +44,17 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     /// Queue that stores command buffers
     private let commandQueue: MTLCommandQueue
 
-    init(frame: CGRect = .zero, renderer: MTLRendering) {
+    init(frame: CGRect = .zero, device: MTLDevice) {
         guard
             let flippedTextureBuffer = MTLBuffers.makeTextureBuffers(
                 nodes: .flippedTextureNodes,
-                with: renderer.device
+                with: device
             ),
-            let commandQueue = renderer.device.makeCommandQueue()
+            let commandQueue = device.makeCommandQueue()
         else {
             fatalError("Metal is not supported on this device.")
         }
-        self.renderer = renderer
+        self.renderer = MTLRenderer(device: device)
         self.flippedTextureBuffers = flippedTextureBuffer
         self.commandQueue = commandQueue
         super.init(frame: frame, device: renderer.device)

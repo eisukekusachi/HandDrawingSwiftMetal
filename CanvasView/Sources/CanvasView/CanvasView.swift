@@ -66,9 +66,9 @@ open class CanvasView: UIView {
         }
         self.sharedDevice = device ?? defaultDevice
         self.renderer = MTLRenderer(device: sharedDevice)
-        self.displayView = .init(renderer: renderer)
+        self.displayView = .init(device: sharedDevice)
         self.canvasRenderer = .init(
-            renderer: renderer,
+            device: sharedDevice,
             displayView: displayView
         )
         self.viewModel = .init(
