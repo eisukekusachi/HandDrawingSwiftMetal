@@ -7,8 +7,6 @@
 
 import Foundation
 
-@preconcurrency import MetalKit
-
 public extension FileManager {
 
     static func createDirectory(_ url: URL) throws {
