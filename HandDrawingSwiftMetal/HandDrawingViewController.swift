@@ -39,15 +39,11 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    /// The `MTLCommandQueue` used throughout the app
-    private lazy var sharedCommandQueue: MTLCommandQueue = {
-        guard let commandQueue = sharedDevice.makeCommandQueue() else {
-            fatalError("Failed to create MTLCommandQueue.")
-        }
-        return commandQueue
+    private lazy var canvasView: HandDrawingCanvasView = {
+        HandDrawingCanvasView(
+            device: sharedDevice
+        )
     }()
-
-    private var canvasView: HandDrawingCanvasView?
 
     private var textureLayerView: TextureLayerView?
 
@@ -71,11 +67,11 @@ class HandDrawingViewController: UIViewController {
             switch event {
             case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
                 Task { [weak self] in
-                    try? await self?.canvasView?.updateFullCanvasTexture()
+                    try? await self?.canvasView.updateFullCanvasTexture()
                 }
             case .changeLayerAlpha:
                 Task { [weak self] in
-                    self?.canvasView?.updateCanvasTextureUsingCurrentTexture()
+                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
                 }
             }
         }
@@ -83,7 +79,7 @@ class HandDrawingViewController: UIViewController {
 
     private var registerUndoObject: ((UndoRedoObjectPair) -> Void) {
         { [weak self] undoObjectPair in
-            self?.canvasView?.registerUndoObject(undoObjectPair)
+            self?.canvasView.registerUndoObject(undoObjectPair)
         }
     }
 
@@ -100,7 +96,7 @@ class HandDrawingViewController: UIViewController {
         textureLayerView = TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
                 device: sharedDevice,
-                commandQueue: sharedCommandQueue,
+                commandQueue: canvasView.sharedCommandQueue,
                 onLayersChanged: handleViewUpdates,
                 onRegisterUndoObjectPair: registerUndoObject
             )
@@ -116,10 +112,7 @@ class HandDrawingViewController: UIViewController {
         showActivityIndicator(true)
         showContentView(false)
         Task { [weak self] in
-            guard
-                let `self`,
-                let canvasView = self.canvasView
-            else { return }
+            guard let `self` else { return }
 
             defer {
                 self.showActivityIndicator(false)
@@ -132,17 +125,17 @@ class HandDrawingViewController: UIViewController {
 
                 self.drawingRenderers.forEach {
                     $0.value.setup(
-                        renderer: canvasView.renderer
+                        renderer: self.canvasView.renderer
                     )
                 }
-                try await self.canvasView?.setup(
+                try await self.canvasView.setup(
                     drawingRenderers: self.drawingRenderers.map { $0.value },
                     configuration: configuration.canvasConfiguration
                 )
                 try self.viewModel.setup(configuration: configuration)
 
                 // Set the undo limit
-                self.canvasView?.undoManager?.levelsOfUndo = configuration.undoCount
+                self.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
                 self.updateComponents()
 
@@ -161,7 +154,7 @@ class HandDrawingViewController: UIViewController {
                 self.showActivityIndicator(true)
 
                 do {
-                    try await self.canvasView?.newCanvas()
+                    try await self.canvasView.newCanvas()
 
                     self.viewModel.resetCoreData()
 
@@ -178,17 +171,14 @@ class HandDrawingViewController: UIViewController {
 extension HandDrawingViewController {
     private func bindData() {
 
-        canvasView?.canvasEvents
+        canvasView.canvasEvents
             .compactMap { event -> CGSize? in
                 guard case let .canvasCreated(size) = event else { return nil }
                 return size
             }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureSize in
-                guard
-                    let `self`,
-                    let textureLayersState = self.canvasView?.textureLayersState
-                else { return }
+                guard let `self` else { return }
 
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
@@ -198,13 +188,13 @@ extension HandDrawingViewController {
                 self.contentView.initialize()
 
                 self.textureLayerView?.update(
-                    textureLayersState,
+                    self.canvasView.textureLayersState,
                     device: self.sharedDevice
                 )
             }
             .store(in: &cancellables)
 
-        canvasView?.strokeEvents
+        canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 switch event {
@@ -216,7 +206,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        canvasView?.didUndo
+        canvasView.didUndo
             .sink { [weak self] undoManager in
                 self?.contentView.setUndoRedoButtonState(
                     .init(undoManager)
@@ -224,7 +214,7 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        canvasView?.didPerformUndo
+        canvasView.didPerformUndo
             .sink { [weak self] undoObject in
                 if let undoObject = undoObject as? UndoAlphaObject {
                     self?.textureLayerView?.updateAlpha(
@@ -285,7 +275,7 @@ extension HandDrawingViewController {
 
     private func addEvents() {
         contentView.tapResetTransforming = { [weak self] in
-            self?.canvasView?.resetTransforming()
+            self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
             guard let `self` else { return }
@@ -316,13 +306,13 @@ extension HandDrawingViewController {
             self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
-            self.canvasView?.setDrawingRenderer(renderer)
+            self.canvasView.setDrawingRenderer(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
-            self?.canvasView?.undo()
+            self?.canvasView.undo()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.canvasView?.redo()
+            self?.canvasView.redo()
         }
 
         contentView.dragBrushSlider = { [weak self] value in
@@ -334,8 +324,7 @@ extension HandDrawingViewController {
     }
 
     private func layoutViews() {
-        if let baseView = contentView.baseView, let canvasView {
-
+        if let baseView = contentView.baseView {
             baseView.addSubview(canvasView)
             canvasView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -428,7 +417,7 @@ extension HandDrawingViewController {
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
         guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
-        canvasView?.setDrawingRenderer(renderer)
+        canvasView.setDrawingRenderer(renderer)
 
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
@@ -492,7 +481,7 @@ extension HandDrawingViewController {
         self.viewModel.onLoadCanvas(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
-                try await self?.canvasView?.loadFiles(
+                try await self?.canvasView.loadFiles(
                     in: workingDirectoryURL
                 )
             },
@@ -504,14 +493,14 @@ extension HandDrawingViewController {
     private func saveCanvas() {
         viewModel.onSaveCanvas(
             saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
-                try await self?.canvasView?.saveFiles(
+                try await self?.canvasView.saveFiles(
                     to: tmpWorkingDirectoryURL
                 )
             },
             completion: { [weak self] in
                 guard
                     let `self`,
-                    let thumbnail = self.canvasView?.thumbnail
+                    let thumbnail = self.canvasView.thumbnail
                 else { return }
                 self.viewModel.upsertFileList(
                     self.viewModel.currentFile(thumbnail: thumbnail)
@@ -522,7 +511,7 @@ extension HandDrawingViewController {
     }
 
     private func saveImage() {
-        if let image = canvasView?.canvasTexture?.uiImage {
+        if let image = canvasView.canvasTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }

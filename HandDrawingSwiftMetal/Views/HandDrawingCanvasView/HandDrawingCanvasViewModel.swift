@@ -48,7 +48,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     private var renderer: MTLRendering
 
     init(
-        renderer: MTLRenderer,
+        renderer: MTLRendering,
         dependencies: HandDrawingCanvasViewDependencies? = nil
     ) {
         self.dependencies = dependencies ?? .init()

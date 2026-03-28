@@ -33,7 +33,9 @@ import TextureLayerView
         .init(renderer: renderer)
     }()
 
-    private let viewModel: HandDrawingCanvasViewModel
+    private lazy var viewModel: HandDrawingCanvasViewModel = {
+        .init(renderer: renderer)
+    }()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -45,25 +47,9 @@ import TextureLayerView
     }
 
     override init(
-        device: MTLDevice? = nil,
-        commandQueue: MTLCommandQueue? = nil
+        device: MTLDevice? = nil
     ) {
-        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
-            fatalError("Metal is not supported on this device.")
-        }
-        guard let commandQueue = commandQueue ?? defaultDevice.makeCommandQueue() else {
-            fatalError("Failed to create command queue.")
-        }
-        self.viewModel = .init(
-            renderer: .init(
-                device: defaultDevice,
-                commandQueue: commandQueue
-            )
-        )
-        super.init(
-            device: device,
-            commandQueue: commandQueue
-        )
+        super.init(device: device)
         self.bindData()
     }
 
