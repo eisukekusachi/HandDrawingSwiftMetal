@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2025/08/11.
 //
 
-import CoreData
 import UIKit
 
 /// A struct that represents the snapshot of `TextureLayersState`
