@@ -146,14 +146,20 @@ public extension TextureLayerViewModel {
         _ textureLayers: TextureLayersState,
         device: MTLDevice? = nil
     ) {
+        guard
+            let device,
+            let dependencies = self.dependencies
+        else {
+            return
+        }
+
         self.textureLayers = textureLayers
 
         // Update the thumbails
-        Task { [weak self] in
+        Task {
             for layer in textureLayers.layers {
-                guard let device else { return }
                 let layerId: LayerId = layer.id
-                let texture = try? await self?.dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+                let texture = try? await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
                     layerId,
                     device: device
                 )
