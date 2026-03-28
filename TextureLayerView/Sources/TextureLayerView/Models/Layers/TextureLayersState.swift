@@ -113,8 +113,7 @@ public extension TextureLayersState {
         guard
             let index = index(for: id)
         else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
+            Logger.error(String(localized: "Unable to find \(id.uuidString)"))
             return
         }
 
@@ -133,8 +132,7 @@ public extension TextureLayersState {
         guard
             let index = index(for: layer.id)
         else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
+            Logger.error(String(localized: "Unable to find \(layer.id.uuidString)"))
             return
         }
 
@@ -151,8 +149,7 @@ public extension TextureLayersState {
         guard
             let index = index(for: id)
         else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
+            Logger.error(String(localized: "Unable to find \(id.uuidString)"))
             return
         }
 
@@ -169,8 +166,7 @@ public extension TextureLayersState {
         guard
             let index = index(for: id)
         else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
+            Logger.error(String(localized: "Unable to find \(id.uuidString)"))
             return
         }
 
@@ -183,8 +179,7 @@ public extension TextureLayersState {
             let texture,
             let index = index(for: id)
         else {
-            let value: String = "index: \(String(describing: index))"
-            Logger.error(String(localized: "Unable to find \(value)"))
+            Logger.error(String(localized: "Unable to find \(id.uuidString)"))
             return
         }
 
