@@ -20,17 +20,17 @@ final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol
     )
 
     /// A dictionary with `LayerId` as the key and MTLTexture as the value
-    private(set) var textures: [LayerId: MTLTexture?] = [:]
+    private(set) var textures: [LayerId: MTLTexture] = [:]
 
     init(
-        textures: [LayerId: MTLTexture?] = [:]
+        textures: [LayerId: MTLTexture] = [:]
     ) {
         self.textures = textures
     }
 
     /// Returns the texture associated with the specified `LayerId`
-    func texture(_ id: LayerId) -> MTLTexture? {
-        textures[id] as? MTLTexture
+    func texture(_ id: UndoTextureId) -> MTLTexture? {
+        textures[id]
     }
 
     /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
