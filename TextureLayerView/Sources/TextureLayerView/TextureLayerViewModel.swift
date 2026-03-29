@@ -152,38 +152,33 @@ public extension TextureLayerViewModel {
         _ textureLayers: TextureLayersState,
         device: MTLDevice? = nil
     ) {
-        guard
-            let device,
-            let dependencies = self.dependencies
-        else {
-            return
-        }
-
-        self.textureLayers = textureLayers
-
-        // Update the thumbnails
-        Task {
-            for layer in textureLayers.layers {
-                let layerId: LayerId = layer.id
-                let texture = try? await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
-                    layerId,
-                    device: device
-                )
-                textureLayers.updateThumbnail(layerId, texture: texture)
-            }
-        }
-
-        // Update the alpha slider handle position
-        updateCurrentAlpha()
-
         // Avoid multiple subscriptions
         cancellables.removeAll()
 
-        textureLayers.objectWillChange
+        self.textureLayers = textureLayers
+
+        self.textureLayers.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        // Update the alpha slider handle position
+        updateCurrentAlpha()
+
+        // Update the thumbnails
+        if let device, let dependencies {
+            Task {
+                for layer in textureLayers.layers {
+                    let layerId: LayerId = layer.id
+                    let texture = try? await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+                        layerId,
+                        device: device
+                    )
+                    textureLayers.updateThumbnail(layerId, texture: texture)
+                }
+            }
+        }
     }
 
     func isSelected(_ id: UUID) -> Bool {
