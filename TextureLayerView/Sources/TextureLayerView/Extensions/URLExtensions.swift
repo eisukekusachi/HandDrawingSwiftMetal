@@ -11,6 +11,12 @@ public extension URL {
 
     /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        guard let url = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first else {
+            fatalError("Failed to resolve Application Support directory URL")
+        }
+        return url
     }
 }
