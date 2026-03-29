@@ -388,15 +388,21 @@ extension HandDrawingCanvasViewModel {
         dependencies.undoTextureInMemoryRepository.removeAll()
     }
 
-    func duplicateTextureFromDocumentsDirectory(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture? {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+    func duplicateTextureFromDocumentsDirectory(
+        _ id: LayerId,
+        device: MTLDevice
+    ) async -> MTLTexture? {
+        await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
     }
 
-    func duplicateTexturesFromDocumentsDirectory(_ ids: [LayerId], device: MTLDevice) async throws -> [(LayerId, MTLTexture)] {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+    func duplicateTexturesFromDocumentsDirectory(
+        _ ids: [LayerId],
+        device: MTLDevice
+    ) async -> [(LayerId, MTLTexture)] {
+        await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
             device: device
         )
