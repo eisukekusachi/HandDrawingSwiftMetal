@@ -175,10 +175,11 @@ public extension TextureLayersState {
     }
 
     func updateThumbnail(_ id: LayerId, texture: MTLTexture?) {
-        guard
-            let texture,
-            let index = index(for: id)
-        else {
+        guard let texture else {
+            Logger.error(String(localized: "Unable to find texture for \(id.uuidString)"))
+            return
+        }
+        guard let index = index(for: id) else {
             Logger.error(String(localized: "Unable to find \(id.uuidString)"))
             return
         }
