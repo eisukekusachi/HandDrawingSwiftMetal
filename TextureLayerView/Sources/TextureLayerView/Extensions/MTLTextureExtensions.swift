@@ -5,14 +5,13 @@
 //  Created by Eisuke Kusachi on 2026/03/22.
 //
 
-import MetalKit
+@preconcurrency import MetalKit
 
-extension MTLTexture {
-
+public extension MTLTexture {
     func data(
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) throws -> Data {
+    ) async throws -> Data {
         let width = self.width
         let height = self.height
         let bytesPerPixel = 4
@@ -45,10 +44,19 @@ extension MTLTexture {
         )
         commandEncoder.endEncoding()
 
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+        return try await withCheckedThrowingContinuation { continuation in
+            commandBuffer.addCompletedHandler { commandBuffer in
+                if let error = commandBuffer.error {
+                    continuation.resume(throwing: error)
+                    return
+                }
 
-        let rawPointer = buffer.contents()
-        return Data(bytes: rawPointer, count: dataSize)
+                let rawPointer = buffer.contents()
+                let data = Data(bytes: rawPointer, count: dataSize)
+                continuation.resume(returning: data)
+            }
+
+            commandBuffer.commit()
+        }
     }
 }

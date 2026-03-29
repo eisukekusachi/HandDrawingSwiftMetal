@@ -67,12 +67,14 @@ open class TextureLayerViewModel: ObservableObject {
             isVisible: true
         )
 
+        let textureData = try await newTexture.data(
+            device: device,
+            commandQueue: commandQueue
+        )
         try await dependencies?.textureLayersDocumentsRepository
-            .addTexture(
-                texture: newTexture,
-                id: layer.id,
-                device: device,
-                commandQueue: commandQueue
+            .addTextureData(
+                textureData: textureData,
+                id: layer.id
             )
         textureLayers.addLayer(
             layer: layer,

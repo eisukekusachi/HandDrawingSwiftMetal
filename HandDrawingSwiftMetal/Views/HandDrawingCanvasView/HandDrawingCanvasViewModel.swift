@@ -409,11 +409,13 @@ private extension HandDrawingCanvasViewModel {
         layerId: UUID,
         texture: MTLTexture
     ) async throws {
-        try await dependencies.textureLayersDocumentsRepository.writeTextureToDisk(
-            id: layerId,
-            texture: texture,
+        let textureData = try await texture.data(
             device: renderer.device,
             commandQueue: renderer.commandQueue
+        )
+        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+            id: layerId,
+            data: textureData
         )
     }
 }

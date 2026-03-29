@@ -43,11 +43,9 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     ) async throws -> [(LayerId, MTLTexture)]
 
     @discardableResult
-    func addTexture(
-        texture: MTLTexture,
-        id: LayerId,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
+    func addTextureData(
+        textureData: Data,
+        id: LayerId
     ) async throws -> Bool
 
     @discardableResult
@@ -63,10 +61,8 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         to: URL
     ) async throws -> Bool
 
-    func writeTextureToDisk(
+    func writeDataToDisk(
         id: LayerId,
-        texture: MTLTexture,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
+        data: Data
     ) async throws
 }

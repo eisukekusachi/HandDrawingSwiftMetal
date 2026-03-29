@@ -81,11 +81,13 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         // Delete all textures in the repository
         removeAll()
 
-        try await addTexture(
-            texture: newTexture,
-            id: layerId,
+        let textureData = try await newTexture.data(
             device: device,
             commandQueue: commandQueue
+        )
+        try await addTextureData(
+            textureData: textureData,
+            id: layerId
         )
 
         // Set the texture size after the initialization of this repository is completed
@@ -140,14 +142,11 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
 public extension TextureLayersDocumentsRepository {
 
-    /// Adds a texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
-    /// so the instance passed as an argument does not need to be a new one
+    /// Adds texture data
     @discardableResult
-    func addTexture(
-        texture: MTLTexture,
-        id: LayerId,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
+    func addTextureData(
+        textureData: Data,
+        id: LayerId
     ) async throws -> Bool {
         // If it doesn’t exist, add it
         guard
@@ -157,11 +156,9 @@ public extension TextureLayersDocumentsRepository {
             return false
         }
 
-        try await writeTextureToDisk(
+        try await writeDataToDisk(
             id: id,
-            texture: texture,
-            device: device,
-            commandQueue: commandQueue
+            data: textureData
         )
 
         return true
@@ -319,18 +316,10 @@ public extension TextureLayersDocumentsRepository {
         return true
     }
 
-    /// Writes the texture to disk by duplicating it into the Documents directory.
-    /// Since `MTLTexture` is a reference type, the passed instance does not need to be newly created.
-    func writeTextureToDisk(
+    func writeDataToDisk(
         id: LayerId,
-        texture: MTLTexture,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
+        data: Data
     ) async throws {
-        let data = try texture.data(
-            device: device,
-            commandQueue: commandQueue
-        )
         try data.write(
             to: workingDirectoryURL.appendingPathComponent(id.uuidString),
             options: .atomic
