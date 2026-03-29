@@ -46,7 +46,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     func addTextureData(
         textureData: Data,
         id: LayerId
-    ) async throws -> Bool
+    ) throws -> Bool
 
     @discardableResult
     func removeTexture(

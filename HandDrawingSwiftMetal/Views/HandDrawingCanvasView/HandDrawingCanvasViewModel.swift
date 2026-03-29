@@ -285,7 +285,7 @@ extension HandDrawingCanvasViewModel {
 
     func performDeletionUndo(
         _ undoObject: UndoDeletionObject
-    ) async {
+    ) {
         guard
             let index = textureLayersState.layers.firstIndex(
                 where: { $0.id == undoObject.textureLayer.id }
@@ -294,7 +294,7 @@ extension HandDrawingCanvasViewModel {
            return
         }
 
-        await textureLayersState.removeLayer(
+        textureLayersState.removeLayer(
             layerIndexToDelete: index
         )
         updateFullCanvasTextureSubject.send()

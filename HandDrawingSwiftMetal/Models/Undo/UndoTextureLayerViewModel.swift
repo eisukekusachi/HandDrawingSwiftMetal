@@ -75,7 +75,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             let layer = textureLayers.selectedLayer
         else { return false }
 
-        let newTexture = try await textureFromDocumentsRepository(
+        let newTexture = await textureFromDocumentsRepository(
             layerId,
             device: renderer.device
         )
@@ -101,33 +101,38 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
     }
 
     @discardableResult
-    override func onTapDeleteButton() async throws -> Bool {
-        guard
-            let layerId = textureLayers.selectedLayerId,
-            let layerIndex = textureLayers.selectedIndex,
-            let layer = textureLayers.selectedLayer,
-            let texture = try await textureFromDocumentsRepository(layerId, device: renderer.device),
-            try await super.onTapDeleteButton()
-        else { return false }
+    override func onTapDeleteButton() async -> Bool {
+        do {
+            guard
+                let layerId = textureLayers.selectedLayerId,
+                let layerIndex = textureLayers.selectedIndex,
+                let layer = textureLayers.selectedLayer,
+                let texture = await textureFromDocumentsRepository(layerId, device: renderer.device),
+                await super.onTapDeleteButton()
+            else { return false }
 
-        let undoObject = UndoAdditionObject(
-            layerToBeAdded: .init(item: layer),
-            at: layerIndex
-        )
-        // Create a deletion undo object to cancel the addition
-        let redoObject = UndoDeletionObject(
-            layerToBeDeleted: .init(item: layer)
-        )
-
-        try await pushUndoDeletionObject(
-            restorationTexture: texture,
-            undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+            let undoObject = UndoAdditionObject(
+                layerToBeAdded: .init(item: layer),
+                at: layerIndex
             )
-        )
+            // Create a deletion undo object to cancel the addition
+            let redoObject = UndoDeletionObject(
+                layerToBeDeleted: .init(item: layer)
+            )
 
-        return true
+            try await pushUndoDeletionObject(
+                restorationTexture: texture,
+                undoRedoObject: .init(
+                    undoObject: undoObject,
+                    redoObject: redoObject
+                )
+            )
+            return true
+
+        } catch {
+            Logger.error(error)
+            return false
+        }
     }
 
     override func onTapTitleButton(_ id: LayerId, title: String) {

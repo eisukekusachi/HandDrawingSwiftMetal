@@ -71,7 +71,7 @@ open class TextureLayerViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue
         )
-        try await dependencies?.textureLayersDocumentsRepository
+        try dependencies?.textureLayersDocumentsRepository
             .addTextureData(
                 textureData: textureData,
                 id: layer.id
@@ -88,24 +88,29 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     @discardableResult
-    open func onTapDeleteButton() async throws -> Bool {
-        guard
-            let dependencies,
-            let selectedIndex = textureLayers.selectedIndex,
-            let selectedId = textureLayers.selectedLayer?.id,
-            textureLayers.layerCount > 1,
-            try dependencies.textureLayersDocumentsRepository
-                .removeTexture(
-                    selectedId
-                )
-        else { return false }
+    open func onTapDeleteButton() async -> Bool {
+        do {
+            guard
+                let dependencies,
+                let selectedIndex = textureLayers.selectedIndex,
+                let selectedId = textureLayers.selectedLayer?.id,
+                textureLayers.layerCount > 1,
+                try dependencies.textureLayersDocumentsRepository
+                    .removeTexture(
+                        selectedId
+                    )
+            else { return false }
 
-        await textureLayers.removeLayer(
-            layerIndexToDelete: selectedIndex
-        )
-        onLayersChanged?(.removeLayer)
+            textureLayers.removeLayer(
+                layerIndexToDelete: selectedIndex
+            )
+            onLayersChanged?(.removeLayer)
 
-        return true
+            return true
+        } catch {
+            Logger.error(error)
+            return false
+        }
     }
 
     open func onTapTitleButton(_ id: UUID, title: String) {

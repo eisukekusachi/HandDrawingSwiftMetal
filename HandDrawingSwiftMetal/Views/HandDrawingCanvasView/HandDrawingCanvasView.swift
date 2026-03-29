@@ -120,14 +120,14 @@ import TextureLayerView
         guard
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
-            let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
+            let currentTexture = await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             )
         else {
             return
         }
 
-        let textures = try await viewModel.duplicateTexturesFromDocumentsDirectory(
+        let textures = await viewModel.duplicateTexturesFromDocumentsDirectory(
             textureLayers.layers.map { $0.id }
         )
 
@@ -278,7 +278,7 @@ extension HandDrawingCanvasView {
             } else if let undoObject = undoObject as? UndoAdditionObject {
                 await self?.viewModel.performAdditionUndo(undoObject)
             } else if let undoObject = undoObject as? UndoDeletionObject {
-                await self?.viewModel.performDeletionUndo(undoObject)
+                self?.viewModel.performDeletionUndo(undoObject)
             } else if let undoObject = undoObject as? UndoSelectionObject {
                 await self?.viewModel.performSelectUndo(undoObject)
             } else if let undoObject = undoObject as? UndoMoveObject {

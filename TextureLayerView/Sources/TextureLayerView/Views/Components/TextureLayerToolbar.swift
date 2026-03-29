@@ -48,11 +48,7 @@ public struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
-                            do {
-                                try await viewModel.onTapDeleteButton()
-                            } catch {
-                                Logger.error(error)
-                            }
+                            await viewModel.onTapDeleteButton()
                         }
                     }
                 },

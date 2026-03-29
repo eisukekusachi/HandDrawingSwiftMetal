@@ -64,7 +64,7 @@ public extension TextureLayersState {
     }
 
     @discardableResult
-    func removeLayer(layerIndexToDelete index: Int) async -> Bool {
+    func removeLayer(layerIndexToDelete index: Int) -> Bool {
         guard layerCount > 1 else {
             let value: String = "index: \(String(describing: index))"
             Logger.error(String(localized: "Unable to find \(value)"))
