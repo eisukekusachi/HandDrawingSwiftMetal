@@ -355,7 +355,7 @@ extension HandDrawingViewController {
                 popup.view.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
-                    popup.view.centerXAnchor.constraint(equalTo: contentView.layerButton.leadingAnchor),
+                    popup.view.centerXAnchor.constraint(equalTo: contentView.layerButton.centerXAnchor),
                     popup.view.widthAnchor.constraint(equalToConstant: 300),
                     popup.view.heightAnchor.constraint(equalToConstant: 300)
                 ])

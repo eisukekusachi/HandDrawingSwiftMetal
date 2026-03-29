@@ -29,7 +29,7 @@ import SwiftUI
             target.bounds, to: destination
         ).midX
         let layerViewX = targetViewCenterX - dialogWidth * 0.5
-        let centerX = targetViewCenterX - layerViewX + target.bounds.width * 0.5
+        let centerX = targetViewCenterX - layerViewX
 
         self.arrowX = centerX
     }
