@@ -412,7 +412,7 @@ private extension HandDrawingCanvasViewModel {
             device: renderer.device,
             commandQueue: renderer.commandQueue
         )
-        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+        try dependencies.textureLayersDocumentsRepository.writeDataToDisk(
             id: layerId,
             data: textureData
         )

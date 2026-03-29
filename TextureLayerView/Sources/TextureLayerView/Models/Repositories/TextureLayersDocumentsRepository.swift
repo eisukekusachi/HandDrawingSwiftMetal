@@ -86,7 +86,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             commandQueue: commandQueue
         )
         try addTextureData(
-            textureData: textureData,
+            data: textureData,
             id: layerId
         )
 
@@ -145,7 +145,7 @@ public extension TextureLayersDocumentsRepository {
     /// Adds texture data
     @discardableResult
     func addTextureData(
-        textureData: Data,
+        data: Data,
         id: LayerId
     ) throws -> Bool {
         // If it doesn’t exist, add it
@@ -158,7 +158,7 @@ public extension TextureLayersDocumentsRepository {
 
         try writeDataToDisk(
             id: id,
-            data: textureData
+            data: data
         )
 
         return true

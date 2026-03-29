@@ -44,7 +44,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     @discardableResult
     func addTextureData(
-        textureData: Data,
+        data: Data,
         id: LayerId
     ) throws -> Bool
 
@@ -64,5 +64,5 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
     func writeDataToDisk(
         id: LayerId,
         data: Data
-    ) async throws
+    ) throws
 }

@@ -73,7 +73,7 @@ open class TextureLayerViewModel: ObservableObject {
         )
         try dependencies?.textureLayersDocumentsRepository
             .addTextureData(
-                textureData: textureData,
+                data: textureData,
                 id: layer.id
             )
         textureLayers.addLayer(
