@@ -10,6 +10,8 @@ import Combine
 import UIKit
 import TextureLayerView
 
+@preconcurrency import MetalKit
+
 @objc final class HandDrawingCanvasView: CanvasView {
 
     var didUndo: AnyPublisher<UndoManager, Never> {

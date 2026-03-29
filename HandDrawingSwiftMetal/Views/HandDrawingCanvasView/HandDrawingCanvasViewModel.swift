@@ -11,6 +11,8 @@ import Foundation
 import MetalKit
 import TextureLayerView
 
+@preconcurrency import MetalKit
+
 @MainActor
 final class HandDrawingCanvasViewModel: ObservableObject {
 

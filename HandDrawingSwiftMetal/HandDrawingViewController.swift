@@ -188,8 +188,7 @@ extension HandDrawingViewController {
                 self.contentView.initialize()
 
                 self.textureLayerView?.update(
-                    self.canvasView.textureLayersState,
-                    device: self.sharedDevice
+                    self.canvasView.textureLayersState
                 )
             }
             .store(in: &cancellables)

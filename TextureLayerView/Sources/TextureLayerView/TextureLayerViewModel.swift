@@ -8,6 +8,8 @@
 import Combine
 import UIKit
 
+@preconcurrency import MetalKit
+
 @MainActor
 open class TextureLayerViewModel: ObservableObject {
 
@@ -155,8 +157,7 @@ public extension TextureLayerViewModel {
     }
 
     func update(
-        _ textureLayers: TextureLayersState,
-        device: MTLDevice? = nil
+        _ textureLayers: TextureLayersState
     ) {
         // Avoid multiple subscriptions
         cancellables.removeAll()

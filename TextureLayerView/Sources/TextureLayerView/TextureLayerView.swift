@@ -39,8 +39,8 @@ public struct TextureLayerView: View {
         }
     }
 
-    public func update(_ state: TextureLayersState, device: MTLDevice) {
-        viewModel.update(state, device: device)
+    public func update(_ state: TextureLayersState) {
+        viewModel.update(state)
     }
 
     public func updateAlpha(_ alpha: Int) {
