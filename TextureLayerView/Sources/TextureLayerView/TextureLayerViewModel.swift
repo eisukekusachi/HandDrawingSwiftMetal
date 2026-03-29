@@ -142,9 +142,9 @@ open class TextureLayerViewModel: ObservableObject {
 }
 
 public extension TextureLayerViewModel {
-    func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async throws -> MTLTexture? {
+    func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async -> MTLTexture? {
         guard let device else { return nil }
-        return try await dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+        return await dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
@@ -173,7 +173,7 @@ public extension TextureLayerViewModel {
             Task {
                 for layer in textureLayers.layers {
                     let layerId: LayerId = layer.id
-                    let texture = try? await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+                    let texture = await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
                         layerId,
                         device: device
                     )
