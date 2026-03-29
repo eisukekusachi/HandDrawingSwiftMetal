@@ -31,7 +31,7 @@ open class TextureLayerViewModel: ObservableObject {
 
     private let commandQueue: MTLCommandQueue?
 
-    private let dependencies: TextureLayerViewDependencies?
+    private let dependencies: TextureLayerViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -71,7 +71,7 @@ open class TextureLayerViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue
         )
-        try dependencies?.textureLayersDocumentsRepository
+        try dependencies.textureLayersDocumentsRepository
             .addTextureData(
                 data: textureData,
                 id: layer.id
@@ -91,7 +91,6 @@ open class TextureLayerViewModel: ObservableObject {
     open func onTapDeleteButton() async -> Bool {
         do {
             guard
-                let dependencies,
                 let selectedIndex = textureLayers.selectedIndex,
                 let selectedId = textureLayers.selectedLayer?.id,
                 textureLayers.layerCount > 1,
@@ -149,7 +148,7 @@ open class TextureLayerViewModel: ObservableObject {
 public extension TextureLayerViewModel {
     func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async -> MTLTexture? {
         guard let device else { return nil }
-        return await dependencies?.textureLayersDocumentsRepository.duplicatedTexture(
+        return await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             device: device
         )
@@ -174,15 +173,16 @@ public extension TextureLayerViewModel {
         updateCurrentAlpha()
 
         // Update the thumbnails
-        if let device, let dependencies {
-            Task {
-                for layer in textureLayers.layers {
+        if let device {
+            Task { [weak self] in
+                guard let `self` else { return }
+                for layer in self.textureLayers.layers {
                     let layerId: LayerId = layer.id
-                    let texture = await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+                    let texture = await self.dependencies.textureLayersDocumentsRepository.duplicatedTexture(
                         layerId,
                         device: device
                     )
-                    textureLayers.updateThumbnail(layerId, texture: texture)
+                    self.textureLayers.updateThumbnail(layerId, texture: texture)
                 }
             }
         }
