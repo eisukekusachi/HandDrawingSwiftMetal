@@ -71,7 +71,7 @@ public enum MTLTextureCreator {
         from colorArray: [UInt8],
         with device: MTLDevice
     ) throws -> MTLTexture? {
-        guard colorArray.count == Int(width * height) * bytesPerPixel else {
+        guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Invalid value")
@@ -82,20 +82,30 @@ public enum MTLTextureCreator {
 
         let bytesPerRow = bytesPerPixel * width
 
-        let texture = makeTexture(
+        guard let texture = makeTexture(
             label: label,
             width: width,
             height: height,
             with: device
-        )
-        texture?.replace(
-            region: MTLRegionMake2D(0, 0, width, height),
-            mipmapLevel: 0,
-            slice: 0,
-            withBytes: colorArray,
-            bytesPerRow: bytesPerRow,
-            bytesPerImage: bytesPerRow * height
-        )
+        ) else {
+            return nil
+        }
+
+        colorArray.withUnsafeBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress else {
+                return
+            }
+
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, width, height),
+                mipmapLevel: 0,
+                slice: 0,
+                withBytes: baseAddress,
+                bytesPerRow: bytesPerRow,
+                bytesPerImage: bytesPerRow * height
+            )
+        }
+
         return texture
     }
 }
