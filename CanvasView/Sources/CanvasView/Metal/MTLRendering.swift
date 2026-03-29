@@ -12,6 +12,8 @@ public protocol MTLRendering {
 
     var device: MTLDevice { get }
 
+    var commandQueue: MTLCommandQueue { get }
+
     var newCommandBuffer: MTLCommandBuffer? { get }
 
     func drawGrayPointBuffersWithMaxBlendMode(
@@ -103,4 +105,13 @@ public protocol MTLRendering {
         texture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
+
+    func makeTexture(
+        _ textureSize: CGSize,
+        label: String?
+    ) -> MTLTexture?
+
+    func makeTexture(
+        _ textureSize: CGSize
+    ) -> MTLTexture?
 }

@@ -44,6 +44,9 @@ open class CanvasView: UIView {
     /// The single Metal device instance used throughout the app
     public let sharedDevice: MTLDevice
 
+    /// The single Metal command queue instance used throughout the app
+    public let sharedCommandQueue: MTLCommandQueue
+
     /// Executes texture operations
     public let renderer: MTLRendering
 
@@ -60,15 +63,31 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
-    public init() {
-        guard let sharedDevice = MTLCreateSystemDefaultDevice() else {
+    public init(
+        device: MTLDevice? = nil
+    ) {
+        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
-        self.sharedDevice = sharedDevice
-        self.renderer = MTLRenderer(device: sharedDevice)
-        self.displayView = .init(renderer: renderer)
+
+        self.sharedDevice = device ?? defaultDevice
+
+        guard let commandQueue = sharedDevice.makeCommandQueue() else {
+            fatalError("Failed to create command queue.")
+        }
+        self.sharedCommandQueue = commandQueue
+
+        self.renderer = MTLRenderer(
+            device: sharedDevice,
+            commandQueue: commandQueue
+        )
+        self.displayView = .init(
+            device: sharedDevice,
+            commandQueue: commandQueue
+        )
         self.canvasRenderer = .init(
-            renderer: renderer,
+            device: sharedDevice,
+            commandQueue: commandQueue,
             displayView: displayView
         )
         self.viewModel = .init(

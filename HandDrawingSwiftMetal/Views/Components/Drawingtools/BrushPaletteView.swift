@@ -38,7 +38,7 @@ struct BrushPaletteView: View {
         self.backgroundColor = Color(backgroundColor)
     }
 
-    public var body: some View {
+    var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
                 ForEach(palette.colors.indices, id: \.self) { i in

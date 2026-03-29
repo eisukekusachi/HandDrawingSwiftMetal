@@ -5,31 +5,36 @@
 //  Created by Eisuke Kusachi on 2025/08/09.
 //
 
-import CanvasView
 import SwiftUI
 
 public struct TextureLayerToolbar: View {
+
+    @ObservedObject private var viewModel: TextureLayerViewModel
 
     private let buttonThrottle = ButtonThrottle()
 
     private let buttonSize: CGFloat = 20
 
-    @ObservedObject private var viewModel: TextureLayerViewModel
-
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
-    init(viewModel: TextureLayerViewModel) {
+    init(
+        viewModel: TextureLayerViewModel
+    ) {
         self.viewModel = viewModel
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 16) {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
                         Task { @MainActor in
-                            viewModel.onTapInsertButton()
+                            do {
+                                try await viewModel.onTapInsertButton()
+                            } catch {
+                                Logger.error(error)
+                            }
                         }
                     }
                 },
@@ -39,13 +44,11 @@ public struct TextureLayerToolbar: View {
                 }
             )
 
-            Spacer().frame(width: 16)
-
             Button(
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
-                            viewModel.onTapDeleteButton()
+                            await viewModel.onTapDeleteButton()
                         }
                     }
                 },
@@ -54,8 +57,6 @@ public struct TextureLayerToolbar: View {
                         .buttonModifier(diameter: buttonSize)
                 }
             )
-
-            Spacer().frame(width: 16)
 
             Button(
                 action: {
@@ -95,14 +96,11 @@ private extension Image {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel()
+    private let viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
 
-    private let textureLayers = TextureLayers(
-        renderer: nil,
-        repository: nil
-    )
+    private let textureLayers = TextureLayersState()
 
-    private let state: TextureLayersState = .init(
+    private let data: TextureLayersModel = .init(
         layers: [
             .init(
                 id: LayerId(),
@@ -122,13 +120,8 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                textureLayers.updateSkippingThumbnail(
-                    textureLayersState: state
-                )
-
-                viewModel.initialize(
-                    textureLayers: textureLayers
-                )
+                textureLayers.update(data)
+                viewModel.update(textureLayers)
             }
         }
     }

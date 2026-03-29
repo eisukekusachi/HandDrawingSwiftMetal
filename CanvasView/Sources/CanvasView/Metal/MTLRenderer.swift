@@ -11,13 +11,12 @@
 @MainActor
 public final class MTLRenderer: Sendable, MTLRendering {
 
-    public var device: MTLDevice {
-        _device
-    }
-    private var _device: MTLDevice
+    public let device: MTLDevice
+
+    public let commandQueue: MTLCommandQueue
 
     public var newCommandBuffer: MTLCommandBuffer? {
-        commandQueue?.makeCommandBuffer()
+        commandQueue.makeCommandBuffer()
     }
 
     /// Buffers used to draw textures with vertical flipping
@@ -25,10 +24,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     private let pipelines: MTLPipelines
 
-    private let commandQueue: MTLCommandQueue?
-
-    init(device: MTLDevice?) {
-        guard let device else { fatalError("Device is nil") }
+    public init(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -36,10 +35,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
             fatalError("Metal is not supported on this device.")
         }
 
-        self._device = device
+        self.device = device
+        self.commandQueue = commandQueue
         self.flippedTextureBuffers = buffer
         self.pipelines = MTLPipelines(device: device)
-        self.commandQueue = device.makeCommandQueue()
     }
 
     public func drawGrayPointBuffersWithMaxBlendMode(
@@ -359,5 +358,27 @@ public final class MTLRenderer: Sendable, MTLRendering {
         )
 
         try await newCommandBuffer.commitAndWaitAsync()
+    }
+
+    public func makeTexture(
+        _ textureSize: CGSize,
+        label: String?
+    ) -> MTLTexture? {
+        let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        )
+        texture?.label = label
+        return texture
+    }
+
+    public func makeTexture(
+        _ textureSize: CGSize
+    ) -> MTLTexture? {
+        makeTexture(
+            textureSize,
+            label: nil
+        )
     }
 }

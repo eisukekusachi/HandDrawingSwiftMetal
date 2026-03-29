@@ -33,6 +33,11 @@ final class HandDrawingViewModel: ObservableObject {
         50
     ]
 
+    let project: ProjectData = .init()
+    let drawingTool: DrawingTool = .init()
+    let brushPalette: BrushPalette
+    let eraserPalette: EraserPalette
+
     var fileSuffix: String {
         _fileSuffix
     }
@@ -45,10 +50,18 @@ final class HandDrawingViewModel: ObservableObject {
 
     private let thumbnailName: String = "thumbnail.png"
 
-    let project: ProjectData = .init()
-    let drawingTool: DrawingTool = .init()
-    let brushPalette: BrushPalette
-    let eraserPalette: EraserPalette
+    /// Current file for displaying in the file list
+    func currentFile(thumbnail: UIImage?) -> LocalFileItem {
+        .init(
+            title: project.projectName,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+            thumbnail: thumbnail,
+            fileURL: URL.documents.appendingPathComponent(
+                projectFileName()
+            )
+        )
+    }
 
     private let projectStorage: CoreDataProjectStorage
     private let drawingToolStorage: CoreDataDrawingToolStorage
@@ -176,7 +189,50 @@ extension HandDrawingViewModel {
 }
 
 extension HandDrawingViewModel {
-    func loadFile(
+
+    func onSaveCanvas(
+        saveCanvasAction: ((URL) async throws -> Void)?,
+        completion: (() -> Void)?,
+        zipFileURL: URL
+    ) {
+        Task(priority: .userInitiated) {
+            defer {
+                /// Remove the working space
+                localFileRepository.removeWorkingDirectory()
+
+                activityIndicatorSubject.send(false)
+            }
+            activityIndicatorSubject.send(true)
+
+            do {
+                // Create a temporary working directory for saving project files
+                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+
+                try await saveCanvasAction?(workingDirectoryURL)
+
+                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
+                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
+                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
+                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
+
+                // Zip the working directory into a single project file
+                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
+
+                completion?()
+
+                toastSubject.send(
+                    .init(
+                        title: "Success",
+                        icon: UIImage(systemName: "hand.thumbsup.fill")
+                    )
+                )
+            } catch {
+                alertSubject.send(error)
+            }
+        }
+    }
+
+    func onLoadCanvas(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?,
         completion: (() -> Void)?
@@ -222,56 +278,14 @@ extension HandDrawingViewModel {
             }
         }
     }
-
-    func saveProject(
-        action: ((URL) async throws -> Void)?,
-        completion: (() -> Void)?,
-        zipFileURL: URL
-    ) {
-        Task(priority: .userInitiated) {
-            defer {
-                /// Remove the working space
-                localFileRepository.removeWorkingDirectory()
-
-                activityIndicatorSubject.send(false)
-            }
-            activityIndicatorSubject.send(true)
-
-            do {
-                // Create a temporary working directory for saving project files
-                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
-
-                try await action?(workingDirectoryURL)
-
-                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
-                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
-                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
-                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
-
-                // Zip the working directory into a single project file
-                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
-
-                completion?()
-
-                toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                alertSubject.send(error)
-            }
-        }
-    }
 }
 
 extension HandDrawingViewModel {
-    func upsertFileList(fileItem: LocalFileItem) {
-        if let index = _fileList.firstIndex(where: { $0.title == fileItem.title }) {
-            _fileList[index] = fileItem
+    func upsertFileList(_ file: LocalFileItem) {
+        if let index = _fileList.firstIndex(where: { $0.title == file.title }) {
+            _fileList[index] = file
         } else {
-            _fileList.append(fileItem)
+            _fileList.append(file)
         }
 
         _fileList.sort { $0.updatedAt > $1.updatedAt }
@@ -312,7 +326,7 @@ extension HandDrawingViewModel {
                         title: projectMetaData.projectName,
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
-                        image: UIImage(data: data),
+                        thumbnail: UIImage(data: data),
                         fileURL: zipFileURL
                     )
                 )

@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2024/05/04.
 //
 
-import CanvasView
 import Foundation
 
 public struct TextureLayersArchiveModel: Codable, Equatable {

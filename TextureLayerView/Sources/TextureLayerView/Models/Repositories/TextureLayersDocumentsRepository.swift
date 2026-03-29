@@ -5,28 +5,42 @@
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import CanvasView
-import Foundation
+import UIKit
 
 @preconcurrency import MetalKit
 
+private struct TextureSource: Sendable {
+    let id: LayerId
+    let url: URL
+    let width: Int
+    let height: Int
+    let hexadecimalData: [UInt8]
+}
+
 /// Manages and persists `TextureLayers` textures on disk
-@MainActor public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+@MainActor
+public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+
+    public static let shared: TextureLayersDocumentsRepository = {
+        do {
+            return try TextureLayersDocumentsRepository(
+                storageDirectoryURL: URL.applicationSupport,
+                directoryName: "TextureStorage"
+            )
+        } catch {
+            fatalError("Failed to initialize TextureLayersDocumentsRepository: \(error)")
+        }
+    }()
 
     /// URL of the texture storage
     public let workingDirectoryURL: URL
 
-    private let renderer: MTLRendering
-
     private var textureSize: CGSize = .zero
 
-    public init(
+    private init(
         storageDirectoryURL: URL,
-        directoryName: String,
-        renderer: MTLRendering
+        directoryName: String
     ) throws {
-        self.renderer = renderer
-
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
         try FileManager.createDirectory(workingDirectoryURL)
@@ -39,192 +53,221 @@ import Foundation
     }
 
     public func initializeStorage(
-        newTextureLayersState: TextureLayersState
-    ) async throws {
-        let textureSize = newTextureLayersState.textureSize
+        textureLayers: TextureLayersModel,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws -> Bool {
+        let textureSize = textureLayers.textureSize
+
         guard
-            let layerId: LayerId = newTextureLayersState.layers.first?.id,
-            Int(textureSize.width) >= canvasMinimumTextureLength && Int(textureSize.height) >= canvasMinimumTextureLength,
+            let layerId: LayerId = textureLayers.layers.first?.id
+        else {
+            Logger.info("Unable to find layer ID")
+            return false
+        }
+
+        guard
+            Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
             let newTexture = MTLTextureCreator.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
-                with: renderer.device
+                with: device
             )
         else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Texture size is below the minimum", bundle: .main) + ":\(textureSize.width) \(textureSize.height)"
-            )
-            Logger.error(error)
-            throw error
+            Logger.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return false
         }
 
         // Delete all textures in the repository
         removeAll()
 
-        try await addTexture(texture: newTexture, id: layerId)
+        let textureData = try await newTexture.data(
+            device: device,
+            commandQueue: commandQueue
+        )
+        try addTextureData(
+            data: textureData,
+            id: layerId
+        )
 
         // Set the texture size after the initialization of this repository is completed
         self.textureSize = textureSize
+
+        return true
     }
 
-    /// Restore the storage from Core Data.
-    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersState`
-    public func restoreStorageFromCoreData(
-        textureLayersState: TextureLayersState
+    /// Restore the storage
+    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
+    public func restoreStorageFromWorkingDirectory(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
     ) throws {
-        guard FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(workingDirectoryURL)
-        ) else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Unable to find texture layer files", bundle: .main)
-            )
-            Logger.error(error)
-            throw error
-        }
+        let textureSize = try validateStorage(
+            in: workingDirectoryURL,
+            textureLayers: textureLayers,
+            device: device
+        )
 
-        let textureSize = textureLayersState.textureSize
-
-        try textureLayersState.layers.forEach { layer in
-            let textureData = try Data(
-                contentsOf: workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
-            )
-            // Check if the data can be converted into a texture
-            guard
-                let hexadecimalData = textureData.encodedHexadecimals,
-                let _ = try MTLTextureCreator.makeTexture(
-                    width: Int(textureSize.width),
-                    height: Int(textureSize.height),
-                    from: hexadecimalData,
-                    with: renderer.device
-                )
-            else {
-                let error = NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Unable to load required data")
-                )
-                Logger.error(error)
-                throw error
-            }
-        }
-
-        // Do nothing since the textures already exist in workingDirectory
-
-        // Retain the texture size
-        self.textureSize = textureLayersState.textureSize
+        self.textureSize = textureSize
     }
 
-    /// Restore the storage from the saved data.
-    /// Verify that the textures in `sourceFolderURL` match `TextureLayersState`,
+    /// Restore the storage
+    /// Verify that the textures in `sourceFolderURL` match `TextureLayersModel`,
     /// and if they do, move them to `workingDirectory`
-    public func restoreStorageFromSavedData(
+    public func restoreStorage(
         url sourceFolderURL: URL,
-        textureLayersState: TextureLayersState
-    ) async throws {
-        guard FileManager.containsAllFileNames(
-            fileNames: textureLayersState.layers.map { $0.fileName },
-            in: FileManager.contentsOfDirectory(sourceFolderURL)
-        ) else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .main),
-                message: String(localized: "Unable to find texture layer files", bundle: .main)
-            )
-            Logger.error(error)
-            throw error
-        }
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws -> Bool {
+        let textureSize = try validateStorage(
+            in: sourceFolderURL,
+            textureLayers: textureLayers,
+            device: device
+        )
 
-        let textureSize = textureLayersState.textureSize
-
-        try textureLayersState.layers.forEach { layer in
-            let textureData = try Data(
-                contentsOf: sourceFolderURL.appendingPathComponent(layer.id.uuidString)
-            )
-            // Check if the data can be converted into a texture
-            guard
-                let hexadecimalData = textureData.encodedHexadecimals,
-                let _ = try MTLTextureCreator.makeTexture(
-                    width: Int(textureSize.width),
-                    height: Int(textureSize.height),
-                    from: hexadecimalData,
-                    with: renderer.device
-                )
-            else {
-                let error = NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Unable to load required data")
-                )
-                Logger.error(error)
-                throw error
-            }
-        }
-
-        // Delete all textures in the repository
         self.removeAll()
 
-        // Move all files
-        try textureLayersState.layers.forEach { layer in
+        try textureLayers.layers.forEach { layer in
             try FileManager.default.moveItem(
                 at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
                 to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
             )
         }
 
-        // Set the texture size after the initialization of this repository is completed
         self.textureSize = textureSize
+
+        return true
     }
 }
 
-extension TextureLayersDocumentsRepository {
+public extension TextureLayersDocumentsRepository {
+
+    /// Adds texture data
+    @discardableResult
+    func addTextureData(
+        data: Data,
+        id: LayerId
+    ) throws -> Bool {
+        // If it doesn’t exist, add it
+        guard
+            !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
+        else {
+            Logger.info("File already exists")
+            return false
+        }
+
+        try writeDataToDisk(
+            id: id,
+            data: data
+        )
+
+        return true
+    }
+
     /// Copies a texture for the given `LayerId`
-    public func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture {
-        if textureSize == .zero {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Texture size is zero")
-            )
-            Logger.error(error)
-            throw error
+    func duplicatedTexture(
+        _ id: LayerId,
+        device: MTLDevice
+    ) async -> MTLTexture? {
+        guard
+            Int(textureSize.width) >= textureMinimumLength &&
+            Int(textureSize.height) >= textureMinimumLength
+        else {
+            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return nil
         }
 
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
+            let newTexture: MTLTexture = try? MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
-                with: renderer.device
+                with: device
             )
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: "\(String(localized: "File not found")):\(destinationUrl.path)"
-            )
-            Logger.error(error)
-            throw error
+            Logger.info("File not found: \(destinationUrl.path)")
+            return nil
         }
 
-        return .init(id: id, texture: newTexture)
+        return newTexture
     }
 
     /// Copies multiple textures for the given `LayerId`s
-    public func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture] {
-        try await withThrowingTaskGroup(of: IdentifiedTexture.self) { group in
+    func duplicatedTextures(
+        _ ids: [LayerId],
+        device: MTLDevice
+    ) async -> [(LayerId, MTLTexture)] {
+        guard
+            Int(textureSize.width) >= textureMinimumLength,
+            Int(textureSize.height) >= textureMinimumLength
+        else {
+            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return []
+        }
+
+        let width = Int(textureSize.width)
+        let height = Int(textureSize.height)
+
+        let sources: [TextureSource] = await withTaskGroup(of: TextureSource?.self) { group in
             for id in ids {
-                group.addTask { try await self.duplicatedTexture(id) }
+                let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+
+                group.addTask {
+                    do {
+                        guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
+                            Logger.info("File not found: \(url.path)")
+                            return nil
+                        }
+                        return TextureSource(
+                            id: id,
+                            url: url,
+                            width: width,
+                            height: height,
+                            hexadecimalData: hexadecimalData
+                        )
+                    } catch {
+                        Logger.info("Failed to load texture source: \(url.path), error: \(error)")
+                        return nil
+                    }
+                }
             }
 
-            var results: [IdentifiedTexture] = []
-            for try await result in group {
-                results.append(result)
+            var results: [TextureSource] = []
+            results.reserveCapacity(ids.count)
+
+            for await result in group {
+                if let result {
+                    results.append(result)
+                }
             }
+
             return results
         }
+
+        var textures: [(LayerId, MTLTexture)] = []
+        textures.reserveCapacity(sources.count)
+
+        for source in sources {
+            do {
+                if let texture = try MTLTextureCreator.makeTexture(
+                    width: source.width,
+                    height: source.height,
+                    from: source.hexadecimalData,
+                    with: device
+                ) {
+                    textures.append((source.id, texture))
+                }
+            } catch {
+                Logger.info("Failed to create texture: \(source.url.path), error: \(error)")
+            }
+        }
+
+        return textures
     }
 
     /// Recreate the directory
-    public func removeAll() {
+    func removeAll() {
         do {
             // Create a new folder
             try FileManager.createNewDirectory(workingDirectoryURL)
@@ -235,7 +278,8 @@ extension TextureLayersDocumentsRepository {
     }
 
     /// Removes the texture for the specified `LayerId` from the Documents directory
-    public func removeTexture(_ id: LayerId) throws {
+    @discardableResult
+    func removeTexture(_ id: LayerId) throws -> Bool {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         // If the file exists, delete it
@@ -243,69 +287,89 @@ extension TextureLayersDocumentsRepository {
             FileManager.default.fileExists(atPath: fileURL.path)
         else {
             // Log the error only, as nothing can be done
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to find \(id.uuidString)")
-            )
-            throw error
+            Logger.info("Unable to find \(id.uuidString)")
+            return false
         }
         try FileManager.default.removeItem(at: fileURL)
+
+        return true
     }
 
-    /// Adds a texture. Although `MTLTexture` is a class type, the texture is duplicated into the Documents directory,
-    /// so the instance passed as an argument does not need to be a new one
-    public func addTexture(texture: MTLTexture, id: LayerId) async throws {
-        // If it doesn’t exist, add it
+    @discardableResult
+    func copyTexture(
+        id: LayerId,
+        to destinationURL: URL
+    ) async throws -> Bool {
+        let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let destinationURL = destinationURL.appendingPathComponent(id.uuidString)
+
+        // If the file exists, copy it
         guard
-            !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
+            FileManager.default.fileExists(atPath: sourceURL.path)
         else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "File already exists")
-            )
-            Logger.error(error)
-            throw error
+            Logger.info("Unable to find \(id.uuidString)")
+            return false
         }
 
-        try await IdentifiedTexture(
-            id: id,
-            texture: texture
-        ).write(
-            in: workingDirectoryURL,
-            device: renderer.device
+        try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+
+        return true
+    }
+
+    func writeDataToDisk(
+        id: LayerId,
+        data: Data
+    ) throws {
+        try data.write(
+            to: workingDirectoryURL.appendingPathComponent(id.uuidString),
+            options: .atomic
         )
     }
+}
 
-    /// Writes the texture to disk by duplicating it into the Documents directory.
-    /// Since `MTLTexture` is a reference type, the passed instance does not need to be newly created.
-    public func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws {
-        // If the file exists, update it
-        guard
-            FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
-        else {
+private extension TextureLayersDocumentsRepository {
+    func validateStorage(
+        in directoryURL: URL,
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) throws -> CGSize {
+        guard FileManager.containsAllFileNames(
+            fileNames: textureLayers.layers.map { $0.fileName },
+            in: FileManager.contentsOfDirectory(directoryURL)
+        ) else {
             let error = NSError(
                 title: String(localized: "Error"),
-                message: "\(String(localized: "File not found"))"
+                message: String(localized: "Unable to find texture layer files")
             )
             Logger.error(error)
             throw error
         }
 
-        do {
-            try await IdentifiedTexture(
-                id: id,
-                texture: texture
-            ).write(
-                in: workingDirectoryURL,
-                device: renderer.device
+        let textureSize = textureLayers.textureSize
+
+        try textureLayers.layers.forEach { layer in
+            let textureData = try Data(
+                contentsOf: directoryURL.appendingPathComponent(layer.id.uuidString)
             )
-        } catch {
-            let error = NSError(
-                title: String(localized :"Error"),
-                message: String(localized :"Failed to update texture")
-            )
-            Logger.error(error)
-            throw error
+
+            guard
+                let hexadecimalData = textureData.encodedHexadecimals,
+                let _ = try MTLTextureCreator.makeTexture(
+                    width: Int(textureSize.width),
+                    height: Int(textureSize.height),
+                    from: hexadecimalData,
+                    with: device
+                )
+            else {
+                let error = NSError(
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to load required data")
+                )
+                Logger.error(error)
+                throw error
+            }
         }
+
+        return textureSize
     }
 }

@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/12/29.
 //
 
-import CanvasView
-import Foundation
+import UIKit
+
 @preconcurrency import MetalKit
 
 @MainActor
@@ -14,25 +14,55 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     var workingDirectoryURL: URL { get }
 
+    @discardableResult
     func initializeStorage(
-        newTextureLayersState: TextureLayersState
-    ) async throws
+        textureLayers: TextureLayersModel,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws -> Bool
 
-    func restoreStorageFromCoreData(
-        textureLayersState: TextureLayersState
+    func restoreStorageFromWorkingDirectory(
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
     ) throws
 
-    func restoreStorageFromSavedData(
+    func restoreStorage(
         url sourceFolderURL: URL,
-        textureLayersState: TextureLayersState
-    ) async throws
+        textureLayers: TextureLayersModel,
+        device: MTLDevice
+    ) async throws -> Bool
 
-    func duplicatedTexture(_ id: LayerId) async throws -> IdentifiedTexture
-    func duplicatedTextures(_ ids: [LayerId]) async throws -> [IdentifiedTexture]
+    func duplicatedTexture(
+        _ id: LayerId,
+        device: MTLDevice
+    ) async -> MTLTexture?
+
+    func duplicatedTextures(
+        _ ids: [LayerId],
+        device: MTLDevice
+    ) async -> [(LayerId, MTLTexture)]
+
+    @discardableResult
+    func addTextureData(
+        data: Data,
+        id: LayerId
+    ) throws -> Bool
+
+    @discardableResult
+    func removeTexture(
+        _ id: LayerId
+    ) throws -> Bool
 
     func removeAll()
-    func removeTexture(_ id: LayerId) throws
 
-    func addTexture(texture: MTLTexture, id: LayerId) async throws
-    func writeTextureToDisk(texture: MTLTexture, for id: LayerId) async throws
+    @discardableResult
+    func copyTexture(
+        id: LayerId,
+        to: URL
+    ) async throws -> Bool
+
+    func writeDataToDisk(
+        id: LayerId,
+        data: Data
+    ) throws
 }

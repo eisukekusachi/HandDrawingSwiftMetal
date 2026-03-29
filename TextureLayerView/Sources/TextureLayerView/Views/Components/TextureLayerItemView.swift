@@ -1,14 +1,13 @@
 //
-//  TextureLayerRowView.swift
+//  TextureLayerItemView.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/08/05.
 //
 
-import CanvasView
 import SwiftUI
 
-public struct TextureLayerRowView: View {
+public struct TextureLayerItemView: View {
 
     var layer: TextureLayerItem
 
@@ -16,36 +15,14 @@ public struct TextureLayerRowView: View {
     private let didTapRow: (TextureLayerItem) -> Void
     private let didTapVisibleButton: (TextureLayerItem) -> Void
 
-    /// The background color when the item is not selected
-    private let defaultBackgroundColor: UIColor
-    /// The background color when the item is selected
-    private let selectedBackgroundColor: UIColor
-
-    private let iconSize: CGSize
-    private let cornerRadius: CGFloat
-
-    private let padding: CGFloat
-
     public init(
         layer: TextureLayerItem,
         isSelected: Bool,
-        defaultBackgroundColor: UIColor = .white,
-        selectedBackgroundColor: UIColor = .black,
-        iconSize: CGSize = .init(width: 32, height: 32),
-        padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4,
         didTapRow: @escaping (TextureLayerItem) -> Void,
         didTapVisibleButton: @escaping (TextureLayerItem) -> Void
     ) {
         self.layer = layer
         self.isSelected = isSelected
-
-        self.iconSize = iconSize
-        self.padding = padding
-        self.cornerRadius = cornerRadius
-
-        self.defaultBackgroundColor = defaultBackgroundColor
-        self.selectedBackgroundColor = selectedBackgroundColor
 
         self.didTapRow = didTapRow
         self.didTapVisibleButton = didTapVisibleButton
@@ -54,7 +31,7 @@ public struct TextureLayerRowView: View {
     public var body: some View {
         ZStack {
             Color(
-                backgroundColor(isSelected)
+                layer.backgroundColor(isSelected)
             )
 
             HStack {
@@ -62,31 +39,37 @@ public struct TextureLayerRowView: View {
                     Image(uiImage: thumbnail)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: iconSize.width, height: iconSize.height)
+                        .frame(
+                            width: layer.iconSize.width,
+                            height: layer.iconSize.height
+                        )
                         .background(Color.white)
-                        .cornerRadius(cornerRadius)
+                        .cornerRadius(layer.cornerRadius)
                         .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius)
+                            RoundedRectangle(cornerRadius: layer.cornerRadius)
                                 .stroke(.gray.opacity(0.5), lineWidth: 1.0)
                         )
-                        .padding(padding)
+                        .padding(layer.padding)
                 } else {
                     Rectangle()
                         .foregroundColor(Color.white)
-                        .frame(width: iconSize.width, height: iconSize.height)
-                        .cornerRadius(cornerRadius)
+                        .frame(
+                            width: layer.iconSize.width,
+                            height: layer.iconSize.height
+                        )
+                        .cornerRadius(layer.cornerRadius)
                         .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius)
+                            RoundedRectangle(cornerRadius: layer.cornerRadius)
                                 .stroke(.gray.opacity(0.5), lineWidth: 1.0)
                         )
-                        .padding(padding)
+                        .padding(layer.padding)
                 }
 
                 Text(layer.title)
                     .font(.subheadline)
                     .foregroundColor(
                         Color(
-                            textColor(isSelected)
+                            layer.textColor(isSelected)
                         )
                     )
 
@@ -97,10 +80,13 @@ public struct TextureLayerRowView: View {
                     .foregroundColor(Color(uiColor: .gray))
 
                 Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
-                    .frame(width: iconSize.width, height: iconSize.height)
+                    .frame(
+                        width: layer.iconSize.width,
+                        height: layer.iconSize.height
+                    )
                     .foregroundColor(
                         Color(
-                            iconColor(isVisible: layer.isVisible, isSelected)
+                            layer.iconColor(isVisible: layer.isVisible, isSelected)
                         )
                     )
                     .onTapGesture {
@@ -108,30 +94,20 @@ public struct TextureLayerRowView: View {
                     }
 
                 Spacer()
-                    .frame(width: padding)
+                    .frame(width: layer.padding)
             }
         }
-        .frame(height: iconSize.height + padding * 2)
+        .frame(height: layer.iconSize.height + layer.padding * 2)
         .background(.clear)
         .onTapGesture {
             didTapRow(layer)
         }
     }
-
-    private func backgroundColor(_ selected: Bool) -> UIColor {
-        !selected ? defaultBackgroundColor : selectedBackgroundColor
-    }
-    private func textColor(_ selected: Bool) -> UIColor {
-        !selected ? selectedBackgroundColor : defaultBackgroundColor
-    }
-    private func iconColor(isVisible: Bool, _ selected: Bool) -> UIColor {
-        !selected ? selectedBackgroundColor : defaultBackgroundColor
-    }
 }
 
 #Preview {
     VStack(spacing: 24) {
-        TextureLayerRowView(
+        TextureLayerItemView(
             layer: .init(
                 id: LayerId(),
                 title: "Title",
@@ -149,7 +125,7 @@ public struct TextureLayerRowView: View {
         )
         .frame(width: 256, height: 44)
 
-        TextureLayerRowView(
+        TextureLayerItemView(
             layer: .init(
                 id: LayerId(),
                 title: "Title",
@@ -167,7 +143,7 @@ public struct TextureLayerRowView: View {
         )
         .frame(width: 256, height: 44)
 
-        TextureLayerRowView(
+        TextureLayerItemView(
             layer: .init(
                 id: LayerId(),
                 title: "Title",
@@ -185,7 +161,7 @@ public struct TextureLayerRowView: View {
         )
         .frame(width: 256, height: 44)
 
-        TextureLayerRowView(
+        TextureLayerItemView(
             layer: .init(
                 id: LayerId(),
                 title: "Title",
@@ -203,7 +179,7 @@ public struct TextureLayerRowView: View {
         )
         .frame(width: 256, height: 64)
 
-        TextureLayerRowView(
+        TextureLayerItemView(
             layer: .init(
                 id: LayerId(),
                 title: "Title",

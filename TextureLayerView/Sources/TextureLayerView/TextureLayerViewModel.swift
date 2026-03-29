@@ -5,184 +5,204 @@
 //  Created by Eisuke Kusachi on 2023/12/16.
 //
 
-import CanvasView
 import Combine
 import UIKit
 
-@MainActor
-public final class TextureLayerViewModel: ObservableObject {
+@preconcurrency import MetalKit
 
-    @Published private(set) var layers: [TextureLayerItem] = []
+@MainActor
+open class TextureLayerViewModel: ObservableObject {
 
     @Published public var currentAlpha: Int = 0
 
     @Published public var isAlphaSliderDragging: Bool = false
 
+    public let onLayersChanged: ((TextureLayerEvent) -> Void)?
+
     public var selectedLayer: TextureLayerItem? {
-        textureLayers?.selectedLayer
+        textureLayers.selectedLayer
     }
 
-    private(set) var textureLayers: (any TextureLayersProtocol)?
-
-    private(set) var defaultBackgroundColor: UIColor = .white
-    private(set) var selectedBackgroundColor: UIColor = .black
-
-    @Published private var selectedLayerId: UUID? {
-        didSet {
-            // Update the slider value when selectedLayerId changes
-            updateCurrentAlpha()
-        }
+    public var textureSize: CGSize {
+        textureLayers.textureSize
     }
+
+    @Published public private(set) var textureLayers: TextureLayersState = .init()
+
+    private let device: MTLDevice?
+
+    private let commandQueue: MTLCommandQueue?
+
+    private let dependencies: TextureLayerViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init() {}
-
-    public func initialize(
-        textureLayers: any TextureLayersProtocol
+    public init(
+        device: MTLDevice?,
+        commandQueue: MTLCommandQueue?,
+        dependencies: TextureLayerViewDependencies? = nil,
+        onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {
-        self.textureLayers = textureLayers
-
-        bindData()
-
-        updateCurrentAlpha()
+        self.device = device
+        self.commandQueue = commandQueue
+        self.dependencies = dependencies ?? .init()
+        self.onLayersChanged = onLayersChanged
     }
 
-    private func bindData() {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
+    @discardableResult
+    open func onTapInsertButton() async throws -> Bool {
+        guard
+            let device,
+            let commandQueue,
+            let selectedIndex = textureLayers.selectedIndex,
+            let newTexture = MTLTextureCreator.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                with: device
+            )
+        else { return false }
 
-        // Bind the alpha slider
-        $currentAlpha
-            .sink { [weak self] alpha in
-                guard
-                    let `self`,
-                    self.isAlphaSliderDragging,
-                    let textureLayers = self.textureLayers,
-                    let selectedLayerId = self.selectedLayerId
-                else { return }
+        let layer: TextureLayerModel = .init(
+            id: LayerId(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
 
-                textureLayers.updateAlpha(
-                    selectedLayerId,
-                    alpha: Int(alpha)
-                )
+        let textureData = try await newTexture.data(
+            device: device,
+            commandQueue: commandQueue
+        )
+        try dependencies.textureLayersDocumentsRepository
+            .addTextureData(
+                data: textureData,
+                id: layer.id
+            )
+        textureLayers.addLayer(
+            layer: layer,
+            thumbnail: newTexture.makeThumbnail(),
+            at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+        )
 
-                // Only the alpha of the selected layer can be changed, so other layers will not be updated
-                textureLayers.requestCanvasUpdate()
-            }
-            .store(in: &cancellables)
+        onLayersChanged?(.addLayer)
 
-        $isAlphaSliderDragging
-            .sink { [weak self] isDragging in
-                if isDragging {
-                    self?.textureLayers?.beginAlphaChange()
-                } else {
-                    self?.textureLayers?.endAlphaChange()
-                }
-            }
-            .store(in: &cancellables)
+        return true
+    }
 
-        textureLayers?.selectedLayerIdPublisher
-            .sink { [weak self] value in
-                self?.selectedLayerId = value
-            }
-            .store(in: &cancellables)
+    @discardableResult
+    open func onTapDeleteButton() async -> Bool {
+        do {
+            guard
+                let selectedIndex = textureLayers.selectedIndex,
+                let selectedId = textureLayers.selectedLayer?.id,
+                textureLayers.layerCount > 1,
+                try dependencies.textureLayersDocumentsRepository
+                    .removeTexture(
+                        selectedId
+                    )
+            else { return false }
 
-        textureLayers?.layersPublisher
-            .sink { [weak self] value in
-                self?.layers = value
-            }
-            .store(in: &cancellables)
+            textureLayers.removeLayer(
+                layerIndexToDelete: selectedIndex
+            )
+            onLayersChanged?(.removeLayer)
 
-        textureLayers?.alphaPublisher
-            .removeDuplicates()
-            .filter { [weak self] alpha in
-                self?.currentAlpha != alpha
-            }
-            .sink { [weak self] alpha in
-                self?.currentAlpha = alpha
-            }
-            .store(in: &cancellables)
+            return true
+        } catch {
+            Logger.error(error)
+            return false
+        }
+    }
+
+    open func onTapTitleButton(_ id: UUID, title: String) {
+        textureLayers.update(id, title: title)
+    }
+
+    open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
+        textureLayers.update(id, isVisible: isVisible)
+        onLayersChanged?(.changeVisibility)
+    }
+
+    open func onTapCell(_ id: UUID) {
+        textureLayers.selectLayer(id)
+        updateCurrentAlpha()
+        onLayersChanged?(.selectLayer)
+    }
+
+    open func onMoveLayer(source: IndexSet, destination: Int) {
+        textureLayers.moveLayer(
+            indices: .init(
+                sourceIndexSet: source,
+                destinationIndex: destination
+            )
+        )
+        onLayersChanged?(.moveLayer)
+    }
+
+    open func onChangeCurrentAlpha(_ alpha: Int) {
+        guard let selectedLayerId = selectedLayer?.id else { return }
+        textureLayers.updateAlpha(selectedLayerId, alpha: alpha)
+        updateCurrentAlpha()
+        onLayersChanged?(.changeLayerAlpha)
     }
 }
 
 public extension TextureLayerViewModel {
-
-    func isSelected(_ id: UUID) -> Bool {
-        textureLayers?.selectedLayer?.id == id
+    func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async -> MTLTexture? {
+        guard let device else { return nil }
+        return await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+            id,
+            device: device
+        )
     }
 
-    func onTapInsertButton() {
-        guard
-            let textureLayers,
-            let selectedIndex = textureLayers.selectedIndex
-        else { return }
+    func update(
+        _ textureLayers: TextureLayersState
+    ) {
+        // Avoid multiple subscriptions
+        cancellables.removeAll()
 
-        Task {
-            do {
-                try await textureLayers.addNewLayer(
-                    at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-                )
-                textureLayers.requestFullCanvasUpdate()
-            } catch {
-                Logger.error(error)
+        self.textureLayers = textureLayers
+
+        self.textureLayers.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        // Update the alpha slider handle position
+        updateCurrentAlpha()
+
+        // Update the thumbnails
+        if let device {
+            Task { @MainActor [weak self] in
+                guard let `self` else { return }
+                for layer in self.textureLayers.layers {
+                    let layerId: LayerId = layer.id
+                    let texture = await self.dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+                        layerId,
+                        device: device
+                    )
+                    self.textureLayers.updateThumbnail(layerId, texture: texture)
+                }
             }
         }
     }
 
-    func onTapDeleteButton() {
-        guard
-            let textureLayers,
-            let selectedIndex = textureLayers.selectedIndex,
-            textureLayers.layerCount > 1
-        else { return }
-
-        Task {
-            try await textureLayers.removeLayer(layerIndexToDelete: selectedIndex)
-            textureLayers.requestFullCanvasUpdate()
-        }
-    }
-
-    func onTapTitleButton(_ id: UUID, title: String) {
-        textureLayers?.updateTitle(id, title: title)
-    }
-
-    func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
-        guard let textureLayers else { return }
-
-        textureLayers.updateVisibility(id, isVisible: isVisible)
-
-        // Since visibility can update layers that are not selected, the entire canvas needs to be updated.
-        textureLayers.requestFullCanvasUpdate()
-    }
-
-    func onTapCell(_ id: UUID) {
-        guard let textureLayers else { return }
-
-        textureLayers.selectLayer(id)
-        textureLayers.requestFullCanvasUpdate()
-    }
-
-    func onMoveLayer(source: IndexSet, destination: Int) {
-        guard let textureLayers else { return }
-
-        Task {
-            textureLayers.moveLayer(
-                indices: .init(
-                    sourceIndexSet: source,
-                    destinationIndex: destination
-                )
-            )
-            textureLayers.requestFullCanvasUpdate()
-        }
+    func isSelected(_ id: UUID) -> Bool {
+        textureLayers.selectedLayer?.id == id
     }
 }
 
 extension TextureLayerViewModel {
 
     private func updateCurrentAlpha() {
-        if let selectedLayerId, let layer = textureLayers?.layer(selectedLayerId) {
-            currentAlpha = layer.alpha
-        }
+        guard
+            let selectedLayerId = selectedLayer?.id,
+            let layer = textureLayers.layer(selectedLayerId),
+            currentAlpha != layer.alpha
+        else { return }
+
+        currentAlpha = layer.alpha
     }
 }

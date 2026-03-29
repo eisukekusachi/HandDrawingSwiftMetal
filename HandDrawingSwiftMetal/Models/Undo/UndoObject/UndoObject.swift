@@ -5,12 +5,11 @@
 //  Created by Eisuke Kusachi on 2025/06/21.
 //
 
-import CanvasView
 import Combine
 import Foundation
 import TextureLayerView
 
-public protocol UndoObject {
+protocol UndoObject {
     /// The texture ID used for the undo operation
     var undoTextureId: UndoTextureId? { get }
 
@@ -19,7 +18,4 @@ public protocol UndoObject {
 
     /// A subject that emits an UndoObjectProtocol instance when the undo object is deallocated
     var deinitSubject: PassthroughSubject<UndoObject, Never> { get }
-
-    @MainActor
-    func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws
 }

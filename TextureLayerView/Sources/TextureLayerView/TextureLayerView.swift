@@ -5,30 +5,32 @@
 //  Created by Eisuke Kusachi on 2023/12/31.
 //
 
-import CanvasView
 import SwiftUI
 
 public struct TextureLayerView: View {
 
-    private let range: ClosedRange<Int> = 0 ... 255
-
     @ObservedObject private var viewModel: TextureLayerViewModel
+
+    private let range: ClosedRange<Int> = 0 ... 255
 
     public init(
         viewModel: TextureLayerViewModel
     ) {
-        self.viewModel = viewModel
+        self._viewModel = .init(wrappedValue: viewModel)
     }
 
     public var body: some View {
         VStack {
-            TextureLayerToolbar(viewModel: viewModel)
+            TextureLayerToolbar(
+                viewModel: viewModel
+            )
 
-            ReversedTextureLayerListView(viewModel: viewModel)
+            ReversedTextureLayerListView(
+                viewModel: viewModel
+            )
 
             TwoRowsSliderView(
-                value: $viewModel.currentAlpha,
-                isDragging: $viewModel.isAlphaSliderDragging,
+                viewModel: viewModel,
                 title: "Alpha",
                 range: range
             )
@@ -36,18 +38,21 @@ public struct TextureLayerView: View {
             .padding([.leading, .trailing, .bottom], 8)
         }
     }
+
+    public func update(_ state: TextureLayersState) {
+        viewModel.update(state)
+    }
+
+    public func updateAlpha(_ alpha: Int) {
+        viewModel.currentAlpha = alpha
+    }
 }
 
 @MainActor
 private struct PreviewView: View {
-    private var viewModel = TextureLayerViewModel()
-
-    private let textureLayers = TextureLayers(
-        renderer: nil,
-        repository: nil
-    )
-
-    private let state: TextureLayersState = .init(
+    private var viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
+    private let textureLayers = TextureLayersState()
+    private let data: TextureLayersModel = .init(
         layers: [
             .init(
                 id: LayerId(),
@@ -91,13 +96,8 @@ private struct PreviewView: View {
         .frame(width: 320, height: 300)
         .onAppear {
             Task {
-                textureLayers.updateSkippingThumbnail(
-                    textureLayersState: state
-                )
-
-                viewModel.initialize(
-                    textureLayers: textureLayers
-                )
+                textureLayers.update(data)
+                viewModel.update(textureLayers)
             }
         }
     }

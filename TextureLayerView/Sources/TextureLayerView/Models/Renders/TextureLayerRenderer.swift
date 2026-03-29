@@ -55,8 +55,8 @@ public class TextureLayerRenderer {
         }
 
         guard
-            let unselectedBottomTexture = makeTexture(textureSize),
-            let unselectedTopTexture = makeTexture(textureSize)
+            let unselectedBottomTexture = renderer.makeTexture(textureSize),
+            let unselectedTopTexture = renderer.makeTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -73,22 +73,14 @@ public class TextureLayerRenderer {
         self.unselectedTopTexture?.label = "unselectedTopTexture"
     }
 
-    public func getTexture(
-        id: LayerId,
-        repository: TextureLayersDocumentsRepositoryProtocol?
-    ) async throws -> IdentifiedTexture? {
-        try await repository?.duplicatedTexture(id)
-    }
-
-    /// Refreshes `selectedLayerTexture` and `realtimeDrawingTexture`, `unselectedBottomTexture`, `unselectedTopTexture`.
-    /// This textures are pre-merged from `TextureLayersDocumentsRepository` necessary for drawing.
+    /// Refreshes `unselectedBottomTexture`, `unselectedTopTexture`.
+    /// This textures are pre-merged necessary for drawing.
     /// By using them, the drawing performance remains consistent regardless of the number of layers.
-    public func refreshTexturesFromRepository(
+    public func refreshUnselectedTextures(
         textureLayers: TextureLayersRenderContext,
-        repository: TextureLayersDocumentsRepositoryProtocol?
+        textures: [(LayerId, MTLTexture)]
     ) async throws {
         guard
-            let repository,
             let unselectedBottomTexture,
             let unselectedTopTexture,
             let newCommandBuffer = renderer.newCommandBuffer
@@ -108,11 +100,6 @@ public class TextureLayerRenderer {
 
         renderer.clearTexture(texture: unselectedBottomTexture, with: newCommandBuffer)
         renderer.clearTexture(texture: unselectedTopTexture, with: newCommandBuffer)
-
-        // Get textures from the Documents directory
-        let textures = try await repository.duplicatedTextures(
-            textureLayers.layers.map { $0.id }
-        )
 
         // Update the class’s textures with the retrieved textures
         drawTextures(
@@ -182,14 +169,12 @@ public class TextureLayerRenderer {
     }
 
     private func drawTextures(
-        repositoryTextures: [IdentifiedTexture],
+        repositoryTextures: [(LayerId, MTLTexture)],
         using layers: [TextureLayerModel],
         on destination: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
-        let textureDictionary = IdentifiedTexture.dictionary(
-            from: Set(repositoryTextures)
-        )
+        let textureDictionary = Dictionary(uniqueKeysWithValues: repositoryTextures)
 
         for layer in layers {
             if let resultTexture = textureDictionary[layer.id] {
@@ -204,13 +189,5 @@ public class TextureLayerRenderer {
                 Logger.error(String(format: String(localized: "Unable to find %@"), message))
             }
         }
-    }
-
-    private func makeTexture(_ textureSize: CGSize) -> MTLTexture? {
-        MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
-        )
     }
 }

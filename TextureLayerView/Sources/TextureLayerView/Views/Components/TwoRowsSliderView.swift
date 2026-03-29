@@ -9,9 +9,7 @@ import SwiftUI
 
 public struct TwoRowsSliderView: View {
 
-    @Binding private var value : Int
-
-    @Binding private var isDragging : Bool
+    @ObservedObject var viewModel: TextureLayerViewModel
 
     private let title: String
     private let range: ClosedRange<Int>
@@ -19,14 +17,12 @@ public struct TwoRowsSliderView: View {
     private var buttonSize: CGFloat
 
     public init(
-        value: Binding<Int>,
-        isDragging: Binding<Bool>,
+        viewModel: TextureLayerViewModel,
         title: String,
         range: ClosedRange<Int>,
         buttonSize: CGFloat = 20
     ) {
-        self._value = value
-        self._isDragging = isDragging
+        self.viewModel = viewModel
         self.title = title
         self.range = range
         self.buttonSize = buttonSize
@@ -42,18 +38,25 @@ public struct TwoRowsSliderView: View {
                 plusButton
             }
             IntSliderView(
-                $value,
-                range: range
-            ) { dragging in
-                self.isDragging = dragging
-            }
+                $viewModel.currentAlpha,
+                range: range,
+                onEditing: { alpha in
+                    viewModel.onChangeCurrentAlpha(alpha)
+                },
+                onEditingChanged: { dragging, alpha in
+                    viewModel.isAlphaSliderDragging = dragging
+                    viewModel.onChangeCurrentAlpha(alpha)
+                }
+            )
         }
     }
 
     private var minusButton: some View {
         Button(
             action: {
-                value = (max(value - 1, range.lowerBound))
+                viewModel.onChangeCurrentAlpha(
+                    max(viewModel.currentAlpha - 1, range.lowerBound)
+                )
             },
             label: {
                 Image(systemName: "minus")
@@ -74,7 +77,7 @@ public struct TwoRowsSliderView: View {
             Spacer()
                 .frame(width: 8)
 
-            Text("\(value)")
+            Text("\(viewModel.currentAlpha)")
                 .font(.footnote)
                 .foregroundColor(Color(uiColor: .gray))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -85,7 +88,9 @@ public struct TwoRowsSliderView: View {
     private var plusButton: some View {
         Button(
             action: {
-                value = (min(value + 1, range.upperBound))
+                viewModel.onChangeCurrentAlpha(
+                    min(viewModel.currentAlpha + 1, range.upperBound)
+                )
             },
             label: {
                 Image(systemName: "plus")
@@ -98,13 +103,11 @@ public struct TwoRowsSliderView: View {
 
 private struct PreviewView: View {
 
-    @State var value: Int = 0
-    @State var isDragging: Bool = false
+    private let viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
 
     var body: some View {
         TwoRowsSliderView(
-            value: $value,
-            isDragging: $isDragging,
+            viewModel: viewModel,
             title: "Alpha",
             range: 0...255
         )

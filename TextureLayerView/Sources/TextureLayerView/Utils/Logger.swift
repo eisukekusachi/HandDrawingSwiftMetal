@@ -1,8 +1,8 @@
 //
 //  Logger.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerView
 //
-//  Created by Eisuke Kusachi on 2026/01/23.
+//  Created by Eisuke Kusachi on 2026/03/21.
 //
 
 import Foundation
@@ -16,7 +16,7 @@ public enum Logger {
     )
     #endif
 
-    static func error(
+    public static func error(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
@@ -28,7 +28,7 @@ public enum Logger {
         #endif
     }
 
-    static func error(
+    public static func error(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
@@ -40,7 +40,7 @@ public enum Logger {
         #endif
     }
 
-    static func info(
+    public static func info(
         file: String = #file,
         function: String = #function,
         line: Int = #line,

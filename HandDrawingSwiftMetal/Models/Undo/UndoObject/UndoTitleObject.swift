@@ -1,17 +1,17 @@
 //
-//  UndoObjectProtocol.swift
+//  UndoTitleObject.swift
 //  HandDrawingSwiftMetal
 //
-//  Created by Eisuke Kusachi on 2025/05/19.
+//  Created by Eisuke Kusachi on 2026/03/28.
 //
 
 import Combine
 import TextureLayerView
 
-/// An undo object for drawing
-final class UndoDrawingObject: UndoObject {
+/// An undo object for reverting layer selection
+final class UndoTitleObject: UndoObject {
 
-    let undoTextureId: UndoTextureId? = UndoTextureId()
+    let undoTextureId: UndoTextureId? = nil
 
     let textureLayer: TextureLayerModel
 

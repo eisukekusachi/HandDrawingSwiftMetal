@@ -1,8 +1,8 @@
 //
 //  MTLTextureCreator.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerView
 //
-//  Created by Eisuke Kusachi on 2023/12/30.
+//  Created by Eisuke Kusachi on 2026/03/21.
 //
 
 @preconcurrency import MetalKit
@@ -107,45 +107,5 @@ public enum MTLTextureCreator {
         }
 
         return texture
-    }
-
-    @MainActor
-    public static func duplicateTexture(
-        texture: MTLTexture?,
-        renderer: MTLRendering
-    ) async throws -> MTLTexture? {
-        guard
-            let texture,
-            let newCommandBuffer = renderer.newCommandBuffer,
-            let resultTexture = MTLTextureCreator.makeTexture(
-                label: texture.label,
-                width: texture.width,
-                height: texture.height,
-                with: renderer.device
-            )
-        else {
-            return nil
-        }
-
-        guard
-            texture.pixelFormat == resultTexture.pixelFormat && texture.sampleCount == resultTexture.sampleCount
-        else {
-            let error = NSError(
-                title: String(localized: "Error", bundle: .module),
-                message: String(localized: "Invalid value", bundle: .module)
-            )
-            Logger.error(error)
-            return nil
-        }
-
-        renderer.copyTexture(
-            srcTexture: texture,
-            dstTexture: resultTexture,
-            with: newCommandBuffer
-        )
-
-        try await newCommandBuffer.commitAndWaitAsync()
-
-        return resultTexture
     }
 }

@@ -6,9 +6,12 @@
 //
 
 import CanvasView
-import UIKit
-import SwiftUI
 import Combine
+import SwiftUI
+import TextureLayerView
+import UIKit
+
+@preconcurrency import MetalKit
 
 class HandDrawingViewController: UIViewController {
 
@@ -21,13 +24,28 @@ class HandDrawingViewController: UIViewController {
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
-    private let textureLayerViewPresenter = TextureLayerViewPresenter()
+    private var textureLayerPopup: UIHostingController<AnyView>?
+    private var textureLayerPresenter = PopupViewPresenter()
 
     private var cancellables = Set<AnyCancellable>()
 
     private let paletteHeight: CGFloat = 44
 
-    private let canvasView = HandDrawingCanvasView()
+    /// The `MTLDevice` used throughout the app
+    private lazy var sharedDevice: MTLDevice = {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        return device
+    }()
+
+    private lazy var canvasView: HandDrawingCanvasView = {
+        HandDrawingCanvasView(
+            device: sharedDevice
+        )
+    }()
+
+    private var textureLayerView: TextureLayerView?
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -43,30 +61,49 @@ class HandDrawingViewController: UIViewController {
         )
     }
 
-    var currentLocalFileItem: LocalFileItem {
-        .init(
-            title: viewModel.project.projectName,
-            createdAt: viewModel.project.createdAt,
-            updatedAt: viewModel.project.updatedAt,
-            image: canvasView.canvasTexture?.uiImage?.resizeWithAspectRatio(
-                height: HandDrawingCanvasView.thumbnailLength,
-                scale: 1.0
-            ),
-            fileURL: URL.documents.appendingPathComponent(
-                viewModel.projectFileName()
-            )
-        )
+    /// Handles a texture layer event and updates the canvas view accordingly
+    private var handleViewUpdates: (TextureLayerEvent) -> Void {
+        { [weak self] event in
+            switch event {
+            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
+                Task { [weak self] in
+                    try? await self?.canvasView.updateFullCanvasTexture()
+                }
+            case .changeLayerAlpha:
+                Task { [weak self] in
+                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
+                }
+            }
+        }
+    }
+
+    private var registerUndoObject: ((UndoRedoObjectPair) -> Void) {
+        { [weak self] undoObjectPair in
+            self?.canvasView.registerUndoObject(undoObjectPair)
+        }
     }
 
     override func viewDidLoad() {
+        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
         super.viewDidLoad()
         view.backgroundColor = .white
-
+        sharedDevice = defaultDevice
+        canvasView = HandDrawingCanvasView(
+            device: sharedDevice
+        )
+        textureLayerView = TextureLayerView(
+            viewModel: UndoTextureLayerViewModel(
+                device: sharedDevice,
+                commandQueue: canvasView.sharedCommandQueue,
+                onLayersChanged: handleViewUpdates,
+                onRegisterUndoObjectPair: registerUndoObject
+            )
+        )
         addEvents()
         bindData()
         layoutViews()
-
-        setupTextureLayerViewPresenter()
         setupNewCanvasDialogPresenter()
         setup()
     }
@@ -129,19 +166,6 @@ class HandDrawingViewController: UIViewController {
             }
         }
     }
-
-    private func setupTextureLayerViewPresenter() {
-        textureLayerViewPresenter.setup(
-            configuration: .init(
-                anchorButton: contentView.layerButton,
-                destinationView: contentView,
-                size: .init(
-                    width: 300,
-                    height: 300
-                )
-            )
-        )
-    }
 }
 
 extension HandDrawingViewController {
@@ -154,78 +178,48 @@ extension HandDrawingViewController {
             }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] textureSize in
-                guard
-                    let `self`,
-                    let textureLayers = self.canvasView.undoTextureLayers
-                else { return }
+                guard let `self` else { return }
 
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
-                    renderer.initializeTextures(textureSize: textureSize)
+                    renderer.initializeTextures(textureSize)
                 }
 
-                self.textureLayerViewPresenter.update(
-                    textureLayers: textureLayers
-                )
                 self.contentView.initialize()
 
-                // Update the thumbnails
-                Task {
-                    for layer in textureLayers.textureLayers.layers {
-                        try await textureLayers.updateThumbnail(layer.id)
-                    }
-                }
+                self.textureLayerView?.update(
+                    self.canvasView.textureLayersState
+                )
             }
             .store(in: &cancellables)
 
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                guard let `self` else { return }
                 switch event {
-                case .fingerStrokeBegan:
-                    self.enableComponentsInteraction(false)
-                    Task {
-                        await self.canvasView.undoTextureLayers?.setUndoDrawing(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-                case .pencilStrokeBegan:
-                    self.enableComponentsInteraction(false)
-                    Task {
-                        await self.canvasView.undoTextureLayers?.setUndoDrawing(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-                case .strokeCompleted:
-                    Task {
-                        try await self.canvasView.undoTextureLayers?.pushUndoDrawingObjectToUndoStack(
-                            texture: self.canvasView.currentTexture
-                        )
-                    }
-
-                    // Update the project's updatedAt value to the current time
-                    self.viewModel.project.update(
-                        updatedAt: Date()
-                    )
-
-                    self.enableComponentsInteraction(true)
-
-                case .strokeCancelled:
-                    self.enableComponentsInteraction(true)
+                case .fingerStrokeBegan, .pencilStrokeBegan:
+                    self?.enableComponentsInteraction(false)
+                case .strokeCompleted, .strokeCancelled:
+                    self?.enableComponentsInteraction(true)
                 }
             }
             .store(in: &cancellables)
 
-        canvasView.undoTextureLayers?.didEmitUndoObjectPair
-            .sink { [weak self] undoObjectPair in
-                self?.canvasView.registerUndoObjectPair(undoObjectPair)
+        canvasView.didUndo
+            .sink { [weak self] undoManager in
+                self?.contentView.setUndoRedoButtonState(
+                    .init(undoManager)
+                )
             }
             .store(in: &cancellables)
 
-        canvasView.didUndo
-            .sink { [weak self] state in
-                self?.contentView.setUndoRedoButtonState(state)
+        canvasView.didPerformUndo
+            .sink { [weak self] undoObject in
+                if let undoObject = undoObject as? UndoAlphaObject {
+                    self?.textureLayerView?.updateAlpha(
+                        undoObject.textureLayer.alpha
+                    )
+                }
             }
             .store(in: &cancellables)
 
@@ -283,10 +277,12 @@ extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.textureLayerViewPresenter.toggleView()
+            guard let `self` else { return }
+            self.textureLayerPresenter.toggleView()
+            self.textureLayerPopup?.view.isHidden = self.textureLayerPresenter.isHidden
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.saveProject()
+            self?.saveCanvas()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -336,6 +332,35 @@ extension HandDrawingViewController {
                 canvasView.topAnchor.constraint(equalTo: baseView.topAnchor),
                 canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
             ])
+
+            let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
+                if let view = self?.textureLayerView {
+                    AnyView(view)
+                } else {
+                    AnyView(EmptyView())
+                }
+            }
+            popupView.presenter.arrowX(
+                contentView.layerButton,
+                to: contentView,
+                dialogWidth: 300
+            )
+
+            textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
+            textureLayerPopup?.view.backgroundColor = .white
+
+            if let popup = textureLayerPopup {
+                baseView.addSubview(popup.view)
+  
+                popup.view.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
+                    popup.view.centerXAnchor.constraint(equalTo: contentView.layerButton.centerXAnchor),
+                    popup.view.widthAnchor.constraint(equalToConstant: 300),
+                    popup.view.heightAnchor.constraint(equalToConstant: 300)
+                ])
+            }
+            textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
         }
 
         addBrushPalette()
@@ -403,10 +428,8 @@ extension HandDrawingViewController {
         let fileView = FileView(
             list: viewModel.fileList,
             onTapItem: { [weak self] zipFileURL in
-                guard let `self` else { return }
-                self.presentedViewController?.dismiss(animated: true)
-                self.textureLayerViewPresenter.hide()
-                self.loadProject(zipFileURL: zipFileURL)
+                self?.presentedViewController?.dismiss(animated: true)
+                self?.loadCanvas(zipFileURL: zipFileURL)
             }
         )
 
@@ -447,14 +470,14 @@ extension HandDrawingViewController {
 
     private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerViewPresenter.enableComponentInteraction(isUserInteractionEnabled)
+        textureLayerPresenter.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 
 extension HandDrawingViewController {
 
-    private func loadProject(zipFileURL: URL) {
-        self.viewModel.loadFile(
+    private func loadCanvas(zipFileURL: URL) {
+        self.viewModel.onLoadCanvas(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
                 try await self?.canvasView.loadFiles(
@@ -466,18 +489,20 @@ extension HandDrawingViewController {
             }
         )
     }
-    private func saveProject() {
-        viewModel.saveProject(
-            action: { [weak self] workingDirectoryURL in
-
+    private func saveCanvas() {
+        viewModel.onSaveCanvas(
+            saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
                 try await self?.canvasView.saveFiles(
-                    to: workingDirectoryURL
+                    to: tmpWorkingDirectoryURL
                 )
             },
             completion: { [weak self] in
-                guard let `self` else { return }
+                guard
+                    let `self`,
+                    let thumbnail = self.canvasView.thumbnail
+                else { return }
                 self.viewModel.upsertFileList(
-                    fileItem: currentLocalFileItem
+                    self.viewModel.currentFile(thumbnail: thumbnail)
                 )
             },
             zipFileURL: zipFileURL

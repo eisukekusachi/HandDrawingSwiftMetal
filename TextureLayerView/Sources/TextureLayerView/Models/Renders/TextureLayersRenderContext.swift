@@ -13,11 +13,11 @@ public struct TextureLayersRenderContext {
     public let selectedIndex: Int
     public let layers: [TextureLayerModel]
 
-    public init?(textureLayers: any TextureLayersProtocol) {
+    public init?(state: TextureLayersState) {
         guard
-            let selectedIndex = textureLayers.selectedIndex
+            let selectedIndex = state.selectedIndex
         else { return nil }
         self.selectedIndex = selectedIndex
-        self.layers = textureLayers.layers.map { .init(item: $0) }
+        self.layers = state.layers.map { .init(item: $0) }
     }
 }

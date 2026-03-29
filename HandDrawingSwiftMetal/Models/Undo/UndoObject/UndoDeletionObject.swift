@@ -5,45 +5,26 @@
 //  Created by Eisuke Kusachi on 2025/06/26.
 //
 
-import CanvasView
 import Combine
-import Foundation
-import MetalKit
 import TextureLayerView
 
 /// An undo object for removing a texture layer
-public final class UndoDeletionObject: UndoObject {
+final class UndoDeletionObject: UndoObject {
 
     /// Not used
-    public let undoTextureId: UndoTextureId? = UndoTextureId()
+    let undoTextureId: UndoTextureId? = UndoTextureId()
 
-    public let textureLayer: TextureLayerModel
+    let textureLayer: TextureLayerModel
 
-    public let deinitSubject = PassthroughSubject<UndoObject, Never>()
+    let deinitSubject = PassthroughSubject<UndoObject, Never>()
 
     deinit {
         deinitSubject.send(self)
     }
 
-    public init(
+    init(
         layerToBeDeleted textureLayer: TextureLayerModel
     ) {
         self.textureLayer = textureLayer
-    }
-
-    @MainActor
-    public func applyUndo(layers: any TextureLayersProtocol, repository: UndoTextureInMemoryRepository) async throws {
-        guard
-            let index = layers.index(for: textureLayer.id)
-        else {
-            let message = "id: \(textureLayer.id.uuidString)"
-            Logger.error(String(format: String(localized: "Unable to find %@"), message))
-            return
-        }
-
-        try await layers.removeLayer(
-            layerIndexToDelete: index
-        )
-        layers.requestFullCanvasUpdate()
     }
 }

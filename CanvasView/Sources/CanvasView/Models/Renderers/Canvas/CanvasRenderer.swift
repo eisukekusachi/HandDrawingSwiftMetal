@@ -40,16 +40,20 @@ import Combine
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        renderer: MTLRendering,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue,
         displayView: CanvasDisplayable
     ) {
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
-            with: renderer.device
+            with: device
         ) else {
             fatalError("Metal is not supported on this device.")
         }
-        self.renderer = renderer
+        self.renderer = MTLRenderer(
+            device: device,
+            commandQueue: commandQueue
+        )
         self.displayView = displayView
         self.flippedTextureBuffers = buffer
     }
@@ -140,12 +144,9 @@ extension CanvasRenderer {
         _ textureSize: CGSize,
         label: String
     ) -> MTLTexture? {
-        let texture = MTLTextureCreator.makeTexture(
-            width: Int(textureSize.width),
-            height: Int(textureSize.height),
-            with: renderer.device
+        renderer.makeTexture(
+            textureSize,
+            label: label
         )
-        texture?.label = label
-        return texture
     }
 }

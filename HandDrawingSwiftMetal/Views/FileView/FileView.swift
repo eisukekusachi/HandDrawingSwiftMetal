@@ -40,7 +40,7 @@ struct FileView: View {
             Rectangle()
                 .fill(Color(red: 0.92, green: 0.92, blue: 0.92))
 
-            if let image = item.image {
+            if let image = item.thumbnail {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
@@ -76,14 +76,14 @@ struct FileView: View {
                 title: "Test",
                 createdAt: Date(),
                 updatedAt: Date(),
-                image: nil,
+                thumbnail: nil,
                 fileURL: URL(fileURLWithPath: "")
             ),
             .init(
                 title: "Test Test Test Test Test Test Test Test Test Test Test Test",
                 createdAt: Date(),
                 updatedAt: Date(),
-                image: nil,
+                thumbnail: nil,
                 fileURL: URL(fileURLWithPath: "")
             )
         ],
