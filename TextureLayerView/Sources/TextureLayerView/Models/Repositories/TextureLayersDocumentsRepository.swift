@@ -9,6 +9,14 @@ import UIKit
 
 @preconcurrency import MetalKit
 
+private struct TextureSource: Sendable {
+    let id: LayerId
+    let url: URL
+    let width: Int
+    let height: Int
+    let hexadecimalData: [UInt8]
+}
+
 /// Manages and persists `TextureLayers` textures on disk
 @MainActor
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
@@ -193,15 +201,72 @@ public extension TextureLayersDocumentsRepository {
         _ ids: [LayerId],
         device: MTLDevice
     ) async -> [(LayerId, MTLTexture)] {
-        var results: [(LayerId, MTLTexture)] = []
+        guard
+            Int(textureSize.width) >= textureMinimumLength,
+            Int(textureSize.height) >= textureMinimumLength
+        else {
+            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
+            return []
+        }
 
-        for id in ids {
-            if let result = await duplicatedTexture(id, device: device) {
-                results.append((id, result))
+        let width = Int(textureSize.width)
+        let height = Int(textureSize.height)
+
+        let sources: [TextureSource] = await withTaskGroup(of: TextureSource?.self) { group in
+            for id in ids {
+                let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+
+                group.addTask {
+                    do {
+                        guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
+                            Logger.info("File not found: \(url.path)")
+                            return nil
+                        }
+                        return TextureSource(
+                            id: id,
+                            url: url,
+                            width: width,
+                            height: height,
+                            hexadecimalData: hexadecimalData
+                        )
+                    } catch {
+                        Logger.info("Failed to load texture source: \(url.path), error: \(error)")
+                        return nil
+                    }
+                }
+            }
+
+            var results: [TextureSource] = []
+            results.reserveCapacity(ids.count)
+
+            for await result in group {
+                if let result {
+                    results.append(result)
+                }
+            }
+
+            return results
+        }
+
+        var textures: [(LayerId, MTLTexture)] = []
+        textures.reserveCapacity(sources.count)
+
+        for source in sources {
+            do {
+                if let texture = try MTLTextureCreator.makeTexture(
+                    width: source.width,
+                    height: source.height,
+                    from: source.hexadecimalData,
+                    with: device
+                ) {
+                    textures.append((source.id, texture))
+                }
+            } catch {
+                Logger.info("Failed to create texture: \(source.url.path), error: \(error)")
             }
         }
 
-        return results
+        return textures
     }
 
     /// Recreate the directory
