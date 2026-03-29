@@ -8,7 +8,6 @@
 import CanvasView
 import Combine
 import Foundation
-import MetalKit
 import TextureLayerView
 
 @preconcurrency import MetalKit
