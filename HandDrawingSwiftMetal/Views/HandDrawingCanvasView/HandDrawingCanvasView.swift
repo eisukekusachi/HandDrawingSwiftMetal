@@ -121,16 +121,14 @@ import TextureLayerView
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
-                selectedLayer.id,
-                device: sharedDevice
+                selectedLayer.id
             )
         else {
             return
         }
 
         let textures = try await viewModel.duplicateTexturesFromDocumentsDirectory(
-            textureLayers.layers.map { $0.id },
-            device: sharedDevice
+            textureLayers.layers.map { $0.id }
         )
 
         try await textureLayerRenderer.refreshUnselectedTextures(
@@ -194,14 +192,13 @@ extension HandDrawingCanvasView {
     ) async throws {
         let resolvedConfiguration = try await viewModel.onSetup(
             configuration: configuration,
-            device: sharedDevice,
             commandQueue: renderer.commandQueue
         )
         try super.setup(resolvedConfiguration)
     }
 
     func newCanvas() async throws {
-        try await viewModel.onNewCanvas(device: sharedDevice)
+        try await viewModel.onNewCanvas()
         try super.createCanvas(viewModel.textureSize)
         super.resetTransforming()
     }
@@ -209,13 +206,12 @@ extension HandDrawingCanvasView {
     func saveFiles(to workingDirectoryURL: URL) async throws {
         try await viewModel.onSaveFiles(
             thumbnail: thumbnail,
-            device: sharedDevice,
             to: workingDirectoryURL
         )
     }
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
-        try await viewModel.onLoadFiles(device: sharedDevice, from: workingDirectoryURL)
+        try await viewModel.onLoadFiles(from: workingDirectoryURL)
         try super.createCanvas(viewModel.textureSize)
     }
 

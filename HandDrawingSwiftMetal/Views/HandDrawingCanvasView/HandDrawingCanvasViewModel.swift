@@ -67,7 +67,6 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 extension HandDrawingCanvasViewModel {
     func onSetup(
         configuration: CanvasConfiguration,
-        device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> CanvasConfiguration? {
         let data: TextureLayersModel
@@ -77,7 +76,7 @@ extension HandDrawingCanvasViewModel {
             do {
                 try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
                     textureLayers: restoredDataFromCoreData,
-                    device: device
+                    device: renderer.device
                 )
                 data = restoredDataFromCoreData
                 resolvedConfiguration = configuration.newTextureSize(restoredDataFromCoreData.textureSize)
@@ -87,7 +86,7 @@ extension HandDrawingCanvasViewModel {
                 let newData = TextureLayersModel(textureSize: configuration.textureSize)
                 try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newData,
-                    device: device,
+                    device: renderer.device,
                     commandQueue: commandQueue
                 )
                 data = newData
@@ -100,7 +99,7 @@ extension HandDrawingCanvasViewModel {
             let newData = TextureLayersModel(textureSize: configuration.textureSize)
             try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                 textureLayers: newData,
-                device: device,
+                device: renderer.device,
                 commandQueue: commandQueue
             )
             data = newData
@@ -133,7 +132,6 @@ extension HandDrawingCanvasViewModel {
 
     func onSaveFiles(
         thumbnail: UIImage?,
-        device: MTLDevice,
         to workingDirectoryURL: URL
     ) async throws {
         do {
@@ -187,7 +185,6 @@ extension HandDrawingCanvasViewModel {
     }
 
     func onLoadFiles(
-        device: MTLDevice,
         from workingDirectoryURL: URL
     ) async throws {
         // Load texture layer data from the JSON file
@@ -199,7 +196,7 @@ extension HandDrawingCanvasViewModel {
         guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
             url: workingDirectoryURL,
             textureLayers: data,
-            device: device
+            device: renderer.device
         ) else {
             return
         }
@@ -207,9 +204,7 @@ extension HandDrawingCanvasViewModel {
         textureLayersState.update(data)
     }
 
-    func onNewCanvas(
-        device: MTLDevice
-    ) async throws {
+    func onNewCanvas() async throws {
         let textureSize = textureLayersState.textureSize
 
         let data: TextureLayersModel = .init(
@@ -389,22 +384,20 @@ extension HandDrawingCanvasViewModel {
     }
 
     func duplicateTextureFromDocumentsDirectory(
-        _ id: LayerId,
-        device: MTLDevice
+        _ id: LayerId
     ) async -> MTLTexture? {
         await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
-            device: device
+            device: renderer.device
         )
     }
 
     func duplicateTexturesFromDocumentsDirectory(
-        _ ids: [LayerId],
-        device: MTLDevice
+        _ ids: [LayerId]
     ) async -> [(LayerId, MTLTexture)] {
         await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
-            device: device
+            device: renderer.device
         )
     }
 }
