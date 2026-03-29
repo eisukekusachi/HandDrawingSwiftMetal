@@ -174,7 +174,7 @@ public extension TextureLayerViewModel {
 
         // Update the thumbnails
         if let device {
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let `self` else { return }
                 for layer in self.textureLayers.layers {
                     let layerId: LayerId = layer.id
