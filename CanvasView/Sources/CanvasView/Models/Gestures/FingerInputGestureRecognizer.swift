@@ -35,12 +35,28 @@ final class FingerInputGestureRecognizer: UIGestureRecognizer {
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
-        state = .ended
+
+        // Determine if any active finger touches remain
+        let remainingDirectTouches = (event?.allTouches ?? []).filter {
+            $0.type == .direct &&
+            $0.phase != .ended &&
+            $0.phase != .cancelled
+        }
+        state = remainingDirectTouches.isEmpty ? .ended : .changed
+
         gestureDelegate?.sendFingerTouches(touches, with: event, on: view)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
-        state = .cancelled
+
+        // Determine if any active finger touches remain
+        let remainingDirectTouches = (event?.allTouches ?? []).filter {
+            $0.type == .direct &&
+            $0.phase != .ended &&
+            $0.phase != .cancelled
+        }
+        state = remainingDirectTouches.isEmpty ? .cancelled : .changed
+
         gestureDelegate?.sendFingerTouches(touches, with: event, on: view)
     }
 }
