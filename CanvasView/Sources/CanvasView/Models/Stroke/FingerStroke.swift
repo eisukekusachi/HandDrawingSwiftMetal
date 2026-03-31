@@ -31,9 +31,10 @@ final class FingerStroke {
 
 extension FingerStroke {
 
-    var hasEndedTouches: Bool {
-        touchHistories.keys.contains { key in
-            touchHistories[key]?.last?.phase == .ended
+    var hasActiveTouches: Bool {
+        touchHistories.values.contains {
+            guard let phase = $0.last?.phase else { return false }
+            return phase != .ended && phase != .cancelled
         }
     }
 

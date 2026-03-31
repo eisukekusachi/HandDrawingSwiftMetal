@@ -17,10 +17,10 @@ extension CGAffineTransform {
         flipY: Bool = false
     ) -> Self? {
         guard
-            let pt1: CGPoint = pointsA.0,
-            let pt2: CGPoint = pointsB.0,
-            let pt3: CGPoint = pointsA.1,
-            let pt4: CGPoint = pointsB.1
+            let pt1: CGPoint = pointsA.1,
+            let pt2: CGPoint = pointsB.1,
+            let pt3: CGPoint = pointsA.0,
+            let pt4: CGPoint = pointsB.0
         else { return nil }
 
         let layerX = center.x

@@ -78,18 +78,23 @@ public extension TouchGestureState {
     }
 
     private func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
+        guard touchHistories.count == 2 else { return nil }
+
+        let keys = Array(touchHistories.keys)
+        let keyFirst = keys[0]
+        let keySecond = keys[1]
+
         guard
-            touchHistories.count == 2,
-            let firstHistory = touchHistories.first,
-            let lastHistory = touchHistories.last,
-            let firstA = firstHistory.first,
-            let lastA = firstHistory.last,
-            let firstB = lastHistory.first,
-            let lastB = lastHistory.last
+            let firstHistory = touchHistories[keyFirst],
+            let secondHistory = touchHistories[keySecond],
+            let firstFirstA = firstHistory.first,
+            let firstLastA = firstHistory.last,
+            let secondFirstB = secondHistory.first,
+            let secondLastB = secondHistory.last
         else { return nil }
 
-        if  (lastA.timestamp - firstA.timestamp) >= transformingGestureRecognitionSecond &&
-            (lastB.timestamp - firstB.timestamp) >= transformingGestureRecognitionSecond {
+        if  (firstLastA.timestamp - firstFirstA.timestamp) >= transformingGestureRecognitionSecond &&
+            (secondLastB.timestamp - secondFirstB.timestamp) >= transformingGestureRecognitionSecond {
             return .transforming
         }
         return nil

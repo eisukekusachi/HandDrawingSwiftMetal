@@ -181,11 +181,10 @@ extension CanvasViewModel {
         // Return if a pen input is in progress
         guard inputState.isNotPencil else { return }
 
-        fingerStroke.appendTouchPointToDictionary(
-            UITouch.getFingerTouches(event: event).reduce(into: [:]) {
-                $0[$1.hashValue] = .init(touch: $1, view: view)
-            }
-        )
+        let touchPoints = UITouch.getFingerTouches(event: event).reduce(into: [TouchID: TouchPoint]()) {
+            $0[TouchID($1)] = .init(touch: $1, view: view)
+        }
+        fingerStroke.appendTouchPointToDictionary(touchPoints)
 
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
@@ -415,9 +414,7 @@ extension CanvasViewModel {
             )
         }
 
-        if fingerStroke.hasEndedTouches {
-            transforming.endTransformation()
-        } else {
+        if fingerStroke.hasActiveTouches {
             transforming.transformCanvas(
                 screenCenter: .init(
                     x: frameSize.width * 0.5,
@@ -425,6 +422,8 @@ extension CanvasViewModel {
                 ),
                 touchHistories: fingerStroke.touchHistories
             )
+        } else {
+            transforming.endTransformation()
         }
 
         present()

@@ -10,5 +10,3 @@ import Foundation
 public typealias TouchesOnScreen = [TouchID: TouchPoint]
 
 public typealias TouchHistoriesOnScreen = [TouchID: [TouchPoint]]
-
-public typealias TouchID = Int
