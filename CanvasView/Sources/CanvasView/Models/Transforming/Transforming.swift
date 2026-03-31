@@ -32,16 +32,16 @@ extension Transforming {
     }
 
     func initialize(_ touchHistories: TouchHistoriesOnScreen) {
+        let keys = Array(touchHistories.keys)
+
         guard
             touchHistories.count == 2,
-            let keyA = touchHistories.keys.sorted().first,
-            let keyB = touchHistories.keys.sorted().last,
-            let pointA = touchHistories[keyA]?.first?.location,
-            let pointB = touchHistories[keyB]?.first?.location
+            let pointA = touchHistories[keys[0]]?.last?.location,
+            let pointB = touchHistories[keys[1]]?.last?.location
         else { return }
 
-        self.keyA = keyA
-        self.keyB = keyB
+        self.keyA = keys[0]
+        self.keyB = keys[1]
         self.firstTouchPointA = pointA
         self.firstTouchPointB = pointB
     }
