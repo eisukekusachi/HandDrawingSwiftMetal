@@ -20,11 +20,10 @@ public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
         commandQueue: MTLCommandQueue
     ) async throws -> Bool
 
-    @discardableResult
     func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) throws -> CGSize?
+    ) throws
 
     func restoreStorage(
         url sourceFolderURL: URL,

@@ -92,11 +92,10 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
     /// Restore the storage
     /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
-    @discardableResult
     public func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) throws -> CGSize? {
+    ) throws {
         return try loadTexturesIfValid(
             from: workingDirectoryURL,
             textureLayers: textureLayers,
@@ -322,12 +321,12 @@ public extension TextureLayersDocumentsRepository {
 }
 
 private extension TextureLayersDocumentsRepository {
-    @discardableResult
+
     func loadTexturesIfValid(
         from directoryURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) throws -> CGSize? {
+    ) throws {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayers.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(directoryURL)
@@ -364,7 +363,5 @@ private extension TextureLayersDocumentsRepository {
                 throw error
             }
         }
-
-        return textureSize
     }
 }
