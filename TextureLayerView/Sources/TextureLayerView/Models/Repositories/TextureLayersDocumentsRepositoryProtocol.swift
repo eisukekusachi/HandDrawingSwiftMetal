@@ -9,8 +9,7 @@ import UIKit
 
 @preconcurrency import MetalKit
 
-@MainActor
-public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
+public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
 
     var workingDirectoryURL: URL { get }
 
@@ -21,10 +20,11 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
         commandQueue: MTLCommandQueue
     ) async throws -> Bool
 
+    @discardableResult
     func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) throws
+    ) throws -> CGSize?
 
     func restoreStorage(
         url sourceFolderURL: URL,
@@ -34,11 +34,13 @@ public protocol TextureLayersDocumentsRepositoryProtocol: AnyObject {
 
     func duplicatedTexture(
         _ id: LayerId,
+        textureSize: CGSize,
         device: MTLDevice
     ) async -> MTLTexture?
 
     func duplicatedTextures(
         _ ids: [LayerId],
+        textureSize: CGSize,
         device: MTLDevice
     ) async -> [(LayerId, MTLTexture)]
 

@@ -389,6 +389,7 @@ extension HandDrawingCanvasViewModel {
     ) async -> MTLTexture? {
         await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
+            textureSize: textureSize,
             device: renderer.device
         )
     }
@@ -398,6 +399,7 @@ extension HandDrawingCanvasViewModel {
     ) async -> [(LayerId, MTLTexture)] {
         await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
+            textureSize: textureSize,
             device: renderer.device
         )
     }

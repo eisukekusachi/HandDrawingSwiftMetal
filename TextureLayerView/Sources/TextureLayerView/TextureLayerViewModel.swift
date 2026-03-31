@@ -152,6 +152,7 @@ public extension TextureLayerViewModel {
         guard let device else { return nil }
         return await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
+            textureSize: textureSize,
             device: device
         )
     }
@@ -181,6 +182,7 @@ public extension TextureLayerViewModel {
                     let layerId: LayerId = layer.id
                     let texture = await self.dependencies.textureLayersDocumentsRepository.duplicatedTexture(
                         layerId,
+                        textureSize: textureSize,
                         device: device
                     )
                     self.textureLayers.updateThumbnail(layerId, texture: texture)
