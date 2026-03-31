@@ -97,7 +97,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws -> CGSize? {
-        try loadTexturesIfValid(
+        return try loadTexturesIfValid(
             from: workingDirectoryURL,
             textureLayers: textureLayers,
             device: device
