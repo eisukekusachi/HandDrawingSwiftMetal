@@ -41,6 +41,7 @@
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
+		D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA06C2F3C18D3008C6E9E /* UndoVisibilityObject.swift */; };
@@ -148,6 +149,7 @@
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
+		D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
 		D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaObject.swift; sourceTree = "<group>"; };
@@ -396,8 +398,10 @@
 		D49C69292F23A75000B66608 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				D49C692B2F23A76400B66608 /* Logger.swift */,
 				D4D624BC2F5C0EAA00026589 /* Debouncer.swift */,
+				D4F5256E2EAC614B00439FFF /* FileInput.swift */,
+				D4F525702EAC616600439FFF /* FileOutput.swift */,
+				D49C692B2F23A76400B66608 /* Logger.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -515,11 +519,10 @@
 		D4F5256B2EAC60F200439FFF /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
-				D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */,
-				D4F5256E2EAC614B00439FFF /* FileInput.swift */,
-				D4F525702EAC616600439FFF /* FileOutput.swift */,
 				D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */,
+				D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */,
 				D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */,
+				D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -747,6 +750,7 @@
 				D41C721B2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift in Sources */,
 				D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */,
 				D49C692C2F23A76400B66608 /* Logger.swift in Sources */,
+				D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */,
 				D4168F242E59F7B4007F7904 /* EraserPaletteView.swift in Sources */,
 				D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */,
 				D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */,

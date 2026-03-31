@@ -198,7 +198,7 @@ extension HandDrawingViewModel {
         Task(priority: .userInitiated) {
             defer {
                 /// Remove the working space
-                localFileRepository.removeWorkingDirectory()
+                try? localFileRepository.removeWorkingDirectory()
 
                 activityIndicatorSubject.send(false)
             }
@@ -206,7 +206,9 @@ extension HandDrawingViewModel {
 
             do {
                 // Create a temporary working directory for saving project files
-                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+                try localFileRepository.createWorkingDirectory()
+
+                let workingDirectoryURL = localFileRepository.workingDirectoryURL
 
                 try await saveCanvasAction?(workingDirectoryURL)
 
@@ -240,7 +242,7 @@ extension HandDrawingViewModel {
         Task {
             defer {
                 // Remove the working space
-                localFileRepository.removeWorkingDirectory()
+                try? localFileRepository.removeWorkingDirectory()
 
                 activityIndicatorSubject.send(false)
             }
@@ -248,7 +250,9 @@ extension HandDrawingViewModel {
 
             do {
                 // Create a temporary working directory
-                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+                try localFileRepository.createWorkingDirectory()
+
+                let workingDirectoryURL = localFileRepository.workingDirectoryURL
 
                 // Extract the zip file into the working directory
                 try await localFileRepository.unzipToWorkingDirectory(
@@ -303,8 +307,11 @@ extension HandDrawingViewModel {
 
         for fileName in fileNames {
             do {
-                defer { localFileRepository.removeWorkingDirectory() }
-                let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
+                defer { try? localFileRepository.removeWorkingDirectory() }
+                try localFileRepository.createWorkingDirectory()
+
+                let workingDirectoryURL = localFileRepository.workingDirectoryURL
+
                 let zipFileURL = URL.documents.appendingPathComponent(fileName)
 
                 try await localFileRepository.unzipToWorkingDirectory(
