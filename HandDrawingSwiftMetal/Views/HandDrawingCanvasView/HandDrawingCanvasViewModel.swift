@@ -112,25 +112,6 @@ extension HandDrawingCanvasViewModel {
         return resolvedConfiguration
     }
 
-    func onCompleteDrawing(
-        texture: MTLTexture?
-    ) async throws {
-        guard
-            let texture,
-            let layerId = self.textureLayersState.selectedLayer?.id
-        else { return }
-
-        try await saveTextureToDocumentsDirectory(
-            layerId: layerId,
-            texture: texture
-        )
-
-        textureLayersState.updateThumbnail(
-            layerId,
-            texture: texture
-        )
-    }
-
     func onSaveFiles(
         thumbnail: UIImage?,
         to workingDirectoryURL: URL
