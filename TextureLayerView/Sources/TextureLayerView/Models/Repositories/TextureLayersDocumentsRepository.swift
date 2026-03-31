@@ -18,9 +18,8 @@ private struct TextureSource: Sendable {
 }
 
 /// Manages and persists `TextureLayers` textures on disk
-@MainActor
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
-
+    @MainActor
     public static let shared: TextureLayersDocumentsRepository = {
         do {
             return try TextureLayersDocumentsRepository(
@@ -34,8 +33,6 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
     /// URL of the texture storage
     public let workingDirectoryURL: URL
-
-    private var textureSize: CGSize = .zero
 
     private init(
         storageDirectoryURL: URL,
@@ -85,13 +82,10 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             device: device,
             commandQueue: commandQueue
         )
-        try addTextureData(
+        try await addTextureData(
             data: textureData,
             id: layerId
         )
-
-        // Set the texture size after the initialization of this repository is completed
-        self.textureSize = textureSize
 
         return true
     }
@@ -102,13 +96,11 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws {
-        let textureSize = try validateStorage(
-            in: workingDirectoryURL,
+        return try loadTexturesIfValid(
+            from: workingDirectoryURL,
             textureLayers: textureLayers,
             device: device
         )
-
-        self.textureSize = textureSize
     }
 
     /// Restore the storage
@@ -119,8 +111,8 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) async throws -> Bool {
-        let textureSize = try validateStorage(
-            in: sourceFolderURL,
+        try loadTexturesIfValid(
+            from: sourceFolderURL,
             textureLayers: textureLayers,
             device: device
         )
@@ -134,8 +126,6 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             )
         }
 
-        self.textureSize = textureSize
-
         return true
     }
 }
@@ -147,7 +137,7 @@ public extension TextureLayersDocumentsRepository {
     func addTextureData(
         data: Data,
         id: LayerId
-    ) throws -> Bool {
+    ) async throws -> Bool {
         // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
@@ -156,7 +146,7 @@ public extension TextureLayersDocumentsRepository {
             return false
         }
 
-        try writeDataToDisk(
+        try await writeDataToDisk(
             id: id,
             data: data
         )
@@ -167,6 +157,7 @@ public extension TextureLayersDocumentsRepository {
     /// Copies a texture for the given `LayerId`
     func duplicatedTexture(
         _ id: LayerId,
+        textureSize: CGSize,
         device: MTLDevice
     ) async -> MTLTexture? {
         guard
@@ -196,6 +187,7 @@ public extension TextureLayersDocumentsRepository {
     /// Copies multiple textures for the given `LayerId`s
     func duplicatedTextures(
         _ ids: [LayerId],
+        textureSize: CGSize,
         device: MTLDevice
     ) async -> [(LayerId, MTLTexture)] {
         guard
@@ -319,20 +311,22 @@ public extension TextureLayersDocumentsRepository {
     func writeDataToDisk(
         id: LayerId,
         data: Data
-    ) throws {
-        try data.write(
-            to: workingDirectoryURL.appendingPathComponent(id.uuidString),
-            options: .atomic
-        )
+    ) async throws {
+        let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+
+        try await Task.detached(priority: .utility) { [data, url] in
+            try data.write(to: url, options: .atomic)
+        }.value
     }
 }
 
 private extension TextureLayersDocumentsRepository {
-    func validateStorage(
-        in directoryURL: URL,
+
+    func loadTexturesIfValid(
+        from directoryURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
-    ) throws -> CGSize {
+    ) throws {
         guard FileManager.containsAllFileNames(
             fileNames: textureLayers.layers.map { $0.fileName },
             in: FileManager.contentsOfDirectory(directoryURL)
@@ -369,7 +363,5 @@ private extension TextureLayersDocumentsRepository {
                 throw error
             }
         }
-
-        return textureSize
     }
 }

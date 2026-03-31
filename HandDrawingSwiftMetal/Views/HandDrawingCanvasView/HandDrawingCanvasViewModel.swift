@@ -112,25 +112,6 @@ extension HandDrawingCanvasViewModel {
         return resolvedConfiguration
     }
 
-    func onCompleteDrawing(
-        texture: MTLTexture?
-    ) async throws {
-        guard
-            let texture,
-            let layerId = self.textureLayersState.selectedLayer?.id
-        else { return }
-
-        try await saveTextureToDocumentsDirectory(
-            layerId: layerId,
-            texture: texture
-        )
-
-        textureLayersState.updateThumbnail(
-            layerId,
-            texture: texture
-        )
-    }
-
     func onSaveFiles(
         thumbnail: UIImage?,
         to workingDirectoryURL: URL
@@ -355,20 +336,24 @@ extension HandDrawingCanvasViewModel {
         undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
             })
             .store(in: &cancellables)
 
         undoRedoObject.redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
             })
             .store(in: &cancellables)
 
@@ -381,7 +366,9 @@ extension HandDrawingCanvasViewModel {
     }
 
     func clearUndoTextures() {
-        dependencies.undoTextureInMemoryRepository.removeAll()
+        Task { [weak self] in
+            await self?.dependencies.undoTextureInMemoryRepository.removeAll()
+        }
     }
 
     func duplicateTextureFromDocumentsDirectory(
@@ -389,6 +376,7 @@ extension HandDrawingCanvasViewModel {
     ) async -> MTLTexture? {
         await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
+            textureSize: textureSize,
             device: renderer.device
         )
     }
@@ -398,12 +386,13 @@ extension HandDrawingCanvasViewModel {
     ) async -> [(LayerId, MTLTexture)] {
         await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
+            textureSize: textureSize,
             device: renderer.device
         )
     }
 }
 
-private extension HandDrawingCanvasViewModel {
+extension HandDrawingCanvasViewModel {
 
     func saveTextureToDocumentsDirectory(
         layerId: UUID,
@@ -413,7 +402,17 @@ private extension HandDrawingCanvasViewModel {
             device: renderer.device,
             commandQueue: renderer.commandQueue
         )
-        try dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+            id: layerId,
+            data: textureData
+        )
+    }
+
+    func saveTextureToDocumentsDirectory(
+        layerId: UUID,
+        textureData: Data
+    ) async throws {
+        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
             id: layerId,
             data: textureData
         )
