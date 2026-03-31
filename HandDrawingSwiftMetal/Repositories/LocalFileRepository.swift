@@ -8,10 +8,10 @@
 import Foundation
 
 /// Manages local file operations
-final class LocalFileRepository {
+final class LocalFileRepository: LocalFileRepositoryProtocol {
 
     /// URL of the directory for storing files
-    private let workingDirectoryURL: URL
+    let workingDirectoryURL: URL
 
     init(workingDirectoryURL: URL) {
         self.workingDirectoryURL = workingDirectoryURL
@@ -20,18 +20,14 @@ final class LocalFileRepository {
 
 extension LocalFileRepository {
 
-    @discardableResult
-    func createWorkingDirectory() throws -> URL {
+    func createWorkingDirectory() throws {
         try FileManager.createNewDirectory(workingDirectoryURL)
-        return workingDirectoryURL
     }
 
-    func removeWorkingDirectory() {
-        // Do nothing if directory deletion fails
-        try? FileManager.default.removeItem(at: workingDirectoryURL)
+    func removeWorkingDirectory() throws {
+        try FileManager.default.removeItem(at: workingDirectoryURL)
     }
 
-    /// Compresses the working directory contents into a ZIP file
     func zipWorkingDirectory(
         to zipFileURL: URL
     ) throws {
@@ -48,7 +44,6 @@ extension LocalFileRepository {
             to: tempZipURL
         )
 
-        // Overwrite if a file with the same name exists
         try moveFiles(from: tempZipURL, to: zipFileURL)
     }
 
