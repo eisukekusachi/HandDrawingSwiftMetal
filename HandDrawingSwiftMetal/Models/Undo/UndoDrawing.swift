@@ -88,12 +88,12 @@ final class UndoDrawing: ObservableObject {
         else { return nil }
 
         do {
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: undoTexture,
                     id: undoTextureId
                 )
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: redoTexture,
                     id: redoTextureId

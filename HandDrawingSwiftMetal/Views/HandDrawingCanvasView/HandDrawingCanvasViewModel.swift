@@ -336,20 +336,24 @@ extension HandDrawingCanvasViewModel {
         undoRedoObject.undoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
             })
             .store(in: &cancellables)
 
         undoRedoObject.redoObject.deinitSubject
             .sink(receiveValue: { [weak self] result in
                 guard let `self`, let undoTextureId = result.undoTextureId else { return }
-                // Do nothing if an error occurs, since nothing can be done
-                try? self.dependencies.undoTextureInMemoryRepository.removeTexture(
-                    undoTextureId
-                )
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.dependencies.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
             })
             .store(in: &cancellables)
 
@@ -362,7 +366,9 @@ extension HandDrawingCanvasViewModel {
     }
 
     func clearUndoTextures() {
-        dependencies.undoTextureInMemoryRepository.removeAll()
+        Task { [weak self] in
+            await self?.dependencies.undoTextureInMemoryRepository.removeAll()
+        }
     }
 
     func duplicateTextureFromDocumentsDirectory(

@@ -285,12 +285,12 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         else { return }
 
         do {
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: undoTexture,
                     id: undoTextureId
                 )
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: redoTexture,
                     id: redoTextureId
@@ -326,7 +326,7 @@ extension UndoTextureLayerViewModel {
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: newTexture,
                     id: undoTextureId
@@ -355,7 +355,7 @@ extension UndoTextureLayerViewModel {
 
         do {
             // Add a texture to the UndoTextureRepository for restoration
-            try inMemoryRepository
+            try await inMemoryRepository
                 .addTexture(
                     newTexture: restorationTexture,
                     id: undoTextureId

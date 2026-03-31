@@ -10,7 +10,7 @@ import TextureLayerView
 
 @preconcurrency import MetalKit
 
-protocol UndoTextureInMemoryRepositoryProtocol: AnyObject {
+protocol UndoTextureInMemoryRepositoryProtocol: Actor {
 
     /// Returns the texture associated with the specified `UndoTextureId`
     func texture(_ id: UndoTextureId) -> MTLTexture?
