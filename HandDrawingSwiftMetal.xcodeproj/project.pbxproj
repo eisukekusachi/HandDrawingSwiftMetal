@@ -398,8 +398,10 @@
 		D49C69292F23A75000B66608 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				D49C692B2F23A76400B66608 /* Logger.swift */,
 				D4D624BC2F5C0EAA00026589 /* Debouncer.swift */,
+				D4F5256E2EAC614B00439FFF /* FileInput.swift */,
+				D4F525702EAC616600439FFF /* FileOutput.swift */,
+				D49C692B2F23A76400B66608 /* Logger.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -517,8 +519,6 @@
 		D4F5256B2EAC60F200439FFF /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
-				D4F5256E2EAC614B00439FFF /* FileInput.swift */,
-				D4F525702EAC616600439FFF /* FileOutput.swift */,
 				D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */,
 				D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */,
 				D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */,
