@@ -20,7 +20,7 @@ public final class DrawingDebouncer {
         _ block: @escaping @Sendable () async throws -> Void
     ) {
         debouncer.perform {
-            Task {
+            Task(priority: .utility) {
                 do {
                     try await block()
                 } catch {
