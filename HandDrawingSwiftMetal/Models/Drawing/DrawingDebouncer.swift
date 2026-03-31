@@ -23,16 +23,15 @@ public final class DrawingDebouncer {
         self.debouncer = Debouncer(delay: delay)
     }
 
-    @MainActor
-    public func perform(_ block: @escaping () async throws -> Void) {
+    public func perform(
+        _ block: @escaping () async throws -> Void
+    ) {
         isProcessingSubject.send(true)
 
         debouncer.perform {
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-
+            Task { [weak self] in
                 defer {
-                    self.isProcessingSubject.send(false)
+                    self?.isProcessingSubject.send(false)
                 }
 
                 do {
