@@ -123,6 +123,11 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
+
+                await self.viewModel.textureLayersState.updateThumbnail(
+                    layerId,
+                    texture: texture
+                )
             } catch {
                 Logger.error(error)
             }
