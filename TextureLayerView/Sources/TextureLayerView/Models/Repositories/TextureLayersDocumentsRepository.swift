@@ -337,7 +337,7 @@ private extension TextureLayersDocumentsRepository {
                 message: String(localized: "Unable to find texture layer files")
             )
             Logger.error(error)
-            return nil
+            throw error
         }
 
         let textureSize = textureLayers.textureSize
