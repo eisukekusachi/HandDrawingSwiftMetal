@@ -10,7 +10,6 @@ import TextureLayerView
 
 @preconcurrency import MetalKit
 
-@MainActor
 protocol UndoTextureInMemoryRepositoryProtocol: AnyObject {
 
     /// Returns the texture associated with the specified `UndoTextureId`

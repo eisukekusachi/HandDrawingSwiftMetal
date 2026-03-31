@@ -12,7 +12,6 @@ import TextureLayerView
 
 /// A repository that manages textures for undo operations.
 /// The textures are stored in memory to avoid blocking the main thread.
-@MainActor
 final class UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
 
     static let shared = UndoTextureInMemoryRepository(
