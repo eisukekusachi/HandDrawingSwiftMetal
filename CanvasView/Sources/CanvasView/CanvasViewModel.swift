@@ -414,9 +414,7 @@ extension CanvasViewModel {
             )
         }
 
-        if fingerStroke.hasEndedTouches {
-            transforming.endTransformation()
-        } else {
+        if fingerStroke.hasActiveTouches {
             transforming.transformCanvas(
                 screenCenter: .init(
                     x: frameSize.width * 0.5,
@@ -424,6 +422,8 @@ extension CanvasViewModel {
                 ),
                 touchHistories: fingerStroke.touchHistories
             )
+        } else {
+            transforming.endTransformation()
         }
 
         present()
