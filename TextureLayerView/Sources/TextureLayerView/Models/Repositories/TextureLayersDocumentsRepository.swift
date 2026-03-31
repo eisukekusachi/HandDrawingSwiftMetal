@@ -82,7 +82,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             device: device,
             commandQueue: commandQueue
         )
-        try addTextureData(
+        try await addTextureData(
             data: textureData,
             id: layerId
         )
@@ -138,7 +138,7 @@ public extension TextureLayersDocumentsRepository {
     func addTextureData(
         data: Data,
         id: LayerId
-    ) throws -> Bool {
+    ) async throws -> Bool {
         // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
@@ -147,7 +147,7 @@ public extension TextureLayersDocumentsRepository {
             return false
         }
 
-        try writeDataToDisk(
+        try await writeDataToDisk(
             id: id,
             data: data
         )
@@ -312,11 +312,12 @@ public extension TextureLayersDocumentsRepository {
     func writeDataToDisk(
         id: LayerId,
         data: Data
-    ) throws {
-        try data.write(
-            to: workingDirectoryURL.appendingPathComponent(id.uuidString),
-            options: .atomic
-        )
+    ) async throws {
+        let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+
+        try await Task.detached(priority: .utility) { [data, url] in
+            try data.write(to: url, options: .atomic)
+        }.value
     }
 }
 

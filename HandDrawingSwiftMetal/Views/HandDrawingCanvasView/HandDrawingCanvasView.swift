@@ -103,17 +103,28 @@ import TextureLayerView
     }
 
     private func completeDrawing() {
-        drawingDebouncer.perform {
-            Task(priority: .utility) { [weak self] in
-                guard let `self` else { return }
+        guard
+            let texture = self.currentTexture,
+            let layerId = self.textureLayersState.selectedLayer?.id
+        else { return }
 
-                do {
-                    try await self.viewModel.onCompleteDrawing(
-                        texture: self.currentTexture
-                    )
-                } catch {
-                    Logger.error(error)
-                }
+        let device = renderer.device
+        let commandQueue = renderer.commandQueue
+
+        drawingDebouncer.perform { [weak self] in
+            guard let `self` else { return }
+
+            do {
+                let textureData = try await texture.data(
+                    device: device,
+                    commandQueue: commandQueue
+                )
+                try await self.viewModel.saveTextureToDocumentsDirectory(
+                    layerId: layerId,
+                    textureData: textureData
+                )
+            } catch {
+                Logger.error(error)
             }
         }
     }

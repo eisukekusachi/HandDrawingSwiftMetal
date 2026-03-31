@@ -73,7 +73,7 @@ open class TextureLayerViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue
         )
-        try dependencies.textureLayersDocumentsRepository
+        try await dependencies.textureLayersDocumentsRepository
             .addTextureData(
                 data: textureData,
                 id: layer.id

@@ -405,7 +405,7 @@ extension HandDrawingCanvasViewModel {
     }
 }
 
-private extension HandDrawingCanvasViewModel {
+extension HandDrawingCanvasViewModel {
 
     func saveTextureToDocumentsDirectory(
         layerId: UUID,
@@ -415,7 +415,17 @@ private extension HandDrawingCanvasViewModel {
             device: renderer.device,
             commandQueue: renderer.commandQueue
         )
-        try dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+            id: layerId,
+            data: textureData
+        )
+    }
+
+    func saveTextureToDocumentsDirectory(
+        layerId: UUID,
+        textureData: Data
+    ) async throws {
+        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
             id: layerId,
             data: textureData
         )
