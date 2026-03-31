@@ -15,16 +15,17 @@ final class Transforming {
 
     private var storedMatrix: CGAffineTransform = CGAffineTransform.identity
 
-    private var keyA: TouchID?
-    private var keyB: TouchID?
-    private var firstTouchPointA: CGPoint?
-    private var firstTouchPointB: CGPoint?
+    private var firstKey: TouchID?
+    private var firstFirstTouchPoint: CGPoint?
+
+    private var secondKey: TouchID?
+    private var secondFirstTouchPoint: CGPoint?
 }
 
 extension Transforming {
 
     var isKeysInitialized: Bool {
-        keyA != nil && keyB != nil
+        firstKey != nil && secondKey != nil
     }
 
     var isNotKeysInitialized: Bool {
@@ -32,33 +33,35 @@ extension Transforming {
     }
 
     func initialize(_ touchHistories: TouchHistoriesOnScreen) {
+        guard touchHistories.count == 2 else { return }
+
         let keys = Array(touchHistories.keys)
 
         guard
-            touchHistories.count == 2,
-            let pointA = touchHistories[keys[0]]?.last?.location,
-            let pointB = touchHistories[keys[1]]?.last?.location
+            let firstPoint = touchHistories[keys[0]]?.last?.location,
+            let secondPoint = touchHistories[keys[1]]?.last?.location
         else { return }
 
-        self.keyA = keys[0]
-        self.keyB = keys[1]
-        self.firstTouchPointA = pointA
-        self.firstTouchPointB = pointB
+        self.firstKey = keys[0]
+        self.firstFirstTouchPoint = firstPoint
+
+        self.secondKey = keys[1]
+        self.secondFirstTouchPoint = secondPoint
     }
 
     func transformCanvas(screenCenter: CGPoint, touchHistories: TouchHistoriesOnScreen) {
         guard
             touchHistories.count == 2,
-            let keyA,
-            let keyB,
-            let firstTouchPointA,
-            let firstTouchPointB,
-            let lastTouchPointA = touchHistories[keyA]?.last?.location,
-            let lastTouchPointB = touchHistories[keyB]?.last?.location,
+            let firstKey,
+            let secondKey,
+            let firstFirstTouchPoint,
+            let secondFirstTouchPoint,
+            let firstLastTouchPoint = touchHistories[firstKey]?.last?.location,
+            let secondLastTouchPoint = touchHistories[secondKey]?.last?.location,
             let newMatrix = CGAffineTransform.makeMatrix(
                 center: screenCenter,
-                pointsA: (firstTouchPointA, lastTouchPointA),
-                pointsB: (firstTouchPointB, lastTouchPointB),
+                pointsA: (firstLastTouchPoint, firstFirstTouchPoint),
+                pointsB: (secondLastTouchPoint, secondFirstTouchPoint),
                 counterRotate: true,
                 flipY: true
             )
@@ -87,9 +90,9 @@ extension Transforming {
 extension Transforming {
 
     private func resetParameters() {
-        keyA = nil
-        keyB = nil
-        firstTouchPointA = nil
-        firstTouchPointB = nil
+        firstKey = nil
+        secondKey = nil
+        firstFirstTouchPoint = nil
+        secondFirstTouchPoint = nil
     }
 }
