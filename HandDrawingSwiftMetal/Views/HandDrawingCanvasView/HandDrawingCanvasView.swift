@@ -51,8 +51,8 @@ import TextureLayerView
     override init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration
-    ) {
-        super.init(
+    ) throws {
+        try super.init(
             device: device,
             configuration: configuration
         )
@@ -61,12 +61,12 @@ import TextureLayerView
 
     func restoreOrInitializeCanvas(
         fallbackTextureSize: CGSize
-    ) async {
+    ) async throws {
         let resolvedTextureSize = await viewModel.restoreOrInitializeTextureLayers(
             fallbackTextureSize: fallbackTextureSize,
             commandQueue: renderer.commandQueue
         )
-        super.initializeCanvas(resolvedTextureSize)
+        try super.initializeCanvas(resolvedTextureSize)
     }
 
     required init?(coder: NSCoder) {
@@ -219,7 +219,7 @@ extension HandDrawingCanvasView {
 
     func newCanvas() async throws {
         try await viewModel.onNewCanvas()
-        super.initializeCanvas(viewModel.textureSize)
+        try super.initializeCanvas(viewModel.textureSize)
         super.resetTransforming()
     }
 
@@ -232,7 +232,7 @@ extension HandDrawingCanvasView {
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
         try await viewModel.onLoadFiles(from: workingDirectoryURL)
-        super.initializeCanvas(viewModel.textureSize)
+        try super.initializeCanvas(viewModel.textureSize)
     }
 
     func undo() {

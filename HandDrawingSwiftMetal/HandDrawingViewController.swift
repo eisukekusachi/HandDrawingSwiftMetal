@@ -47,10 +47,14 @@ class HandDrawingViewController: UIViewController {
     }()
 
     private lazy var canvasView: HandDrawingCanvasView = {
-        HandDrawingCanvasView(
-            device: sharedDevice,
-            configuration: configuration.canvasConfiguration
-        )
+        do {
+            return try HandDrawingCanvasView(
+                device: sharedDevice,
+                configuration: configuration.canvasConfiguration
+            )
+        } catch {
+            fatalError("Failed to initialize CanvasView: \(error)")
+        }
     }()
 
     private lazy var textureLayerView: TextureLayerView = {
@@ -123,15 +127,18 @@ class HandDrawingViewController: UIViewController {
                 self.showActivityIndicator(false)
                 self.showContentView(true)
             }
+            do {
+                try await self.canvasView.restoreOrInitializeCanvas(
+                    fallbackTextureSize: configuration.canvasConfiguration.textureSize
+                )
+                self.viewModel.loadLocalDrawingComponentsData(
+                    configuration: configuration
+                )
+                self.updateDrawingComponents()
 
-            await self.canvasView.restoreOrInitializeCanvas(
-                fallbackTextureSize: configuration.canvasConfiguration.textureSize
-            )
-
-            self.viewModel.loadLocalDrawingComponentsData(
-                configuration: configuration
-            )
-            self.updateDrawingComponents()
+            } catch {
+                fatalError("Failed to initialize CanvasView: \(error)")
+            }
         }
     }
 

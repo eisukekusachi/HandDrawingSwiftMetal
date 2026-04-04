@@ -66,7 +66,7 @@ open class CanvasView: UIView {
     public init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration = .init()
-    ) {
+    ) throws {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
@@ -84,12 +84,12 @@ open class CanvasView: UIView {
             commandQueue: commandQueue
         )
         self.canvasRenderer = .init(
-            device: sharedDevice,
-            commandQueue: commandQueue,
-            displayView: displayView
-        )
-        self.viewModel = .init(
             renderer: renderer,
+            displayView: displayView,
+            backgroundColor: configuration.backgroundColor,
+            baseBackgroundColor: configuration.baseBackgroundColor
+        )
+        self.viewModel = try .init(
             canvasRenderer: canvasRenderer,
             configuration: configuration
         )
@@ -183,8 +183,8 @@ open class CanvasView: UIView {
     }
 
     /// Creates the canvas using the specified texture size
-    public func initializeCanvas(_ textureSize: CGSize) {
-        viewModel.initializeCanvas(
+    public func initializeCanvas(_ textureSize: CGSize) throws {
+        try viewModel.initializeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }

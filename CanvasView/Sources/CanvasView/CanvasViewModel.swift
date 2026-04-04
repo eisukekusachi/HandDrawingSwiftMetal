@@ -72,16 +72,10 @@ public final class CanvasViewModel {
     private let transforming = Transforming()
 
     init(
-        renderer: MTLRendering,
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
-    ) {
+    ) throws {
         self.canvasRenderer = canvasRenderer
-
-        self.canvasRenderer.setup(
-            backgroundColor: configuration.backgroundColor,
-            baseBackgroundColor: configuration.baseBackgroundColor
-        )
 
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
@@ -91,13 +85,27 @@ public final class CanvasViewModel {
             configuration.transformingGestureRecognitionSecond
         )
 
-        initializeCanvas(configuration.textureSize)
+        try initializeCanvas(configuration.textureSize)
     }
 }
 
 extension CanvasViewModel {
 
-    func initializeCanvas(_ textureSize: CGSize) {
+    func initializeCanvas(_ textureSize: CGSize) throws {
+        guard
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
+        else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
+        }
+
         guard
             let canvasTexture = canvasRenderer.makeTexture(
                 textureSize,
@@ -112,7 +120,12 @@ extension CanvasViewModel {
                 label: "realtimeDrawingTexture"
             )
         else {
-            fatalError("Failed to create canvasTextures")
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to create canvas textures")
+            )
+            Logger.error(error)
+            throw error
         }
 
         self.canvasTexture = canvasTexture
