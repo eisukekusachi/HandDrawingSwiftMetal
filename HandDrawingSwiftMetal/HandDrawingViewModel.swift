@@ -71,7 +71,7 @@ final class HandDrawingViewModel: ObservableObject {
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
 
-    private let dependencies: HandDrawingViewDependencies?
+    private let dependencies: HandDrawingViewDependencies
 
     /// A publisher that emits a request to show or hide the activity indicator
     public var activityIndicator: AnyPublisher<Bool, Never> {
@@ -90,7 +90,7 @@ final class HandDrawingViewModel: ObservableObject {
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     public init(
-        dependencies: HandDrawingViewDependencies? = .init()
+        dependencies: HandDrawingViewDependencies = .init()
     ) {
         self.dependencies = dependencies
         self.brushPalette = .init(colors: initializeColors)
@@ -198,7 +198,7 @@ extension HandDrawingViewModel {
         zipFileURL: URL
     ) {
         Task(priority: .userInitiated) { [weak self] in
-            guard let `self`, let dependencies else { return }
+            guard let `self` else { return }
 
             defer {
                 /// Remove the working space
@@ -244,7 +244,7 @@ extension HandDrawingViewModel {
         completion: (() -> Void)?
     ) {
         Task { [weak self] in
-            guard let `self`, let dependencies else { return }
+            guard let `self` else { return }
 
             defer {
                 // Remove the working space
@@ -302,8 +302,6 @@ extension HandDrawingViewModel {
     }
 
     private func fileItemList(fileSuffix: String) async {
-        guard let dependencies else { return }
-
         var fileNames: [String] = []
 
         URL.documents.allFileURLs(suffix: fileSuffix).map {
