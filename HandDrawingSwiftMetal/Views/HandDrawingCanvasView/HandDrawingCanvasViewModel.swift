@@ -67,11 +67,11 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
 extension HandDrawingCanvasViewModel {
     func restoreOrInitializeTextureLayers(
-        configuration: CanvasConfiguration,
+        fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
-    ) async -> CanvasConfiguration {
-        let data: TextureLayersModel
-        let resolvedConfiguration: CanvasConfiguration
+    ) async -> CGSize {
+        let textureLayersData: TextureLayersModel
+        let resolvedTextureSize: CGSize
 
         if let restoredDataFromCoreData {
             do {
@@ -79,40 +79,40 @@ extension HandDrawingCanvasViewModel {
                     textureLayers: restoredDataFromCoreData,
                     device: renderer.device
                 )
-                data = restoredDataFromCoreData
-                resolvedConfiguration = configuration.newTextureSize(restoredDataFromCoreData.textureSize)
+                textureLayersData = restoredDataFromCoreData
+                resolvedTextureSize = restoredDataFromCoreData.textureSize
 
             } catch {
                 // Initialize using the configuration values when an error occurs
                 let newData = await initalizeStorage(
-                    configuration: configuration,
+                    textureSize: fallbackTextureSize,
                     commandQueue: commandQueue
                 )
-                data = newData
-                resolvedConfiguration = configuration
+                textureLayersData = newData
+                resolvedTextureSize = fallbackTextureSize
 
                 // Initialize the Core Data storage if fetching fails
                 textureLayerStorage.clearAll()
             }
         } else {
             let newData = await initalizeStorage(
-                configuration: configuration,
+                textureSize: fallbackTextureSize,
                 commandQueue: commandQueue
             )
-            data = newData
-            resolvedConfiguration = configuration
+            textureLayersData = newData
+            resolvedTextureSize = fallbackTextureSize
         }
 
-        textureLayersState.update(data)
+        textureLayersState.update(textureLayersData)
 
-        return resolvedConfiguration
+        return resolvedTextureSize
     }
 
     private func initalizeStorage(
-        configuration: CanvasConfiguration,
+        textureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async -> TextureLayersModel {
-        let data = TextureLayersModel(textureSize: configuration.textureSize)
+        let data = TextureLayersModel(textureSize: textureSize)
         do {
             try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                 textureLayers: data,
