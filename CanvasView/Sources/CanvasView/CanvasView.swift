@@ -68,7 +68,7 @@ open class CanvasView: UIView {
     public init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration = .init(),
-        onCanvasInitialized: (() throws -> Void)? = nil,
+        onInitializing: (() async throws -> Void)? = nil,
         onCompleted: ((CGSize) -> Void)? = nil
     ) throws {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -103,8 +103,10 @@ open class CanvasView: UIView {
         addEvents()
         bindData()
 
-        if let onCanvasInitialized {
-            try onCanvasInitialized()
+        if let onInitializing {
+            Task {
+                try await onInitializing()
+            }
         } else {
             try self.viewModel.initializeCanvas(
                 configuration.textureSize

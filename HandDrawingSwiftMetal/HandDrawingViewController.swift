@@ -51,81 +51,24 @@ class HandDrawingViewController: UIViewController {
             return try HandDrawingCanvasView(
                 device: sharedDevice,
                 configuration: configuration.canvasConfiguration,
-                onCanvasInitialized: onCanvasInitialized,
-                onCompleted: onCompleted
+                onInitializing: onCanvasInitializing,
+                onCompleted: onCanvasCompleted
             )
         } catch {
             fatalError("Failed to initialize CanvasView: \(error)")
         }
     }()
 
-    private lazy var onCanvasInitialized: (() throws -> Void)? = {
-        Task { [weak self] in
-            guard let `self` else { return }
-            defer {
-                self.showActivityIndicator(false)
-                self.showContentView(true)
-            }
-            self.showActivityIndicator(true)
-            self.showContentView(false)
-
-            try await self.canvasView.restoreOrInitializeCanvas(
-                fallbackTextureSize: configuration.canvasConfiguration.textureSize
-            )
-            self.viewModel.loadLocalDrawingComponentsData(
-                configuration: configuration
-            )
-            self.updateDrawingComponents()
-        }
-    }
-
-    private lazy var onCompleted: ((CGSize) -> Void)? = { [weak self] textureSize in
-        guard let `self` else { return }
-
-        // Initialize the textures in DrawingRenderer
-        for renderer in self.drawingRenderers.values {
-            renderer.initializeTextures(textureSize)
-        }
-
-        self.textureLayerView.update(
-            self.canvasView.textureLayersState
-        )
-
-        self.contentView.showCanvasAfterCompletion()
-    }
-
     private lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
-                device: sharedDevice,
+                device: canvasView.sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue,
-                onLayersChanged: handleViewUpdates,
-                onRegisterUndoObjectPair: registerUndoObject
+                onLayersChanged: onTextureLayersChanged,
+                onRegisterUndoObjectPair: onRegisterUndoObjectPair
             )
         )
     }()
-
-    /// Handles a texture layer event and updates the canvas view accordingly
-    private var handleViewUpdates: (TextureLayerEvent) -> Void {
-        { [weak self] event in
-            switch event {
-            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
-                Task { [weak self] in
-                    try? await self?.canvasView.updateFullCanvasTexture()
-                }
-            case .changeLayerAlpha:
-                Task { [weak self] in
-                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
-                }
-            }
-        }
-    }
-
-    private var registerUndoObject: ((UndoRedoObjectPair) -> Void) {
-        { [weak self] undoObjectPair in
-            self?.canvasView.registerUndoObject(undoObjectPair)
-        }
-    }
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -176,6 +119,71 @@ class HandDrawingViewController: UIViewController {
                     self.showAlert(error)
                 }
             }
+        }
+    }
+}
+
+private extension HandDrawingViewController {
+    /// Handler that is invoked during canvas initialization
+    var onCanvasInitializing: (() async throws -> Void)? {
+        { [weak self] in
+            guard let `self` else { return }
+
+            defer {
+                self.showActivityIndicator(false)
+                self.showContentView(true)
+            }
+            self.showActivityIndicator(true)
+            self.showContentView(false)
+
+            try await self.canvasView.restoreOrInitializeCanvas(
+                fallbackTextureSize: self.configuration.canvasConfiguration.textureSize
+            )
+            self.viewModel.loadLocalDrawingComponentsData(
+                configuration: self.configuration
+            )
+            self.updateDrawingComponents()
+        }
+    }
+
+    /// Handler invoked after the canvas setup is completed
+    var onCanvasCompleted: ((CGSize) -> Void)? {
+        { [weak self] textureSize in
+            guard let `self` else { return }
+
+            // Initialize the textures in DrawingRenderer
+            for renderer in self.drawingRenderers.values {
+                renderer.initializeTextures(textureSize)
+            }
+
+            self.textureLayerView.update(
+                self.canvasView.textureLayersState
+            )
+
+            self.contentView.showCanvasAfterCompletion()
+        }
+    }
+
+    /// Handler that responds to texture layer events and updates the canvas view accordingly.
+    var onTextureLayersChanged: (TextureLayerEvent) -> Void {
+        { [weak self] event in
+            switch event {
+            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
+                Task { [weak self] in
+                    try? await self?.canvasView.updateFullCanvasTexture()
+                }
+            case .changeLayerAlpha:
+                Task { [weak self] in
+                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
+                }
+            }
+        }
+    }
+
+    /// Handler invoked when an undo/redo object pair is registered
+    var onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void) {
+        { [weak self] undoObjectPair in
+            self?.canvasView.registerUndoObject(undoObjectPair)
         }
     }
 }
