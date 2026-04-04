@@ -71,10 +71,7 @@ final class HandDrawingViewModel: ObservableObject {
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
 
-    /// Repository that manages files in the Documents directory
-    private let localFileRepository: LocalFileRepository = LocalFileRepository(
-        workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
-    )
+    private let dependencies: HandDrawingViewDependencies?
 
     /// A publisher that emits a request to show or hide the activity indicator
     public var activityIndicator: AnyPublisher<Bool, Never> {
@@ -92,10 +89,11 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    public init() {
-
+    public init(
+        dependencies: HandDrawingViewDependencies? = .init()
+    ) {
+        self.dependencies = dependencies
         self.brushPalette = .init(colors: initializeColors)
-
         self.eraserPalette = .init(alphas: initializeAlphas)
 
         self.projectStorageController = .init(
@@ -199,20 +197,22 @@ extension HandDrawingViewModel {
         completion: (() -> Void)?,
         zipFileURL: URL
     ) {
-        Task(priority: .userInitiated) {
+        Task(priority: .userInitiated) { [weak self] in
+            guard let `self`, let dependencies else { return }
+
             defer {
                 /// Remove the working space
-                try? localFileRepository.removeWorkingDirectory()
+                try? dependencies.localFileRepository.removeWorkingDirectory()
 
-                activityIndicatorSubject.send(false)
+                self.activityIndicatorSubject.send(false)
             }
-            activityIndicatorSubject.send(true)
+            self.activityIndicatorSubject.send(true)
 
             do {
                 // Create a temporary working directory for saving project files
-                try localFileRepository.createWorkingDirectory()
+                try dependencies.localFileRepository.createWorkingDirectory()
 
-                let workingDirectoryURL = localFileRepository.workingDirectoryURL
+                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
 
                 try await saveCanvasAction?(workingDirectoryURL)
 
@@ -222,18 +222,18 @@ extension HandDrawingViewModel {
                 try ProjectArchiveModel(project).write(in: workingDirectoryURL)
 
                 // Zip the working directory into a single project file
-                try localFileRepository.zipWorkingDirectory(to: zipFileURL)
+                try dependencies.localFileRepository.zipWorkingDirectory(to: zipFileURL)
 
                 completion?()
 
-                toastSubject.send(
+                self.toastSubject.send(
                     .init(
                         title: "Success",
                         icon: UIImage(systemName: "hand.thumbsup.fill")
                     )
                 )
             } catch {
-                alertSubject.send(error)
+                self.alertSubject.send(error)
             }
         }
     }
@@ -243,46 +243,48 @@ extension HandDrawingViewModel {
         action: ((URL) async throws -> Void)?,
         completion: (() -> Void)?
     ) {
-        Task {
+        Task { [weak self] in
+            guard let `self`, let dependencies else { return }
+
             defer {
                 // Remove the working space
-                try? localFileRepository.removeWorkingDirectory()
+                try? dependencies.localFileRepository.removeWorkingDirectory()
 
-                activityIndicatorSubject.send(false)
+                self.activityIndicatorSubject.send(false)
             }
-            activityIndicatorSubject.send(true)
+            self.activityIndicatorSubject.send(true)
 
             do {
                 // Create a temporary working directory
-                try localFileRepository.createWorkingDirectory()
+                try dependencies.localFileRepository.createWorkingDirectory()
 
-                let workingDirectoryURL = localFileRepository.workingDirectoryURL
+                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
 
                 // Extract the zip file into the working directory
-                try await localFileRepository.unzipToWorkingDirectory(
+                try await dependencies.localFileRepository.unzipToWorkingDirectory(
                     from: zipFileURL
                 )
 
                 try await action?(workingDirectoryURL)
 
                 // Throw an error if the project name cannot be retrieved
-                try projectStorage.update(directoryURL: workingDirectoryURL)
+                try self.projectStorage.update(directoryURL: workingDirectoryURL)
 
                 // Since it’s optional, ignore any errors that occur
-                try? drawingToolStorage.update(directoryURL: workingDirectoryURL)
-                try? brushPaletteStorage.update(directoryURL: workingDirectoryURL)
-                try? eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
+                try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
+                try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
+                try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
 
                 completion?()
 
-                toastSubject.send(
+                self.toastSubject.send(
                     .init(
                         title: "Success",
                         icon: UIImage(systemName: "hand.thumbsup.fill")
                     )
                 )
             } catch {
-                alertSubject.send(error)
+                self.alertSubject.send(error)
             }
         }
     }
@@ -300,6 +302,7 @@ extension HandDrawingViewModel {
     }
 
     private func fileItemList(fileSuffix: String) async {
+        guard let dependencies else { return }
 
         var fileNames: [String] = []
 
@@ -311,14 +314,14 @@ extension HandDrawingViewModel {
 
         for fileName in fileNames {
             do {
-                defer { try? localFileRepository.removeWorkingDirectory() }
-                try localFileRepository.createWorkingDirectory()
+                defer { try? dependencies.localFileRepository.removeWorkingDirectory() }
+                try dependencies.localFileRepository.createWorkingDirectory()
 
-                let workingDirectoryURL = localFileRepository.workingDirectoryURL
+                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
 
                 let zipFileURL = URL.documents.appendingPathComponent(fileName)
 
-                try await localFileRepository.unzipToWorkingDirectory(
+                try await dependencies.localFileRepository.unzipToWorkingDirectory(
                     from: zipFileURL
                 )
 
