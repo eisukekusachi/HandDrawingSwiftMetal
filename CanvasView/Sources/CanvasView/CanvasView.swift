@@ -65,12 +65,11 @@ open class CanvasView: UIView {
 
     public init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration? = nil
+        configuration: CanvasConfiguration = .init()
     ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
-        let configuration = configuration ?? .init()
         self.sharedDevice = device ?? defaultDevice
         guard let commandQueue = sharedDevice.makeCommandQueue() else {
             fatalError("Failed to create command queue.")
@@ -90,6 +89,7 @@ open class CanvasView: UIView {
             displayView: displayView
         )
         self.viewModel = .init(
+            renderer: renderer,
             canvasRenderer: canvasRenderer,
             configuration: configuration
         )
@@ -97,10 +97,6 @@ open class CanvasView: UIView {
         layoutViews()
         addEvents()
         bindData()
-        viewModel.onInit(
-            renderer: renderer,
-            configuration: configuration
-        )
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

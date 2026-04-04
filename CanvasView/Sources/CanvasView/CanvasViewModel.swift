@@ -72,6 +72,7 @@ public final class CanvasViewModel {
     private var drawingRenderer: DrawingRenderer?
 
     init(
+        renderer: MTLRendering,
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
     ) {
@@ -89,12 +90,7 @@ public final class CanvasViewModel {
         self.touchGesture.setTransformingGestureRecognitionSecond(
             configuration.transformingGestureRecognitionSecond
         )
-    }
 
-    func onInit(
-        renderer: MTLRendering,
-        configuration: CanvasConfiguration
-    ) {
         // Set an initial value, as nothing is rendered when the drawing renderer is empty
         let drawingRenderer = BrushDrawingRenderer()
         drawingRenderer.setup(renderer: renderer)

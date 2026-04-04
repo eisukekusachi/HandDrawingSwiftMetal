@@ -39,13 +39,9 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private lazy var canvasView: HandDrawingCanvasView = {
-        HandDrawingCanvasView(
-            device: sharedDevice
-        )
-    }()
+    private var canvasView: HandDrawingCanvasView!
 
-    private var textureLayerView: TextureLayerView?
+    private var textureLayerView: TextureLayerView!
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -94,7 +90,8 @@ class HandDrawingViewController: UIViewController {
         )
         sharedDevice = defaultDevice
         canvasView = HandDrawingCanvasView(
-            device: sharedDevice
+            device: sharedDevice,
+            configuration: configuration.canvasConfiguration
         )
         textureLayerView = TextureLayerView(
             viewModel: UndoTextureLayerViewModel(

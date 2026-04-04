@@ -50,7 +50,7 @@ import TextureLayerView
 
     override init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration? = nil
+        configuration: CanvasConfiguration
     ) {
         super.init(
             device: device,
