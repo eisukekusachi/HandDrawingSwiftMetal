@@ -49,10 +49,26 @@ import TextureLayerView
     }
 
     override init(
-        device: MTLDevice? = nil
+        device: MTLDevice? = nil,
+        configuration: CanvasConfiguration? = nil
     ) {
-        super.init(device: device)
+        super.init(
+            device: device,
+            configuration: configuration
+        )
         self.bindData()
+    }
+
+    func initializeCanvas(
+        configuration: CanvasConfiguration
+    ) async {
+        let conifuration = await viewModel.restoreOrInitializeTextureLayers(
+            configuration: configuration,
+            commandQueue: renderer.commandQueue
+        )
+        super.initializeCanvas(
+            conifuration.textureSize
+        )
     }
 
     required init?(coder: NSCoder) {
@@ -204,20 +220,10 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
-    func setup(
-        drawingRenderers: [DrawingRenderer],
-        configuration: CanvasConfiguration
-    ) async throws {
-        let resolvedConfiguration = try await viewModel.onSetup(
-            configuration: configuration,
-            commandQueue: renderer.commandQueue
-        )
-        try super.setup(resolvedConfiguration)
-    }
 
     func newCanvas() async throws {
         try await viewModel.onNewCanvas()
-        try super.createCanvas(viewModel.textureSize)
+        super.initializeCanvas(viewModel.textureSize)
         super.resetTransforming()
     }
 
@@ -230,7 +236,7 @@ extension HandDrawingCanvasView {
 
     func loadFiles(in workingDirectoryURL: URL) async throws {
         try await viewModel.onLoadFiles(from: workingDirectoryURL)
-        try super.createCanvas(viewModel.textureSize)
+        super.initializeCanvas(viewModel.textureSize)
     }
 
     func undo() {

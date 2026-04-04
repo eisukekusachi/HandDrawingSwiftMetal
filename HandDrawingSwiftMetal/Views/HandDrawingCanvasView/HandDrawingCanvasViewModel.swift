@@ -66,10 +66,10 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 }
 
 extension HandDrawingCanvasViewModel {
-    func onSetup(
+    func restoreOrInitializeTextureLayers(
         configuration: CanvasConfiguration,
         commandQueue: MTLCommandQueue
-    ) async throws -> CanvasConfiguration? {
+    ) async -> CanvasConfiguration {
         let data: TextureLayersModel
         let resolvedConfiguration: CanvasConfiguration
 
@@ -84,10 +84,8 @@ extension HandDrawingCanvasViewModel {
 
             } catch {
                 // Initialize using the configuration values when an error occurs
-                let newData = TextureLayersModel(textureSize: configuration.textureSize)
-                try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                    textureLayers: newData,
-                    device: renderer.device,
+                let newData = await initalizeStorage(
+                    configuration: configuration,
                     commandQueue: commandQueue
                 )
                 data = newData
@@ -97,10 +95,8 @@ extension HandDrawingCanvasViewModel {
                 textureLayerStorage.clearAll()
             }
         } else {
-            let newData = TextureLayersModel(textureSize: configuration.textureSize)
-            try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                textureLayers: newData,
-                device: renderer.device,
+            let newData = await initalizeStorage(
+                configuration: configuration,
                 commandQueue: commandQueue
             )
             data = newData
@@ -110,6 +106,23 @@ extension HandDrawingCanvasViewModel {
         textureLayersState.update(data)
 
         return resolvedConfiguration
+    }
+
+    private func initalizeStorage(
+        configuration: CanvasConfiguration,
+        commandQueue: MTLCommandQueue
+    ) async -> TextureLayersModel {
+        let data = TextureLayersModel(textureSize: configuration.textureSize)
+        do {
+            try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+                textureLayers: data,
+                device: renderer.device,
+                commandQueue: commandQueue
+            )
+        } catch {
+            fatalError("Failed to initialize storage")
+        }
+        return data
     }
 
     func onSaveFiles(

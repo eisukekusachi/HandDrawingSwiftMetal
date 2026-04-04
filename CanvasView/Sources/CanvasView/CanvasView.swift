@@ -64,19 +64,18 @@ open class CanvasView: UIView {
     private let viewModel: CanvasViewModel
 
     public init(
-        device: MTLDevice? = nil
+        device: MTLDevice? = nil,
+        configuration: CanvasConfiguration? = nil
     ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
-
+        let configuration = configuration ?? .init()
         self.sharedDevice = device ?? defaultDevice
-
         guard let commandQueue = sharedDevice.makeCommandQueue() else {
             fatalError("Failed to create command queue.")
         }
         self.sharedCommandQueue = commandQueue
-
         self.renderer = MTLRenderer(
             device: sharedDevice,
             commandQueue: commandQueue
@@ -91,12 +90,14 @@ open class CanvasView: UIView {
             displayView: displayView
         )
         self.viewModel = .init(
-            canvasRenderer: canvasRenderer
+            canvasRenderer: canvasRenderer,
+            configuration: configuration
         )
         super.init(frame: .zero)
         layoutViews()
         addEvents()
         bindData()
+        initializeCanvas(configuration.textureSize)
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -123,7 +124,6 @@ open class CanvasView: UIView {
     }
 
     private func bindData() {
-
         // Subscribes to display texture size changes.
         // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
@@ -178,16 +178,9 @@ open class CanvasView: UIView {
         viewModel.frameSize = frame.size
     }
 
-    /// Sets up the canvas using the specified configuration
-    public func setup(
-        _ configuration: CanvasConfiguration? = nil
-    ) throws {
-        try viewModel.setup(configuration ?? .init())
-    }
-
     /// Creates the canvas using the specified texture size
-    public func createCanvas(_ textureSize: CGSize) throws {
-        try viewModel.createCanvas(
+    public func initializeCanvas(_ textureSize: CGSize) {
+        viewModel.initializeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }

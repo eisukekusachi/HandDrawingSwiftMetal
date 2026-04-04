@@ -122,12 +122,16 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    func setup(configuration: ProjectConfiguration) throws {
+    func loadLocalDrawingComponentsData(configuration: ProjectConfiguration) {
         // Retain the file suffix
         _fileSuffix = configuration.fileSuffix
 
         // Fetch data from Core Data
-        try fetchDataFromCoreDataIfAvailable()
+        do {
+            try fetchDataFromCoreDataIfAvailable()
+        } catch {
+            Logger.error(error)
+        }
 
         Task {
             // Create a list of file items

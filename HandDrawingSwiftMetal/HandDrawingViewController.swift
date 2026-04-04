@@ -89,6 +89,9 @@ class HandDrawingViewController: UIViewController {
         }
         super.viewDidLoad()
         view.backgroundColor = .white
+        let configuration: ProjectConfiguration = self.configuration ?? .init(
+            canvasConfiguration: .init()
+        )
         sharedDevice = defaultDevice
         canvasView = HandDrawingCanvasView(
             device: sharedDevice
@@ -105,43 +108,33 @@ class HandDrawingViewController: UIViewController {
         bindData()
         layoutViews()
         setupNewCanvasDialogPresenter()
-        setup()
-    }
 
-    private func setup() {
+        // Set the undo limit
+        canvasView.undoManager?.levelsOfUndo = configuration.undoCount
+
+        drawingRenderers.forEach {
+            $0.value.setup(
+                renderer: canvasView.renderer
+            )
+        }
+
         showActivityIndicator(true)
         showContentView(false)
         Task { [weak self] in
             guard let `self` else { return }
-
             defer {
                 self.showActivityIndicator(false)
                 self.showContentView(true)
             }
-            do {
-                let configuration: ProjectConfiguration = self.configuration ?? .init(
-                    canvasConfiguration: .init()
-                )
 
-                self.drawingRenderers.forEach {
-                    $0.value.setup(
-                        renderer: self.canvasView.renderer
-                    )
-                }
-                try await self.canvasView.setup(
-                    drawingRenderers: self.drawingRenderers.map { $0.value },
-                    configuration: configuration.canvasConfiguration
-                )
-                try self.viewModel.setup(configuration: configuration)
+            await self.canvasView.initializeCanvas(
+                configuration: configuration.canvasConfiguration
+            )
 
-                // Set the undo limit
-                self.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
-
-                self.updateComponents()
-
-            } catch {
-                fatalError("Failed to initialize the canvas")
-            }
+            self.viewModel.loadLocalDrawingComponentsData(
+                configuration: configuration
+            )
+            self.updateDrawingComponents()
         }
     }
 
@@ -158,7 +151,7 @@ class HandDrawingViewController: UIViewController {
 
                     self.viewModel.resetCoreData()
 
-                    self.updateComponents()
+                    self.updateDrawingComponents()
 
                 } catch {
                     self.showAlert(error)
@@ -409,17 +402,18 @@ extension HandDrawingViewController {
         ])
     }
 
-    private func updateComponents() {
+    private func updateDrawingComponents() {
         (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
         (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
 
-        contentView.updateDrawingComponents(viewModel.drawingTool.type)
-
-        guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
-        canvasView.setDrawingRenderer(renderer)
-
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
+
+        contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+        if let renderer = drawingRenderers[viewModel.drawingTool.type] {
+            canvasView.setDrawingRenderer(renderer)
+        }
     }
 }
 
@@ -485,7 +479,7 @@ extension HandDrawingViewController {
                 )
             },
             completion: { [weak self] in
-                self?.updateComponents()
+                self?.updateDrawingComponents()
             }
         )
     }

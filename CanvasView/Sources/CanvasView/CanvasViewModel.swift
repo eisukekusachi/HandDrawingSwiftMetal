@@ -72,52 +72,29 @@ public final class CanvasViewModel {
     private var drawingRenderer: DrawingRenderer?
 
     init(
-        canvasRenderer: CanvasRenderer
+        canvasRenderer: CanvasRenderer,
+        configuration: CanvasConfiguration
     ) {
         self.canvasRenderer = canvasRenderer
-    }
 
-    func setup(
-        _ configuration: CanvasConfiguration
-    ) throws {
-
-        try createCanvas(configuration.textureSize)
-
-        canvasRenderer.setup(
+        self.canvasRenderer.setup(
             backgroundColor: configuration.backgroundColor,
             baseBackgroundColor: configuration.baseBackgroundColor
         )
-        setupTouchGesture(
-            drawingGestureRecognitionSecond: configuration.drawingGestureRecognitionSecond,
-            transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
-        )
-    }
 
-    private func setupTouchGesture(
-        drawingGestureRecognitionSecond: TimeInterval,
-        transformingGestureRecognitionSecond: TimeInterval
-    ) {
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            drawingGestureRecognitionSecond
+            configuration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            transformingGestureRecognitionSecond
+            configuration.transformingGestureRecognitionSecond
         )
     }
 }
 
 extension CanvasViewModel {
 
-    /// Presents `canvasTexture` to the screen
-    func present() {
-        canvasRenderer.drawCanvasTextureToDisplay(
-            matrix: transforming.matrix,
-            canvasTexture: canvasTexture
-        )
-    }
-
-    func createCanvas(_ textureSize: CGSize) throws {
+    func initializeCanvas(_ textureSize: CGSize) {
         guard
             let canvasTexture = canvasRenderer.makeTexture(
                 textureSize,
@@ -132,7 +109,7 @@ extension CanvasViewModel {
                 label: "realtimeDrawingTexture"
             )
         else {
-            throw CanvasError.failedToCreateCanvas
+            fatalError("Failed to create canvasTextures")
         }
 
         self.canvasTexture = canvasTexture
@@ -143,6 +120,14 @@ extension CanvasViewModel {
 
         canvasEventSubject.send(
             .canvasCreated(textureSize)
+        )
+    }
+
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
         )
     }
 
