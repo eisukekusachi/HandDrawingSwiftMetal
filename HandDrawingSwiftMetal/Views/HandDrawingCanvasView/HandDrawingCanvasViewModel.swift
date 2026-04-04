@@ -39,7 +39,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var restoredDataFromCoreData: TextureLayersModel? {
+    private var restoredTextureLayerDataFromCoreData: TextureLayersModel? {
         guard
             let entity = textureLayerStorage.fetch()
         else { return nil }
@@ -73,14 +73,14 @@ extension HandDrawingCanvasViewModel {
         let textureLayersData: TextureLayersModel
         let resolvedTextureSize: CGSize
 
-        if let restoredDataFromCoreData {
+        if let restoredTextureLayerDataFromCoreData {
             do {
                 try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-                    textureLayers: restoredDataFromCoreData,
+                    textureLayers: restoredTextureLayerDataFromCoreData,
                     device: renderer.device
                 )
-                textureLayersData = restoredDataFromCoreData
-                resolvedTextureSize = restoredDataFromCoreData.textureSize
+                textureLayersData = restoredTextureLayerDataFromCoreData
+                resolvedTextureSize = restoredTextureLayerDataFromCoreData.textureSize
 
             } catch {
                 // Initialize using the configuration values when an error occurs
