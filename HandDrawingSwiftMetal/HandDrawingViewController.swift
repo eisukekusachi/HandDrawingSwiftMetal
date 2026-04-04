@@ -50,12 +50,49 @@ class HandDrawingViewController: UIViewController {
         do {
             return try HandDrawingCanvasView(
                 device: sharedDevice,
-                configuration: configuration.canvasConfiguration
+                configuration: configuration.canvasConfiguration,
+                onCanvasInitialized: onCanvasInitialized,
+                onCompleted: onCompleted
             )
         } catch {
             fatalError("Failed to initialize CanvasView: \(error)")
         }
     }()
+
+    private lazy var onCanvasInitialized: (() throws -> Void)? = {
+        Task { [weak self] in
+            guard let `self` else { return }
+            defer {
+                self.showActivityIndicator(false)
+                self.showContentView(true)
+            }
+            self.showActivityIndicator(true)
+            self.showContentView(false)
+
+            try await self.canvasView.restoreOrInitializeCanvas(
+                fallbackTextureSize: configuration.canvasConfiguration.textureSize
+            )
+            self.viewModel.loadLocalDrawingComponentsData(
+                configuration: configuration
+            )
+            self.updateDrawingComponents()
+        }
+    }
+
+    private lazy var onCompleted: ((CGSize) -> Void)? = { [weak self] textureSize in
+        guard let `self` else { return }
+
+        // Initialize the textures in DrawingRenderer
+        for renderer in self.drawingRenderers.values {
+            renderer.initializeTextures(textureSize)
+        }
+
+        self.textureLayerView.update(
+            self.canvasView.textureLayersState
+        )
+
+        self.contentView.showCanvasAfterCompletion()
+    }
 
     private lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
@@ -118,28 +155,6 @@ class HandDrawingViewController: UIViewController {
                 renderer: canvasView.renderer
             )
         }
-
-        showActivityIndicator(true)
-        showContentView(false)
-        Task { [weak self] in
-            guard let `self` else { return }
-            defer {
-                self.showActivityIndicator(false)
-                self.showContentView(true)
-            }
-            do {
-                try await self.canvasView.restoreOrInitializeCanvas(
-                    fallbackTextureSize: configuration.canvasConfiguration.textureSize
-                )
-                self.viewModel.loadLocalDrawingComponentsData(
-                    configuration: configuration
-                )
-                self.updateDrawingComponents()
-
-            } catch {
-                fatalError("Failed to initialize CanvasView: \(error)")
-            }
-        }
     }
 
     private func setupNewCanvasDialogPresenter() {
@@ -167,29 +182,6 @@ class HandDrawingViewController: UIViewController {
 
 extension HandDrawingViewController {
     private func bindData() {
-
-        canvasView.canvasEvents
-            .compactMap { event -> CGSize? in
-                guard case let .canvasCreated(size) = event else { return nil }
-                return size
-            }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] textureSize in
-                guard let `self` else { return }
-
-                // Initialize the textures in DrawingRenderer
-                for renderer in drawingRenderers.values {
-                    renderer.initializeTextures(textureSize)
-                }
-
-                self.contentView.initialize()
-
-                self.textureLayerView.update(
-                    self.canvasView.textureLayersState
-                )
-            }
-            .store(in: &cancellables)
-
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in

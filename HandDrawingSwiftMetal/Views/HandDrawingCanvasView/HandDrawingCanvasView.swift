@@ -50,11 +50,17 @@ import TextureLayerView
 
     override init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration,
+        onCanvasInitialized: (() throws -> Void)? = nil,
+        onCompleted: ((CGSize) -> Void)? = nil
     ) throws {
         try super.init(
             device: device,
-            configuration: configuration
+            configuration: configuration,
+            onCanvasInitialized: onCanvasInitialized,
+            onCompleted: { textureSize in
+                onCompleted?(textureSize)
+            }
         )
         self.bindData()
     }

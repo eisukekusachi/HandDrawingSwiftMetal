@@ -63,9 +63,13 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
+    private let onCompleted: ((CGSize) -> Void)?
+
     public init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration = .init()
+        configuration: CanvasConfiguration = .init(),
+        onCanvasInitialized: (() throws -> Void)? = nil,
+        onCompleted: ((CGSize) -> Void)? = nil
     ) throws {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
@@ -93,10 +97,19 @@ open class CanvasView: UIView {
             canvasRenderer: canvasRenderer,
             configuration: configuration
         )
+        self.onCompleted = onCompleted
         super.init(frame: .zero)
         layoutViews()
         addEvents()
         bindData()
+
+        if let onCanvasInitialized {
+            try onCanvasInitialized()
+        } else {
+            try self.viewModel.initializeCanvas(
+                configuration.textureSize
+            )
+        }
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -146,6 +159,8 @@ open class CanvasView: UIView {
                         self.canvasEventSubject.send(
                             .canvasCreated(textureSize)
                         )
+
+                        self.onCompleted?(textureSize)
                     }
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
