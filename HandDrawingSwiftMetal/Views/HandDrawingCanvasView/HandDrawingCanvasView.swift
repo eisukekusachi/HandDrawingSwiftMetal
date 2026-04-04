@@ -77,7 +77,10 @@ import TextureLayerView
         super.didMoveToWindow()
         // Configure undoManager here because it may be nil
         // before the view is attached to a window, causing settings to be ignored.
-        setupInitialUndoManager()
+        // Set an initial value to prevent out-of-memory errors when no limit is applied
+        if undoManager?.levelsOfUndo == 0 {
+            undoManager?.levelsOfUndo = 8
+        }
     }
 
     private func bindData() {
@@ -209,11 +212,6 @@ import TextureLayerView
             canvasTexture: canvasTexture,
             commandBuffer: currentFrameCommandBuffer
         )
-    }
-
-    private func setupInitialUndoManager() {
-        // Set an initial value to prevent out-of-memory errors when no limit is applied
-        undoManager?.levelsOfUndo = 8
     }
 }
 
