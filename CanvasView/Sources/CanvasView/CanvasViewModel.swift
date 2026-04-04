@@ -90,6 +90,19 @@ public final class CanvasViewModel {
             configuration.transformingGestureRecognitionSecond
         )
     }
+
+    func onInit(
+        renderer: MTLRendering,
+        configuration: CanvasConfiguration
+    ) {
+        // Set an initial value, as nothing is rendered when the drawing renderer is empty
+        let drawingRenderer = BrushDrawingRenderer()
+        drawingRenderer.setup(renderer: renderer)
+        drawingRenderer.initializeTextures(configuration.textureSize)
+        setDrawingRenderer(drawingRenderer)
+
+        initializeCanvas(configuration.textureSize)
+    }
 }
 
 extension CanvasViewModel {
