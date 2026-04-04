@@ -84,7 +84,7 @@ extension HandDrawingCanvasViewModel {
 
             } catch {
                 // Initialize using the configuration values when an error occurs
-                let newData = await initalizeStorage(
+                let newData = await initializeStorage(
                     textureSize: fallbackTextureSize,
                     commandQueue: commandQueue
                 )
@@ -95,7 +95,7 @@ extension HandDrawingCanvasViewModel {
                 textureLayerStorage.clearAll()
             }
         } else {
-            let newData = await initalizeStorage(
+            let newData = await initializeStorage(
                 textureSize: fallbackTextureSize,
                 commandQueue: commandQueue
             )
@@ -108,7 +108,7 @@ extension HandDrawingCanvasViewModel {
         return resolvedTextureSize
     }
 
-    private func initalizeStorage(
+    private func initializeStorage(
         textureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async -> TextureLayersModel {
