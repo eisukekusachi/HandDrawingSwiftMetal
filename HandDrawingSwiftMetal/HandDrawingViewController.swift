@@ -19,7 +19,7 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var configuration: ProjectConfiguration?
+    private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -39,9 +39,23 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private var canvasView: HandDrawingCanvasView!
+    private lazy var canvasView: HandDrawingCanvasView = {
+        HandDrawingCanvasView(
+            device: sharedDevice,
+            configuration: configuration.canvasConfiguration
+        )
+    }()
 
-    private var textureLayerView: TextureLayerView!
+    private lazy var textureLayerView: TextureLayerView = {
+        TextureLayerView(
+            viewModel: UndoTextureLayerViewModel(
+                device: sharedDevice,
+                commandQueue: canvasView.sharedCommandQueue,
+                onLayersChanged: handleViewUpdates,
+                onRegisterUndoObjectPair: registerUndoObject
+            )
+        )
+    }()
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -85,22 +99,8 @@ class HandDrawingViewController: UIViewController {
         }
         super.viewDidLoad()
         view.backgroundColor = .white
-        let configuration: ProjectConfiguration = self.configuration ?? .init(
-            canvasConfiguration: .init()
-        )
+
         sharedDevice = defaultDevice
-        canvasView = HandDrawingCanvasView(
-            device: sharedDevice,
-            configuration: configuration.canvasConfiguration
-        )
-        textureLayerView = TextureLayerView(
-            viewModel: UndoTextureLayerViewModel(
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue,
-                onLayersChanged: handleViewUpdates,
-                onRegisterUndoObjectPair: registerUndoObject
-            )
-        )
         addEvents()
         bindData()
         layoutViews()
@@ -177,7 +177,7 @@ extension HandDrawingViewController {
 
                 self.contentView.initialize()
 
-                self.textureLayerView?.update(
+                self.textureLayerView.update(
                     self.canvasView.textureLayersState
                 )
             }
@@ -206,7 +206,7 @@ extension HandDrawingViewController {
         canvasView.didPerformUndo
             .sink { [weak self] undoObject in
                 if let undoObject = undoObject as? UndoAlphaObject {
-                    self?.textureLayerView?.updateAlpha(
+                    self?.textureLayerView.updateAlpha(
                         undoObject.textureLayer.alpha
                     )
                 }
