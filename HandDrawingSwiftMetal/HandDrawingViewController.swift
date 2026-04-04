@@ -15,6 +15,13 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
+    public var zipFileURL: URL {
+        FileManager.documentsFileURL(
+            projectName: viewModel.project.projectName,
+            suffix: viewModel.fileSuffix
+        )
+    }
+
     @IBOutlet private weak var contentView: HandDrawingContentView!
 
     @IBOutlet private weak var activityIndicatorView: UIView!
@@ -57,20 +64,6 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
-        .brush: BrushDrawingRenderer(),
-        .eraser: EraserDrawingRenderer()
-    ]
-
-    private let viewModel = HandDrawingViewModel()
-
-    public var zipFileURL: URL {
-        FileManager.documentsFileURL(
-            projectName: viewModel.project.projectName,
-            suffix: viewModel.fileSuffix
-        )
-    }
-
     /// Handles a texture layer event and updates the canvas view accordingly
     private var handleViewUpdates: (TextureLayerEvent) -> Void {
         { [weak self] event in
@@ -92,6 +85,13 @@ class HandDrawingViewController: UIViewController {
             self?.canvasView.registerUndoObject(undoObjectPair)
         }
     }
+
+    private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
+        .brush: BrushDrawingRenderer(),
+        .eraser: EraserDrawingRenderer()
+    ]
+
+    private let viewModel = HandDrawingViewModel()
 
     override func viewDidLoad() {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -136,10 +136,10 @@ class HandDrawingViewController: UIViewController {
     }
 
     private func setupNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = { [weak self] in
-            guard let `self` else { return }
+        newCanvasDialogPresenter.onTapButton = {
+            Task { [weak self] in
+                guard let `self` else { return }
 
-            Task {
                 defer { self.showActivityIndicator(false) }
                 self.showActivityIndicator(true)
 
@@ -287,9 +287,7 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            guard
-                let `self`
-            else { return }
+            guard let `self` else { return }
             self.viewModel.toggleDrawingTool()
 
             self.contentView.updateDrawingComponents(viewModel.drawingTool.type)

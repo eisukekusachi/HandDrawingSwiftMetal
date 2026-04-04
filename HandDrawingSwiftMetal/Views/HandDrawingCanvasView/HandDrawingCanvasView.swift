@@ -14,6 +14,17 @@ import TextureLayerView
 
 @objc final class HandDrawingCanvasView: CanvasView {
 
+    var thumbnail: UIImage? {
+        canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: 500,
+            scale: 1.0
+        )
+    }
+
+    var textureLayersState: TextureLayersState {
+        viewModel.textureLayersState
+    }
+
     var didUndo: AnyPublisher<UndoManager, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -23,10 +34,6 @@ import TextureLayerView
         didPerformUndoSubject.eraseToAnyPublisher()
     }
     private var didPerformUndoSubject = PassthroughSubject<UndoObject, Never>()
-
-    var textureLayersState: TextureLayersState {
-        viewModel.textureLayersState
-    }
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
@@ -40,13 +47,6 @@ import TextureLayerView
     }()
 
     private var cancellables = Set<AnyCancellable>()
-
-    var thumbnail: UIImage? {
-        canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: 500,
-            scale: 1.0
-        )
-    }
 
     override init(
         device: MTLDevice? = nil,
