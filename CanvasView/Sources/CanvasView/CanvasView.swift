@@ -137,8 +137,13 @@ open class CanvasView: UIView {
                 switch event {
                 case .canvasCreated(let textureSize):
                     Task { [weak self] in
-                        await self?.completeCanvasCreation(textureSize)
-                        self?.canvasEventSubject.send(
+                        guard let `self` else { return }
+                        self.viewModel.onCompleteCanvasCreation(
+                            renderer: self.renderer,
+                            textureSize: textureSize
+                        )
+                        await self.completeCanvasCreation(textureSize)
+                        self.canvasEventSubject.send(
                             .canvasCreated(textureSize)
                         )
                     }

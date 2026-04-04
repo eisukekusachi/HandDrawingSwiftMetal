@@ -60,6 +60,9 @@ public final class CanvasViewModel {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
+    /// A class that manages drawing lines onto textures
+    private var drawingRenderer: DrawingRenderer?
+
     /// Manages input from pen and finger
     private let inputState = InputState()
 
@@ -67,9 +70,6 @@ public final class CanvasViewModel {
     private let touchGesture = TouchGestureState()
 
     private let transforming = Transforming()
-
-    /// A class that manages drawing lines onto textures
-    private var drawingRenderer: DrawingRenderer?
 
     init(
         renderer: MTLRendering,
@@ -90,12 +90,6 @@ public final class CanvasViewModel {
         self.touchGesture.setTransformingGestureRecognitionSecond(
             configuration.transformingGestureRecognitionSecond
         )
-
-        // Set an initial value, as nothing is rendered when the drawing renderer is empty
-        let drawingRenderer = BrushDrawingRenderer()
-        drawingRenderer.setup(renderer: renderer)
-        drawingRenderer.initializeTextures(configuration.textureSize)
-        setDrawingRenderer(drawingRenderer)
 
         initializeCanvas(configuration.textureSize)
     }
@@ -163,6 +157,19 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    func onCompleteCanvasCreation(
+        renderer: MTLRendering,
+        textureSize: CGSize
+    ) {
+        if drawingRenderer == nil {
+            // Set an initial value, as nothing is rendered when the drawing renderer is empty
+            let drawingRenderer = BrushDrawingRenderer()
+            drawingRenderer.setup(renderer: renderer)
+            drawingRenderer.initializeTextures(textureSize)
+            setDrawingRenderer(drawingRenderer)
+        }
+    }
 
     /// Processes finger touches and determines whether the gesture is drawing or transforming
     func onFingerGestureDetected(
