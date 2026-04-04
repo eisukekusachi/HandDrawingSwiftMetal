@@ -59,11 +59,11 @@ import TextureLayerView
         self.bindData()
     }
 
-    func initializeCanvas(
-        configuration: CanvasConfiguration
+    func restoreOrInitializeCanvas(
+        fallbackTextureSize: CGSize
     ) async {
         let resolvedTextureSize = await viewModel.restoreOrInitializeTextureLayers(
-            fallbackTextureSize: configuration.textureSize,
+            fallbackTextureSize: fallbackTextureSize,
             commandQueue: renderer.commandQueue
         )
         super.initializeCanvas(resolvedTextureSize)

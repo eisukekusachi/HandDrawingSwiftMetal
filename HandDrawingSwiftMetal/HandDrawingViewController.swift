@@ -124,8 +124,8 @@ class HandDrawingViewController: UIViewController {
                 self.showContentView(true)
             }
 
-            await self.canvasView.initializeCanvas(
-                configuration: configuration.canvasConfiguration
+            await self.canvasView.restoreOrInitializeCanvas(
+                fallbackTextureSize: configuration.canvasConfiguration.textureSize
             )
 
             self.viewModel.loadLocalDrawingComponentsData(
