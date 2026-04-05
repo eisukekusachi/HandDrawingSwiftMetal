@@ -95,7 +95,6 @@ open class CanvasView: UIView {
         layoutViews()
         addEvents()
         bindData()
-        prepareForDrawing()
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
