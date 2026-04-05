@@ -40,28 +40,20 @@ import Combine
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue,
-        displayView: CanvasDisplayable
-    ) {
-        guard let buffer = MTLBuffers.makeTextureBuffers(
-            nodes: .flippedTextureNodes,
-            with: device
-        ) else {
-            fatalError("Metal is not supported on this device.")
-        }
-        self.renderer = MTLRenderer(
-            device: device,
-            commandQueue: commandQueue
-        )
-        self.displayView = displayView
-        self.flippedTextureBuffers = buffer
-    }
-
-    public func setup(
+        renderer: MTLRendering,
+        displayView: CanvasDisplayable,
         backgroundColor: UIColor?,
         baseBackgroundColor: UIColor?
     ) {
+        guard let buffer = MTLBuffers.makeTextureBuffers(
+            nodes: .flippedTextureNodes,
+            with: renderer.device
+        ) else {
+            fatalError("Metal is not supported on this device.")
+        }
+        self.renderer = renderer
+        self.displayView = displayView
+        self.flippedTextureBuffers = buffer
         if let backgroundColor { self.backgroundColor = backgroundColor }
         if let baseBackgroundColor { self.baseBackgroundColor = baseBackgroundColor }
     }
@@ -76,7 +68,6 @@ import Combine
 }
 
 extension CanvasRenderer {
-
     /// Updates `canvasTexture` using `currentTexture` and the background color
     public func updateCanvasTexture(
         currentTexture: MTLTexture?,

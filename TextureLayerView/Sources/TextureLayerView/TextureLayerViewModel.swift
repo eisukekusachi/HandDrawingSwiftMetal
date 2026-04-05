@@ -38,8 +38,8 @@ open class TextureLayerViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        device: MTLDevice?,
-        commandQueue: MTLCommandQueue?,
+        device: MTLDevice? = nil,
+        commandQueue: MTLCommandQueue? = nil,
         dependencies: TextureLayerViewDependencies? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {

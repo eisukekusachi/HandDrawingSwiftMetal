@@ -42,6 +42,7 @@
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
 		D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */; };
+		D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA06C2F3C18D3008C6E9E /* UndoVisibilityObject.swift */; };
@@ -150,6 +151,7 @@
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
 		D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepositoryProtocol.swift; sourceTree = "<group>"; };
+		D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewDependencies.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
 		D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaObject.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 				D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */,
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
+				D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
 			);
@@ -710,6 +713,7 @@
 				D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */,
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,
+				D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */,
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
 				D48CA0752F3C18D3008C6E9E /* UndoSelectionObject.swift in Sources */,
 				D48CA0762F3C18D3008C6E9E /* UndoDrawingObject.swift in Sources */,

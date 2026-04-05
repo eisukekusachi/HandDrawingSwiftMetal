@@ -15,11 +15,18 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
+    public var zipFileURL: URL {
+        FileManager.documentsFileURL(
+            projectName: viewModel.project.projectName,
+            suffix: viewModel.fileSuffix
+        )
+    }
+
     @IBOutlet private weak var contentView: HandDrawingContentView!
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var configuration: ProjectConfiguration?
+    private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
     private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
@@ -40,12 +47,27 @@ class HandDrawingViewController: UIViewController {
     }()
 
     private lazy var canvasView: HandDrawingCanvasView = {
-        HandDrawingCanvasView(
-            device: sharedDevice
-        )
+        do {
+            return try HandDrawingCanvasView(
+                device: sharedDevice,
+                configuration: configuration.canvasConfiguration,
+                onCompleted: onCanvasCompleted
+            )
+        } catch {
+            fatalError("Failed to initialize CanvasView: \(error)")
+        }
     }()
 
-    private var textureLayerView: TextureLayerView?
+    private lazy var textureLayerView: TextureLayerView = {
+        TextureLayerView(
+            viewModel: UndoTextureLayerViewModel(
+                device: canvasView.sharedDevice,
+                commandQueue: canvasView.sharedCommandQueue,
+                onLayersChanged: onTextureLayersChanged,
+                onRegisterUndoObjectPair: onRegisterUndoObjectPair
+            )
+        )
+    }()
 
     private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
@@ -54,15 +76,86 @@ class HandDrawingViewController: UIViewController {
 
     private let viewModel = HandDrawingViewModel()
 
-    public var zipFileURL: URL {
-        FileManager.documentsFileURL(
-            projectName: viewModel.project.projectName,
-            suffix: viewModel.fileSuffix
+    override func viewDidLoad() {
+        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device.")
+        }
+        super.viewDidLoad()
+        view.backgroundColor = .white
+
+        sharedDevice = defaultDevice
+        addEvents()
+        bindData()
+        layoutViews()
+        setupNewCanvasDialogPresenter()
+
+        drawingRenderers.forEach {
+            $0.value.setup(
+                renderer: canvasView.renderer
+            )
+        }
+
+        showActivityIndicator(true)
+        showContentView(false)
+
+        viewModel.loadLocalDrawingComponentsData(
+            configuration: configuration
         )
+        updateDrawingComponents()
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Set the undo limit
+        canvasView.undoManager?.levelsOfUndo = configuration.undoCount
     }
 
-    /// Handles a texture layer event and updates the canvas view accordingly
-    private var handleViewUpdates: (TextureLayerEvent) -> Void {
+    private func setupNewCanvasDialogPresenter() {
+        newCanvasDialogPresenter.onTapButton = {
+            Task { [weak self] in
+                guard let `self` else { return }
+
+                defer { self.showActivityIndicator(false) }
+                self.showActivityIndicator(true)
+
+                do {
+                    try await self.canvasView.newCanvas()
+
+                    self.viewModel.resetCoreData()
+
+                    self.updateDrawingComponents()
+
+                } catch {
+                    self.showAlert(error)
+                }
+            }
+        }
+    }
+}
+
+private extension HandDrawingViewController {
+    /// Handler invoked after the canvas setup is completed
+    var onCanvasCompleted: ((CGSize) -> Void)? {
+        { [weak self] textureSize in
+            guard let `self` else { return }
+
+            // Initialize the textures in DrawingRenderer
+            for renderer in self.drawingRenderers.values {
+                renderer.initializeTextures(textureSize)
+            }
+
+            self.textureLayerView.update(
+                self.canvasView.textureLayersState
+            )
+
+            self.contentView.showCanvasAfterCompletion()
+
+            self.showActivityIndicator(false)
+            self.showContentView(true)
+        }
+    }
+
+    /// Handler that responds to texture layer events and updates the canvas view accordingly.
+    var onTextureLayersChanged: (TextureLayerEvent) -> Void {
         { [weak self] event in
             switch event {
             case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
@@ -77,122 +170,16 @@ class HandDrawingViewController: UIViewController {
         }
     }
 
-    private var registerUndoObject: ((UndoRedoObjectPair) -> Void) {
+    /// Handler invoked when an undo/redo object pair is registered
+    var onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void) {
         { [weak self] undoObjectPair in
             self?.canvasView.registerUndoObject(undoObjectPair)
-        }
-    }
-
-    override func viewDidLoad() {
-        guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
-            fatalError("Metal is not supported on this device.")
-        }
-        super.viewDidLoad()
-        view.backgroundColor = .white
-        sharedDevice = defaultDevice
-        canvasView = HandDrawingCanvasView(
-            device: sharedDevice
-        )
-        textureLayerView = TextureLayerView(
-            viewModel: UndoTextureLayerViewModel(
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue,
-                onLayersChanged: handleViewUpdates,
-                onRegisterUndoObjectPair: registerUndoObject
-            )
-        )
-        addEvents()
-        bindData()
-        layoutViews()
-        setupNewCanvasDialogPresenter()
-        setup()
-    }
-
-    private func setup() {
-        showActivityIndicator(true)
-        showContentView(false)
-        Task { [weak self] in
-            guard let `self` else { return }
-
-            defer {
-                self.showActivityIndicator(false)
-                self.showContentView(true)
-            }
-            do {
-                let configuration: ProjectConfiguration = self.configuration ?? .init(
-                    canvasConfiguration: .init()
-                )
-
-                self.drawingRenderers.forEach {
-                    $0.value.setup(
-                        renderer: self.canvasView.renderer
-                    )
-                }
-                try await self.canvasView.setup(
-                    drawingRenderers: self.drawingRenderers.map { $0.value },
-                    configuration: configuration.canvasConfiguration
-                )
-                try self.viewModel.setup(configuration: configuration)
-
-                // Set the undo limit
-                self.canvasView.undoManager?.levelsOfUndo = configuration.undoCount
-
-                self.updateComponents()
-
-            } catch {
-                fatalError("Failed to initialize the canvas")
-            }
-        }
-    }
-
-    private func setupNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = { [weak self] in
-            guard let `self` else { return }
-
-            Task {
-                defer { self.showActivityIndicator(false) }
-                self.showActivityIndicator(true)
-
-                do {
-                    try await self.canvasView.newCanvas()
-
-                    self.viewModel.resetCoreData()
-
-                    self.updateComponents()
-
-                } catch {
-                    self.showAlert(error)
-                }
-            }
         }
     }
 }
 
 extension HandDrawingViewController {
     private func bindData() {
-
-        canvasView.canvasEvents
-            .compactMap { event -> CGSize? in
-                guard case let .canvasCreated(size) = event else { return nil }
-                return size
-            }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] textureSize in
-                guard let `self` else { return }
-
-                // Initialize the textures in DrawingRenderer
-                for renderer in drawingRenderers.values {
-                    renderer.initializeTextures(textureSize)
-                }
-
-                self.contentView.initialize()
-
-                self.textureLayerView?.update(
-                    self.canvasView.textureLayersState
-                )
-            }
-            .store(in: &cancellables)
-
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
@@ -216,7 +203,7 @@ extension HandDrawingViewController {
         canvasView.didPerformUndo
             .sink { [weak self] undoObject in
                 if let undoObject = undoObject as? UndoAlphaObject {
-                    self?.textureLayerView?.updateAlpha(
+                    self?.textureLayerView.updateAlpha(
                         undoObject.textureLayer.alpha
                     )
                 }
@@ -297,9 +284,7 @@ extension HandDrawingViewController {
             self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            guard
-                let `self`
-            else { return }
+            guard let `self` else { return }
             self.viewModel.toggleDrawingTool()
 
             self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
@@ -409,17 +394,18 @@ extension HandDrawingViewController {
         ])
     }
 
-    private func updateComponents() {
+    private func updateDrawingComponents() {
         (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
         (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
 
-        contentView.updateDrawingComponents(viewModel.drawingTool.type)
-
-        guard let renderer = drawingRenderers[viewModel.drawingTool.type] else { return }
-        canvasView.setDrawingRenderer(renderer)
-
         contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
         contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
+
+        contentView.updateDrawingComponents(viewModel.drawingTool.type)
+
+        if let renderer = drawingRenderers[viewModel.drawingTool.type] {
+            canvasView.setDrawingRenderer(renderer)
+        }
     }
 }
 
@@ -485,7 +471,7 @@ extension HandDrawingViewController {
                 )
             },
             completion: { [weak self] in
-                self?.updateComponents()
+                self?.updateDrawingComponents()
             }
         )
     }

@@ -60,6 +60,9 @@ public final class CanvasViewModel {
         drawingRenderer?.displayRealtimeDrawingTexture ?? false
     }
 
+    /// A class that manages drawing lines onto textures
+    private var drawingRenderer: DrawingRenderer?
+
     /// Manages input from pen and finger
     private let inputState = InputState()
 
@@ -68,56 +71,41 @@ public final class CanvasViewModel {
 
     private let transforming = Transforming()
 
-    /// A class that manages drawing lines onto textures
-    private var drawingRenderer: DrawingRenderer?
-
     init(
-        canvasRenderer: CanvasRenderer
-    ) {
-        self.canvasRenderer = canvasRenderer
-    }
-
-    func setup(
-        _ configuration: CanvasConfiguration
+        canvasRenderer: CanvasRenderer,
+        configuration: CanvasConfiguration
     ) throws {
+        self.canvasRenderer = canvasRenderer
 
-        try createCanvas(configuration.textureSize)
-
-        canvasRenderer.setup(
-            backgroundColor: configuration.backgroundColor,
-            baseBackgroundColor: configuration.baseBackgroundColor
-        )
-        setupTouchGesture(
-            drawingGestureRecognitionSecond: configuration.drawingGestureRecognitionSecond,
-            transformingGestureRecognitionSecond: configuration.transformingGestureRecognitionSecond
-        )
-    }
-
-    private func setupTouchGesture(
-        drawingGestureRecognitionSecond: TimeInterval,
-        transformingGestureRecognitionSecond: TimeInterval
-    ) {
         // Set the gesture recognition durations in seconds
         self.touchGesture.setDrawingGestureRecognitionSecond(
-            drawingGestureRecognitionSecond
+            configuration.drawingGestureRecognitionSecond
         )
         self.touchGesture.setTransformingGestureRecognitionSecond(
-            transformingGestureRecognitionSecond
+            configuration.transformingGestureRecognitionSecond
         )
+
+        self.currentTextureSize = configuration.textureSize
     }
 }
 
 extension CanvasViewModel {
 
-    /// Presents `canvasTexture` to the screen
-    func present() {
-        canvasRenderer.drawCanvasTextureToDisplay(
-            matrix: transforming.matrix,
-            canvasTexture: canvasTexture
-        )
-    }
+    func initializeCanvas(_ textureSize: CGSize) throws {
+        guard
+            Int(textureSize.width) >= canvasMinimumTextureLength &&
+            Int(textureSize.height) >= canvasMinimumTextureLength
+        else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
+        }
 
-    func createCanvas(_ textureSize: CGSize) throws {
         guard
             let canvasTexture = canvasRenderer.makeTexture(
                 textureSize,
@@ -132,7 +120,12 @@ extension CanvasViewModel {
                 label: "realtimeDrawingTexture"
             )
         else {
-            throw CanvasError.failedToCreateCanvas
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to create canvas textures")
+            )
+            Logger.error(error)
+            throw error
         }
 
         self.canvasTexture = canvasTexture
@@ -143,6 +136,14 @@ extension CanvasViewModel {
 
         canvasEventSubject.send(
             .canvasCreated(textureSize)
+        )
+    }
+
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
         )
     }
 
@@ -169,6 +170,19 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
+
+    func onCompleteCanvasCreation(
+        renderer: MTLRendering,
+        textureSize: CGSize
+    ) {
+        if drawingRenderer == nil {
+            // Set an initial value, as nothing is rendered when the drawing renderer is empty
+            let drawingRenderer = BrushDrawingRenderer()
+            drawingRenderer.setup(renderer: renderer)
+            drawingRenderer.initializeTextures(textureSize)
+            setDrawingRenderer(drawingRenderer)
+        }
+    }
 
     /// Processes finger touches and determines whether the gesture is drawing or transforming
     func onFingerGestureDetected(

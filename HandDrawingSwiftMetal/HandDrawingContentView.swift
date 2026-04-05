@@ -60,6 +60,8 @@ final class HandDrawingContentView: UIView {
     }
 
     private func commonInit() {
+        backgroundColor = .white
+
         baseView.alpha = 0.0
 
         addEvents()
@@ -68,12 +70,10 @@ final class HandDrawingContentView: UIView {
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
 
-    func initialize() {
+    func showCanvasAfterCompletion() {
         UIView.animate(withDuration: 0.1) { [weak self] in
             self?.baseView.alpha = 1.0
         }
-
-        backgroundColor = .white
     }
 
     func updateDrawingComponents(_ tool: DrawingToolType) {

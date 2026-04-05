@@ -13,12 +13,11 @@ public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
 
     var workingDirectoryURL: URL { get }
 
-    @discardableResult
     func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async throws -> Bool
+    ) async throws
 
     func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
