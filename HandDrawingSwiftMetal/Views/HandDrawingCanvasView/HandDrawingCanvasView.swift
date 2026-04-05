@@ -54,9 +54,9 @@ import TextureLayerView
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration,
         onCompleted: ((CGSize) -> Void)? = nil
-    ) throws {
+    ) {
         self.configuration = configuration
-        try super.init(
+        super.init(
             device: device,
             configuration: configuration,
             onCompleted: onCompleted
