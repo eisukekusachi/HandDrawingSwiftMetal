@@ -12,12 +12,6 @@ import UIKit
 
 open class CanvasView: UIView {
 
-    /// Emits canvas events
-    public var canvasEvents: AnyPublisher<CanvasEvent, Never> {
-        canvasEventSubject.eraseToAnyPublisher()
-    }
-    private let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
-
     /// Emits stroke events
     public var strokeEvents: AnyPublisher<StrokeEvent, Never> {
         strokeEventSubject.eraseToAnyPublisher()
@@ -158,10 +152,6 @@ open class CanvasView: UIView {
                             textureSize: textureSize
                         )
                         await self.completeCanvasCreation(textureSize)
-                        self.canvasEventSubject.send(
-                            .canvasCreated(textureSize)
-                        )
-
                         self.onCompleted?(textureSize)
                     }
                 case .displayCurrentTexture:
