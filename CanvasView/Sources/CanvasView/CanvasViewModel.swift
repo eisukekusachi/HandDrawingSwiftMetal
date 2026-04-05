@@ -84,6 +84,8 @@ public final class CanvasViewModel {
         self.touchGesture.setTransformingGestureRecognitionSecond(
             configuration.transformingGestureRecognitionSecond
         )
+
+        self.currentTextureSize = configuration.textureSize
     }
 }
 

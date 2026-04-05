@@ -62,7 +62,6 @@ open class CanvasView: UIView {
     public init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration = .init(),
-        onInitializing: (() async throws -> Void)? = nil,
         onCompleted: ((CGSize) -> Void)? = nil
     ) throws {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -96,16 +95,7 @@ open class CanvasView: UIView {
         layoutViews()
         addEvents()
         bindData()
-
-        if let onInitializing {
-            Task {
-                try await onInitializing()
-            }
-        } else {
-            try self.viewModel.initializeCanvas(
-                configuration.textureSize
-            )
-        }
+        prepareForDrawing()
     }
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -194,6 +184,16 @@ open class CanvasView: UIView {
         try viewModel.initializeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
+    }
+
+    open func prepareForDrawing() {
+        do {
+            try initializeCanvas(
+                viewModel.currentTextureSize
+            )
+        } catch {
+            fatalError("Failed to initialize canvas: \(error)")
+        }
     }
 
     /// Called after the canvas has been created

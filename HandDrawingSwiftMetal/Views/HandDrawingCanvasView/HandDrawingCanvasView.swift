@@ -48,29 +48,33 @@ import TextureLayerView
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let configuration: CanvasConfiguration
+
     override init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration,
-        onInitializing: (() async throws -> Void)? = nil,
         onCompleted: ((CGSize) -> Void)? = nil
     ) throws {
+        self.configuration = configuration
         try super.init(
             device: device,
             configuration: configuration,
-            onInitializing: onInitializing,
             onCompleted: onCompleted
         )
         self.bindData()
+        self.startPreparingForDrawing()
+    }
+    private func startPreparingForDrawing() {
+        prepareForDrawing()
     }
 
-    func restoreOrInitializeCanvas(
+    func restoreOrInitializeTextureState(
         fallbackTextureSize: CGSize
-    ) async throws {
-        let resolvedTextureSize = await viewModel.restoreOrInitializeTextureLayers(
+    ) async -> CGSize {
+        await viewModel.restoreOrInitializeTextureLayers(
             fallbackTextureSize: fallbackTextureSize,
             commandQueue: renderer.commandQueue
         )
-        try super.initializeCanvas(resolvedTextureSize)
     }
 
     required init?(coder: NSCoder) {
@@ -84,6 +88,19 @@ import TextureLayerView
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         if undoManager?.levelsOfUndo == 0 {
             undoManager?.levelsOfUndo = 8
+        }
+    }
+
+    override func prepareForDrawing() {
+        Task {
+            do {
+                let textureSize = await restoreOrInitializeTextureState(
+                    fallbackTextureSize: self.configuration.textureSize
+                )
+                try initializeCanvas(textureSize)
+            } catch {
+                fatalError("Failed to prepare canvas for drawing: \(error)")
+            }
         }
     }
 

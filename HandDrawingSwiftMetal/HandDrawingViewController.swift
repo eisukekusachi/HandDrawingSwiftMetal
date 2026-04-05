@@ -51,7 +51,6 @@ class HandDrawingViewController: UIViewController {
             return try HandDrawingCanvasView(
                 device: sharedDevice,
                 configuration: configuration.canvasConfiguration,
-                onInitializing: onCanvasInitializing,
                 onCompleted: onCanvasCompleted
             )
         } catch {
@@ -98,6 +97,14 @@ class HandDrawingViewController: UIViewController {
                 renderer: canvasView.renderer
             )
         }
+
+        showActivityIndicator(true)
+        showContentView(false)
+
+        viewModel.loadLocalDrawingComponentsData(
+            configuration: configuration
+        )
+        updateDrawingComponents()
     }
 
     private func setupNewCanvasDialogPresenter() {
@@ -124,28 +131,6 @@ class HandDrawingViewController: UIViewController {
 }
 
 private extension HandDrawingViewController {
-    /// Handler that is invoked during canvas initialization
-    var onCanvasInitializing: (() async throws -> Void)? {
-        { [weak self] in
-            guard let `self` else { return }
-
-            defer {
-                self.showActivityIndicator(false)
-                self.showContentView(true)
-            }
-            self.showActivityIndicator(true)
-            self.showContentView(false)
-
-            try await self.canvasView.restoreOrInitializeCanvas(
-                fallbackTextureSize: self.configuration.canvasConfiguration.textureSize
-            )
-            self.viewModel.loadLocalDrawingComponentsData(
-                configuration: self.configuration
-            )
-            self.updateDrawingComponents()
-        }
-    }
-
     /// Handler invoked after the canvas setup is completed
     var onCanvasCompleted: ((CGSize) -> Void)? {
         { [weak self] textureSize in
@@ -161,6 +146,9 @@ private extension HandDrawingViewController {
             )
 
             self.contentView.showCanvasAfterCompletion()
+
+            self.showActivityIndicator(false)
+            self.showContentView(true)
         }
     }
 
