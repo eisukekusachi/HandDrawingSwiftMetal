@@ -53,16 +53,24 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         textureLayers: TextureLayersModel,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async throws -> Bool {
+    ) async throws {
         let textureSize = textureLayers.textureSize
 
+        // There is no recovery path. so missing layerId is treated as an error.
         guard
             let layerId: LayerId = textureLayers.layers.first?.id
         else {
-            Logger.info("Unable to find layer ID")
-            return false
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Unable to find layer ID"
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
+        // There is no recovery path. so invalid texture size is treated as an error.
         guard
             Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
             let newTexture = MTLTextureCreator.makeTexture(
@@ -71,8 +79,14 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
                 with: device
             )
         else {
-            Logger.error("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return false
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         // Delete all textures in the repository
@@ -86,8 +100,6 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             data: textureData,
             id: layerId
         )
-
-        return true
     }
 
     /// Restore the storage

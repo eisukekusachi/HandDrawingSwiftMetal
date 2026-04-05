@@ -113,6 +113,7 @@ extension HandDrawingCanvasViewModel {
         commandQueue: MTLCommandQueue
     ) async -> TextureLayersModel {
         let data = TextureLayersModel(textureSize: textureSize)
+
         do {
             try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                 textureLayers: data,
@@ -122,6 +123,7 @@ extension HandDrawingCanvasViewModel {
         } catch {
             fatalError("Failed to initialize storage")
         }
+        
         return data
     }
 
