@@ -63,7 +63,7 @@ open class CanvasView: UIView {
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration = .init(),
         onCompleted: ((CGSize) -> Void)? = nil
-    ) throws {
+    ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
@@ -86,7 +86,7 @@ open class CanvasView: UIView {
             backgroundColor: configuration.backgroundColor,
             baseBackgroundColor: configuration.baseBackgroundColor
         )
-        self.viewModel = try .init(
+        self.viewModel = .init(
             canvasRenderer: canvasRenderer,
             configuration: configuration
         )

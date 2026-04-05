@@ -47,15 +47,11 @@ class HandDrawingViewController: UIViewController {
     }()
 
     private lazy var canvasView: HandDrawingCanvasView = {
-        do {
-            return try HandDrawingCanvasView(
-                device: sharedDevice,
-                configuration: configuration.canvasConfiguration,
-                onCompleted: onCanvasCompleted
-            )
-        } catch {
-            fatalError("Failed to initialize CanvasView: \(error)")
-        }
+        HandDrawingCanvasView(
+            device: sharedDevice,
+            configuration: configuration.canvasConfiguration,
+            onCompleted: onCanvasCompleted
+        )
     }()
 
     private lazy var textureLayerView: TextureLayerView = {

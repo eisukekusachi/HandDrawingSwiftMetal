@@ -74,7 +74,7 @@ public final class CanvasViewModel {
     init(
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
-    ) throws {
+    ) {
         self.canvasRenderer = canvasRenderer
 
         // Set the gesture recognition durations in seconds
