@@ -89,9 +89,6 @@ class HandDrawingViewController: UIViewController {
         layoutViews()
         setupNewCanvasDialogPresenter()
 
-        // Set the undo limit
-        canvasView.undoManager?.levelsOfUndo = configuration.undoCount
-
         drawingRenderers.forEach {
             $0.value.setup(
                 renderer: canvasView.renderer
@@ -105,6 +102,11 @@ class HandDrawingViewController: UIViewController {
             configuration: configuration
         )
         updateDrawingComponents()
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Set the undo limit
+        canvasView.undoManager?.levelsOfUndo = configuration.undoCount
     }
 
     private func setupNewCanvasDialogPresenter() {
