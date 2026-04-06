@@ -34,7 +34,13 @@ public class TextureLayersState: ObservableObject {
     // Set a default value to avoid nil
     @Published public private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
-    public init() {}
+    public init(
+        textureLayers: TextureLayersModel? = nil
+    ) {
+        if let textureLayers {
+            update(textureLayers)
+        }
+    }
 
     public func update(
         _ textureLayers: TextureLayersModel

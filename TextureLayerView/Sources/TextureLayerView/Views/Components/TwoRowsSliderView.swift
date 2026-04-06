@@ -103,7 +103,11 @@ public struct TwoRowsSliderView: View {
 
 private struct PreviewView: View {
 
-    private let viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
+    private let viewModel = TextureLayerViewModel(
+        textureLayers: .init(),
+        device: nil,
+        commandQueue: nil
+    )
 
     var body: some View {
         TwoRowsSliderView(

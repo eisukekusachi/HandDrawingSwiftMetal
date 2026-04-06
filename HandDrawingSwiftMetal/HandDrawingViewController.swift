@@ -26,6 +26,8 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
+    private var textureLayers: TextureLayersState = .init()
+
     private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
@@ -57,6 +59,7 @@ class HandDrawingViewController: UIViewController {
     private lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
+                textureLayers: textureLayers,
                 device: canvasView.sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue,
                 onLayersChanged: onTextureLayersChanged,
