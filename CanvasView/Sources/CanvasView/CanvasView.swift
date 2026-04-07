@@ -185,16 +185,6 @@ open class CanvasView: UIView {
         )
     }
 
-    open func prepareForDrawing() {
-        do {
-            try initializeCanvas(
-                viewModel.currentTextureSize
-            )
-        } catch {
-            fatalError("Failed to initialize canvas: \(error)")
-        }
-    }
-
     /// Called after the canvas has been created
     open func completeCanvasCreation(_ textureSize: CGSize) async {
         viewModel.updateCanvasTexture(currentTexture)

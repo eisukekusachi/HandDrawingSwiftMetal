@@ -26,8 +26,6 @@ class HandDrawingViewController: UIViewController {
 
     @IBOutlet private weak var activityIndicatorView: UIView!
 
-    private var textureLayers: TextureLayersState = .init()
-
     private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
@@ -50,6 +48,7 @@ class HandDrawingViewController: UIViewController {
 
     private lazy var canvasView: HandDrawingCanvasView = {
         HandDrawingCanvasView(
+            textureLayersState: viewModel.textureLayersState,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration,
             onCompleted: onCanvasCompleted
@@ -59,7 +58,7 @@ class HandDrawingViewController: UIViewController {
     private lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
-                textureLayers: textureLayers,
+                textureLayers: viewModel.textureLayersState,
                 device: canvasView.sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue,
                 onLayersChanged: onTextureLayersChanged,
@@ -97,10 +96,27 @@ class HandDrawingViewController: UIViewController {
         showActivityIndicator(true)
         showContentView(false)
 
-        viewModel.loadLocalDrawingComponentsData(
-            configuration: configuration
-        )
-        updateDrawingComponents()
+        Task {
+            do {
+                let textureSize = await viewModel.restoreOrInitializeTextureLayers(
+                    device: sharedDevice,
+                    fallbackTextureSize: self.configuration.canvasConfiguration.textureSize,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+                try canvasView.initializeCanvas(textureSize)
+
+                viewModel.loadLocalDrawingComponentsData(
+                    configuration: configuration
+                )
+                updateDrawingComponents()
+
+                showActivityIndicator(false)
+                showContentView(true)
+
+            } catch {
+                fatalError()
+            }
+        }
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -117,7 +133,7 @@ class HandDrawingViewController: UIViewController {
                 self.showActivityIndicator(true)
 
                 do {
-                    try await self.canvasView.newCanvas()
+                    try await self.newCanvas()
 
                     self.viewModel.resetCoreData()
 
@@ -128,6 +144,30 @@ class HandDrawingViewController: UIViewController {
                 }
             }
         }
+    }
+
+    func newCanvas() async throws {
+        try await viewModel.onNewCanvas(
+            device: sharedDevice,
+            commandQueue: canvasView.sharedCommandQueue
+        )
+        try canvasView.initializeCanvas(viewModel.textureSize)
+        canvasView.resetTransforming()
+    }
+
+    func saveFiles(to workingDirectoryURL: URL) async throws {
+        try await viewModel.onSaveFiles(
+            thumbnail: canvasView.thumbnail,
+            to: workingDirectoryURL
+        )
+    }
+
+    func loadFiles(in workingDirectoryURL: URL) async throws {
+        try await viewModel.onLoadFiles(
+            device: canvasView.sharedDevice,
+            from: workingDirectoryURL
+        )
+        try canvasView.initializeCanvas(viewModel.textureSize)
     }
 }
 
@@ -143,7 +183,7 @@ private extension HandDrawingViewController {
             }
 
             self.textureLayerView.update(
-                self.canvasView.textureLayersState
+                self.viewModel.textureLayersState
             )
 
             self.contentView.showCanvasAfterCompletion()
@@ -465,7 +505,7 @@ extension HandDrawingViewController {
         self.viewModel.onLoadCanvas(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
-                try await self?.canvasView.loadFiles(
+                try await self?.loadFiles(
                     in: workingDirectoryURL
                 )
             },
@@ -477,7 +517,7 @@ extension HandDrawingViewController {
     private func saveCanvas() {
         viewModel.onSaveCanvas(
             saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
-                try await self?.canvasView.saveFiles(
+                try await self?.saveFiles(
                     to: tmpWorkingDirectoryURL
                 )
             },
