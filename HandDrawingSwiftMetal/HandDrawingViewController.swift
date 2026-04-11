@@ -102,13 +102,13 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                var textureSize = await viewModel.restoreOrInitializeTextureLayers(
+                let textureSize = await viewModel.restoreOrInitializeTextureLayers(
                     device: sharedDevice,
                     fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
                 )
 
-                textureSize = try await canvasView.initializeCanvas(textureSize)
+                try await canvasView.initializeCanvas(textureSize)
 
                 textureLayerView.update(
                     viewModel.textureLayersState

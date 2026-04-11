@@ -165,18 +165,13 @@ open class CanvasView: UIView {
     }
 
     /// Creates the canvas using the specified texture size
-    @discardableResult
-    open func initializeCanvas(_ textureSize: CGSize) async throws -> CGSize {
-        let textureSize = CanvasConfiguration.clampedTextureSize(textureSize)
-
+    open func initializeCanvas(_ textureSize: CGSize) async throws {
         try await viewModel.initializeCanvas(textureSize)
 
         // Set an initial value, as nothing is rendered when the drawing renderer is empty
         if viewModel.drawingRenderer == nil {
             initializeDrawingRenderer(textureSize: textureSize)
         }
-
-        return textureSize
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {

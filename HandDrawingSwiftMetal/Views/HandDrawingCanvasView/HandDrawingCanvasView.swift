@@ -171,9 +171,8 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    @discardableResult
-    override func initializeCanvas(_ textureSize: CGSize) async throws -> CGSize {
-        let textureSize = try await super.initializeCanvas(textureSize)
+    override func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await super.initializeCanvas(textureSize)
 
         // Initialize the textures used for Undo
         viewModel.undoDrawing?.initializeUndoTextures(
@@ -183,8 +182,6 @@ import TextureLayerView
 
         try textureLayerRenderer.initializeTextures(textureSize: textureSize)
         try await updateFullCanvasTexture()
-
-        return textureSize
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
