@@ -179,8 +179,8 @@ open class CanvasView: UIView {
     }
 
     /// Creates the canvas using the specified texture size
-    public func initializeCanvas(_ textureSize: CGSize) throws {
-        try viewModel.initializeCanvas(
+    public func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await viewModel.initializeCanvas(
             CanvasConfiguration.clampedTextureSize(textureSize)
         )
     }

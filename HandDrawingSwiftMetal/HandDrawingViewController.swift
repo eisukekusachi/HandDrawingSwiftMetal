@@ -103,7 +103,7 @@ class HandDrawingViewController: UIViewController {
                     fallbackTextureSize: self.configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
                 )
-                try canvasView.initializeCanvas(textureSize)
+                try await canvasView.initializeCanvas(textureSize)
 
                 viewModel.loadLocalDrawingComponentsData(
                     configuration: configuration
@@ -152,7 +152,7 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue
         )
-        try canvasView.initializeCanvas(viewModel.textureSize)
+        try await canvasView.initializeCanvas(viewModel.textureSize)
         canvasView.resetTransforming()
     }
 
@@ -168,7 +168,7 @@ class HandDrawingViewController: UIViewController {
             device: canvasView.sharedDevice,
             from: workingDirectoryURL
         )
-        try canvasView.initializeCanvas(viewModel.textureSize)
+        try await canvasView.initializeCanvas(viewModel.textureSize)
     }
 }
 

@@ -91,7 +91,7 @@ public final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initializeCanvas(_ textureSize: CGSize) throws {
+    func initializeCanvas(_ textureSize: CGSize) async throws {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
