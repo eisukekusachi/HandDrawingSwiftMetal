@@ -114,7 +114,8 @@ class HandDrawingViewController: UIViewController {
                 showContentView(true)
 
             } catch {
-                fatalError()
+                showActivityIndicator(false)
+                showAlert(error)
             }
         }
     }
