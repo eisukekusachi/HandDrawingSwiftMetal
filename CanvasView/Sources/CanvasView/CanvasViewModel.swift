@@ -172,10 +172,12 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        precondition(
-            canvasTexture != nil,
-            "canvasView is not initialized. Call initializeCanvas(_:) before use"
-        )
+        guard
+            canvasTexture != nil
+        else {
+            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
+            return
+        }
 
         inputState.update(.finger)
 
@@ -246,10 +248,13 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        precondition(
-            canvasTexture != nil,
-            "canvasView is not initialized. Call initializeCanvas(_:) before use"
-        )
+        guard
+            canvasTexture != nil
+        else {
+            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
+            return
+        }
+
 
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
