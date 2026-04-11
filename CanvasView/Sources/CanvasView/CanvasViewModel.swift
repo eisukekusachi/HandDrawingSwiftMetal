@@ -172,6 +172,11 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
+        precondition(
+            canvasTexture != nil,
+            "canvasView is not initialized. Call initializeCanvas(_:) before use"
+        )
+
         inputState.update(.finger)
 
         // Return if a pen input is in progress
@@ -241,6 +246,11 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
+        precondition(
+            canvasTexture != nil,
+            "canvasView is not initialized. Call initializeCanvas(_:) before use"
+        )
+
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
             cancelFingerDrawing()
