@@ -54,15 +54,13 @@ import TextureLayerView
     init(
         textureLayersState: TextureLayersState,
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration,
-        onCompleted: ((CGSize) -> Void)? = nil
+        configuration: CanvasConfiguration
     ) {
         self.textureLayersState = textureLayersState
         self.configuration = configuration
         super.init(
             device: device,
-            configuration: configuration,
-            onCompleted: onCompleted
+            configuration: configuration
         )
         self.bindData()
     }
@@ -173,19 +171,17 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    override func completeCanvasCreation(_ textureSize: CGSize) async {
+    override func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await super.initializeCanvas(textureSize)
+
         // Initialize the textures used for Undo
         viewModel.undoDrawing?.initializeUndoTextures(
             textureSize: textureSize
         )
         resetUndo()
 
-        do {
-            try textureLayerRenderer.initializeTextures(textureSize: textureSize)
-            try await updateFullCanvasTexture()
-        } catch {
-            Logger.error(error)
-        }
+        try textureLayerRenderer.initializeTextures(textureSize: textureSize)
+        try await updateFullCanvasTexture()
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {

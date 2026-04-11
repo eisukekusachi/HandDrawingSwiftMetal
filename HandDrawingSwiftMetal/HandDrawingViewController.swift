@@ -50,8 +50,7 @@ class HandDrawingViewController: UIViewController {
         HandDrawingCanvasView(
             textureLayersState: viewModel.textureLayersState,
             device: sharedDevice,
-            configuration: configuration.canvasConfiguration,
-            onCompleted: onCanvasCompleted
+            configuration: configuration.canvasConfiguration
         )
     }()
 
@@ -93,6 +92,11 @@ class HandDrawingViewController: UIViewController {
             )
         }
 
+        viewModel.loadLocalDrawingComponentsData(
+            configuration: configuration
+        )
+        updateDrawingComponents()
+
         showActivityIndicator(true)
         showContentView(false)
 
@@ -100,18 +104,25 @@ class HandDrawingViewController: UIViewController {
             do {
                 let textureSize = await viewModel.restoreOrInitializeTextureLayers(
                     device: sharedDevice,
-                    fallbackTextureSize: self.configuration.canvasConfiguration.textureSize,
+                    fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
                 )
+
                 try await canvasView.initializeCanvas(textureSize)
 
-                viewModel.loadLocalDrawingComponentsData(
-                    configuration: configuration
+                textureLayerView.update(
+                    viewModel.textureLayersState
                 )
-                updateDrawingComponents()
+
+                // Initialize the textures in DrawingRenderer
+                for renderer in drawingRenderers.values {
+                    renderer.initializeTextures(textureSize)
+                }
 
                 showActivityIndicator(false)
                 showContentView(true)
+
+                contentView.showCanvasAfterCompletion()
 
             } catch {
                 showActivityIndicator(false)
@@ -173,27 +184,6 @@ class HandDrawingViewController: UIViewController {
 }
 
 private extension HandDrawingViewController {
-    /// Handler invoked after the canvas setup is completed
-    var onCanvasCompleted: ((CGSize) -> Void)? {
-        { [weak self] textureSize in
-            guard let `self` else { return }
-
-            // Initialize the textures in DrawingRenderer
-            for renderer in self.drawingRenderers.values {
-                renderer.initializeTextures(textureSize)
-            }
-
-            self.textureLayerView.update(
-                self.viewModel.textureLayersState
-            )
-
-            self.contentView.showCanvasAfterCompletion()
-
-            self.showActivityIndicator(false)
-            self.showContentView(true)
-        }
-    }
-
     /// Handler that responds to texture layer events and updates the canvas view accordingly.
     var onTextureLayersChanged: (TextureLayerEvent) -> Void {
         { [weak self] event in
