@@ -61,7 +61,7 @@ public final class CanvasViewModel {
     }
 
     /// A class that manages drawing lines onto textures
-    private var drawingRenderer: DrawingRenderer?
+    private(set) var drawingRenderer: DrawingRenderer?
 
     /// Manages input from pen and finger
     private let inputState = InputState()
@@ -91,7 +91,7 @@ public final class CanvasViewModel {
 
 extension CanvasViewModel {
 
-    func initializeCanvas(_ textureSize: CGSize) throws {
+    func initializeCanvas(_ textureSize: CGSize) async throws {
         guard
             Int(textureSize.width) >= canvasMinimumTextureLength &&
             Int(textureSize.height) >= canvasMinimumTextureLength
@@ -133,10 +133,6 @@ extension CanvasViewModel {
         self.realtimeDrawingTexture = realtimeDrawingTexture
 
         currentTextureSize = textureSize
-
-        canvasEventSubject.send(
-            .canvasCreated(textureSize)
-        )
     }
 
     /// Presents `canvasTexture` to the screen
@@ -170,26 +166,19 @@ extension CanvasViewModel {
 }
 
 extension CanvasViewModel {
-
-    func onCompleteCanvasCreation(
-        renderer: MTLRendering,
-        textureSize: CGSize
-    ) {
-        if drawingRenderer == nil {
-            // Set an initial value, as nothing is rendered when the drawing renderer is empty
-            let drawingRenderer = BrushDrawingRenderer()
-            drawingRenderer.setup(renderer: renderer)
-            drawingRenderer.initializeTextures(textureSize)
-            setDrawingRenderer(drawingRenderer)
-        }
-    }
-
     /// Processes finger touches and determines whether the gesture is drawing or transforming
     func onFingerGestureDetected(
         touches: Set<UITouch>,
         with event: UIEvent?,
         view: UIView
     ) {
+        guard
+            canvasTexture != nil
+        else {
+            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
+            return
+        }
+
         inputState.update(.finger)
 
         // Return if a pen input is in progress
@@ -259,6 +248,14 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
+        guard
+            canvasTexture != nil
+        else {
+            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
+            return
+        }
+
+
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
             cancelFingerDrawing()

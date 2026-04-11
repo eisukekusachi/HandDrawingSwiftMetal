@@ -17,6 +17,8 @@ open class TextureLayerViewModel: ObservableObject {
 
     @Published public var isAlphaSliderDragging: Bool = false
 
+    @Published public private(set) var textureLayers: TextureLayersState
+
     public let onLayersChanged: ((TextureLayerEvent) -> Void)?
 
     public var selectedLayer: TextureLayerItem? {
@@ -27,8 +29,6 @@ open class TextureLayerViewModel: ObservableObject {
         textureLayers.textureSize
     }
 
-    @Published public private(set) var textureLayers: TextureLayersState = .init()
-
     private let device: MTLDevice?
 
     private let commandQueue: MTLCommandQueue?
@@ -38,11 +38,13 @@ open class TextureLayerViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
+        textureLayers: TextureLayersState,
         device: MTLDevice? = nil,
         commandQueue: MTLCommandQueue? = nil,
         dependencies: TextureLayerViewDependencies? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
     ) {
+        self.textureLayers = textureLayers
         self.device = device
         self.commandQueue = commandQueue
         self.dependencies = dependencies ?? .init()

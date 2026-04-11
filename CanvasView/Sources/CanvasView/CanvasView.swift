@@ -57,12 +57,9 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
-    private let onCompleted: ((CGSize) -> Void)?
-
     public init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration = .init(),
-        onCompleted: ((CGSize) -> Void)? = nil
+        configuration: CanvasConfiguration = .init()
     ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
@@ -90,7 +87,6 @@ open class CanvasView: UIView {
             canvasRenderer: canvasRenderer,
             configuration: configuration
         )
-        self.onCompleted = onCompleted
         super.init(frame: .zero)
         layoutViews()
         addEvents()
@@ -133,16 +129,6 @@ open class CanvasView: UIView {
         viewModel.canvasEventSubject
             .sink { [weak self] event in
                 switch event {
-                case .canvasCreated(let textureSize):
-                    Task { [weak self] in
-                        guard let `self` else { return }
-                        self.viewModel.onCompleteCanvasCreation(
-                            renderer: self.renderer,
-                            textureSize: textureSize
-                        )
-                        await self.completeCanvasCreation(textureSize)
-                        self.onCompleted?(textureSize)
-                    }
                 case .displayCurrentTexture:
                     self?.updateCanvasTextureUsingCurrentTexture()
                 case .displayRealtimeDrawingTexture:
@@ -179,26 +165,17 @@ open class CanvasView: UIView {
     }
 
     /// Creates the canvas using the specified texture size
-    public func initializeCanvas(_ textureSize: CGSize) throws {
-        try viewModel.initializeCanvas(
-            CanvasConfiguration.clampedTextureSize(textureSize)
-        )
-    }
+    open func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await viewModel.initializeCanvas(textureSize)
 
-    open func prepareForDrawing() {
-        do {
-            try initializeCanvas(
-                viewModel.currentTextureSize
-            )
-        } catch {
-            fatalError("Failed to initialize canvas: \(error)")
+        // Set an initial value, as nothing is rendered when the drawing renderer is empty
+        if viewModel.drawingRenderer == nil {
+            initializeDrawingRenderer(textureSize: textureSize)
         }
-    }
 
-    /// Called after the canvas has been created
-    open func completeCanvasCreation(_ textureSize: CGSize) async {
-        viewModel.updateCanvasTexture(currentTexture)
-        present()
+        // Display the initialized canvas immediately so the view does not remain
+        // stale or blank until a later draw or display event occurs
+        updateCanvasTextureUsingCurrentTexture()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
@@ -260,5 +237,16 @@ extension CanvasView: PencilInputGestureRecognizerSender {
             actualTouches: touches,
             view: view
         )
+    }
+}
+
+private extension CanvasView {
+    func initializeDrawingRenderer(
+        textureSize: CGSize
+    ) {
+        let drawingRenderer = BrushDrawingRenderer()
+        drawingRenderer.setup(renderer: renderer)
+        drawingRenderer.initializeTextures(textureSize)
+        setDrawingRenderer(drawingRenderer)
     }
 }

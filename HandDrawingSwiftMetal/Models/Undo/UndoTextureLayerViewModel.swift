@@ -32,6 +32,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     init(
+        textureLayers: TextureLayersState,
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
         inMemoryRepository: UndoTextureInMemoryRepository? = nil,
@@ -42,6 +43,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         self.inMemoryRepository = inMemoryRepository ?? .shared
         self.onRegisterUndoObjectPair = onRegisterUndoObjectPair
         super.init(
+            textureLayers: textureLayers,
             device: device,
             commandQueue: commandQueue,
             onLayersChanged: onLayersChanged

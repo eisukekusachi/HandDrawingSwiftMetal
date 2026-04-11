@@ -21,10 +21,6 @@ import TextureLayerView
         )
     }
 
-    var textureLayersState: TextureLayersState {
-        viewModel.textureLayersState
-    }
-
     var didUndo: AnyPublisher<UndoManager, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
@@ -38,43 +34,35 @@ import TextureLayerView
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
+    private let textureLayersState: TextureLayersState
+
     private lazy var textureLayerRenderer: TextureLayerRenderer = {
         .init(renderer: renderer)
     }()
 
     private lazy var viewModel: HandDrawingCanvasViewModel = {
-        .init(renderer: renderer)
+        .init(
+            textureLayersState: textureLayersState,
+            renderer: renderer
+        )
     }()
 
     private var cancellables = Set<AnyCancellable>()
 
     private let configuration: CanvasConfiguration
 
-    override init(
+    init(
+        textureLayersState: TextureLayersState,
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration,
-        onCompleted: ((CGSize) -> Void)? = nil
+        configuration: CanvasConfiguration
     ) {
+        self.textureLayersState = textureLayersState
         self.configuration = configuration
         super.init(
             device: device,
-            configuration: configuration,
-            onCompleted: onCompleted
+            configuration: configuration
         )
         self.bindData()
-        self.startPreparingForDrawing()
-    }
-    private func startPreparingForDrawing() {
-        prepareForDrawing()
-    }
-
-    func restoreOrInitializeTextureState(
-        fallbackTextureSize: CGSize
-    ) async -> CGSize {
-        await viewModel.restoreOrInitializeTextureLayers(
-            fallbackTextureSize: fallbackTextureSize,
-            commandQueue: renderer.commandQueue
-        )
     }
 
     required init?(coder: NSCoder) {
@@ -88,19 +76,6 @@ import TextureLayerView
         // Set an initial value to prevent out-of-memory errors when no limit is applied
         if undoManager?.levelsOfUndo == 0 {
             undoManager?.levelsOfUndo = 8
-        }
-    }
-
-    override func prepareForDrawing() {
-        Task {
-            do {
-                let textureSize = await restoreOrInitializeTextureState(
-                    fallbackTextureSize: self.configuration.textureSize
-                )
-                try initializeCanvas(textureSize)
-            } catch {
-                fatalError("Failed to prepare canvas for drawing: \(error)")
-            }
         }
     }
 
@@ -196,19 +171,17 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    override func completeCanvasCreation(_ textureSize: CGSize) async {
+    override func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await super.initializeCanvas(textureSize)
+
         // Initialize the textures used for Undo
         viewModel.undoDrawing?.initializeUndoTextures(
             textureSize: textureSize
         )
         resetUndo()
 
-        do {
-            try textureLayerRenderer.initializeTextures(textureSize: textureSize)
-            try await updateFullCanvasTexture()
-        } catch {
-            Logger.error(error)
-        }
+        try textureLayerRenderer.initializeTextures(textureSize: textureSize)
+        try await updateFullCanvasTexture()
     }
 
     override func updateCanvasTextureUsingRealtimeDrawingTexture() {
@@ -237,24 +210,6 @@ import TextureLayerView
 }
 
 extension HandDrawingCanvasView {
-
-    func newCanvas() async throws {
-        try await viewModel.onNewCanvas()
-        try super.initializeCanvas(viewModel.textureSize)
-        super.resetTransforming()
-    }
-
-    func saveFiles(to workingDirectoryURL: URL) async throws {
-        try await viewModel.onSaveFiles(
-            thumbnail: thumbnail,
-            to: workingDirectoryURL
-        )
-    }
-
-    func loadFiles(in workingDirectoryURL: URL) async throws {
-        try await viewModel.onLoadFiles(from: workingDirectoryURL)
-        try super.initializeCanvas(viewModel.textureSize)
-    }
 
     func undo() {
         guard let undoManager else { return }

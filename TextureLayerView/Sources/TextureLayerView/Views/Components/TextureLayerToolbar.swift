@@ -96,34 +96,29 @@ private extension Image {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
-
-    private let textureLayers = TextureLayersState()
-
-    private let data: TextureLayersModel = .init(
-        layers: [
-            .init(
-                id: LayerId(),
-                title: "Layer0",
-                alpha: 255,
-                isVisible: true
+    private let viewModel = TextureLayerViewModel(
+        textureLayers: TextureLayersState(
+            textureLayers: .init(
+                layers: [
+                    .init(
+                        id: LayerId(),
+                        title: "Layer0",
+                        alpha: 255,
+                        isVisible: true
+                    )
+                ],
+                layerIndex: 0,
+                textureSize: .zero
             )
-        ],
-        layerIndex: 0,
-        textureSize: .zero
+        ),
+        device: nil,
+        commandQueue: nil
     )
-
     var body: some View {
         TextureLayerToolbar(
             viewModel: viewModel
         )
         .frame(width: 320, height: 300)
-        .onAppear {
-            Task {
-                textureLayers.update(data)
-                viewModel.update(textureLayers)
-            }
-        }
     }
 }
 

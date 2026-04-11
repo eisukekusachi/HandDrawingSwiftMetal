@@ -50,56 +50,53 @@ public struct TextureLayerView: View {
 
 @MainActor
 private struct PreviewView: View {
-    private var viewModel = TextureLayerViewModel(device: nil, commandQueue: nil)
-    private let textureLayers = TextureLayersState()
-    private let data: TextureLayersModel = .init(
-        layers: [
-            .init(
-                id: LayerId(),
-                title: "Layer0",
-                alpha: 255,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer1",
-                alpha: 200,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer2",
-                alpha: 150,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer3",
-                alpha: 100,
-                isVisible: true
-            ),
-            .init(
-                id: LayerId(),
-                title: "Layer4",
-                alpha: 50,
-                isVisible: true
+    private var viewModel = TextureLayerViewModel(
+        textureLayers: TextureLayersState(
+            textureLayers: .init(
+                layers: [
+                    .init(
+                        id: LayerId(),
+                        title: "Layer0",
+                        alpha: 255,
+                        isVisible: true
+                    ),
+                    .init(
+                        id: LayerId(),
+                        title: "Layer1",
+                        alpha: 200,
+                        isVisible: true
+                    ),
+                    .init(
+                        id: LayerId(),
+                        title: "Layer2",
+                        alpha: 150,
+                        isVisible: true
+                    ),
+                    .init(
+                        id: LayerId(),
+                        title: "Layer3",
+                        alpha: 100,
+                        isVisible: true
+                    ),
+                    .init(
+                        id: LayerId(),
+                        title: "Layer4",
+                        alpha: 50,
+                        isVisible: true
+                    )
+                ],
+                layerIndex: 3,
+                textureSize: .zero
             )
-        ],
-        layerIndex: 3,
-        textureSize: .zero
+        ),
+        device: nil,
+        commandQueue: nil
     )
-
     var body: some View {
         TextureLayerView(
             viewModel: viewModel
         )
         .frame(width: 320, height: 300)
-        .onAppear {
-            Task {
-                textureLayers.update(data)
-                viewModel.update(textureLayers)
-            }
-        }
     }
 }
 

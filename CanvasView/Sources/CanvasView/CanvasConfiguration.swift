@@ -32,7 +32,7 @@ public struct CanvasConfiguration {
         transformingGestureRecognitionSecond: TimeInterval = 0.05
     ) {
         // The screen size is used when the value is nil
-        self.textureSize = Self.clampedTextureSize(textureSize ?? Self.screenSize)
+        self.textureSize = textureSize ?? Self.screenSize
         self.backgroundColor = backgroundColor
         self.baseBackgroundColor = baseBackgroundColor
         self.drawingGestureRecognitionSecond = drawingGestureRecognitionSecond
@@ -41,7 +41,7 @@ public struct CanvasConfiguration {
 
     public func newTextureSize(_ textureSize: CGSize) -> Self {
         .init(
-            textureSize: Self.clampedTextureSize(textureSize),
+            textureSize: textureSize,
             backgroundColor: backgroundColor,
             baseBackgroundColor: baseBackgroundColor,
             drawingGestureRecognitionSecond: drawingGestureRecognitionSecond,
@@ -56,13 +56,6 @@ public struct CanvasConfiguration {
         return .init(
             width: size.width * scale,
             height: size.height * scale
-        )
-    }
-
-    public static func clampedTextureSize(_ textureSize: CGSize) -> CGSize {
-        CGSize(
-            width: max(textureSize.width, CGFloat(canvasMinimumTextureLength)),
-            height: max(textureSize.height, CGFloat(canvasMinimumTextureLength))
         )
     }
 }

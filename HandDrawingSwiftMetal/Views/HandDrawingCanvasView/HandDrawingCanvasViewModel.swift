@@ -25,194 +25,28 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     let updateFullCanvasTextureSubject = PassthroughSubject<Void, Never>()
 
-    let textureLayersState: TextureLayersState = TextureLayersState()
+    let textureLayersState: TextureLayersState
 
     let undoDrawing: UndoDrawing?
 
-    private let textureLayerStorage: CoreDataTextureLayerStorage
-
     private let dependencies: HandDrawingCanvasViewDependencies
 
-    private let textureLayersStorageController: PersistenceController = PersistenceController(
-        xcdatamodeldName: "TextureLayerStorage"
-    )
-
     private var cancellables = Set<AnyCancellable>()
-
-    private var restoredTextureLayerDataFromCoreData: TextureLayersModel? {
-        guard
-            let entity = textureLayerStorage.fetch()
-        else { return nil }
-        return textureLayerStorage.textureLayersModel(from: entity)
-    }
 
     private var renderer: MTLRendering
 
     init(
+        textureLayersState: TextureLayersState,
         renderer: MTLRendering,
         dependencies: HandDrawingCanvasViewDependencies? = nil
     ) {
+        self.textureLayersState = textureLayersState
         self.dependencies = dependencies ?? .init()
-        self.textureLayerStorage = .init(
-            textureLayers: textureLayersState,
-            context: textureLayersStorageController.viewContext
-        )
         self.renderer = renderer
         self.undoDrawing = .init(
             renderer: self.renderer,
             inMemoryRepository: self.dependencies.undoTextureInMemoryRepository
         )
-    }
-}
-
-extension HandDrawingCanvasViewModel {
-    func restoreOrInitializeTextureLayers(
-        fallbackTextureSize: CGSize,
-        commandQueue: MTLCommandQueue
-    ) async -> CGSize {
-        let textureLayersData: TextureLayersModel
-        let resolvedTextureSize: CGSize
-
-        if let restoredTextureLayerDataFromCoreData {
-            do {
-                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-                    textureLayers: restoredTextureLayerDataFromCoreData,
-                    device: renderer.device
-                )
-                textureLayersData = restoredTextureLayerDataFromCoreData
-                resolvedTextureSize = restoredTextureLayerDataFromCoreData.textureSize
-
-            } catch {
-                // Initialize using the configuration values when an error occurs
-                let newData = await initializeStorage(
-                    textureSize: fallbackTextureSize,
-                    commandQueue: commandQueue
-                )
-                textureLayersData = newData
-                resolvedTextureSize = fallbackTextureSize
-
-                // Initialize the Core Data storage if fetching fails
-                textureLayerStorage.clearAll()
-            }
-        } else {
-            let newData = await initializeStorage(
-                textureSize: fallbackTextureSize,
-                commandQueue: commandQueue
-            )
-            textureLayersData = newData
-            resolvedTextureSize = fallbackTextureSize
-        }
-
-        textureLayersState.update(textureLayersData)
-
-        return resolvedTextureSize
-    }
-
-    private func initializeStorage(
-        textureSize: CGSize,
-        commandQueue: MTLCommandQueue
-    ) async -> TextureLayersModel {
-        let data = TextureLayersModel(textureSize: textureSize)
-
-        do {
-            try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                textureLayers: data,
-                device: renderer.device,
-                commandQueue: commandQueue
-            )
-        } catch {
-            fatalError("Failed to initialize storage")
-        }
-        
-        return data
-    }
-
-    func onSaveFiles(
-        thumbnail: UIImage?,
-        to workingDirectoryURL: URL
-    ) async throws {
-        do {
-            // Save the thumbnail image into the working directory
-            try thumbnail?.pngData()?.write(
-                to: workingDirectoryURL.appendingPathComponent("thumbnail.png")
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to create the thumbnail")
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Copy the texture files into the working directory
-            for layer in textureLayersState.layers {
-                try await dependencies.textureLayersDocumentsRepository.copyTexture(
-                    id: layer.id,
-                    to: workingDirectoryURL
-                )
-            }
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to create the textures")
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Save the texture layers as JSON
-            try TextureLayersArchiveModel(
-                layers: textureLayersState.layers.map { .init(item: $0) },
-                layerIndex: textureLayersState.selectedIndex ?? 0,
-                textureSize: textureLayersState.textureSize
-            ).write(
-                in: workingDirectoryURL
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to save the texture layers")
-            )
-            Logger.error(error)
-            throw error
-        }
-    }
-
-    func onLoadFiles(
-        from workingDirectoryURL: URL
-    ) async throws {
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
-
-        guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-            url: workingDirectoryURL,
-            textureLayers: data,
-            device: renderer.device
-        ) else {
-            return
-        }
-
-        textureLayersState.update(data)
-    }
-
-    func onNewCanvas() async throws {
-        let data: TextureLayersModel = .init(
-            textureSize: textureLayersState.textureSize
-        )
-
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: data,
-            device: renderer.device,
-            commandQueue: renderer.commandQueue
-        )
-
-        textureLayersState.update(data)
     }
 }
 
