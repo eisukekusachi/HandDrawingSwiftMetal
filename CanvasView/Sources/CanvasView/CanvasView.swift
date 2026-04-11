@@ -172,6 +172,10 @@ open class CanvasView: UIView {
         if viewModel.drawingRenderer == nil {
             initializeDrawingRenderer(textureSize: textureSize)
         }
+
+        // Display the initialized canvas immediately so the view does not remain
+        // stale or blank until a later draw or display event occurs
+        updateCanvasTextureUsingCurrentTexture()
     }
 
     open func updateCanvasTextureUsingRealtimeDrawingTexture() {
