@@ -13,15 +13,15 @@ import UIKit
 @MainActor
 open class TextureLayerViewModel: ObservableObject {
 
-    @Published public var currentAlpha: Int = 0
+    @Published var currentAlpha: Int = 0
 
-    @Published public var isAlphaSliderDragging: Bool = false
+    @Published var isAlphaSliderDragging: Bool = false
 
-    @Published public private(set) var textureLayers: TextureLayersState
+    @Published private(set) var textureLayers: TextureLayersState
 
-    public let onLayersChanged: ((TextureLayerEvent) -> Void)?
+    let onLayersChanged: ((TextureLayerEvent) -> Void)?
 
-    public var selectedLayer: TextureLayerItem? {
+    var selectedLayer: TextureLayerItem? {
         textureLayers.selectedLayer
     }
 
@@ -37,7 +37,7 @@ open class TextureLayerViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         textureLayers: TextureLayersState,
         device: MTLDevice? = nil,
         commandQueue: MTLCommandQueue? = nil,
@@ -149,7 +149,7 @@ open class TextureLayerViewModel: ObservableObject {
     }
 }
 
-public extension TextureLayerViewModel {
+extension TextureLayerViewModel {
     func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice?) async -> MTLTexture? {
         guard let device else { return nil }
         return await dependencies.textureLayersDocumentsRepository.duplicatedTexture(

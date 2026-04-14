@@ -8,4 +8,4 @@
 import Foundation
 
 /// Minimum texture size supported by the app
-public let textureMinimumLength: Int = 16
+let textureMinimumLength: Int = 16

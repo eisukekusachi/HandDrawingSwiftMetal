@@ -7,12 +7,12 @@
 
 import Foundation
 
-public final class TextureLayerViewDependencies {
+final class TextureLayerViewDependencies {
 
-    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     @MainActor
-    public init(
+    init(
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
         self.textureLayersDocumentsRepository = textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
