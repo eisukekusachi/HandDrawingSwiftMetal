@@ -12,6 +12,13 @@ import UIKit
 
 open class CanvasView: UIView {
 
+    public var thumbnail: UIImage? {
+        canvasTexture?.uiImage?.resizeWithAspectRatio(
+            height: 500,
+            scale: 1.0
+        )
+    }
+
     /// Emits stroke events
     public var strokeEvents: AnyPublisher<StrokeEvent, Never> {
         strokeEventSubject.eraseToAnyPublisher()
