@@ -51,7 +51,7 @@ public class TextureLayersState: ObservableObject {
     }
 }
 
-public extension TextureLayersState {
+extension TextureLayersState {
 
     func addLayer(
         layer: TextureLayerModel,

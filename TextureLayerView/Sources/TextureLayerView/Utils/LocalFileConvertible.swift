@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol LocalFileConvertible: Sendable, Codable {
+protocol LocalFileConvertible: Sendable, Codable {
     static var fileName: String { get }
 
     /// Read from a **directory** URL (fileName is appended)
@@ -17,7 +17,7 @@ public protocol LocalFileConvertible: Sendable, Codable {
     func write(in directory: URL) throws
 }
 
-public extension LocalFileConvertible {
+extension LocalFileConvertible {
     init(in directory: URL) throws {
         let fileURL = directory.appendingPathComponent(Self.fileName)
         let data = try Data(contentsOf: fileURL)

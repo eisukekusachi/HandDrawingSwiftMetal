@@ -18,7 +18,7 @@ private struct TextureSource: Sendable {
 }
 
 /// Manages and persists `TextureLayers` textures on disk
-public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     @MainActor
     public static let shared: TextureLayersDocumentsRepository = {
         do {
@@ -32,7 +32,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     }()
 
     /// URL of the texture storage
-    public let workingDirectoryURL: URL
+    let workingDirectoryURL: URL
 
     private init(
         storageDirectoryURL: URL,
@@ -49,7 +49,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         try url.setResourceValues(resourceValues)
     }
 
-    public func initializeStorage(
+    func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -104,7 +104,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
     /// Restore the storage
     /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
-    public func restoreStorageFromWorkingDirectory(
+    func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws {
@@ -118,7 +118,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     /// Restore the storage
     /// Verify that the textures in `sourceFolderURL` match `TextureLayersModel`,
     /// and if they do, move them to `workingDirectory`
-    public func restoreStorage(
+    func restoreStorage(
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
@@ -142,7 +142,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     }
 }
 
-public extension TextureLayersDocumentsRepository {
+extension TextureLayersDocumentsRepository {
 
     /// Adds texture data
     @discardableResult

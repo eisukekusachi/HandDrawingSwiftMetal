@@ -8,7 +8,6 @@
 import Foundation
 
 extension URL {
-
     /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
         guard let url = FileManager.default.urls(

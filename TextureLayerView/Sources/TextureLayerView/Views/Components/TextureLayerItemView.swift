@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct TextureLayerItemView: View {
+struct TextureLayerItemView: View {
 
     var layer: TextureLayerItem
 
@@ -15,7 +15,7 @@ public struct TextureLayerItemView: View {
     private let didTapRow: (TextureLayerItem) -> Void
     private let didTapVisibleButton: (TextureLayerItem) -> Void
 
-    public init(
+    init(
         layer: TextureLayerItem,
         isSelected: Bool,
         didTapRow: @escaping (TextureLayerItem) -> Void,
@@ -28,7 +28,7 @@ public struct TextureLayerItemView: View {
         self.didTapVisibleButton = didTapVisibleButton
     }
 
-    public var body: some View {
+    var body: some View {
         ZStack {
             Color(
                 layer.backgroundColor(isSelected)

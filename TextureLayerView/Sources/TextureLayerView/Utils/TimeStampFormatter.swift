@@ -7,13 +7,13 @@
 
 import Foundation
 
-public enum TimeStampFormatter {
+enum TimeStampFormatter {
 
-    public static var currentDate: String {
+    static var currentDate: String {
         TimeStampFormatter.current(template: "MMM dd HH mm ss")
     }
 
-    public static func current(template: String) -> String {
+    static func current(template: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: template, options: 0, locale: .current)
         return dateFormatter.string(from: Date())

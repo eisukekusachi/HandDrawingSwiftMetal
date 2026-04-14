@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct TwoRowsSliderView: View {
+struct TwoRowsSliderView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
@@ -16,7 +16,7 @@ public struct TwoRowsSliderView: View {
 
     private var buttonSize: CGFloat
 
-    public init(
+    init(
         viewModel: TextureLayerViewModel,
         title: String,
         range: ClosedRange<Int>,
@@ -28,7 +28,7 @@ public struct TwoRowsSliderView: View {
         self.buttonSize = buttonSize
     }
 
-    public var body: some View {
+    var body: some View {
         VStack(spacing: 4) {
             HStack {
                 minusButton
@@ -103,7 +103,7 @@ public struct TwoRowsSliderView: View {
 
 private struct PreviewView: View {
 
-    private let viewModel = TextureLayerViewModel(
+    let viewModel = TextureLayerViewModel(
         textureLayers: .init(),
         device: nil,
         commandQueue: nil

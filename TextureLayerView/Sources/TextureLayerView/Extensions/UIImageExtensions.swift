@@ -8,8 +8,7 @@
 import MetalKit
 import Accelerate
 
-public extension UIImage {
-
+extension UIImage {
     static func makeCFData(_ texture: MTLTexture?, flipY: Bool = false) -> CFData? {
         guard let texture = texture else { return nil }
         

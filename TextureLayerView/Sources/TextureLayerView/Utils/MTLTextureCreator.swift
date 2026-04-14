@@ -10,9 +10,9 @@
 private let bytesPerPixel = 4
 private let bitsPerComponent = 8
 
-public enum MTLTextureCreator {
+enum MTLTextureCreator {
 
-    public static func loadHexadecimalData(
+    static func loadHexadecimalData(
         from url: URL
     ) throws -> [UInt8]? {
         guard let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals else {
@@ -21,7 +21,7 @@ public enum MTLTextureCreator {
         return hexadecimalData
     }
 
-    public static func makeTexture(
+    static func makeTexture(
         label: String? = nil,
         url: URL,
         size: CGSize,
@@ -39,7 +39,7 @@ public enum MTLTextureCreator {
         )
     }
 
-    public static func makeTexture(
+    static func makeTexture(
         label: String? = nil,
         width: Int,
         height: Int,
@@ -64,7 +64,7 @@ public enum MTLTextureCreator {
         return texture
     }
 
-    public static func makeTexture(
+    static func makeTexture(
         label: String? = nil,
         width: Int,
         height: Int,
