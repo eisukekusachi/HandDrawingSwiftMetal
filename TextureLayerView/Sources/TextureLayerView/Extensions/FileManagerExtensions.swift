@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension FileManager {
+extension FileManager {
 
     static func createDirectory(_ url: URL) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)

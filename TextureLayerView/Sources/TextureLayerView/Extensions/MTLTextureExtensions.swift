@@ -5,9 +5,10 @@
 //  Created by Eisuke Kusachi on 2026/03/22.
 //
 
+@preconcurrency import Accelerate
 @preconcurrency import MetalKit
 
-public extension MTLTexture {
+extension MTLTexture {
     func data(
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -58,5 +59,52 @@ public extension MTLTexture {
 
             commandBuffer.commit()
         }
+    }
+
+    var upsideDownUIImage: UIImage? {
+        let width = self.width
+        let height = self.height
+        let numComponents = 4
+        let bytesPerRow = width * numComponents
+        let totalBytes = bytesPerRow * height
+        let region = MTLRegionMake2D(0, 0, width, height)
+        var bgraBytes = [UInt8](repeating: 0, count: totalBytes)
+        self.getBytes(&bgraBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
+        // use Accelerate framework to convert from BGRA to RGBA
+        var bgraBuffer = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: bgraBytes),
+                    height: vImagePixelCount(height), width: vImagePixelCount(width), rowBytes: bytesPerRow)
+        let rgbaBytes = [UInt8](repeating: 0, count: totalBytes)
+        var rgbaBuffer = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: rgbaBytes),
+                    height: vImagePixelCount(height), width: vImagePixelCount(width), rowBytes: bytesPerRow)
+        let map: [UInt8] = [2, 1, 0, 3]
+        vImagePermuteChannels_ARGB8888(&bgraBuffer, &rgbaBuffer, map, 0)
+        // flipping image vertically
+        let flippedBytes = bgraBytes // share the buffer
+        var flippedBuffer = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: flippedBytes),
+                    height: vImagePixelCount(self.height), width: vImagePixelCount(self.width), rowBytes: bytesPerRow)
+        vImageVerticalReflect_ARGB8888(&rgbaBuffer, &flippedBuffer, 0)
+        // create CGImage with RGBA Flipped Bytes
+        guard let data = CFDataCreate(nil, flippedBytes, totalBytes) else { return nil }
+        guard let dataProvider = CGDataProvider(data: data) else { return nil }
+        let cgImage = CGImage(width: self.width,
+                              height: self.height,
+                              bitsPerComponent: 8,
+                              bitsPerPixel: 8 * numComponents,
+                              bytesPerRow: bytesPerRow,
+                              space: CGColorSpaceCreateDeviceRGB(),
+                              bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                              provider: dataProvider,
+                              decode: nil,
+                              shouldInterpolate: true,
+                              intent: .defaultIntent)
+        guard let cgImage = cgImage else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+
+    func makeThumbnail(length: Int = 128) -> UIImage? {
+        upsideDownUIImage?.resizeWithAspectRatio(
+            width: CGFloat(length),
+            scale: 1.0
+        )
     }
 }

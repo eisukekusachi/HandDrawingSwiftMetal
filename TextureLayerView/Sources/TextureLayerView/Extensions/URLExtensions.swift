@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension URL {
+extension URL {
 
     /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
@@ -18,5 +18,30 @@ public extension URL {
             fatalError("Failed to resolve Application Support directory URL")
         }
         return url
+    }
+
+    static var documents: URL {
+        URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
+    }
+
+    var fileName: String {
+        self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
+    }
+
+    func allFileURLs(suffix: String = "") -> [URL] {
+        if FileManager.default.fileExists(atPath: self.path) {
+            do {
+                let urls = try FileManager.default.contentsOfDirectory(
+                    at: self,
+                    includingPropertiesForKeys: nil
+                )
+                return urls.filter {
+                    suffix.isEmpty || $0.lastPathComponent.hasSuffix(suffix)
+                }
+            } catch {
+                Logger.error(error)
+            }
+        }
+        return []
     }
 }

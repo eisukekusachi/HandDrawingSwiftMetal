@@ -14,17 +14,11 @@ let package = Package(
             name: "TextureLayerView",
             targets: ["TextureLayerView"]),
     ],
-    dependencies: [
-        .package(path: "../CanvasView")
-    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "TextureLayerView",
-            dependencies: [
-                .product(name: "CanvasView", package: "CanvasView")
-            ]
+            name: "TextureLayerView"
         ),
         .testTarget(
             name: "TextureLayerViewTests",
