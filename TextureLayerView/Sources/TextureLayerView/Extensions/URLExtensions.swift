@@ -8,7 +8,6 @@
 import Foundation
 
 extension URL {
-
     static var documents: URL {
         guard
             let url = FileManager.default.urls(
