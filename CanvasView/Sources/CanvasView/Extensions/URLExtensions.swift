@@ -36,19 +36,18 @@ public extension URL {
     }
 
     func allFileURLs(suffix: String = "") -> [URL] {
-        if FileManager.default.fileExists(atPath: self.path) {
-            do {
-                let urls = try FileManager.default.contentsOfDirectory(
-                    at: self,
-                    includingPropertiesForKeys: nil
-                )
-                return urls.filter {
-                    suffix.isEmpty || $0.lastPathComponent.hasSuffix(suffix)
-                }
-            } catch {
-                Logger.error(error)
+        do {
+            let urls = try FileManager.default.contentsOfDirectory(
+                at: self,
+                includingPropertiesForKeys: nil
+            )
+
+            return urls.filter {
+                suffix.isEmpty || $0.lastPathComponent.hasSuffix(suffix)
             }
+        } catch {
+            Logger.error(error)
+            return []
         }
-        return []
     }
 }
