@@ -18,7 +18,7 @@ private struct TextureSource: Sendable {
 }
 
 /// Manages and persists `TextureLayers` textures on disk
-final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     @MainActor
     public static let shared: TextureLayersDocumentsRepository = {
         do {
@@ -32,7 +32,7 @@ final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryPr
     }()
 
     /// URL of the texture storage
-    let workingDirectoryURL: URL
+    public let workingDirectoryURL: URL
 
     private init(
         storageDirectoryURL: URL,
@@ -49,7 +49,7 @@ final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryPr
         try url.setResourceValues(resourceValues)
     }
 
-    func initializeStorage(
+    public func initializeStorage(
         textureLayers: TextureLayersModel,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -104,7 +104,7 @@ final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryPr
 
     /// Restore the storage
     /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
-    func restoreStorageFromWorkingDirectory(
+    public func restoreStorageFromWorkingDirectory(
         textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws {
@@ -118,7 +118,7 @@ final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryPr
     /// Restore the storage
     /// Verify that the textures in `sourceFolderURL` match `TextureLayersModel`,
     /// and if they do, move them to `workingDirectory`
-    func restoreStorage(
+    public func restoreStorage(
         url sourceFolderURL: URL,
         textureLayers: TextureLayersModel,
         device: MTLDevice
@@ -142,7 +142,7 @@ final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryPr
     }
 }
 
-extension TextureLayersDocumentsRepository {
+public extension TextureLayersDocumentsRepository {
 
     /// Adds texture data
     @discardableResult
@@ -300,7 +300,7 @@ extension TextureLayersDocumentsRepository {
     }
 
     @discardableResult
-    func copyTexture(
+    public func copyTexture(
         id: LayerId,
         to destinationURL: URL
     ) async throws -> Bool {
