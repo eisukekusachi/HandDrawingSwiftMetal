@@ -32,7 +32,7 @@ public extension URL {
     }
 
     var fileName: String {
-        self.lastPathComponent.components(separatedBy: ".").first ?? self.lastPathComponent
+        self.deletingPathExtension().lastPathComponent
     }
 
     func allFileURLs(suffix: String = "") -> [URL] {
