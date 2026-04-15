@@ -20,7 +20,7 @@ private struct TextureSource: Sendable {
 /// Manages and persists `TextureLayers` textures on disk
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     @MainActor
-    public static let shared: TextureLayersDocumentsRepository = {
+    public static let shared: any TextureLayersDocumentsRepositoryProtocol = {
         do {
             return try TextureLayersDocumentsRepository(
                 storageDirectoryURL: URL.applicationSupport,
@@ -300,7 +300,7 @@ public extension TextureLayersDocumentsRepository {
     }
 
     @discardableResult
-    public func copyTexture(
+    func copyTexture(
         id: LayerId,
         to destinationURL: URL
     ) async throws -> Bool {
