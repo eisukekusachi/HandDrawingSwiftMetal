@@ -6,6 +6,7 @@
 //
 
 import CanvasView
+import TextureLayerView
 import UIKit
 
 @preconcurrency import MetalKit

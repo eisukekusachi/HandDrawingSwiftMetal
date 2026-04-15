@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-public struct ReversedTextureLayerListView: View {
+struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
-    public var body: some View {
+    var body: some View {
         List {
             ForEach(
                 // In drawing apps, textures stack from bottom to top,
@@ -50,7 +50,7 @@ public struct ReversedTextureLayerListView: View {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel(
+    let viewModel = TextureLayerViewModel(
         textureLayers: TextureLayersState(
             textureLayers: .init(
                 layers: [

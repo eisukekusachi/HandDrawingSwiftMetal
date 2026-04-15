@@ -14,13 +14,6 @@ import TextureLayerView
 
 @objc final class HandDrawingCanvasView: CanvasView {
 
-    var thumbnail: UIImage? {
-        canvasTexture?.uiImage?.resizeWithAspectRatio(
-            height: 500,
-            scale: 1.0
-        )
-    }
-
     var didUndo: AnyPublisher<UndoManager, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }

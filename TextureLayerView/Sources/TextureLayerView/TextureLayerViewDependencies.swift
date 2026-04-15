@@ -9,7 +9,7 @@ import Foundation
 
 public final class TextureLayerViewDependencies {
 
-    public let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     @MainActor
     public init(

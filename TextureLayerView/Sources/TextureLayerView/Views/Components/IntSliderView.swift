@@ -7,14 +7,15 @@
 
 import SwiftUI
 
-public struct IntSliderView: View {
+struct IntSliderView: View {
     @Binding private var value: Int
+
     private var range: ClosedRange<Float>
 
     private var onEditing: ((Int) -> Void)?
     private var onEditingChanged: ((Bool, Int) -> Void)?
 
-    public init(
+    init(
         _ value: Binding<Int>,
         range: ClosedRange<Int>,
         onEditing: ((Int) -> Void)? = nil,
@@ -26,7 +27,7 @@ public struct IntSliderView: View {
         self.onEditingChanged = onEditingChanged
     }
 
-    public var body: some View {
+    var body: some View {
         Slider(
             value: Binding(
                 get: { Float(value) },

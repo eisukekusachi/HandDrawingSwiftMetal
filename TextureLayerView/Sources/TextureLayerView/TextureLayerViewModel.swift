@@ -17,11 +17,11 @@ open class TextureLayerViewModel: ObservableObject {
 
     @Published public var isAlphaSliderDragging: Bool = false
 
-    @Published public private(set) var textureLayers: TextureLayersState
+    @Published public var textureLayers: TextureLayersState
 
-    public let onLayersChanged: ((TextureLayerEvent) -> Void)?
+    let onLayersChanged: ((TextureLayerEvent) -> Void)?
 
-    public var selectedLayer: TextureLayerItem? {
+    var selectedLayer: TextureLayerItem? {
         textureLayers.selectedLayer
     }
 

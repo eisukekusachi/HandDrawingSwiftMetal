@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct TextureLayerToolbar: View {
+struct TextureLayerToolbar: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
@@ -24,7 +24,7 @@ public struct TextureLayerToolbar: View {
         self.viewModel = viewModel
     }
 
-    public var body: some View {
+    var body: some View {
         HStack(spacing: 16) {
             Button(
                 action: {

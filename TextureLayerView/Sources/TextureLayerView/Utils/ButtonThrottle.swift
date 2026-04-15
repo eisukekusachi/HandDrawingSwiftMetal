@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public final class ButtonThrottle: @unchecked Sendable {
+final class ButtonThrottle: @unchecked Sendable {
     private var isLocked = [String: Bool]()
     private let queue = DispatchQueue(label: "com.hand-drawing-swift-metal.ButtonThrottleQueue")
 

@@ -50,7 +50,7 @@ public struct TextureLayerView: View {
 
 @MainActor
 private struct PreviewView: View {
-    private var viewModel = TextureLayerViewModel(
+    var viewModel = TextureLayerViewModel(
         textureLayers: TextureLayersState(
             textureLayers: .init(
                 layers: [
