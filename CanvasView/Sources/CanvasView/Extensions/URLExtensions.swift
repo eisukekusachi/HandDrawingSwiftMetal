@@ -10,7 +10,14 @@ import Foundation
 public extension URL {
 
     static var documents: URL {
-        URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
+        guard
+            let url = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first else {
+            fatalError("Failed to resolve Documents directory URL")
+        }
+        return url
     }
 
     /// A URL to store persistent and temporary data

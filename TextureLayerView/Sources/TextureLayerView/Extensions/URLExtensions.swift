@@ -8,6 +8,18 @@
 import Foundation
 
 extension URL {
+
+    static var documents: URL {
+        guard
+            let url = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first else {
+            fatalError("Failed to resolve Documents directory URL")
+        }
+        return url
+    }
+
     /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
         guard let url = FileManager.default.urls(
@@ -17,10 +29,6 @@ extension URL {
             fatalError("Failed to resolve Application Support directory URL")
         }
         return url
-    }
-
-    static var documents: URL {
-        URL(fileURLWithPath: NSHomeDirectory() + "/Documents")
     }
 
     var fileName: String {
