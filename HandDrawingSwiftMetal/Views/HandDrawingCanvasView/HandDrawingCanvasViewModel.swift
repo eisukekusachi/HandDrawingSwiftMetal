@@ -67,9 +67,13 @@ extension HandDrawingCanvasViewModel {
             let textureLayerId = undoObject.textureLayer.id
             textureLayersState.selectLayer(textureLayerId)
 
+            let textureData = try await newTexture.data(
+                device: renderer.device,
+                commandQueue: renderer.commandQueue
+            )
             try await saveTextureToDocumentsDirectory(
                 layerId: textureLayerId,
-                texture: newTexture
+                textureData: textureData
             )
             textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
 
@@ -92,9 +96,13 @@ extension HandDrawingCanvasViewModel {
         else { return }
 
         do {
+            let textureData = try await newTexture.data(
+                device: renderer.device,
+                commandQueue: renderer.commandQueue
+            )
             try await saveTextureToDocumentsDirectory(
                 layerId: undoObject.textureLayer.id,
-                texture: newTexture
+                textureData: textureData
             )
 
             textureLayersState.addLayer(
@@ -238,20 +246,6 @@ extension HandDrawingCanvasViewModel {
 }
 
 extension HandDrawingCanvasViewModel {
-
-    func saveTextureToDocumentsDirectory(
-        layerId: UUID,
-        texture: MTLTexture
-    ) async throws {
-        let textureData = try await texture.data(
-            device: renderer.device,
-            commandQueue: renderer.commandQueue
-        )
-        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
-            id: layerId,
-            data: textureData
-        )
-    }
 
     func saveTextureToDocumentsDirectory(
         layerId: UUID,
