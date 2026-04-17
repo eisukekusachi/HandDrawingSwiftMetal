@@ -20,10 +20,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
     private let onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)?
 
-    private let inMemoryRepository: UndoTextureInMemoryRepository?
-
-    /// Holds the previous texture to support undoing drawings
-    private var previousDrawingTextureForUndo: MTLTexture?
+    private let inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
 
     private var previousAlpha: Int?
 
@@ -35,12 +32,12 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         textureLayers: TextureLayersState,
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        inMemoryRepository: UndoTextureInMemoryRepository? = nil,
+        inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil,
         onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)? = nil
     ) {
         self.renderer = MTLRenderer(device: device, commandQueue: commandQueue)
-        self.inMemoryRepository = inMemoryRepository ?? .shared
+        self.inMemoryRepository = inMemoryRepository ?? UndoTextureInMemoryRepository.shared
         self.onRegisterUndoObjectPair = onRegisterUndoObjectPair
         super.init(
             textureLayers: textureLayers,
@@ -59,13 +56,6 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
                     )
                 }
             }.store(in: &cancellables)
-    }
-
-    func initializeUndoTextures(
-        textureSize: CGSize
-    ) {
-        // Create a texture for use in drawing undo operations
-        previousDrawingTextureForUndo = renderer.makeTexture(textureSize)
     }
 
     @discardableResult
@@ -242,73 +232,6 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
                 redoObject: redoObject
             )
         )
-    }
-
-    func pushUndoDrawingObject(
-        texture: MTLTexture?
-    ) async throws {
-        guard let inMemoryRepository else { return }
-
-        guard
-            let selectedLayer = textureLayers.selectedLayer
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@"), "selectedLayer"))
-            return
-        }
-        guard
-            let undoTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: previousDrawingTextureForUndo,
-                renderer: renderer
-            )
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@"), "undoTexture"))
-            return
-        }
-        guard
-            let redoTexture = try await MTLTextureCreator.duplicateTexture(
-                texture: texture,
-                renderer: renderer
-            )
-        else {
-            Logger.error(String(format: String(localized: "Unable to find %@"), "redoTexture"))
-            return
-        }
-
-        let undoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer)
-        )
-        let redoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer)
-        )
-
-        guard
-            let undoTextureId = undoObject.undoTextureId,
-            let redoTextureId = redoObject.undoTextureId
-        else { return }
-
-        do {
-            try await inMemoryRepository
-                .addTexture(
-                    newTexture: undoTexture,
-                    id: undoTextureId
-                )
-            try await inMemoryRepository
-                .addTexture(
-                    newTexture: redoTexture,
-                    id: redoTextureId
-                )
-
-            onRegisterUndoObjectPair?(
-                .init(
-                    undoObject: undoObject,
-                    redoObject: redoObject
-                )
-            )
-
-        } catch {
-            // No action on error
-            Logger.error(error)
-        }
     }
 }
 
