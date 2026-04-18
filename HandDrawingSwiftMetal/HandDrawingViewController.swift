@@ -602,9 +602,9 @@ private extension HandDrawingViewController {
                 await self?.performTitleUndo(undoObject)
             }
 
-            self?.textureLayerView.updateAlpha(
-                undoObject.textureLayer.alpha
-            )
+            if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                self?.textureLayerView.updateAlpha(alpha)
+            }
         }
     }
 
