@@ -158,8 +158,8 @@ class HandDrawingViewController: UIViewController {
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
         // Set an initial value to prevent out-of-memory errors when no limit is applied
-        if undoManager?.levelsOfUndo == 0 {
-            undoManager?.levelsOfUndo = 8
+        if canvasView.undoManager?.levelsOfUndo == 0 {
+            canvasView.undoManager?.levelsOfUndo = 8
         }
     }
 
@@ -559,17 +559,17 @@ private extension HandDrawingViewController {
     }
 
     func undo() {
-        guard let undoManager else { return }
+        guard let undoManager = canvasView.undoManager else { return }
         undoManager.undo()
         setUndoRedoButtonState(undoManager)
     }
     func redo() {
-        guard let undoManager else { return }
+        guard let undoManager = canvasView.undoManager else { return }
         undoManager.redo()
         setUndoRedoButtonState(undoManager)
     }
     func resetUndo() {
-        guard let undoManager else { return }
+        guard let undoManager = canvasView.undoManager else { return }
         clearUndoTextures()
         undoManager.removeAllActions()
         setUndoRedoButtonState(undoManager)
@@ -815,7 +815,7 @@ private extension HandDrawingViewController {
     func registerUndoObject(
         _ undoRedoObject: UndoRedoObjectPair
     ) {
-        guard let undoManager else { return }
+        guard let undoManager = canvasView.undoManager else { return }
         registerUndoObjectPair(
             undoRedoObject
         )
