@@ -9,7 +9,7 @@ import Combine
 import Foundation
 import TextureLayerView
 
-protocol UndoObject {
+protocol UndoObject: AnyObject {
     /// The texture ID used for the undo operation
     var undoTextureId: UndoTextureId? { get }
 
