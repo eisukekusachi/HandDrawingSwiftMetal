@@ -87,7 +87,7 @@ extension UndoCoordinator {
                 )
             }
         case .strokeCompleted:
-            Task {
+            Task { @MainActor in
                 guard
                     let selectedLayer = textureLayersState.selectedLayer,
                     let undoRedoObjectPair = try await undoDrawing?.pushUndoDrawingObject(
