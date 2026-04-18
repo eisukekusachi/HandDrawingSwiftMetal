@@ -63,12 +63,10 @@ final class UndoCoordinator {
     func undo() {
         guard let undoManager else { return }
         undoManager.undo()
-        didUndoSubject.send()
     }
     func redo() {
         guard let undoManager else { return }
         undoManager.redo()
-        didUndoSubject.send()
     }
     func resetUndo() async {
         guard let undoManager else { return }
