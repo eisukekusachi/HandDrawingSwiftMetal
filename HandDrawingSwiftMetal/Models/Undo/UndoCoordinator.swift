@@ -128,8 +128,11 @@ extension UndoCoordinator {
 
         didChangeUndoStateSubject.send()
     }
+}
 
-    func performUndo(_ undoObject: UndoObject) {
+private extension UndoCoordinator {
+
+    private func performUndo(_ undoObject: UndoObject) {
         Task { [weak self] in
             if let undoObject = undoObject as? UndoDrawingObject {
                 await self?.performDrawingUndo(undoObject)
@@ -149,23 +152,6 @@ extension UndoCoordinator {
                 await self?.performTitleUndo(undoObject)
             }
         }
-    }
-}
-
-private extension UndoCoordinator {
-
-    func subscribeDeinitIfNeeded(_ undoObject: UndoObject) {
-        let id = ObjectIdentifier(undoObject)
-        guard subscribedUndoObjects.insert(id).inserted else { return }
-
-        undoObject.deinitSubject
-            .sink { [weak self] result in
-                guard let self, let undoTextureId = result.undoTextureId else { return }
-                Task { @MainActor in
-                    try? await self.undoTextureInMemoryRepository.removeTexture(undoTextureId)
-                }
-            }
-            .store(in: &cancellables)
     }
 
     func performDrawingUndo(
@@ -307,5 +293,19 @@ private extension UndoCoordinator {
             undoObject.textureLayer.id,
             title: undoObject.textureLayer.title
         )
+    }
+
+    func subscribeDeinitIfNeeded(_ undoObject: UndoObject) {
+        let id = ObjectIdentifier(undoObject)
+        guard subscribedUndoObjects.insert(id).inserted else { return }
+
+        undoObject.deinitSubject
+            .sink { [weak self] result in
+                guard let self, let undoTextureId = result.undoTextureId else { return }
+                Task { @MainActor in
+                    try? await self.undoTextureInMemoryRepository.removeTexture(undoTextureId)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
