@@ -193,16 +193,16 @@ private extension EraserDrawingRenderer {
     }
 }
 
-public extension EraserDrawingRenderer {
+extension EraserDrawingRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 
     static private let initEraserSize: Int = 8
 
-    static func diameterIntValue(_ value: Float) -> Int {
+    public static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter
     }
-    static func diameterFloatValue(_ value: Int) -> Float {
+    public static func diameterFloatValue(_ value: Int) -> Float {
         Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }
