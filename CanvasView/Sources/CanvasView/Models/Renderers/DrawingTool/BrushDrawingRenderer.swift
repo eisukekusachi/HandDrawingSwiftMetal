@@ -179,16 +179,16 @@ private extension BrushDrawingRenderer {
     }
 }
 
-extension BrushDrawingRenderer {
+public extension BrushDrawingRenderer {
     static private let minDiameter: Int = 1
     static private let maxDiameter: Int = 64
 
     static private let initBrushSize: Int = 8
 
-    public static func diameterIntValue(_ value: Float) -> Int {
+    static func diameterIntValue(_ value: Float) -> Int {
         Int(value * Float(maxDiameter - minDiameter)) + minDiameter
     }
-    public static func diameterFloatValue(_ value: Int) -> Float {
+    static func diameterFloatValue(_ value: Int) -> Float {
         Float(value - minDiameter) / Float(maxDiameter - minDiameter)
     }
 }

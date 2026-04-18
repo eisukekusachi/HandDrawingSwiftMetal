@@ -7,15 +7,15 @@
 
 import UIKit
 
-public typealias ToastMessageId = UUID
+typealias ToastMessageId = UUID
 
-public struct ToastMessage: Identifiable {
-    public let id: ToastMessageId
-    public let title: String
-    public let icon: UIImage?
-    public let duration: Double
+struct ToastMessage: Identifiable {
+    let id: ToastMessageId
+    let title: String
+    let icon: UIImage?
+    let duration: Double
 
-    public init(
+    init(
         title: String,
         icon: UIImage?,
         duration: Double = 2.0

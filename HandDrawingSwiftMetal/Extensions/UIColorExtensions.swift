@@ -8,6 +8,7 @@
 import UIKit
 
 extension UIColor {
+
     convenience init?(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
 

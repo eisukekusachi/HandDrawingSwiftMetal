@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct TouchID: Hashable {
+struct TouchID: Hashable {
     private let id: ObjectIdentifier
 
     init(_ touch: UITouch) {

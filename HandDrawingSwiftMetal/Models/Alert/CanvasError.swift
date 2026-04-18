@@ -7,9 +7,9 @@
 
 import Foundation
 
-public typealias CanvasErrorId = UUID
+typealias CanvasErrorId = UUID
 
-public struct CanvasError: Identifiable {
+struct CanvasError: Identifiable {
     public let id: CanvasErrorId
     public let domain: String
     public let title: String

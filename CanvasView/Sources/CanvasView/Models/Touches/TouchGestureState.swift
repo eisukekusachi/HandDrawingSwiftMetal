@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class TouchGestureState {
+final class TouchGestureState {
 
     private(set) var state: TouchGestureType
 
@@ -25,7 +25,7 @@ public final class TouchGestureState {
     }
 }
 
-public extension TouchGestureState {
+extension TouchGestureState {
 
     func setDrawing() {
         state = .drawing
@@ -61,9 +61,9 @@ public extension TouchGestureState {
     }
 }
 
-public extension TouchGestureState {
+private extension TouchGestureState {
 
-    private func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
+    func isDrawingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
         guard
             touchHistories.count == 1,
             let history = touchHistories.first?.value,
@@ -77,7 +77,7 @@ public extension TouchGestureState {
         return nil
     }
 
-    private func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
+    func isTransformingGesture(_ touchHistories: TouchHistoriesOnScreen) -> TouchGestureType? {
         guard touchHistories.count == 2 else { return nil }
 
         let keys = Array(touchHistories.keys)

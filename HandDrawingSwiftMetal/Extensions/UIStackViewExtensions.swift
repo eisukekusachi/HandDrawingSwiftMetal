@@ -8,6 +8,7 @@
 import UIKit
 
 extension UIStackView {
+
     func removeAllArrangedSubviews() {
         arrangedSubviews.forEach {
             self.removeArrangedSubview($0)

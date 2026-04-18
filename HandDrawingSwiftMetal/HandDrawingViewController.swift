@@ -16,7 +16,7 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
-    public var zipFileURL: URL {
+    var zipFileURL: URL {
         FileManager.documentsFileURL(
             projectName: viewModel.project.projectName,
             suffix: viewModel.fileSuffix

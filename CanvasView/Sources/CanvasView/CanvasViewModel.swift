@@ -10,7 +10,7 @@ import UIKit
 
 /// A view model that manages canvas rendering and texture layers.
 @MainActor
-public final class CanvasViewModel {
+final class CanvasViewModel {
 
     /// The frame size, which changes when the screen rotates or the view layout updates.
     var frameSize: CGSize = .zero {

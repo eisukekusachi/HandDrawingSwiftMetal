@@ -13,19 +13,18 @@ public struct MTLTextureNodes: Sendable {
     var indices: MTLTextureIndices = MTLTextureIndices()
 }
 
-public extension MTLTextureNodes {
+extension MTLTextureNodes {
 
-    static let textureNodes: MTLTextureNodes = .init()
+    public static let textureNodes: MTLTextureNodes = .init()
 
-    static let flippedTextureNodes: MTLTextureNodes = .init(
+    public static let flippedTextureNodes: MTLTextureNodes = .init(
         vertices: MTLTextureVertices(),
         textureCoord: .cartesianTextureCoordinates,
         indices: MTLTextureIndices()
     )
-
 }
 
-public struct MTLTextureVertices: Sendable {
+struct MTLTextureVertices: Sendable {
     var LT: CGPoint = .init(x: -1.0, y: -1.0)
     var RT: CGPoint = .init(x:  1.0, y: -1.0)
     var RB: CGPoint = .init(x:  1.0, y:  1.0)
@@ -165,13 +164,13 @@ public struct MTLTextureVertices: Sendable {
 
 }
 
-public struct MTLTextureCoordinates: Sendable {
+struct MTLTextureCoordinates: Sendable {
     let LT: CGPoint
     let RT: CGPoint
     let RB: CGPoint
     let LB: CGPoint
 
-    public func getValues() -> [Float] {
+    func getValues() -> [Float] {
         [
             Float(LB.x), Float(LB.y),
             Float(RB.x), Float(RB.y),
@@ -182,7 +181,7 @@ public struct MTLTextureCoordinates: Sendable {
 
     /// UV coordinates for a screen coordinate system with the origin at the top-left corner.
     /// This is typical in `UIKit`, where (0,0) represents the top-left of the screen.
-    public static let screenTextureCoordinates: Self = .init(
+    static let screenTextureCoordinates: Self = .init(
         LT: .init(x: 0.0, y: 0.0),
         RT: .init(x: 1.0, y: 0.0),
         RB: .init(x: 1.0, y: 1.0),
@@ -191,7 +190,7 @@ public struct MTLTextureCoordinates: Sendable {
 
     /// UV coordinates for a Cartesian coordinate system with the origin at the bottom-left corner
     /// Commonly used in `Metal` rendering, where the bottom-left is (0,0).
-    public static let cartesianTextureCoordinates: Self = .init(
+    static let cartesianTextureCoordinates: Self = .init(
         LT: .init(x: 0.0, y: 1.0),
         RT: .init(x: 1.0, y: 1.0),
         RB: .init(x: 1.0, y: 0.0),
@@ -199,15 +198,15 @@ public struct MTLTextureCoordinates: Sendable {
     )
 }
 
-public struct MTLTextureIndices: Sendable {
-    public let LB: UInt16 = 0
-    public let RB: UInt16 = 1
-    public let RT: UInt16 = 2
-    public let LT: UInt16 = 3
+struct MTLTextureIndices: Sendable {
+    let LB: UInt16 = 0
+    let RB: UInt16 = 1
+    let RT: UInt16 = 2
+    let LT: UInt16 = 3
 
-    public init() {}
+    init() {}
 
-    public func getValues() -> [UInt16] {
+    func getValues() -> [UInt16] {
         [
             LB, RB, RT,
             LB, RT, LT

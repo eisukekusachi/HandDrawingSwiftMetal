@@ -87,22 +87,22 @@ final class HandDrawingViewModel: ObservableObject {
     private let dependencies: HandDrawingViewDependencies
 
     /// A publisher that emits a request to show or hide the activity indicator
-    public var activityIndicator: AnyPublisher<Bool, Never> {
+    var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
     }
     private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
-    public var alert: AnyPublisher<any Error, Never> {
+    var alert: AnyPublisher<any Error, Never> {
         alertSubject.eraseToAnyPublisher()
     }
     private let alertSubject = PassthroughSubject<any Error, Never>()
 
-    public var toast: AnyPublisher<ToastMessage, Never> {
+    var toast: AnyPublisher<ToastMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    public init(
+    init(
         dependencies: HandDrawingViewDependencies? = nil
     ) {
         self.dependencies = dependencies ?? .init()

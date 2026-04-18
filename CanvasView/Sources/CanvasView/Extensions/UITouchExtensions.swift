@@ -8,7 +8,6 @@
 import UIKit
 
 extension UITouch {
-
     /// Determines whether all fingers have been released from the screen
     static func isAllFingersReleasedFromScreen(
         event: UIEvent?

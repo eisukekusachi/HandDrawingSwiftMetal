@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum InputType: Sendable {
+enum InputType: Sendable {
     /// The status is still undetermined
     case undetermined
 

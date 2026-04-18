@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TouchGestureType: Int, Sendable {
+enum TouchGestureType: Int, Sendable {
 
     case undetermined
 

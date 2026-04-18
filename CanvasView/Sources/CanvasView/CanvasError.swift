@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum CanvasError: Error, LocalizedError {
+enum CanvasError: Error, LocalizedError {
     case textureSizeMismatch
     case failedToCreateCanvas
 

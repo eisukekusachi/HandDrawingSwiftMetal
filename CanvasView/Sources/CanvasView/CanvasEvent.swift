@@ -8,7 +8,7 @@
 import UIKit
 
 /// Events emitted by the canvas to notify about rendering updates or state changes
-public enum CanvasEvent {
+enum CanvasEvent {
 
     /// Indicates that the current texture should be displayed
     case displayCurrentTexture

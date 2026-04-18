@@ -84,6 +84,7 @@ extension CoreDataBrushPaletteStorage {
 }
 
 private extension CoreDataBrushPaletteStorage {
+
     func save(_ target: BrushPalette) async {
         guard
             let context = self.storage.context,

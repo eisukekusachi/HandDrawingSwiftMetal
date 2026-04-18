@@ -8,7 +8,7 @@
 import CoreData
 import Foundation
 
-public protocol CoreDataStorageProtocol {
+protocol CoreDataStorageProtocol {
     associatedtype Entity: NSManagedObject
     var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>?
@@ -16,7 +16,7 @@ public protocol CoreDataStorageProtocol {
     func clearAll() throws
 }
 
-public final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
+final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
     public let context: NSManagedObjectContext?
 
     public init(context: NSManagedObjectContext?) {
