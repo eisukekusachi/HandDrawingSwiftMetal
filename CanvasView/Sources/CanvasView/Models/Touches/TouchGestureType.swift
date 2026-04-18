@@ -1,6 +1,6 @@
 //
 //  TouchGestureType.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
 //

@@ -1,6 +1,6 @@
 //
 //  CanvasError.swift
-//  CanvasView
+//  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/03.
 //

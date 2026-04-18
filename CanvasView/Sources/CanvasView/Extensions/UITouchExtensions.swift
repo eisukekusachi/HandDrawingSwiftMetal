@@ -1,6 +1,6 @@
 //
 //  UITouchExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
 //

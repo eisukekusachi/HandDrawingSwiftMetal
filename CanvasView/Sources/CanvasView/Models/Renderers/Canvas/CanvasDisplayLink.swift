@@ -1,6 +1,6 @@
 //
 //  CanvasDisplayLink.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/02/04.
 //

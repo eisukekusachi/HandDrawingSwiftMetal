@@ -1,6 +1,6 @@
 //
 //  SmoothDrawingCurveTests.swift
-//  HandDrawingSwiftMetalTests
+//  CanvasViewTests
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
 //

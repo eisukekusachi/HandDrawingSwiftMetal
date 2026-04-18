@@ -1,6 +1,6 @@
 //
 //  DataExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2023/11/05.
 //

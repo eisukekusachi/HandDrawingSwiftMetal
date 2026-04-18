@@ -1,6 +1,6 @@
 //
 //  CanvasConfigurationTests.swift
-//  CanvasView
+//  CanvasViewTests
 //
 //  Created by Eisuke Kusachi on 2026/03/07.
 //

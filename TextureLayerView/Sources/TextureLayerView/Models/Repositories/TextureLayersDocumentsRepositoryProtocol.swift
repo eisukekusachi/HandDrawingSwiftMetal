@@ -1,6 +1,6 @@
 //
 //  TextureLayersDocumentsRepositoryProtocol.swift
-//  CanvasView
+//  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/12/29.
 //

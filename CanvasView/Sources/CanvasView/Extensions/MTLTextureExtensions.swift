@@ -1,6 +1,6 @@
 //
 //  MTLTextureExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2023/10/14.
 //

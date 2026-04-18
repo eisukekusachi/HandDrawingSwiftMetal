@@ -1,6 +1,6 @@
 //
 //  InterpolatorTests.swift
-//  CanvasView
+//  CanvasViewTests
 //
 //  Created by Eisuke Kusachi on 2025/11/15.
 //

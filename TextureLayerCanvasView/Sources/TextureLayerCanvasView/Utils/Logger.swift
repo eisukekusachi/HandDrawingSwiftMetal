@@ -1,6 +1,6 @@
 //
 //  Logger.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2026/01/23.
 //

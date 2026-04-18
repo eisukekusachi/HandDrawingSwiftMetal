@@ -1,6 +1,6 @@
 //
 //  MTLTextureNodes.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/11/07.
 //

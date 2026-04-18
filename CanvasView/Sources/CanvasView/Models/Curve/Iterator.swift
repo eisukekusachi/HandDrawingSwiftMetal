@@ -1,6 +1,6 @@
 //
 //  Iterator.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2022/11/03.
 //

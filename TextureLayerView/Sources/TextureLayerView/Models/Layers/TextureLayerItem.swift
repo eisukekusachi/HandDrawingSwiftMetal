@@ -1,6 +1,6 @@
 //
 //  TextureLayerItem.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
 //

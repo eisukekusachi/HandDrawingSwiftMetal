@@ -1,6 +1,6 @@
 //
 //  DrawingDebouncer.swift
-//  CanvasView
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2025/11/22.
 //

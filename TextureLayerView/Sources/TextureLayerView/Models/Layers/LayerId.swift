@@ -1,6 +1,6 @@
 //
 //  LayerId.swift
-//  CanvasView
+//  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/10/12.
 //

@@ -1,6 +1,6 @@
 //
 //  CGPointExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/04/02.
 //

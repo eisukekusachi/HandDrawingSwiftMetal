@@ -1,6 +1,6 @@
 //
 //  TextureLayersStateTests.swift
-//  CanvasView
+//  TextureLayerViewTests
 //
 //  Created by Eisuke Kusachi on 2025/12/30.
 //

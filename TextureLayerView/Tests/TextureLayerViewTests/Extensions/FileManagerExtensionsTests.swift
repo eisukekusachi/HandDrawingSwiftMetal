@@ -1,6 +1,6 @@
 //
 //  FileManagerExtensionsTests.swift
-//  HandDrawingSwiftMetalTests
+//  TextureLayerViewTests
 //
 //  Created by Eisuke Kusachi on 2025/07/13.
 //

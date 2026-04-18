@@ -1,6 +1,6 @@
 //
 //  TouchGestureStateTests.swift
-//  CanvasView
+//  CanvasViewTests
 //
 //  Created by Eisuke Kusachi on 2025/08/09.
 //
