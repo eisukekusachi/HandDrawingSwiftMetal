@@ -16,7 +16,7 @@ final class UndoCoordinator {
 
     private(set) var undoManager: UndoManager?
 
-    public var didUndo: AnyPublisher<Void, Never> {
+    var didUndo: AnyPublisher<Void, Never> {
         didUndoSubject.eraseToAnyPublisher()
     }
     private let didUndoSubject = PassthroughSubject<Void, Never>()
