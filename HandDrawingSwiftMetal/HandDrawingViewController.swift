@@ -183,6 +183,11 @@ private extension HandDrawingViewController {
                 Task { [weak self] in
                     try? await self?.canvasView.updateFullCanvasTexture()
                 }
+                // Update the alpha UI to match the currently selected layer.
+                // changeLayerAlpha is excluded because the slider already reflects that change.
+                if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                    self?.textureLayerView.updateAlpha(alpha)
+                }
             case .changeLayerAlpha:
                 Task { [weak self] in
                     self?.canvasView.updateCanvasTextureUsingCurrentTexture()
@@ -294,6 +299,9 @@ private extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(
                     .init(undoManager)
                 )
+                if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                    self?.textureLayerView.updateAlpha(alpha)
+                }
             }
             .store(in: &cancellables)
     }
