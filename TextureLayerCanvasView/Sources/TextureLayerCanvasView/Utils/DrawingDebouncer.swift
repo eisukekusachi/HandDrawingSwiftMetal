@@ -8,7 +8,7 @@
 import Foundation
 
 /// A debouncer to prevent heavy processing from running continuously during drawing
-public final class DrawingDebouncer {
+final class DrawingDebouncer {
 
     private let debouncer: Debouncer
 

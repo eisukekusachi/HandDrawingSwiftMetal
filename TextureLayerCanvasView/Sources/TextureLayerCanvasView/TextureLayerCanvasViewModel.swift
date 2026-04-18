@@ -1,19 +1,18 @@
 //
-//  HandDrawingCanvasViewModel.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerCanvasViewModel.swift
+//  TextureLayerCanvasView
 //
-//  Created by Eisuke Kusachi on 2026/02/04.
+//  Created by Eisuke Kusachi on 2026/04/18.
 //
 
 import CanvasView
 import Combine
-import Foundation
 import TextureLayerView
 
 @preconcurrency import MetalKit
 
 @MainActor
-final class HandDrawingCanvasViewModel: ObservableObject {
+final class TextureLayerCanvasViewModel: ObservableObject {
 
     var textureSize: CGSize {
         textureLayersState.textureSize
@@ -25,7 +24,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
 
     let textureLayersState: TextureLayersState
 
-    private let dependencies: HandDrawingCanvasViewDependencies
+    private let dependencies: TextureLayerCanvasViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -34,7 +33,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     init(
         textureLayersState: TextureLayersState,
         renderer: MTLRendering,
-        dependencies: HandDrawingCanvasViewDependencies? = nil
+        dependencies: TextureLayerCanvasViewDependencies? = nil
     ) {
         self.textureLayersState = textureLayersState
         self.dependencies = dependencies ?? .init()
@@ -42,7 +41,7 @@ final class HandDrawingCanvasViewModel: ObservableObject {
     }
 }
 
-extension HandDrawingCanvasViewModel {
+extension TextureLayerCanvasViewModel {
 
     func duplicateTextureFromDocumentsDirectory(
         _ id: LayerId
@@ -63,9 +62,6 @@ extension HandDrawingCanvasViewModel {
             device: renderer.device
         )
     }
-}
-
-extension HandDrawingCanvasViewModel {
 
     func saveTextureToDocumentsDirectory(
         layerId: UUID,

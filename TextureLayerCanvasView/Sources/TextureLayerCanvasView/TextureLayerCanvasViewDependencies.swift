@@ -1,13 +1,13 @@
 //
-//  HandDrawingCanvasViewDependencies.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerCanvasViewDependencies.swift
+//  TextureLayerCanvasView
 //
-//  Created by Eisuke Kusachi on 2026/03/19.
+//  Created by Eisuke Kusachi on 2026/04/18.
 //
 
 import TextureLayerView
 
-final class HandDrawingCanvasViewDependencies {
+final class TextureLayerCanvasViewDependencies {
 
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 

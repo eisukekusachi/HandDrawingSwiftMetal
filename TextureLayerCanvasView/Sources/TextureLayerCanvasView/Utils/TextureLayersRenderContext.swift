@@ -5,11 +5,10 @@
 //  Created by Eisuke Kusachi on 2026/02/15.
 //
 
-import Foundation
 import TextureLayerView
 
 @MainActor
-public struct TextureLayersRenderContext {
+struct TextureLayersRenderContext {
 
     public let selectedIndex: Int
     public let layers: [TextureLayerModel]

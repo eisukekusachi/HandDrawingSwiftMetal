@@ -7,7 +7,7 @@
 
 import MetalKit
 
-public struct TextureLayerRenderContext {
+struct TextureLayerRenderContext {
     public let isVisible: Bool
     public let alpha: Int
     public let texture: MTLTexture?

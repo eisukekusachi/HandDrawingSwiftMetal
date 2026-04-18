@@ -1,18 +1,17 @@
 //
-//  HandDrawingCanvasView.swift
-//  HandDrawingSwiftMetal
+//  TextureLayerCanvasView.swift
+//  TextureLayerCanvasView
 //
-//  Created by Eisuke Kusachi on 2026/01/22.
+//  Created by Eisuke Kusachi on 2026/04/18.
 //
 
 import CanvasView
 import Combine
-import UIKit
 import TextureLayerView
 
 @preconcurrency import MetalKit
 
-@objc final class HandDrawingCanvasView: CanvasView {
+@objc public final class TextureLayerCanvasView: CanvasView {
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
@@ -23,7 +22,7 @@ import TextureLayerView
         .init(renderer: renderer)
     }()
 
-    private lazy var viewModel: HandDrawingCanvasViewModel = {
+    private lazy var viewModel: TextureLayerCanvasViewModel = {
         .init(
             textureLayersState: textureLayersState,
             renderer: renderer
@@ -34,7 +33,7 @@ import TextureLayerView
 
     private let configuration: CanvasConfiguration
 
-    init(
+    public init(
         textureLayersState: TextureLayersState,
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration
@@ -113,7 +112,7 @@ import TextureLayerView
         }
     }
 
-    func updateFullCanvasTexture() async throws {
+    public func updateFullCanvasTexture() async throws {
         guard
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
@@ -137,7 +136,7 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    override func initializeCanvas(_ textureSize: CGSize) async throws {
+    override public func initializeCanvas(_ textureSize: CGSize) async throws {
         try await super.initializeCanvas(textureSize)
 
         try textureLayerRenderer.initializeTextures(textureSize: textureSize)
@@ -145,12 +144,12 @@ import TextureLayerView
         try await updateFullCanvasTexture()
     }
 
-    override func updateCanvasTextureUsingRealtimeDrawingTexture() {
+    override public func updateCanvasTextureUsingRealtimeDrawingTexture() {
         updateCanvasTexture(realtimeDrawingTexture)
         present()
     }
 
-    override func updateCanvasTextureUsingCurrentTexture() {
+    override public func updateCanvasTextureUsingCurrentTexture() {
         updateCanvasTexture(currentTexture)
         present()
     }
@@ -169,7 +168,7 @@ import TextureLayerView
         )
     }
 
-    func saveTextureToDocumentsDirectory(
+    public func saveTextureToDocumentsDirectory(
         layerId: UUID,
         textureData: Data
     ) async throws {

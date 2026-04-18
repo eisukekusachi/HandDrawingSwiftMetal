@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import SwiftUI
+import TextureLayerCanvasView
 import TextureLayerView
 import UIKit
 
@@ -50,8 +51,8 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private lazy var canvasView: HandDrawingCanvasView = {
-        HandDrawingCanvasView(
+    private lazy var canvasView: TextureLayerCanvasView = {
+        TextureLayerCanvasView(
             textureLayersState: viewModel.textureLayersState,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration

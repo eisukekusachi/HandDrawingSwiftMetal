@@ -12,7 +12,7 @@ import UIKit
 @preconcurrency import MetalKit
 
 @MainActor
-public class TextureLayerRenderer {
+class TextureLayerRenderer {
 
     public var backgroundColor: UIColor = .white
 
