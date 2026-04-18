@@ -7,7 +7,6 @@
 
 import CanvasView
 import Combine
-import Foundation
 import MetalKit
 import TextureLayerView
 
@@ -18,13 +17,13 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         inMemoryRepository != nil
     }
 
-    private let onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)?
+    private let onRegisterUndoObject: ((UndoRedoObjectPair) -> Void)?
 
     private let inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
 
-    private var previousAlpha: Int?
+    private let device: MTLDevice
 
-    private let renderer: MTLRendering
+    private var previousAlpha: Int?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -34,11 +33,11 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
         commandQueue: MTLCommandQueue,
         inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil,
         onLayersChanged: ((TextureLayerEvent) -> Void)? = nil,
-        onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void)? = nil
+        onRegisterUndoObject: ((UndoRedoObjectPair) -> Void)? = nil
     ) {
-        self.renderer = MTLRenderer(device: device, commandQueue: commandQueue)
+        self.device = device
         self.inMemoryRepository = inMemoryRepository ?? UndoTextureInMemoryRepository.shared
-        self.onRegisterUndoObjectPair = onRegisterUndoObjectPair
+        self.onRegisterUndoObject = onRegisterUndoObject
         super.init(
             textureLayers: textureLayers,
             device: device,
@@ -51,8 +50,21 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
                 if isDragging {
                     self.previousAlpha = self.currentAlpha
                 } else {
-                    self.pushUndoAlphaObject(
-                        item: self.textureLayers.selectedLayer
+                    guard
+                        let item = self.textureLayers.selectedLayer,
+                        let previousAlpha = self.previousAlpha
+                    else { return }
+                    self.onRegisterUndoObject?(
+                        .init(
+                            undoObject: UndoAlphaObject(
+                                layer: .init(item: item),
+                                alpha: previousAlpha
+                            ),
+                            redoObject: UndoAlphaObject(
+                                layer: .init(item: item),
+                                alpha: item.alpha
+                            )
+                        )
                     )
                 }
             }.store(in: &cancellables)
@@ -69,23 +81,20 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
         let newTexture = await textureFromDocumentsRepository(
             layerId,
-            device: renderer.device
-        )
-
-        // Create a deletion undo object to cancel the addition
-        let undoObject = UndoDeletionObject(
-            layerToBeDeleted: .init(item: layer)
-        )
-        let redoObject = UndoAdditionObject(
-            layerToBeAdded: .init(item: layer),
-            at: layerIndex
+            device: device
         )
 
         await pushUndoAdditionObject(
             newTexture: newTexture,
+            // Create a deletion undo object to cancel the addition
             undoRedoObject: .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoDeletionObject(
+                    layerToBeDeleted: .init(item: layer)
+                ),
+                redoObject: UndoAdditionObject(
+                    layerToBeAdded: .init(item: layer),
+                    at: layerIndex
+                )
             )
         )
 
@@ -99,24 +108,21 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
                 let layerId = textureLayers.selectedLayerId,
                 let layerIndex = textureLayers.selectedIndex,
                 let layer = textureLayers.selectedLayer,
-                let texture = await textureFromDocumentsRepository(layerId, device: renderer.device),
+                let texture = await textureFromDocumentsRepository(layerId, device: device),
                 await super.onTapDeleteButton()
             else { return false }
-
-            let undoObject = UndoAdditionObject(
-                layerToBeAdded: .init(item: layer),
-                at: layerIndex
-            )
-            // Create a deletion undo object to cancel the addition
-            let redoObject = UndoDeletionObject(
-                layerToBeDeleted: .init(item: layer)
-            )
 
             try await pushUndoDeletionObject(
                 restorationTexture: texture,
                 undoRedoObject: .init(
-                    undoObject: undoObject,
-                    redoObject: redoObject
+                    undoObject: UndoAdditionObject(
+                        layerToBeAdded: .init(item: layer),
+                        at: layerIndex
+                    ),
+                    // Create a deletion undo object to cancel the addition
+                    redoObject: UndoDeletionObject(
+                        layerToBeDeleted: .init(item: layer)
+                    )
                 )
             )
             return true
@@ -128,64 +134,58 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
     }
 
     override func onTapTitleButton(_ id: LayerId, title: String) {
-        guard let layer = textureLayers.layers.first(where: { $0.id == id }) else { return }
-        let undoObject = UndoTitleObject(
-            layer: .init(item: layer)
-        )
+        guard let undoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
 
         super.onTapTitleButton(id, title: title)
 
-        guard let layer = textureLayers.layers.first(where: { $0.id == id }) else { return }
-        let redoObject = UndoTitleObject(
-            layer: .init(item: layer)
-        )
+        guard let redoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
 
-        onRegisterUndoObjectPair?(
+        onRegisterUndoObject?(
             .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoTitleObject(
+                    layer: .init(item: undoLayer)
+                ),
+                redoObject: UndoTitleObject(
+                    layer: .init(item: redoLayer)
+                )
             )
         )
     }
 
     override func onTapVisibleButton(_ id: LayerId, isVisible: Bool) {
-        guard let layer = textureLayers.layers.first(where: { $0.id == id }) else { return }
-        let undoObject = UndoVisibilityObject(
-            layer: .init(item: layer)
-        )
+        guard let undoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
 
         super.onTapVisibleButton(id, isVisible: isVisible)
 
-        guard let layer = textureLayers.layers.first(where: { $0.id == id }) else { return }
-        let redoObject = UndoVisibilityObject(
-            layer: .init(item: layer)
-        )
+        guard let redoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
 
-        onRegisterUndoObjectPair?(
+        onRegisterUndoObject?(
             .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoVisibilityObject(
+                    layer: .init(item: undoLayer)
+                ),
+                redoObject: UndoVisibilityObject(
+                    layer: .init(item: redoLayer)
+                )
             )
         )
     }
 
     override func onTapCell(_ id: UUID) {
-        guard let layer = textureLayers.selectedLayer else { return }
-        let undoObject = UndoSelectionObject(
-            layer: .init(item: layer)
-        )
+        guard let undoLayer = textureLayers.selectedLayer else { return }
 
         super.onTapCell(id)
 
-        guard let layer = textureLayers.selectedLayer else { return }
-        let redoObject = UndoSelectionObject(
-            layer: .init(item: layer)
-        )
+        guard let redoLayer = textureLayers.selectedLayer else { return }
 
-        onRegisterUndoObjectPair?(
+        onRegisterUndoObject?(
             .init(
-                undoObject: undoObject,
-                redoObject: redoObject
+                undoObject: UndoSelectionObject(
+                    layer: .init(item: undoLayer)
+                ),
+                redoObject: UndoSelectionObject(
+                    layer: .init(item: redoLayer)
+                )
             )
         )
     }
@@ -201,41 +201,16 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             layer: .init(item: layer)
         )
 
-        onRegisterUndoObjectPair?(
+        onRegisterUndoObject?(
             .init(
                 undoObject: redoObject.reversedObject,
                 redoObject: redoObject
             )
         )
     }
-
-    func pushUndoAlphaObject(
-        item: TextureLayerItem?
-    ) {
-        guard
-            let item,
-            let previousAlpha
-        else { return }
-
-        let undoObject = UndoAlphaObject(
-            layer: .init(item: item),
-            alpha: previousAlpha
-        )
-        let redoObject = UndoAlphaObject(
-            layer: .init(item: item),
-            alpha: item.alpha
-        )
-
-        onRegisterUndoObjectPair?(
-            .init(
-                undoObject: undoObject,
-                redoObject: redoObject
-            )
-        )
-    }
 }
 
-extension UndoTextureLayerViewModel {
+private extension UndoTextureLayerViewModel {
 
     func pushUndoAdditionObject(
         newTexture: MTLTexture?,
@@ -257,7 +232,7 @@ extension UndoTextureLayerViewModel {
                     id: undoTextureId
                 )
 
-            onRegisterUndoObjectPair?(
+            onRegisterUndoObject?(
                 undoRedoObject
             )
 
@@ -286,7 +261,7 @@ extension UndoTextureLayerViewModel {
                     id: undoTextureId
                 )
 
-            onRegisterUndoObjectPair?(
+            onRegisterUndoObject?(
                 undoRedoObject
             )
         } catch {
@@ -294,4 +269,27 @@ extension UndoTextureLayerViewModel {
             Logger.error(error)
         }
     }
+/*
+    func pushUndoAlphaObject(
+        item: TextureLayerItem?
+    ) {
+        guard
+            let item,
+            let previousAlpha
+        else { return }
+
+        onRegisterUndoObject?(
+            .init(
+                undoObject: UndoAlphaObject(
+                    layer: .init(item: item),
+                    alpha: previousAlpha
+                ),
+                redoObject: UndoAlphaObject(
+                    layer: .init(item: item),
+                    alpha: item.alpha
+                )
+            )
+        )
+    }
+ */
 }

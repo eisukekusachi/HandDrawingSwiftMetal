@@ -66,7 +66,9 @@ class HandDrawingViewController: UIViewController {
                 device: canvasView.sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue,
                 onLayersChanged: onTextureLayersChanged,
-                onRegisterUndoObjectPair: onRegisterUndoObjectPair
+                onRegisterUndoObject: { [weak self] undoObjectPair in
+                    self?.registerUndoObject(undoObjectPair)
+                }
             )
         )
     }()
@@ -548,13 +550,6 @@ private extension HandDrawingViewController {
 }
 
 private extension HandDrawingViewController {
-
-    /// Handler invoked when an undo/redo object pair is registered
-    var onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void) {
-        { [weak self] undoObjectPair in
-            self?.registerUndoObject(undoObjectPair)
-        }
-    }
 
     func undo() {
         guard let undoManager = canvasView.undoManager else { return }
