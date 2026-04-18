@@ -16,10 +16,10 @@ final class UndoCoordinator {
 
     private(set) var undoManager: UndoManager?
 
-    var didUndo: AnyPublisher<Void, Never> {
-        didUndoSubject.eraseToAnyPublisher()
+    var didChangeUndoState: AnyPublisher<Void, Never> {
+        didChangeUndoStateSubject.eraseToAnyPublisher()
     }
-    private let didUndoSubject = PassthroughSubject<Void, Never>()
+    private let didChangeUndoStateSubject = PassthroughSubject<Void, Never>()
 
     private let canvasView: TextureLayerCanvasView
 
@@ -65,10 +65,12 @@ final class UndoCoordinator {
     func undo() {
         guard let undoManager else { return }
         undoManager.undo()
+        didChangeUndoStateSubject.send()
     }
     func redo() {
         guard let undoManager else { return }
         undoManager.redo()
+        didChangeUndoStateSubject.send()
     }
     func resetUndo() async {
         guard let undoManager else { return }
@@ -76,7 +78,7 @@ final class UndoCoordinator {
         undoManager.removeAllActions()
         cancellables.removeAll()
         subscribedUndoObjects.removeAll()
-        didUndoSubject.send()
+        didChangeUndoStateSubject.send()
     }
 }
 
@@ -122,7 +124,7 @@ extension UndoCoordinator {
             self?.registerUndo(undoRedoObject.reversed())
         }
 
-        didUndoSubject.send()
+        didChangeUndoStateSubject.send()
     }
 
     func performUndo(_ undoObject: UndoObject) {

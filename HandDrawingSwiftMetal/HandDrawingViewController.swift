@@ -147,6 +147,11 @@ class HandDrawingViewController: UIViewController {
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
+        if let undoManager = undoCoordinator.undoManager {
+            contentView.setUndoRedoButtonState(
+                .init(undoManager)
+            )
+        }
     }
 
     func newCanvas() async throws {
@@ -291,7 +296,7 @@ private extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        undoCoordinator.didUndo
+        undoCoordinator.didChangeUndoState
             .sink { [weak self] in
                 guard
                     let undoManager = self?.undoCoordinator.undoManager
