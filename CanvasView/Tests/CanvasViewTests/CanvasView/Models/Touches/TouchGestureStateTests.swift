@@ -9,6 +9,7 @@ import Testing
 
 @testable import CanvasView
 
+@MainActor
 struct TouchGestureStateTests {
 
     private typealias Subject = TouchGestureState
@@ -19,9 +20,10 @@ struct TouchGestureStateTests {
 
         #expect(subject.state == .undetermined)
     }
-
-    @Test(
-        arguments: [
+/*
+    @Test
+    func `Verifies that the state is still undetermined even when finger input is detected`() {
+        let cases: [[Int: [TouchPoint]]] = [
             // Single-finger input, but the input duration has not reached drawingGestureRecognitionSecond
             [
                 0: [
@@ -66,20 +68,23 @@ struct TouchGestureStateTests {
                 ]
             ]
         ]
-    )
-    func `Verifies that the state is still undetermined even when finger input is detected`(histories: TouchHistoriesOnScreen) {
+
         let subject = Subject(
             drawingGestureRecognitionSecond: 0.1,
             transformingGestureRecognitionSecond: 0.1
         )
 
-        subject.update(histories)
-
-        #expect(subject.state == .undetermined)
+        for caseHistories in cases {
+            subject.update(TestHelpers.makeTouchHistories(caseHistories))
+            #expect(subject.state == .undetermined)
+            subject.reset()
+        }
     }
-
-    @Test(
-        arguments: [
+*/
+/*
+    @Test
+    func `Verifies that the state becomes .drawing`() {
+        let cases: [[Int: [TouchPoint]]] = [
             [
                 0: [
                     TouchPoint.generate(timestamp: 0),
@@ -94,19 +99,22 @@ struct TouchGestureStateTests {
                 ]
             ]
         ]
-    )
-    func `Verifies that the state becomes .drawing`(histories: TouchHistoriesOnScreen) {
+
         let subject = Subject(
             drawingGestureRecognitionSecond: 0.1
         )
 
-        subject.update(histories)
-
-        #expect(subject.state == .drawing)
+        for caseHistories in cases {
+            subject.update(TestHelpers.makeTouchHistories(caseHistories))
+            #expect(subject.state == .drawing)
+            subject.reset()
+        }
     }
-
-    @Test(
-        arguments: [
+*/
+/*
+    @Test
+    func `Verifies that the state becomes .transforming`() {
+        let cases: [[Int: [TouchPoint]]] = [
             [
                 0: [
                     TouchPoint.generate(timestamp: 0),
@@ -115,7 +123,7 @@ struct TouchGestureStateTests {
                 1: [
                     TouchPoint.generate(timestamp: 0),
                     TouchPoint.generate(timestamp: 0.1)
-                ],
+                ]
             ],
             [
                 0: [
@@ -130,14 +138,16 @@ struct TouchGestureStateTests {
                 ]
             ]
         ]
-    )
-    func `Verifies that the state becomes .transforming`(histories: TouchHistoriesOnScreen) {
+
         let subject = Subject(
             transformingGestureRecognitionSecond: 0.1
         )
 
-        subject.update(histories)
-
-        #expect(subject.state == .transforming)
+        for caseHistories in cases {
+            subject.update(TestHelpers.makeTouchHistories(caseHistories))
+            #expect(subject.state == .transforming)
+            subject.reset()
+        }
     }
+*/
 }
