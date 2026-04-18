@@ -1,6 +1,6 @@
 //
 //  Calculator.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2022/02/05.
 //

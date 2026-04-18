@@ -1,6 +1,6 @@
 //
 //  DrawingDebouncer.swift
-//  CanvasView
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2025/11/22.
 //
@@ -8,7 +8,7 @@
 import Foundation
 
 /// A debouncer to prevent heavy processing from running continuously during drawing
-public final class DrawingDebouncer {
+final class DrawingDebouncer {
 
     private let debouncer: Debouncer
 

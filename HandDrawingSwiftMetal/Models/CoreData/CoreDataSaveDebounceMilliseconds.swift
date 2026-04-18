@@ -8,4 +8,4 @@
 import Foundation
 
 /// The debounce duration before performing a save operation.
-public let coreDataSaveDebounceMilliseconds: Int = 500
+let coreDataSaveDebounceMilliseconds: Int = 500

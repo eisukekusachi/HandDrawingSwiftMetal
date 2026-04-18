@@ -1,6 +1,6 @@
 //
 //  UITouchExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/10/21.
 //
@@ -8,7 +8,6 @@
 import UIKit
 
 extension UITouch {
-
     /// Determines whether all fingers have been released from the screen
     static func isAllFingersReleasedFromScreen(
         event: UIEvent?

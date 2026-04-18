@@ -1,13 +1,13 @@
 //
 //  TouchGestureType.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
 //
 
 import Foundation
 
-public enum TouchGestureType: Int, Sendable {
+enum TouchGestureType: Int, Sendable {
 
     case undetermined
 

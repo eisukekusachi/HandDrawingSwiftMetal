@@ -1,6 +1,6 @@
 //
 //  CGPointExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/04/02.
 //
@@ -45,5 +45,4 @@ extension CGPoint {
         guard let value = to else { return 0.0 }
         return sqrt(pow(value.x - x, 2) + pow(value.y - y, 2))
     }
-
 }

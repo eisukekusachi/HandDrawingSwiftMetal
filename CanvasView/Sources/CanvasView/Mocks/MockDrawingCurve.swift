@@ -1,6 +1,6 @@
 //
 //  MockDrawingCurve.swift
-//  HandDrawingSwiftMetalTests
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/01/25.
 //

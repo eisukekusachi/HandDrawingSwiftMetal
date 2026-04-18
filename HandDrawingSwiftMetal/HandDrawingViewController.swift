@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import SwiftUI
+import TextureLayerCanvasView
 import TextureLayerView
 import UIKit
 
@@ -15,7 +16,7 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
-    public var zipFileURL: URL {
+    var zipFileURL: URL {
         FileManager.documentsFileURL(
             projectName: viewModel.project.projectName,
             suffix: viewModel.fileSuffix
@@ -34,9 +35,13 @@ class HandDrawingViewController: UIViewController {
     private var textureLayerPopup: UIHostingController<AnyView>?
     private var textureLayerPresenter = PopupViewPresenter()
 
+    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository.shared
+
     private var cancellables = Set<AnyCancellable>()
 
     private let paletteHeight: CGFloat = 44
+
+    private var undoDrawing: UndoDrawing?
 
     /// The `MTLDevice` used throughout the app
     private lazy var sharedDevice: MTLDevice = {
@@ -46,8 +51,8 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private lazy var canvasView: HandDrawingCanvasView = {
-        HandDrawingCanvasView(
+    private lazy var canvasView: TextureLayerCanvasView = {
+        TextureLayerCanvasView(
             textureLayersState: viewModel.textureLayersState,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration
@@ -100,6 +105,11 @@ class HandDrawingViewController: UIViewController {
         showActivityIndicator(true)
         showContentView(false)
 
+        undoDrawing = .init(
+            renderer: canvasView.renderer,
+            inMemoryRepository: undoTextureInMemoryRepository
+        )
+
         Task {
             do {
                 let textureSize = await viewModel.restoreOrInitializeTextureLayers(
@@ -108,7 +118,7 @@ class HandDrawingViewController: UIViewController {
                     commandQueue: canvasView.sharedCommandQueue
                 )
 
-                try await canvasView.initializeCanvas(textureSize)
+                try await initializeCanvas(textureSize)
 
                 textureLayerView.update(
                     viewModel.textureLayersState
@@ -130,13 +140,72 @@ class HandDrawingViewController: UIViewController {
             }
         }
     }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Set the undo limit
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
+
+        // Set an initial value to prevent out-of-memory errors when no limit is applied
+        if canvasView.undoManager?.levelsOfUndo == 0 {
+            canvasView.undoManager?.levelsOfUndo = 8
+        }
     }
 
-    private func setupNewCanvasDialogPresenter() {
+    func newCanvas() async throws {
+        try await viewModel.onNewCanvas(
+            device: sharedDevice,
+            commandQueue: canvasView.sharedCommandQueue
+        )
+        try await initializeCanvas(viewModel.textureSize)
+        canvasView.resetTransforming()
+    }
+
+    func saveFiles(to workingDirectoryURL: URL) async throws {
+        try await viewModel.onSaveFiles(
+            thumbnail: canvasView.thumbnail,
+            to: workingDirectoryURL
+        )
+    }
+
+    func loadFiles(in workingDirectoryURL: URL) async throws {
+        try await viewModel.onLoadFiles(
+            device: canvasView.sharedDevice,
+            from: workingDirectoryURL
+        )
+        try await initializeCanvas(viewModel.textureSize)
+    }
+}
+
+private extension HandDrawingViewController {
+    /// Handler that responds to texture layer events and updates the canvas view accordingly.
+    var onTextureLayersChanged: (TextureLayerEvent) -> Void {
+        { [weak self] event in
+            switch event {
+            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
+                Task { [weak self] in
+                    try? await self?.canvasView.updateFullCanvasTexture()
+                }
+            case .changeLayerAlpha:
+                Task { [weak self] in
+                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
+                }
+            }
+        }
+    }
+
+    func initializeCanvas(_ textureSize: CGSize) async throws {
+
+        try await canvasView.initializeCanvas(textureSize)
+
+        // Initialize the textures used for Undo
+        undoDrawing?.initializeUndoTextures(
+            textureSize: textureSize
+        )
+        resetUndo()
+    }
+
+    func setupNewCanvasDialogPresenter() {
         newCanvasDialogPresenter.onTapButton = {
             Task { [weak self] in
                 guard let `self` else { return }
@@ -158,58 +227,7 @@ class HandDrawingViewController: UIViewController {
         }
     }
 
-    func newCanvas() async throws {
-        try await viewModel.onNewCanvas(
-            device: sharedDevice,
-            commandQueue: canvasView.sharedCommandQueue
-        )
-        try await canvasView.initializeCanvas(viewModel.textureSize)
-        canvasView.resetTransforming()
-    }
-
-    func saveFiles(to workingDirectoryURL: URL) async throws {
-        try await viewModel.onSaveFiles(
-            thumbnail: canvasView.thumbnail,
-            to: workingDirectoryURL
-        )
-    }
-
-    func loadFiles(in workingDirectoryURL: URL) async throws {
-        try await viewModel.onLoadFiles(
-            device: canvasView.sharedDevice,
-            from: workingDirectoryURL
-        )
-        try await canvasView.initializeCanvas(viewModel.textureSize)
-    }
-}
-
-private extension HandDrawingViewController {
-    /// Handler that responds to texture layer events and updates the canvas view accordingly.
-    var onTextureLayersChanged: (TextureLayerEvent) -> Void {
-        { [weak self] event in
-            switch event {
-            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
-                Task { [weak self] in
-                    try? await self?.canvasView.updateFullCanvasTexture()
-                }
-            case .changeLayerAlpha:
-                Task { [weak self] in
-                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
-                }
-            }
-        }
-    }
-
-    /// Handler invoked when an undo/redo object pair is registered
-    var onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void) {
-        { [weak self] undoObjectPair in
-            self?.canvasView.registerUndoObject(undoObjectPair)
-        }
-    }
-}
-
-extension HandDrawingViewController {
-    private func bindData() {
+    func bindData() {
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
@@ -219,24 +237,8 @@ extension HandDrawingViewController {
                 case .strokeCompleted, .strokeCancelled:
                     self?.enableComponentsInteraction(true)
                 }
-            }
-            .store(in: &cancellables)
 
-        canvasView.didUndo
-            .sink { [weak self] undoManager in
-                self?.contentView.setUndoRedoButtonState(
-                    .init(undoManager)
-                )
-            }
-            .store(in: &cancellables)
-
-        canvasView.didPerformUndo
-            .sink { [weak self] undoObject in
-                if let undoObject = undoObject as? UndoAlphaObject {
-                    self?.textureLayerView.updateAlpha(
-                        undoObject.textureLayer.alpha
-                    )
-                }
+                self?.registerDrawingUndoObjectAfterCompletion(event)
             }
             .store(in: &cancellables)
 
@@ -289,7 +291,7 @@ extension HandDrawingViewController {
             .store(in: &cancellables)
     }
 
-    private func addEvents() {
+    func addEvents() {
         contentView.tapResetTransforming = { [weak self] in
             self?.canvasView.resetTransforming()
         }
@@ -323,10 +325,10 @@ extension HandDrawingViewController {
             self.canvasView.setDrawingRenderer(renderer)
         }
         contentView.tapUndoButton = { [weak self] in
-            self?.canvasView.undo()
+            self?.undo()
         }
         contentView.tapRedoButton = { [weak self] in
-            self?.canvasView.redo()
+            self?.redo()
         }
 
         contentView.dragBrushSlider = { [weak self] value in
@@ -337,7 +339,7 @@ extension HandDrawingViewController {
         }
     }
 
-    private func layoutViews() {
+    func layoutViews() {
         if let baseView = contentView.baseView {
             baseView.addSubview(canvasView)
             canvasView.translatesAutoresizingMaskIntoConstraints = false
@@ -382,7 +384,7 @@ extension HandDrawingViewController {
         addEraserPalette()
     }
 
-    private func addBrushPalette() {
+    func addBrushPalette() {
         let targetView: UIView = contentView.brushPaletteView
 
         let brushPaletteHostingView = UIHostingController(
@@ -403,7 +405,7 @@ extension HandDrawingViewController {
         ])
     }
 
-    private func addEraserPalette() {
+    func addEraserPalette() {
         let targetView: UIView = contentView.eraserPaletteView
 
         let eraserPaletteHostingView = UIHostingController(
@@ -424,7 +426,7 @@ extension HandDrawingViewController {
         ])
     }
 
-    private func updateDrawingComponents() {
+    func updateDrawingComponents() {
         (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
         (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
 
@@ -439,8 +441,8 @@ extension HandDrawingViewController {
     }
 }
 
-extension HandDrawingViewController {
-    private func showFileView() {
+private extension HandDrawingViewController {
+    func showFileView() {
         let fileView = FileView(
             list: viewModel.fileList,
             onTapItem: { [weak self] zipFileURL in
@@ -454,7 +456,7 @@ extension HandDrawingViewController {
         present(vc, animated: true)
     }
 
-    private func showAlert(_ error: CanvasError) {
+    func showAlert(_ error: CanvasError) {
         dialogPresenter.configuration = .init(
             title: error.title,
             message: error.message
@@ -462,7 +464,7 @@ extension HandDrawingViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    private func showAlert(_ error: Error) {
+    func showAlert(_ error: Error) {
         dialogPresenter.configuration = .init(
             title: "Error",
             message: error.localizedDescription
@@ -470,29 +472,29 @@ extension HandDrawingViewController {
         dialogPresenter.presentAlert(on: self)
     }
 
-    private func showToast(_ model: ToastMessage) {
+    func showToast(_ model: ToastMessage) {
         let toast = Toast()
         toast.showMessage(model)
         view.addSubview(toast)
     }
 
-    private func showActivityIndicator(_ isShown: Bool) {
+    func showActivityIndicator(_ isShown: Bool) {
         activityIndicatorView.isHidden = !isShown
     }
 
-    private func showContentView(_ isShown: Bool) {
+    func showContentView(_ isShown: Bool) {
         contentView.isHidden = !isShown
     }
 
-    private func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
+    func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
         textureLayerPresenter.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 
-extension HandDrawingViewController {
+private extension HandDrawingViewController {
 
-    private func loadCanvas(zipFileURL: URL) {
+    func loadCanvas(zipFileURL: URL) {
         self.viewModel.onLoadCanvas(
             zipFileURL: zipFileURL,
             action: { [weak self] workingDirectoryURL in
@@ -505,7 +507,7 @@ extension HandDrawingViewController {
             }
         )
     }
-    private func saveCanvas() {
+    func saveCanvas() {
         viewModel.onSaveCanvas(
             saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
                 try await self?.saveFiles(
@@ -525,12 +527,12 @@ extension HandDrawingViewController {
         )
     }
 
-    private func saveImage() {
+    func saveImage() {
         if let image = canvasView.canvasTexture?.uiImage {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(didFinishSavingImage), nil)
         }
     }
-    @objc private func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    @objc func didFinishSavingImage(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error {
             Logger.error(error)
             showAlert(error)
@@ -541,6 +543,286 @@ extension HandDrawingViewController {
                     icon: UIImage(systemName: "hand.thumbsup.fill")
                 )
             )
+        }
+    }
+}
+
+private extension HandDrawingViewController {
+
+    /// Handler invoked when an undo/redo object pair is registered
+    var onRegisterUndoObjectPair: ((UndoRedoObjectPair) -> Void) {
+        { [weak self] undoObjectPair in
+            self?.registerUndoObject(undoObjectPair)
+        }
+    }
+
+    func undo() {
+        guard let undoManager = canvasView.undoManager else { return }
+        undoManager.undo()
+        setUndoRedoButtonState(undoManager)
+    }
+    func redo() {
+        guard let undoManager = canvasView.undoManager else { return }
+        undoManager.redo()
+        setUndoRedoButtonState(undoManager)
+    }
+    func resetUndo() {
+        guard let undoManager = canvasView.undoManager else { return }
+        clearUndoTextures()
+        undoManager.removeAllActions()
+        setUndoRedoButtonState(undoManager)
+    }
+
+    func setUndoRedoButtonState(_ undoManager: UndoManager?) {
+        guard let undoManager else { return }
+        contentView.setUndoRedoButtonState(
+            .init(undoManager)
+        )
+    }
+
+    func performUndo(_ undoObject: UndoObject) {
+        Task { [weak self] in
+            if let undoObject = undoObject as? UndoDrawingObject {
+                await self?.performDrawingUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoAdditionObject {
+                await self?.performAdditionUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoDeletionObject {
+                self?.performDeletionUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoSelectionObject {
+                await self?.performSelectUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoMoveObject {
+                self?.performMoveUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoAlphaObject {
+                await self?.performAlphaUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoVisibilityObject {
+                await self?.performVisibilityUndo(undoObject)
+            } else if let undoObject = undoObject as? UndoTitleObject {
+                await self?.performTitleUndo(undoObject)
+            }
+
+            if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                self?.textureLayerView.updateAlpha(alpha)
+            }
+        }
+    }
+
+    func performDrawingUndo(
+        _ undoObject: UndoDrawingObject
+    ) async {
+        guard
+            let undoTextureId = undoObject.undoTextureId,
+            let newTexture = try? await MTLTextureCreator.duplicateTexture(
+                texture: undoTextureInMemoryRepository.texture(undoTextureId),
+                renderer: canvasView.renderer
+            )
+        else { return }
+
+        do {
+            let textureLayerId = undoObject.textureLayer.id
+            viewModel.textureLayersState.selectLayer(textureLayerId)
+
+            let textureData = try await newTexture.data(
+                device: canvasView.renderer.device,
+                commandQueue: canvasView.renderer.commandQueue
+            )
+
+            try await canvasView.saveTextureToDocumentsDirectory(
+                layerId: textureLayerId,
+                textureData: textureData
+            )
+            viewModel.textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
+
+            try? canvasView.setCurrentTexture(newTexture)
+            canvasView.updateCanvasTextureUsingCurrentTexture()
+
+        } catch {
+            Logger.error(error)
+        }
+    }
+
+    func performAdditionUndo(
+        _ undoObject: UndoAdditionObject
+    ) async {
+        guard
+            let undoTextureId = undoObject.undoTextureId,
+            let newTexture = try? await MTLTextureCreator.duplicateTexture(
+                texture: undoTextureInMemoryRepository.texture(undoTextureId),
+                renderer: canvasView.renderer
+            )
+        else { return }
+
+        do {
+            let textureData = try await newTexture.data(
+                device: canvasView.renderer.device,
+                commandQueue: canvasView.renderer.commandQueue
+            )
+            try await canvasView.saveTextureToDocumentsDirectory(
+                layerId: undoObject.textureLayer.id,
+                textureData: textureData
+            )
+
+            viewModel.textureLayersState.addLayer(
+                layer: undoObject.textureLayer,
+                thumbnail: newTexture.makeThumbnail(),
+                at: undoObject.insertIndex
+            )
+
+            try? await canvasView.updateFullCanvasTexture()
+
+        } catch {
+            Logger.error(error)
+        }
+    }
+
+    func performDeletionUndo(
+        _ undoObject: UndoDeletionObject
+    ) {
+        guard
+            let index = viewModel.textureLayersState.layers.firstIndex(
+                where: { $0.id == undoObject.textureLayer.id }
+            )
+        else {
+           return
+        }
+
+        viewModel.textureLayersState.removeLayer(
+            layerIndexToDelete: index
+        )
+
+        Task {
+            try? await canvasView.updateFullCanvasTexture()
+        }
+    }
+
+    func performMoveUndo(
+        _ undoObject: UndoMoveObject
+    ) {
+        viewModel.textureLayersState.moveLayer(
+            indices: undoObject.indices
+        )
+
+        Task {
+            try? await canvasView.updateFullCanvasTexture()
+        }
+    }
+
+    func performSelectUndo(
+        _ undoObject: UndoSelectionObject
+    ) async {
+        viewModel.textureLayersState.selectLayer(
+            undoObject.textureLayer.id
+        )
+
+        try? await canvasView.updateFullCanvasTexture()
+    }
+
+    func performAlphaUndo(
+        _ undoObject: UndoAlphaObject
+    ) async {
+        viewModel.textureLayersState.update(
+            undoObject.textureLayer.id,
+            alpha: undoObject.textureLayer.alpha
+        )
+
+        canvasView.updateCanvasTextureUsingCurrentTexture()
+    }
+
+    func performVisibilityUndo(
+        _ undoObject: UndoVisibilityObject
+    ) async {
+        viewModel.textureLayersState.update(
+            undoObject.textureLayer.id,
+            isVisible: undoObject.textureLayer.isVisible
+        )
+
+        try? await canvasView.updateFullCanvasTexture()
+    }
+
+    func performTitleUndo(
+        _ undoObject: UndoTitleObject
+    ) async {
+        viewModel.textureLayersState.update(
+            undoObject.textureLayer.id,
+            title: undoObject.textureLayer.title
+        )
+    }
+
+    func registerDrawingUndoObjectAfterCompletion(_ event: StrokeEvent) {
+        switch event {
+        case .fingerStrokeBegan, .pencilStrokeBegan:
+            Task {
+                await undoDrawing?.setUndoDrawing(
+                    texture: canvasView.currentTexture
+                )
+            }
+        case .strokeCompleted:
+            Task {
+                guard
+                    let selectedLayer = viewModel.textureLayersState.selectedLayer,
+                    let undoRedoObjectPair = try await undoDrawing?.pushUndoDrawingObject(
+                        selectedLayer: selectedLayer,
+                        texture: canvasView.currentTexture
+                    )
+                 else {
+                    return
+                }
+                registerUndoObject(undoRedoObjectPair)
+            }
+        case .strokeCancelled:
+            break
+        }
+    }
+
+    func registerUndoObject(
+        _ undoRedoObject: UndoRedoObjectPair
+    ) {
+        guard let undoManager = canvasView.undoManager else { return }
+        registerUndoObjectPair(
+            undoRedoObject
+        )
+        setUndoRedoButtonState(undoManager)
+    }
+
+    func clearUndoTextures() {
+        Task { [weak self] in
+            await self?.undoTextureInMemoryRepository.removeAll()
+        }
+    }
+
+    func registerUndoObjectPair(
+        _ undoRedoObject: UndoRedoObjectPair
+    ) {
+        guard let undoManager = canvasView.undoManager else { return }
+
+        undoRedoObject.undoObject.deinitSubject
+            .sink(receiveValue: { [weak self] result in
+                guard let `self`, let undoTextureId = result.undoTextureId else { return }
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
+            })
+            .store(in: &cancellables)
+
+        undoRedoObject.redoObject.deinitSubject
+            .sink(receiveValue: { [weak self] result in
+                guard let `self`, let undoTextureId = result.undoTextureId else { return }
+                Task {
+                    // Do nothing if an error occurs, since nothing can be done
+                    try? await self.undoTextureInMemoryRepository.removeTexture(
+                        undoTextureId
+                    )
+                }
+            })
+            .store(in: &cancellables)
+
+        undoManager.registerUndo(withTarget: self) { [weak self, undoRedoObject] _ in
+            self?.performUndo(undoRedoObject.undoObject)
+
+            // Redo Registration
+            self?.registerUndoObjectPair(undoRedoObject.reversed())
         }
     }
 }

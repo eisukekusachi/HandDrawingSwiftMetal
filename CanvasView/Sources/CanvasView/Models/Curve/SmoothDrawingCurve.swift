@@ -1,6 +1,6 @@
 //
 //  SmoothDrawingCurve.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -9,18 +9,18 @@ import Combine
 import UIKit
 
 /// An iterator for creating a smooth curve in real-time using touch phases
-public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
+final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    public var touchPhase: TouchPhase {
+    var touchPhase: TouchPhase {
         _touchPhase
     }
 
     /// Checks whether the first curve has ever been drawn during the drawing process
-    public func isFirstCurveNeeded() -> Bool {
+    func isFirstCurveNeeded() -> Bool {
         return array.count >= 3 && !hasFirstCurveBeenDrawn
     }
 
-    public func markFirstCurveAsDrawn() {
+    func markFirstCurveAsDrawn() {
         hasFirstCurveBeenDrawn = true
     }
 
@@ -30,7 +30,7 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
 
     private var tmpIterator = Iterator<GrayscaleDotPoint>()
 
-    public func append(
+    func append(
         points: [GrayscaleDotPoint],
         touchPhase: TouchPhase
     ) {
@@ -40,7 +40,7 @@ public final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve
         self.appendSmoothPoints()
     }
 
-    override public func reset() {
+    override func reset() {
         super.reset()
 
         tmpIterator.reset()

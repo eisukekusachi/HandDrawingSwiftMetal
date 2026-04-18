@@ -7,7 +7,8 @@
 
 import Foundation
 
-public extension NSError {
+extension NSError {
+
     convenience init(
         domain: String = "CanvasView",
         file: String = #file,

@@ -1,30 +1,30 @@
 //
 //  Iterator.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2022/11/03.
 //
 
 import Foundation
 
-public class Iterator<T: Equatable>: IteratorProtocol {
+class Iterator<T: Equatable>: IteratorProtocol {
 
-    public typealias Element = T
+    typealias Element = T
 
     private(set) var array: [Element] = []
     private(set) var index: Int = 0
 
-    public var count: Int {
+    var count: Int {
         return array.count
     }
-    public var currentIndex: Int {
+    var currentIndex: Int {
         return index - 1
     }
-    public var isFirstProcessing: Bool {
+    var isFirstProcessing: Bool {
         return index == 1
     }
 
-    public func next() -> Element? {
+    func next() -> Element? {
         if index < array.count {
             let element = array[index]
             index += 1
@@ -34,7 +34,7 @@ public class Iterator<T: Equatable>: IteratorProtocol {
         }
     }
 
-    public func next(range: Int = 1, _ results: ([Element]) -> Void) {
+    func next(range: Int = 1, _ results: ([Element]) -> Void) {
         if range <= 0 { return }
 
         while (index + range) <= array.count {
@@ -42,7 +42,7 @@ public class Iterator<T: Equatable>: IteratorProtocol {
             index += 1
         }
     }
-    public func next(range: Int) -> [Element]? {
+    func next(range: Int) -> [Element]? {
         if range <= 0 { return nil }
 
         if (index + range) <= array.count {
@@ -56,18 +56,18 @@ public class Iterator<T: Equatable>: IteratorProtocol {
             return nil
         }
     }
-    public func append(_ element: Element) {
+    func append(_ element: Element) {
         array.append(element)
     }
-    public func append(_ elements: [Element]) {
+    func append(_ elements: [Element]) {
         array.append(contentsOf: elements)
     }
 
-    public func replace(index: Int, element: Element) {
+    func replace(index: Int, element: Element) {
         array[index] = element
     }
 
-    public func reset() {
+    func reset() {
         index = 0
         array = []
     }

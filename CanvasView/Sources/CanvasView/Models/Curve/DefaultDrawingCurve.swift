@@ -1,6 +1,6 @@
 //
 //  DefaultDrawingCurve.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -9,18 +9,18 @@ import Combine
 import UIKit
 
 /// iterator for creating a curve in real-time using touch phases
-public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
+final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
 
-    public var touchPhase: TouchPhase {
+    var touchPhase: TouchPhase {
         _touchPhase
     }
 
     /// Checks whether the first curve has ever been drawn during the drawing process
-    public func isFirstCurveNeeded() -> Bool {
+    func isFirstCurveNeeded() -> Bool {
         return array.count >= 3 && !hasFirstCurveBeenDrawn
     }
 
-    public func markFirstCurveAsDrawn() {
+    func markFirstCurveAsDrawn() {
         hasFirstCurveBeenDrawn = true
     }
 
@@ -28,7 +28,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
 
     private(set) var hasFirstCurveBeenDrawn: Bool = false
 
-    public func append(
+    func append(
         points: [GrayscaleDotPoint],
         touchPhase: TouchPhase
     ) {
@@ -36,7 +36,7 @@ public final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurv
         self._touchPhase = touchPhase
     }
 
-    override public func reset() {
+    override func reset() {
         super.reset()
 
         _touchPhase = .cancelled

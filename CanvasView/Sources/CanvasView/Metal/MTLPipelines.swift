@@ -1,6 +1,6 @@
 //
 //  MTLPipelines.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -8,7 +8,7 @@
 import MetalKit
 
 @MainActor
-final public class MTLPipelines: Sendable {
+final class MTLPipelines: Sendable {
 
     let drawGrayPointsWithMaxBlendMode: MTLRenderPipelineState
     let drawTexture: MTLRenderPipelineState
@@ -17,7 +17,7 @@ final public class MTLPipelines: Sendable {
     let mergeTextures: MTLComputePipelineState
     let fillColor: MTLComputePipelineState
 
-    public init(device: MTLDevice) {
+    init(device: MTLDevice) {
         /*
         // Use the main bundle in the main app
         guard

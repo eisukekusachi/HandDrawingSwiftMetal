@@ -1,6 +1,6 @@
 //
 //  TextureLayerRenderer.swift
-//  CanvasView
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2026/02/05.
 //
@@ -12,7 +12,7 @@ import UIKit
 @preconcurrency import MetalKit
 
 @MainActor
-public class TextureLayerRenderer {
+class TextureLayerRenderer {
 
     public var backgroundColor: UIColor = .white
 

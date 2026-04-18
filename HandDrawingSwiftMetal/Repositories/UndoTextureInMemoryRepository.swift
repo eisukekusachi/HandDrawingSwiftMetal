@@ -14,7 +14,7 @@ import TextureLayerView
 /// The textures are stored in memory to avoid blocking the main thread.
 final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
 
-    static let shared = UndoTextureInMemoryRepository(
+    static let shared: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository(
         textures: [:]
     )
 

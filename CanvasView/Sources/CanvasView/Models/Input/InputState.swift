@@ -1,24 +1,24 @@
 //
 //  InputState.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/08/03.
 //
 
 import Foundation
 
-public final class InputState {
+final class InputState {
 
-    public typealias T = InputType
+    typealias T = InputType
 
     private(set) var state: T = .undetermined
 
-    public init(_ state: T = .undetermined) {
+    init(_ state: T = .undetermined) {
         self.state = state
     }
 }
 
-public extension InputState {
+extension InputState {
 
     var isUndetermined: Bool {
         state == .undetermined

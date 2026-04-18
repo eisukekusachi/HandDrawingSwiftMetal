@@ -1,6 +1,6 @@
 //
 //  UndoVisibilityObject.swift
-//  CanvasView
+//  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/12/21.
 //

@@ -1,6 +1,6 @@
 //
 //  MTLBuffers.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -85,7 +85,7 @@ public enum MTLBuffers {
         )
     }
 
-    public static func makeCanvasTextureBuffers(
+    static func makeCanvasTextureBuffers(
         matrix: CGAffineTransform? = nil,
         frameSize: CGSize,
         sourceSize: CGSize,

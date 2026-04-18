@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension URL {
+extension URL {
 
     static var documents: URL {
         guard

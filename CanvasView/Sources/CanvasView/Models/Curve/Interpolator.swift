@@ -1,6 +1,6 @@
 //
 //  Interpolation.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2021/11/27.
 //

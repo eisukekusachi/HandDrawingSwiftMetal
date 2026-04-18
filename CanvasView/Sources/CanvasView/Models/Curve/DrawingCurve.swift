@@ -1,6 +1,6 @@
 //
 //  DrawingCurve.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// iterator for realtime drawing with `UITouch.Phase`
-public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
+protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
     var touchPhase: TouchPhase { get }
 
@@ -27,7 +27,7 @@ public protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
     func reset()
 }
 
-public extension DrawingCurve {
+extension DrawingCurve {
 
     func curvePoints(
         firstDuration: Int? = nil,

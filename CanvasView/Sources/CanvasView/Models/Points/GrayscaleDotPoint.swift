@@ -1,6 +1,6 @@
 //
 //  GrayscaleDotPoint.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
@@ -34,7 +34,7 @@ public struct GrayscaleDotPoint: Equatable, Sendable {
     }
 }
 
-public extension GrayscaleDotPoint {
+extension GrayscaleDotPoint {
 
     static func average(_ left: Self, _ right: Self) -> Self {
         .init(

@@ -1,6 +1,6 @@
 //
 //  Debouncer.swift
-//  CanvasView
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2025/10/11.
 //

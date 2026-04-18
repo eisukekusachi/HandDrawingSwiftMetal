@@ -1,6 +1,6 @@
 //
 //  TouchPoint.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2022/11/19.
 //
@@ -9,63 +9,63 @@ import UIKit
 
 /// A `Sendable` snapshot that captures the state of a single `UITouch`
 /// https://developer.apple.com/documentation/uikit/uitouch
-public struct TouchPoint: Equatable, Sendable {
+struct TouchPoint: Equatable, Sendable {
 
     /// The current location of the touch in the coordinate system
-    public let location: CGPoint
+    let location: CGPoint
 
     /// The previous location of the touch in the coordinate system
-    public let previousLocation: CGPoint
+    let previousLocation: CGPoint
 
     /// The radius (in points) of the touch
-    public let majorRadius: CGFloat
+    let majorRadius: CGFloat
 
     /// The tolerance (in points) of the touch’s radius
-    public let majorRadiusTolerance: CGFloat
+    let majorRadiusTolerance: CGFloat
 
     /// A precise location for the touch, when available
-    public let preciseLocation: CGPoint
+    let preciseLocation: CGPoint
 
     /// A precise previous location for the touch, when available
-    public let precisePreviousLocation: CGPoint
+    let precisePreviousLocation: CGPoint
 
     /// The number of times the finger was tapped for this given touch
-    public let tapCount: Int
+    let tapCount: Int
 
     /// The time when the touch occurred or when it was last mutated
-    public let timestamp: TimeInterval
+    let timestamp: TimeInterval
 
     /// The type of touch received
-    public let type: UITouch.TouchType
+    let type: UITouch.TouchType
 
     /// The phase of the touch
-    public let phase: TouchPhase
+    let phase: TouchPhase
 
     /// The force of the touch, where a value of 1.0 represents the force of an average touch (predetermined by the system, not user-specific)
-    public let force: CGFloat
+    let force: CGFloat
 
     /// The maximum possible force for a touch
-    public let maximumPossibleForce: CGFloat
+    let maximumPossibleForce: CGFloat
 
     /// The altitude (in radians) of the stylus
-    public let altitudeAngle: CGFloat
+    let altitudeAngle: CGFloat
 
     /// A unit vector that points in the direction of the azimuth of the stylus
-    public let azimuthUnitVector: CGVector
+    let azimuthUnitVector: CGVector
 
     /// A value that represents the current barrel-roll angle of Apple Pencil
-    public let rollAngle: CGFloat
+    let rollAngle: CGFloat
 
     /// A set of touch properties whose values contain only estimates
-    public let estimatedProperties: UITouch.Properties
+    let estimatedProperties: UITouch.Properties
 
     /// The set of touch properties for which updated values are expected in the future
-    public let estimatedPropertiesExpectingUpdates: UITouch.Properties
+    let estimatedPropertiesExpectingUpdates: UITouch.Properties
 
     /// An index number that lets you correlate an updated touch with the original touch
-    public let estimationUpdateIndex: NSNumber?
+    let estimationUpdateIndex: NSNumber?
 
-    public init(
+    init(
         location: CGPoint,
         previousLocation: CGPoint,
         majorRadius: CGFloat,

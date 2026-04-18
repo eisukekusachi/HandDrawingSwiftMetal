@@ -7,13 +7,13 @@
 
 import Foundation
 
-public final class ProjectData {
+final class ProjectData {
 
     @Published public var projectName: String
     @Published public var createdAt: Date
     @Published public var updatedAt: Date
 
-    public init(
+    init(
         projectName: String = Calendar.currentDate,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -39,13 +39,13 @@ public final class ProjectData {
         }
     }
 
-    public func updateAll(newProjectName: String) {
+    func updateAll(newProjectName: String) {
         self.projectName = newProjectName
         self.createdAt = Date()
         self.updatedAt = Date()
     }
 
-    public func updateUpdatedAt() {
+    func updateUpdatedAt() {
         self.updatedAt = Date()
     }
 }

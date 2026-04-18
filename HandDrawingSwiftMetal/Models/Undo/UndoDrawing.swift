@@ -1,6 +1,6 @@
 //
 //  UndoDrawing.swift
-//  CanvasView
+//  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/09/23.
 //

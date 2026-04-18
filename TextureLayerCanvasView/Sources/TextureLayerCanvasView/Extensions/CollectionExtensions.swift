@@ -1,13 +1,13 @@
 //
 //  CollectionExtensions.swift
-//  HandDrawingSwiftMetal
+//  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
 import Foundation
 
-public extension Collection where Index == Int {
+extension Collection where Index == Int {
 
     func safeSlice(lower: Int, upper: Int) -> SubSequence {
         guard
