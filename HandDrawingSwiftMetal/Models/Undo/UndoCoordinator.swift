@@ -52,6 +52,8 @@ final class UndoCoordinator {
         }
 
         self.undoManager = undoManager
+
+        self.didChangeUndoStateSubject.send()
     }
 
     func initializeDrawingUndoTextures(_ textureSize: CGSize) async {

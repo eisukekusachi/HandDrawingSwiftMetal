@@ -147,11 +147,6 @@ class HandDrawingViewController: UIViewController {
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
-        if let undoManager = undoCoordinator.undoManager {
-            contentView.setUndoRedoButtonState(
-                .init(undoManager)
-            )
-        }
     }
 
     func newCanvas() async throws {
