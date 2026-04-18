@@ -8,7 +8,6 @@
 import Foundation
 
 extension Array where Element: Equatable {
-
     /// Retrieves all elements starting from the element after the specified element.
     /// - Parameter element: The element to start after
     /// - Returns: A subarray starting from the element after the specified element, or `nil` if the element is not found.

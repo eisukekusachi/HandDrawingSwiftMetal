@@ -1,6 +1,6 @@
 //
 //  NSErrorExtensions.swift
-//  CanvasView
+//  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/03.
 //
@@ -10,7 +10,7 @@ import Foundation
 extension NSError {
 
     convenience init(
-        domain: String = "CanvasView",
+        domain: String = "TextureLayerCanvasView",
         file: String = #file,
         function: String = #function,
         line: Int = #line,
