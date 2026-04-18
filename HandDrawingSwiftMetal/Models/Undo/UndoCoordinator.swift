@@ -72,6 +72,7 @@ final class UndoCoordinator {
         guard let undoManager else { return }
         await undoTextureInMemoryRepository.removeAll()
         undoManager.removeAllActions()
+        cancellables.removeAll()
         didUndoSubject.send()
     }
 }
