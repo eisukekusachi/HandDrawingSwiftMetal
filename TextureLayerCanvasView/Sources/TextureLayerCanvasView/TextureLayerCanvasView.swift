@@ -18,10 +18,6 @@ import TextureLayerView
 
     private let textureLayersState: TextureLayersState
 
-    private lazy var textureLayerRenderer: TextureLayerRenderer = {
-        .init(renderer: renderer)
-    }()
-
     private lazy var viewModel: TextureLayerCanvasViewModel = {
         .init(
             textureLayersState: textureLayersState,
@@ -59,31 +55,20 @@ import TextureLayerView
                 }
             }
             .store(in: &cancellables)
+    }
 
-        viewModel.updateCanvasTextureSubject
-            .sink { [weak self] texture in
-                guard let `self` else { return }
-                if let texture {
-                    try? self.setCurrentTexture(texture)
-                }
-                self.updateCanvasTextureUsingCurrentTexture()
-            }
-            .store(in: &cancellables)
+    override public func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await super.initializeCanvas(textureSize)
 
-        viewModel.updateFullCanvasTextureSubject
-            .sink {
-                Task { [weak self] in
-                    guard let `self` else { return }
-                    try? await self.updateFullCanvasTexture()
-                }
-            }
-            .store(in: &cancellables)
+        try viewModel.initializeTextures(textureSize)
+
+        try await updateFullCanvasTexture()
     }
 
     private func completeDrawing() {
         guard
-            let texture = self.currentTexture,
-            let layerId = self.textureLayersState.selectedLayer?.id
+            let texture = currentTexture,
+            let layerId = textureLayersState.selectedLayer?.id
         else { return }
 
         let device = renderer.device
@@ -91,7 +76,6 @@ import TextureLayerView
 
         drawingDebouncer.perform { [weak self] in
             guard let `self` else { return }
-
             do {
                 let textureData = try await texture.data(
                     device: device,
@@ -101,7 +85,6 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
-
                 await self.viewModel.textureLayersState.updateThumbnail(
                     layerId,
                     texture: texture
@@ -112,45 +95,44 @@ import TextureLayerView
         }
     }
 
-    override public func initializeCanvas(_ textureSize: CGSize) async throws {
-        try await super.initializeCanvas(textureSize)
-
-        try textureLayerRenderer.initializeTextures(textureSize: textureSize)
-
-        try await updateFullCanvasTexture()
-    }
-
     public func updateFullCanvasTexture() async throws {
         guard
             let selectedLayer = textureLayersState.selectedLayer,
-            let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
-            )
+            ),
+            let newCommandBuffer = renderer.newCommandBuffer
         else {
             return
         }
 
-        let textures = try await viewModel.duplicateTexturesFromDocumentsDirectory(
-            textureLayers.layers.map { $0.id }
+        try await viewModel.unpdateUnselectedTextures(
+            textureLayers: .init(state: textureLayersState),
+            with: newCommandBuffer
         )
 
-        try await textureLayerRenderer.refreshUnselectedTextures(
-            textureLayers: textureLayers,
-            textures: textures
-        )
+        try await newCommandBuffer.commitAndWaitAsync()
+
         try setCurrentTexture(currentTexture)
 
         updateCanvasTextureUsingCurrentTexture()
     }
 
     override public func updateCanvasTextureUsingRealtimeDrawingTexture() {
-        updateCanvasTexture(realtimeDrawingTexture)
+        viewModel.updateCanvasTexture(
+            realtimeDrawingTexture,
+            on: canvasTexture,
+            with: currentFrameCommandBuffer
+        )
         present()
     }
 
     override public func updateCanvasTextureUsingCurrentTexture() {
-        updateCanvasTexture(currentTexture)
+        viewModel.updateCanvasTexture(
+            currentTexture,
+            on: canvasTexture,
+            with: currentFrameCommandBuffer
+        )
         present()
     }
 
@@ -161,23 +143,6 @@ import TextureLayerView
         try await viewModel.saveTextureToDocumentsDirectory(
             layerId: layerId,
             textureData: textureData
-        )
-    }
-}
-
-private extension TextureLayerCanvasView {
-
-    func updateCanvasTexture(_ texture: MTLTexture?) {
-        guard let selectedLayer = textureLayersState.selectedLayer else { return }
-
-        textureLayerRenderer.updateCanvasTexture(
-            textureLayer: .init(
-                isVisible: selectedLayer.isVisible,
-                alpha: selectedLayer.alpha,
-                texture: texture ?? currentTexture
-            ),
-            canvasTexture: canvasTexture,
-            commandBuffer: currentFrameCommandBuffer
         )
     }
 }
