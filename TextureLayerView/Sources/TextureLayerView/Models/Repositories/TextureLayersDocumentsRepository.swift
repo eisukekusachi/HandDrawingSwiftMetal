@@ -171,26 +171,38 @@ public extension TextureLayersDocumentsRepository {
         _ id: LayerId,
         textureSize: CGSize,
         device: MTLDevice
-    ) async -> MTLTexture? {
+    ) async throws -> MTLTexture {
         guard
             Int(textureSize.width) >= textureMinimumLength &&
             Int(textureSize.height) >= textureMinimumLength
         else {
-            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return nil
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let newTexture: MTLTexture = try? MTLTextureCreator.makeTexture(
+            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
                 with: device
             )
         else {
-            Logger.info("File not found: \(destinationUrl.path)")
-            return nil
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "File not found: \(destinationUrl.path)"
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         return newTexture
@@ -201,49 +213,50 @@ public extension TextureLayersDocumentsRepository {
         _ ids: [LayerId],
         textureSize: CGSize,
         device: MTLDevice
-    ) async -> [(LayerId, MTLTexture)] {
+    ) async throws -> [(LayerId, MTLTexture)] {
         guard
             Int(textureSize.width) >= textureMinimumLength,
             Int(textureSize.height) >= textureMinimumLength
         else {
-            Logger.info("Texture size is below the minimum: \(textureSize.width) \(textureSize.height)")
-            return []
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
         }
 
         let width = Int(textureSize.width)
         let height = Int(textureSize.height)
-
-        let sources: [TextureSource] = await withTaskGroup(of: TextureSource?.self) { group in
+        let sources: [TextureSource] = try await withThrowingTaskGroup(of: TextureSource.self) { group in
             for id in ids {
                 let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
                 group.addTask {
-                    do {
-                        guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
-                            Logger.info("File not found: \(url.path)")
-                            return nil
-                        }
-                        return TextureSource(
-                            id: id,
-                            url: url,
-                            width: width,
-                            height: height,
-                            hexadecimalData: hexadecimalData
+                    guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
+                        throw NSError(
+                            title: "Error",
+                            message: "File not found: \(url.path)"
                         )
-                    } catch {
-                        Logger.info("Failed to load texture source: \(url.path), error: \(error)")
-                        return nil
                     }
+
+                    return TextureSource(
+                        id: id,
+                        url: url,
+                        width: width,
+                        height: height,
+                        hexadecimalData: hexadecimalData
+                    )
                 }
             }
 
             var results: [TextureSource] = []
             results.reserveCapacity(ids.count)
 
-            for await result in group {
-                if let result {
-                    results.append(result)
-                }
+            for try await result in group {
+                results.append(result)
             }
 
             return results
@@ -253,18 +266,13 @@ public extension TextureLayersDocumentsRepository {
         textures.reserveCapacity(sources.count)
 
         for source in sources {
-            do {
-                if let texture = try MTLTextureCreator.makeTexture(
-                    width: source.width,
-                    height: source.height,
-                    from: source.hexadecimalData,
-                    with: device
-                ) {
-                    textures.append((source.id, texture))
-                }
-            } catch {
-                Logger.info("Failed to create texture: \(source.url.path), error: \(error)")
-            }
+            let texture = try MTLTextureCreator.makeTexture(
+                width: source.width,
+                height: source.height,
+                from: source.hexadecimalData,
+                with: device
+            )
+            textures.append((source.id, texture))
         }
 
         return textures
@@ -359,13 +367,7 @@ private extension TextureLayersDocumentsRepository {
             )
 
             guard
-                let hexadecimalData = textureData.encodedHexadecimals,
-                let _ = try MTLTextureCreator.makeTexture(
-                    width: Int(textureSize.width),
-                    height: Int(textureSize.height),
-                    from: hexadecimalData,
-                    with: device
-                )
+                let hexadecimalData = textureData.encodedHexadecimals
             else {
                 let error = NSError(
                     title: String(localized: "Error"),
@@ -374,6 +376,13 @@ private extension TextureLayersDocumentsRepository {
                 Logger.error(error)
                 throw error
             }
+
+            let _ = try MTLTextureCreator.makeTexture(
+               width: Int(textureSize.width),
+               height: Int(textureSize.height),
+               from: hexadecimalData,
+               with: device
+           )
         }
     }
 }

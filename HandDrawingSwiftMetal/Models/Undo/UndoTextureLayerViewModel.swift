@@ -79,7 +79,7 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             let layer = textureLayers.selectedLayer
         else { return false }
 
-        let newTexture = await textureFromDocumentsRepository(
+        let newTexture = try await textureFromDocumentsRepository(
             layerId,
             device: device
         )
@@ -107,10 +107,12 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             guard
                 let layerId = textureLayers.selectedLayerId,
                 let layerIndex = textureLayers.selectedIndex,
-                let layer = textureLayers.selectedLayer,
-                let texture = await textureFromDocumentsRepository(layerId, device: device),
-                await super.onTapDeleteButton()
+                let layer = textureLayers.selectedLayer
             else { return false }
+
+            let texture = try await textureFromDocumentsRepository(layerId, device: device)
+
+            await super.onTapDeleteButton()
 
             try await registerDeletionUndo(
                 restorationTexture: texture,

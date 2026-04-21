@@ -112,18 +112,26 @@ import TextureLayerView
         }
     }
 
+    override public func initializeCanvas(_ textureSize: CGSize) async throws {
+        try await super.initializeCanvas(textureSize)
+
+        try textureLayerRenderer.initializeTextures(textureSize: textureSize)
+
+        try await updateFullCanvasTexture()
+    }
+
     public func updateFullCanvasTexture() async throws {
         guard
             let selectedLayer = textureLayersState.selectedLayer,
             let textureLayers: TextureLayersRenderContext = .init(state: textureLayersState),
-            let currentTexture = await viewModel.duplicateTextureFromDocumentsDirectory(
+            let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             )
         else {
             return
         }
 
-        let textures = await viewModel.duplicateTexturesFromDocumentsDirectory(
+        let textures = try await viewModel.duplicateTexturesFromDocumentsDirectory(
             textureLayers.layers.map { $0.id }
         )
 
@@ -136,14 +144,6 @@ import TextureLayerView
         updateCanvasTextureUsingCurrentTexture()
     }
 
-    override public func initializeCanvas(_ textureSize: CGSize) async throws {
-        try await super.initializeCanvas(textureSize)
-
-        try textureLayerRenderer.initializeTextures(textureSize: textureSize)
-
-        try await updateFullCanvasTexture()
-    }
-
     override public func updateCanvasTextureUsingRealtimeDrawingTexture() {
         updateCanvasTexture(realtimeDrawingTexture)
         present()
@@ -154,7 +154,20 @@ import TextureLayerView
         present()
     }
 
-    private func updateCanvasTexture(_ texture: MTLTexture?) {
+    public func saveTextureToDocumentsDirectory(
+        layerId: UUID,
+        textureData: Data
+    ) async throws {
+        try await viewModel.saveTextureToDocumentsDirectory(
+            layerId: layerId,
+            textureData: textureData
+        )
+    }
+}
+
+private extension TextureLayerCanvasView {
+
+    func updateCanvasTexture(_ texture: MTLTexture?) {
         guard let selectedLayer = textureLayersState.selectedLayer else { return }
 
         textureLayerRenderer.updateCanvasTexture(
@@ -165,16 +178,6 @@ import TextureLayerView
             ),
             canvasTexture: canvasTexture,
             commandBuffer: currentFrameCommandBuffer
-        )
-    }
-
-    public func saveTextureToDocumentsDirectory(
-        layerId: UUID,
-        textureData: Data
-    ) async throws {
-        try await viewModel.saveTextureToDocumentsDirectory(
-            layerId: layerId,
-            textureData: textureData
         )
     }
 }

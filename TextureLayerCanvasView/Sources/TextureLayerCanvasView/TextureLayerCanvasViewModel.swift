@@ -45,8 +45,8 @@ extension TextureLayerCanvasViewModel {
 
     func duplicateTextureFromDocumentsDirectory(
         _ id: LayerId
-    ) async -> MTLTexture? {
-        await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+    ) async throws -> MTLTexture? {
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
             textureSize: textureSize,
             device: renderer.device
@@ -55,8 +55,8 @@ extension TextureLayerCanvasViewModel {
 
     func duplicateTexturesFromDocumentsDirectory(
         _ ids: [LayerId]
-    ) async -> [(LayerId, MTLTexture)] {
-        await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+    ) async throws -> [(LayerId, MTLTexture)] {
+        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
             textureSize: textureSize,
             device: renderer.device
