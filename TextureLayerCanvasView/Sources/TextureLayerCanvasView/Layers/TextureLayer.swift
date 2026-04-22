@@ -1,5 +1,5 @@
 //
-//  TextureLayerRenderContext.swift
+//  TextureLayer.swift
 //  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2026/02/15.
@@ -7,12 +7,12 @@
 
 import MetalKit
 
-struct TextureLayerRenderContext {
-    public let isVisible: Bool
-    public let alpha: Int
-    public let texture: MTLTexture?
+struct TextureLayer {
+    let isVisible: Bool
+    let alpha: Int
+    let texture: MTLTexture?
 
-    public init(
+    init(
         isVisible: Bool,
         alpha: Int,
         texture: MTLTexture?

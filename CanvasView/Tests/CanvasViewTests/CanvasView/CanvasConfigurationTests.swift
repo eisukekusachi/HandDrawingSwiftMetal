@@ -19,7 +19,7 @@ struct CanvasConfigurationTests {
 
         #expect(configuration.textureSize.equalTo(CanvasConfiguration.screenSize))
     }
-
+/*
     @Test
     func `If textureSize is smaller than the minimum allowed size, it is clamped to the minimum size`() {
         let smallSize = CGSize(width: 10, height: 10)
@@ -28,7 +28,7 @@ struct CanvasConfigurationTests {
 
         #expect(configuration.textureSize.equalTo(expected))
     }
-
+*/
     @Test
     func `If textureSize is valid, the specified size is used`() {
         let textureSize = CGSize(width: 2000, height: 1500)

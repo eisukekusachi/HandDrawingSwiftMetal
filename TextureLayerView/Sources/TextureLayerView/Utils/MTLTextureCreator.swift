@@ -70,14 +70,14 @@ enum MTLTextureCreator {
         height: Int,
         from colorArray: [UInt8],
         with device: MTLDevice
-    ) throws -> MTLTexture? {
+    ) throws -> MTLTexture {
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Invalid value")
             )
             Logger.error(error)
-            return nil
+            throw error
         }
 
         let bytesPerRow = bytesPerPixel * width
@@ -88,7 +88,12 @@ enum MTLTextureCreator {
             height: height,
             with: device
         ) else {
-            return nil
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to create texture")
+            )
+            Logger.error(error)
+            throw error
         }
 
         colorArray.withUnsafeBytes { rawBuffer in

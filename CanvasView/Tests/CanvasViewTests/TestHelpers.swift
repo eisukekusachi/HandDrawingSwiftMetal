@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import UIKit
+
+@testable import CanvasView
 
 /// Repeatedly evaluates `condition` at the given interval until it becomes `true` or the timeout is reached
-@MainActor
 struct TestHelpers {
 
     static func waitUntil(
@@ -23,4 +25,42 @@ struct TestHelpers {
         }
         return condition()
     }
+
+    /// Creates a stable `TouchID` for unit tests.
+    ///
+    /// `TouchID` is based on `ObjectIdentifier(UITouch)`, so tests need a real touch instance.
+    @MainActor
+    static func makeTouchID(seed: Int) -> TouchID {
+        let touch = UITouchDummy(
+            location: .zero,
+            previousLocation: .zero,
+            majorRadius: 0,
+            majorRadiusTolerance: 0,
+            preciseLocation: .zero,
+            precisePreviousLocation: .zero,
+            tapCount: 0,
+            timestamp: TimeInterval(seed),
+            type: .direct,
+            phase: .began,
+            force: 0,
+            maximumPossibleForce: 0,
+            altitudeAngle: 0,
+            azimuthUnitVector: .zero,
+            rollAngle: 0,
+            estimatedProperties: [],
+            estimatedPropertiesExpectingUpdates: [],
+            estimationUpdateIndex: seed as NSNumber
+        )
+        return TouchID(touch)
+    }
+/*
+    @MainActor
+    static func makeTouchHistories(_ histories: [Int: [TouchPoint]]) -> TouchHistoriesOnScreen {
+        Dictionary(
+            uniqueKeysWithValues: histories.map { seed, points in
+                (makeTouchID(seed: seed), points)
+            }
+        )
+    }
+*/
 }

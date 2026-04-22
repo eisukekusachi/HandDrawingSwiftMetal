@@ -9,7 +9,7 @@ import UIKit
 
 /// A `Sendable` snapshot that captures the state of a single `UITouch`
 /// https://developer.apple.com/documentation/uikit/uitouch
-struct TouchPoint: Equatable, Sendable {
+public struct TouchPoint: Equatable, Sendable {
 
     /// The current location of the touch in the coordinate system
     let location: CGPoint
@@ -65,7 +65,7 @@ struct TouchPoint: Equatable, Sendable {
     /// An index number that lets you correlate an updated touch with the original touch
     let estimationUpdateIndex: NSNumber?
 
-    init(
+    public init(
         location: CGPoint,
         previousLocation: CGPoint,
         majorRadius: CGFloat,

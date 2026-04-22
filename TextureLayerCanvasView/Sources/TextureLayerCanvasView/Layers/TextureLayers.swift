@@ -1,5 +1,5 @@
 //
-//  TextureLayersRenderContext.swift
+//  TextureLayers.swift
 //  TextureLayerCanvasView
 //
 //  Created by Eisuke Kusachi on 2026/02/15.
@@ -8,12 +8,15 @@
 import TextureLayerView
 
 @MainActor
-struct TextureLayersRenderContext {
+struct TextureLayers {
 
-    public let selectedIndex: Int
-    public let layers: [TextureLayerModel]
+    let selectedIndex: Int
+    let layers: [TextureLayerModel]
+}
 
-    public init?(state: TextureLayersState) {
+extension TextureLayers {
+
+    init?(state: TextureLayersState) {
         guard
             let selectedIndex = state.selectedIndex
         else { return nil }

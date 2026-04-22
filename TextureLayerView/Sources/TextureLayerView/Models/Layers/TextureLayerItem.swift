@@ -39,7 +39,7 @@ public struct TextureLayerItem: Identifiable {
         title: String = "",
         alpha: Int = 255,
         isVisible: Bool = true,
-        thumbnail: UIImage?,
+        thumbnail: UIImage? = nil,
         defaultBackgroundColor: UIColor = .white,
         selectedBackgroundColor: UIColor = .black,
         iconSize: CGSize = .init(width: 32, height: 32),
