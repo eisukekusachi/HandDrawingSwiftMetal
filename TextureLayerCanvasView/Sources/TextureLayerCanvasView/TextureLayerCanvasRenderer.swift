@@ -17,20 +17,10 @@ final class TextureLayerCanvasRenderer {
 
     private let renderer: MTLRendering
 
-    /// Buffers used to draw textures with vertical flipping
-    private let flippedTextureBuffers: MTLTextureBuffers
-
     init(
         renderer: MTLRendering,
     ) {
-        guard let buffer = MTLBuffers.makeTextureBuffers(
-            nodes: .flippedTextureNodes,
-            with: renderer.device
-        ) else {
-            fatalError("Metal is not supported on this device.")
-        }
         self.renderer = renderer
-        self.flippedTextureBuffers = buffer
     }
 
     func renderLayersIntoTextures(
