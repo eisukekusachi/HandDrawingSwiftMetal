@@ -80,7 +80,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         self.unselectedTopTexture?.label = "unselectedTopTexture"
     }
 
-    func unpdateUnselectedTextures(
+    func updateUnselectedTextures(
         textureLayers: TextureLayers?,
         with commandBuffer: MTLCommandBuffer
     ) async throws {

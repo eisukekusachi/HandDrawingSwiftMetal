@@ -106,7 +106,7 @@ import TextureLayerView
             return
         }
 
-        try await viewModel.unpdateUnselectedTextures(
+        try await viewModel.updateUnselectedTextures(
             textureLayers: .init(state: textureLayersState),
             with: newCommandBuffer
         )
