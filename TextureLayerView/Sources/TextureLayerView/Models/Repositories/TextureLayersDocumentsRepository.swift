@@ -236,12 +236,13 @@ public extension TextureLayersDocumentsRepository {
 
                 group.addTask {
                     guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
-                        throw NSError(
-                            title: "Error",
-                            message: "File not found: \(url.path)"
+                        let error = NSError(
+                            title: String(localized: "Error"),
+                            message: String(localized: "File not found: \(url.path)")
                         )
+                        Logger.error(error)
+                        throw error
                     }
-
                     return TextureSource(
                         id: id,
                         url: url,
