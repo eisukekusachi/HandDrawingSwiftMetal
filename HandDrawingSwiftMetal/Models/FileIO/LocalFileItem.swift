@@ -31,4 +31,16 @@ public class LocalFileItem: Identifiable {
         self.thumbnail = thumbnail
         self._fileURL = fileURL
     }
+
+    func update(
+        title: String? = nil,
+        fileURL: URL? = nil,
+        updatedAt: Date? = nil,
+        thumbnail: UIImage? = nil
+    ) {
+        if let title { self.title = title }
+        if let fileURL { self._fileURL = fileURL }
+        if let updatedAt { self.updatedAt = updatedAt }
+        if let thumbnail { self.thumbnail = thumbnail }
+    }
 }

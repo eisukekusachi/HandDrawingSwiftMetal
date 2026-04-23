@@ -59,7 +59,7 @@ extension CoreDataProjectStorage {
         }
     }
 
-    func update(directoryURL: URL) throws {
+    func update(directoryURL: URL, projectName: String) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
             let result = try? ProjectArchiveModel(in: directoryURL)
@@ -77,7 +77,7 @@ extension CoreDataProjectStorage {
         }
 
         project.update(
-            projectName: result.projectName,
+            projectName: projectName,
             createdAt: result.createdAt,
             updatedAt: result.updatedAt
         )

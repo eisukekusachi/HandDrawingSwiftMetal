@@ -461,6 +461,43 @@ private extension HandDrawingViewController {
         let fileView = FileView(
             list: viewModel.fileList,
             selectedFileURL: zipFileURL,
+            onRenameSelected: { [weak self] oldURL, newName in
+                guard let self else { return oldURL }
+
+                let ext = oldURL.pathExtension
+
+                func makeURL(_ name: String) -> URL {
+                    FileManager.documentsFileURL(projectName: name, suffix: ext)
+                }
+
+                let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+                let baseName = trimmed.isEmpty ? oldURL.deletingPathExtension().lastPathComponent : trimmed
+
+                var candidateName = baseName
+                var candidateURL = makeURL(candidateName)
+                var suffixIndex = 2
+
+                while FileManager.default.fileExists(atPath: candidateURL.path) && candidateURL != oldURL {
+                    candidateName = "\(baseName)_\(suffixIndex)"
+                    candidateURL = makeURL(candidateName)
+                    suffixIndex += 1
+                }
+
+                let newURL = candidateURL
+
+                // Rename on disk
+                try FileManager.default.moveItem(at: oldURL, to: newURL)
+
+                // Update current project name if renaming the currently-open file
+                if oldURL == self.zipFileURL {
+                    self.viewModel.project.update(projectName: candidateName, updatedAt: Date())
+                }
+
+                // Update file list model
+                self.viewModel.renameFileItem(oldFileURL: oldURL, newFileURL: newURL, newTitle: candidateName)
+
+                return newURL
+            },
             onTapItem: { [weak self] zipFileURL in
                 self?.presentedViewController?.dismiss(animated: true)
                 self?.loadCanvas(zipFileURL: zipFileURL)

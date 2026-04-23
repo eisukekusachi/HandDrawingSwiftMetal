@@ -10,12 +10,16 @@ import SwiftUI
 
 struct FileView: View {
 
-    private let list: [LocalFileItem]
     private let onTapItem: ((URL) -> Void)
+    private let onRenameSelected: ((URL, String) async throws -> URL)?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    @State private var list: [LocalFileItem]
     @State private var selectedIndex: Int?
+    @State private var isShowingRenameAlert: Bool = false
+    @State private var renameDraft: String = ""
 
     private var columns: [GridItem] {
         let spacing: CGFloat = 12
@@ -32,10 +36,12 @@ struct FileView: View {
     init(
         list: [LocalFileItem],
         selectedFileURL: URL? = nil,
+        onRenameSelected: ((URL, String) async throws -> URL)? = nil,
         onTapItem: @escaping ((URL) -> Void)
     ) {
-        self.list = list
         self.onTapItem = onTapItem
+        self.onRenameSelected = onRenameSelected
+        self._list = State(initialValue: list)
         self._selectedIndex = State(
             initialValue: selectedFileURL.flatMap { url in
                 list.firstIndex(where: { $0.fileURL == url })
@@ -65,6 +71,17 @@ struct FileView: View {
             .navigationTitle("Files")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        guard let selectedIndex else { return }
+                        renameDraft = list[selectedIndex].title
+                        isShowingRenameAlert = true
+                    }) {
+                        Image(systemName: "pencil")
+                    }
+                    .accessibilityLabel("Rename")
+                    .disabled(onRenameSelected == nil || selectedIndex == nil)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
                         ZStack {
@@ -80,6 +97,40 @@ struct FileView: View {
                     }
                     .accessibilityLabel("Close")
                 }
+            }
+            .alert("Rename", isPresented: $isShowingRenameAlert) {
+                TextField("Name", text: $renameDraft)
+                Button("Cancel", role: .cancel) {}
+                Button("OK") {
+                    let newName = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !newName.isEmpty else { return }
+                    guard
+                        let selectedIndex,
+                        let onRenameSelected
+                    else { return }
+
+                    let oldURL = list[selectedIndex].fileURL
+                    let oldTitle = list[selectedIndex].title
+
+                    // Immediate UI update
+                    list[selectedIndex].update(title: newName, updatedAt: Date())
+
+                    Task { @MainActor in
+                        do {
+                            let newURL = try await onRenameSelected(oldURL, newName)
+                            list[selectedIndex].update(
+                                title: newURL.deletingPathExtension().lastPathComponent,
+                                fileURL: newURL,
+                                updatedAt: Date()
+                            )
+                        } catch {
+                            // Revert if rename failed
+                            list[selectedIndex].update(title: oldTitle, fileURL: oldURL, updatedAt: Date())
+                        }
+                    }
+                }
+            } message: {
+                Text("Enter a new name.")
             }
         }
         .navigationViewStyle(.stack)
@@ -154,6 +205,7 @@ struct FileView: View {
             )
         ],
         selectedFileURL: nil,
+        onRenameSelected: { url, _ in url },
         onTapItem: { _ in }
     )
 }

@@ -451,7 +451,10 @@ extension HandDrawingViewModel {
                 try await action?(workingDirectoryURL)
 
                 // Throw an error if the project name cannot be retrieved
-                try self.projectStorage.update(directoryURL: workingDirectoryURL)
+                try self.projectStorage.update(
+                    directoryURL: workingDirectoryURL,
+                    projectName: zipFileURL.deletingPathExtension().lastPathComponent
+                )
 
                 // Since it’s optional, ignore any errors that occur
                 try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
@@ -483,6 +486,21 @@ extension HandDrawingViewModel {
 
         _fileList.sort { $0.updatedAt > $1.updatedAt }
     }
+
+    func renameFileItem(
+        oldFileURL: URL,
+        newFileURL: URL,
+        newTitle: String
+    ) {
+        guard let index = _fileList.firstIndex(where: { $0.fileURL == oldFileURL }) else { return }
+        _fileList[index].update(
+            title: newTitle,
+            fileURL: newFileURL,
+            updatedAt: Date()
+        )
+    }
+
+    // Intentionally no longer renames inside zip.
 
     private func fileItemList(fileSuffix: String) async {
         var fileNames: [String] = []
@@ -516,9 +534,11 @@ extension HandDrawingViewModel {
                     contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
                 )
 
+                let title = zipFileURL.deletingPathExtension().lastPathComponent
+
                 _fileList.append(
                     .init(
-                        title: projectMetaData.projectName,
+                        title: title,
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
                         thumbnail: UIImage(data: data),
