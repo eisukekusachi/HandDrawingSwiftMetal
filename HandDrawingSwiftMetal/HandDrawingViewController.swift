@@ -460,6 +460,7 @@ private extension HandDrawingViewController {
     func showFileView() {
         let fileView = FileView(
             list: viewModel.fileList,
+            selectedFileURL: zipFileURL,
             onTapItem: { [weak self] zipFileURL in
                 self?.presentedViewController?.dismiss(animated: true)
                 self?.loadCanvas(zipFileURL: zipFileURL)
@@ -467,6 +468,13 @@ private extension HandDrawingViewController {
         )
 
         let vc = UIHostingController(rootView: fileView)
+        vc.modalPresentationStyle = .pageSheet
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.selectedDetentIdentifier = .large
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
+        }
 
         present(vc, animated: true)
     }
