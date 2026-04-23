@@ -66,6 +66,12 @@ final class HandDrawingContentView: UIView {
 
         addEvents()
 
+        // Ensure the New button participates in system tint dimming
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "plus.square.fill.on.square.fill")
+        newButton.configuration = config
+        newButton.tintColor = .systemBlue
+
         brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
         eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
