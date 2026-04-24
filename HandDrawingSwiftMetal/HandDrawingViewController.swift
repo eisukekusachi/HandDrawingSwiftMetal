@@ -25,7 +25,6 @@ class HandDrawingViewController: UIViewController {
     private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
-    private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
     private var textureLayerPopup: UIHostingController<AnyView>?
     private var textureLayerPresenter = PopupViewPresenter()
@@ -89,7 +88,6 @@ class HandDrawingViewController: UIViewController {
         addEvents()
         bindData()
         layoutViews()
-        setupNewCanvasDialogPresenter()
 
         drawingRenderers.forEach {
             $0.value.setup(
@@ -201,28 +199,6 @@ private extension HandDrawingViewController {
         )
     }
 
-    func setupNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = {
-            Task { [weak self] in
-                guard let `self` else { return }
-
-                defer { self.showActivityIndicator(false) }
-                self.showActivityIndicator(true)
-
-                do {
-                    try await self.newCanvas()
-
-                    self.viewModel.resetCoreData()
-
-                    self.updateDrawingComponents()
-
-                } catch {
-                    self.showAlert(error)
-                }
-            }
-        }
-    }
-
     func bindData() {
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
@@ -320,10 +296,6 @@ private extension HandDrawingViewController {
         contentView.tapExportImageButton = { [weak self] in
             self?.contentView.exportImageButton.debounce()
             self?.saveImage()
-        }
-        contentView.tapNewButton = { [weak self] in
-            guard let `self` else { return }
-            self.newCanvasDialogPresenter.presentAlert(on: self)
         }
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
