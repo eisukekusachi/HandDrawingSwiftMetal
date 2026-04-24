@@ -12,6 +12,9 @@ struct FileView: View {
 
     private let onTapItem: ((URL) -> Void)
     private let onRenameSelected: ((URL, String) async throws -> URL)?
+    private let onDeleteSelected: ((URL) async throws -> Void)?
+    private let onCreateNew: ((String) async throws -> Void)?
+    private let currentOpenFileURL: URL?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -19,7 +22,12 @@ struct FileView: View {
     @State private var list: [LocalFileItem]
     @State private var selectedIndex: Int?
     @State private var isShowingRenameAlert: Bool = false
+    @State private var isShowingDeleteConfirm: Bool = false
+    @State private var isShowingErrorAlert: Bool = false
+    @State private var errorAlertMessage: String = ""
     @State private var renameDraft: String = ""
+    @State private var isShowingNewFileAlert: Bool = false
+    @State private var newFileNameDraft: String = "Untitled"
 
     private var columns: [GridItem] {
         let spacing: CGFloat = 12
@@ -36,11 +44,17 @@ struct FileView: View {
     init(
         list: [LocalFileItem],
         selectedFileURL: URL? = nil,
+        currentOpenFileURL: URL? = nil,
         onRenameSelected: ((URL, String) async throws -> URL)? = nil,
+        onDeleteSelected: ((URL) async throws -> Void)? = nil,
+        onCreateNew: ((String) async throws -> Void)? = nil,
         onTapItem: @escaping ((URL) -> Void)
     ) {
         self.onTapItem = onTapItem
         self.onRenameSelected = onRenameSelected
+        self.onDeleteSelected = onDeleteSelected
+        self.onCreateNew = onCreateNew
+        self.currentOpenFileURL = currentOpenFileURL
         self._list = State(initialValue: list)
         self._selectedIndex = State(
             initialValue: selectedFileURL.flatMap { url in
@@ -50,7 +64,16 @@ struct FileView: View {
     }
 
     var body: some View {
-        NavigationView {
+        let deleteDisabled: Bool = {
+            guard
+                onDeleteSelected != nil,
+                let i = selectedIndex,
+                i < list.count
+            else { return true }
+            if let currentOpenFileURL, list[i].fileURL == currentOpenFileURL { return true }
+            return false
+        }()
+        return NavigationView {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(0 ..< list.count, id: \.self) { index in
@@ -72,15 +95,34 @@ struct FileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        guard let selectedIndex else { return }
-                        renameDraft = list[selectedIndex].title
-                        isShowingRenameAlert = true
-                    }) {
-                        Image(systemName: "pencil")
+                    HStack(spacing: 20) {
+                        if onCreateNew != nil {
+                            Button(action: {
+                                newFileNameDraft = "Untitled"
+                                isShowingNewFileAlert = true
+                            }) {
+                                Image(systemName: "plus.circle")
+                            }
+                            .accessibilityLabel("New file")
+                        }
+
+                        Button(action: {
+                            guard let selectedIndex else { return }
+                            renameDraft = list[selectedIndex].title
+                            isShowingRenameAlert = true
+                        }) {
+                            Image(systemName: "pencil")
+                        }
+                        .accessibilityLabel("Rename")
+                        .disabled(onRenameSelected == nil || selectedIndex == nil)
+
+                        Button(action: { isShowingDeleteConfirm = true }) {
+                            Image(systemName: "trash")
+                        }
+                        .accessibilityLabel("Delete")
+                        .tint(.red)
+                        .disabled(deleteDisabled)
                     }
-                    .accessibilityLabel("Rename")
-                    .disabled(onRenameSelected == nil || selectedIndex == nil)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
@@ -131,6 +173,52 @@ struct FileView: View {
                 }
             } message: {
                 Text("Enter a new name.")
+            }
+            .alert("New file", isPresented: $isShowingNewFileAlert) {
+                TextField("File name", text: $newFileNameDraft)
+                Button("Cancel", role: .cancel) {}
+                Button("Create") {
+                    let name = newFileNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !name.isEmpty, let onCreateNew else { return }
+                    Task { @MainActor in
+                        do {
+                            try await onCreateNew(name)
+                        } catch {
+                            errorAlertMessage = error.localizedDescription
+                            isShowingErrorAlert = true
+                        }
+                    }
+                }
+            } message: {
+                Text("Enter a name for the new file (without extension). If the name exists, a suffix like _2 is added.")
+            }
+            .alert("Delete this file?", isPresented: $isShowingDeleteConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) {
+                    guard
+                        let onDeleteSelected,
+                        let index = selectedIndex
+                    else { return }
+
+                    let fileURL = list[index].fileURL
+                    Task { @MainActor in
+                        do {
+                            try await onDeleteSelected(fileURL)
+                            list.remove(at: index)
+                            selectedIndex = nil
+                        } catch {
+                            errorAlertMessage = error.localizedDescription
+                            isShowingErrorAlert = true
+                        }
+                    }
+                }
+            } message: {
+                Text("This file will be removed from the device. This can’t be undone.")
+            }
+            .alert("Error", isPresented: $isShowingErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorAlertMessage)
             }
         }
         .navigationViewStyle(.stack)
@@ -205,7 +293,10 @@ struct FileView: View {
             )
         ],
         selectedFileURL: nil,
+        currentOpenFileURL: nil,
         onRenameSelected: { url, _ in url },
+        onDeleteSelected: { _ in },
+        onCreateNew: { _ in },
         onTapItem: { _ in }
     )
 }

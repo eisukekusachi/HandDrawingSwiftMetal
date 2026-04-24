@@ -70,6 +70,7 @@
 		D49C692C2F23A76400B66608 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C692B2F23A76400B66608 /* Logger.swift */; };
 		D49C69362F23CD7700B66608 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69352F23CD7700B66608 /* FileManager.swift */; };
 		D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69392F246BA800B66608 /* LocalFileItem.swift */; };
+		D4FC0F022F94AA0100C55A4C /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */; };
 		D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */; };
 		D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */; };
 		D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */; };
@@ -177,6 +178,7 @@
 		D49C692B2F23A76400B66608 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		D49C69352F23CD7700B66608 /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		D49C69392F246BA800B66608 /* LocalFileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileItem.swift; sourceTree = "<group>"; };
+		D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinator.swift; sourceTree = "<group>"; };
 		D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectArchiveModel.swift; sourceTree = "<group>"; };
 		D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
 		D49C69472F2EE29C00B66608 /* TextureLayerStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TextureLayerStorage.xcdatamodel; sourceTree = "<group>"; };
@@ -306,6 +308,7 @@
 		D426FC9E2E5DD90500CC116D /* FileIO */ = {
 			isa = PBXGroup;
 			children = (
+				D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */,
 				D49C69352F23CD7700B66608 /* FileManager.swift */,
 				D49C69392F246BA800B66608 /* LocalFileItem.swift */,
 				D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */,
@@ -751,6 +754,7 @@
 				D49C69362F23CD7700B66608 /* FileManager.swift in Sources */,
 				D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */,
 				D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */,
+				D4FC0F022F94AA0100C55A4C /* FileCoordinator.swift in Sources */,
 				D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */,
 				D426FC602E5C0A8B00CC116D /* DrawingToolArchiveModel.swift in Sources */,
 				D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */,

@@ -51,29 +51,19 @@ final class HandDrawingViewModel: ObservableObject {
         xcdatamodeldName: "TextureLayerStorage"
     )
 
-    var fileSuffix: String {
-        _fileSuffix
-    }
-    private var _fileSuffix: String = ""
+    var fileSuffix: String { fileCoordinator.fileSuffix }
 
-    var fileList: [LocalFileItem] {
-        _fileList
-    }
-    private var _fileList: [LocalFileItem] = []
+    var fileList: [LocalFileItem] { fileCoordinator.fileList }
 
-    private let thumbnailName: String = "thumbnail.png"
+    var projectDocumentURL: URL {
+        fileCoordinator.documentURLForProjectName(project.projectName)
+    }
+
+    private let fileCoordinator: FileCoordinator
 
     /// Current file for displaying in the file list
     func currentFile(thumbnail: UIImage?) -> LocalFileItem {
-        .init(
-            title: project.projectName,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt,
-            thumbnail: thumbnail,
-            fileURL: URL.documents.appendingPathComponent(
-                projectFileName()
-            )
-        )
+        fileCoordinator.localFileItem(for: project, thumbnail: thumbnail)
     }
 
     private let projectStorage: CoreDataProjectStorage
@@ -83,8 +73,6 @@ final class HandDrawingViewModel: ObservableObject {
 
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
-
-    private let dependencies: HandDrawingViewDependencies
 
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
@@ -102,13 +90,13 @@ final class HandDrawingViewModel: ObservableObject {
     }
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
+    private var cancellables = Set<AnyCancellable>()
+
     init(
         dependencies: HandDrawingViewDependencies? = nil
     ) {
-        self.dependencies = dependencies ?? .init()
         self.brushPalette = .init(colors: initializeColors)
         self.eraserPalette = .init(alphas: initializeAlphas)
-
         self.textureLayerStorage = .init(
             textureLayers: textureLayersState,
             context: textureLayersStorageController.viewContext
@@ -135,11 +123,16 @@ final class HandDrawingViewModel: ObservableObject {
             palette: eraserPalette,
             context: drawingToolStorageController.viewContext
         )
+        self.fileCoordinator = FileCoordinator(dependencies: dependencies ?? .init())
+        self.fileCoordinator.objectWillChange
+            .sink { [weak self] in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     func loadLocalDrawingComponentsData(configuration: ProjectConfiguration) {
-        // Retain the file suffix
-        _fileSuffix = configuration.fileSuffix
+        fileCoordinator.applyProjectFileConfiguration(configuration)
 
         // Fetch data from Core Data
         do {
@@ -149,10 +142,7 @@ final class HandDrawingViewModel: ObservableObject {
         }
 
         Task {
-            // Create a list of file items
-            await fileItemList(
-                fileSuffix: _fileSuffix
-            )
+            await fileCoordinator.refreshFileListFromDocuments()
         }
     }
 
@@ -188,8 +178,8 @@ final class HandDrawingViewModel: ObservableObject {
 
         if let restoredTextureLayerDataFromCoreData {
             do {
-                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-                    textureLayers: restoredTextureLayerDataFromCoreData,
+                try fileCoordinator.restorePersistedTextureLayersInDocuments(
+                    restoredTextureLayerDataFromCoreData,
                     device: device
                 )
                 textureLayersData = restoredTextureLayerDataFromCoreData
@@ -197,7 +187,7 @@ final class HandDrawingViewModel: ObservableObject {
 
             } catch {
                 // Initialize using the configuration values when an error occurs
-                let newData = await initializeStorage(
+                let newData = await fileCoordinator.createAndInitializeTextureLayers(
                     device: device,
                     textureSize: fallbackTextureSize,
                     commandQueue: commandQueue
@@ -209,7 +199,7 @@ final class HandDrawingViewModel: ObservableObject {
                 textureLayerStorage.clearAll()
             }
         } else {
-            let newData = await initializeStorage(
+            let newData = await fileCoordinator.createAndInitializeTextureLayers(
                 device: device,
                 textureSize: fallbackTextureSize,
                 commandQueue: commandQueue
@@ -222,26 +212,6 @@ final class HandDrawingViewModel: ObservableObject {
 
         return resolvedTextureSize
     }
-
-    private func initializeStorage(
-        device: MTLDevice,
-        textureSize: CGSize,
-        commandQueue: MTLCommandQueue
-    ) async -> TextureLayersModel {
-        let data = TextureLayersModel(textureSize: textureSize)
-
-        do {
-            try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                textureLayers: data,
-                device: device,
-                commandQueue: commandQueue
-            )
-        } catch {
-            fatalError("Failed to initialize storage")
-        }
-
-        return data
-    }
 }
 
 extension HandDrawingViewModel {
@@ -249,109 +219,48 @@ extension HandDrawingViewModel {
         thumbnail: UIImage?,
         to workingDirectoryURL: URL
     ) async throws {
-        do {
-            // Save the thumbnail image into the working directory
-            try thumbnail?.pngData()?.write(
-                to: workingDirectoryURL.appendingPathComponent("thumbnail.png")
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to create the thumbnail")
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Copy the texture files into the working directory
-            for layer in textureLayersState.layers {
-                try await dependencies.textureLayersDocumentsRepository.copyTexture(
-                    id: layer.id,
-                    to: workingDirectoryURL
-                )
-            }
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to create the textures")
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        do {
-            // Save the texture layers as JSON
-            try TextureLayersArchiveModel(
-                layers: textureLayersState.layers.map { .init(item: $0) },
-                layerIndex: textureLayersState.selectedIndex ?? 0,
-                textureSize: textureLayersState.textureSize
-            ).write(
-                in: workingDirectoryURL
-            )
-        } catch {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Failed to save the texture layers")
-            )
-            Logger.error(error)
-            throw error
-        }
+        try await fileCoordinator.saveCanvasToWorkingDirectory(
+            textureLayersState: textureLayersState,
+            thumbnail: thumbnail,
+            to: workingDirectoryURL
+        )
     }
 
     func onLoadFiles(
         device: MTLDevice,
         from workingDirectoryURL: URL
     ) async throws {
-        // Load texture layer data from the JSON file
-        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-            in: workingDirectoryURL
+        try await fileCoordinator.loadCanvasFromWorkingDirectory(
+            device: device,
+            from: workingDirectoryURL,
+            into: textureLayersState
         )
-        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
-
-        guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-            url: workingDirectoryURL,
-            textureLayers: data,
-            device: device
-        ) else {
-            return
-        }
-
-        textureLayersState.update(data)
     }
 
     func onNewCanvas(
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        let data: TextureLayersModel = .init(
-            textureSize: textureLayersState.textureSize
-        )
-
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: data,
+        let data = try await fileCoordinator.createNewTextureLayers(
             device: device,
+            textureSize: textureLayersState.textureSize,
             commandQueue: commandQueue
         )
-
         textureLayersState.update(data)
     }
 }
 
 extension HandDrawingViewModel {
-    func projectFileName() -> String {
-        if _fileSuffix.isEmpty {
-            return project.projectName
-        } else {
-            return project.projectName + "." + _fileSuffix
-        }
-    }
-
     func toggleDrawingTool() {
         drawingTool.swapTool(drawingTool.type)
     }
 
     func resetCoreData() {
+        resetDrawingDefaultsAndSetProjectName(Calendar.currentDate)
+    }
+
+    /// Same defaults as `resetCoreData`, but sets the project title to `projectName` (e.g. new file from the file list).
+    func resetDrawingDefaultsAndSetProjectName(_ projectName: String) {
         drawingToolStorage.update(
             type: .brush,
             brushDiameter: 8,
@@ -366,7 +275,7 @@ extension HandDrawingViewModel {
             index: 0
         )
         project.update(
-            projectName: Calendar.currentDate,
+            projectName: projectName,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -374,6 +283,22 @@ extension HandDrawingViewModel {
 }
 
 extension HandDrawingViewModel {
+
+    func performSaveCanvas(
+        saveCanvasAction: ((URL) async throws -> Void)?,
+        zipFileURL: URL
+    ) async throws {
+        try await fileCoordinator.saveZippedProject(to: zipFileURL) { workingDirectoryURL in
+            try await saveCanvasAction?(workingDirectoryURL)
+            try self.fileCoordinator.writeSessionMetadataToWorkingDirectory(
+                workingDirectoryURL,
+                drawingTool: self.drawingTool,
+                brushPalette: self.brushPalette,
+                eraserPalette: self.eraserPalette,
+                project: self.project
+            )
+        }
+    }
 
     func onSaveCanvas(
         saveCanvasAction: ((URL) async throws -> Void)?,
@@ -383,29 +308,14 @@ extension HandDrawingViewModel {
         Task(priority: .userInitiated) { [weak self] in
             guard let `self` else { return }
 
-            defer {
-                /// Remove the working space
-                try? dependencies.localFileRepository.removeWorkingDirectory()
-
-                self.activityIndicatorSubject.send(false)
-            }
+            defer { self.activityIndicatorSubject.send(false) }
             self.activityIndicatorSubject.send(true)
 
             do {
-                // Create a temporary working directory for saving project files
-                try dependencies.localFileRepository.createWorkingDirectory()
-
-                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
-
-                try await saveCanvasAction?(workingDirectoryURL)
-
-                try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
-                try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
-                try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
-                try ProjectArchiveModel(project).write(in: workingDirectoryURL)
-
-                // Zip the working directory into a single project file
-                try dependencies.localFileRepository.zipWorkingDirectory(to: zipFileURL)
+                try await self.performSaveCanvas(
+                    saveCanvasAction: saveCanvasAction,
+                    zipFileURL: zipFileURL
+                )
 
                 completion?()
 
@@ -421,6 +331,28 @@ extension HandDrawingViewModel {
         }
     }
 
+    /// New blank project file on disk: unique URL, new canvas, default tools, then save and list row.
+    func createNewEmptyProjectFile(
+        proposedName: String,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue,
+        saveCanvasAction: @escaping (URL) async throws -> Void
+    ) async throws -> URL {
+        activityIndicatorSubject.send(true)
+        defer { activityIndicatorSubject.send(false) }
+
+        let targetURL = try fileCoordinator.makeUniqueNewProjectDocumentURL(proposedBaseName: proposedName)
+        let stem = targetURL.deletingPathExtension().lastPathComponent
+        try await onNewCanvas(device: device, commandQueue: commandQueue)
+        resetDrawingDefaultsAndSetProjectName(stem)
+        try await performSaveCanvas(
+            saveCanvasAction: saveCanvasAction,
+            zipFileURL: targetURL
+        )
+        upsertFileList(currentFile(thumbnail: nil))
+        return targetURL
+    }
+
     func onLoadCanvas(
         zipFileURL: URL,
         action: ((URL) async throws -> Void)?,
@@ -429,37 +361,22 @@ extension HandDrawingViewModel {
         Task { [weak self] in
             guard let `self` else { return }
 
-            defer {
-                // Remove the working space
-                try? dependencies.localFileRepository.removeWorkingDirectory()
-
-                self.activityIndicatorSubject.send(false)
-            }
+            defer { self.activityIndicatorSubject.send(false) }
             self.activityIndicatorSubject.send(true)
 
             do {
-                // Create a temporary working directory
-                try dependencies.localFileRepository.createWorkingDirectory()
+                try await self.fileCoordinator.loadUnzippedProject(from: zipFileURL) { workingDirectoryURL in
+                    try await action?(workingDirectoryURL)
 
-                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
+                    try self.projectStorage.update(
+                        directoryURL: workingDirectoryURL,
+                        projectName: zipFileURL.deletingPathExtension().lastPathComponent
+                    )
 
-                // Extract the zip file into the working directory
-                try await dependencies.localFileRepository.unzipToWorkingDirectory(
-                    from: zipFileURL
-                )
-
-                try await action?(workingDirectoryURL)
-
-                // Throw an error if the project name cannot be retrieved
-                try self.projectStorage.update(
-                    directoryURL: workingDirectoryURL,
-                    projectName: zipFileURL.deletingPathExtension().lastPathComponent
-                )
-
-                // Since it’s optional, ignore any errors that occur
-                try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
-                try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
-                try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
+                    try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
+                    try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
+                    try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
+                }
 
                 completion?()
 
@@ -478,78 +395,30 @@ extension HandDrawingViewModel {
 
 extension HandDrawingViewModel {
     func upsertFileList(_ file: LocalFileItem) {
-        if let index = _fileList.firstIndex(where: { $0.title == file.title }) {
-            _fileList[index] = file
-        } else {
-            _fileList.append(file)
-        }
-
-        _fileList.sort { $0.updatedAt > $1.updatedAt }
+        fileCoordinator.upsertFileList(file)
     }
 
-    func renameFileItem(
+    @discardableResult
+    func renameFileForFileView(
         oldFileURL: URL,
-        newFileURL: URL,
-        newTitle: String
-    ) {
-        guard let index = _fileList.firstIndex(where: { $0.fileURL == oldFileURL }) else { return }
-        _fileList[index].update(
-            title: newTitle,
-            fileURL: newFileURL,
-            updatedAt: Date()
+        newName: String,
+        currentOpenFileURL: URL
+    ) throws -> URL {
+        try fileCoordinator.renameFileForFileView(
+            oldFileURL: oldFileURL,
+            newName: newName,
+            currentOpenFileURL: currentOpenFileURL,
+            project: project
         )
     }
 
-    // Intentionally no longer renames inside zip.
-
-    private func fileItemList(fileSuffix: String) async {
-        var fileNames: [String] = []
-
-        URL.documents.allFileURLs(suffix: fileSuffix).map {
-            $0.lastPathComponent
-        }.forEach {
-            fileNames.append($0)
-        }
-
-        for fileName in fileNames {
-            do {
-                defer { try? dependencies.localFileRepository.removeWorkingDirectory() }
-                try dependencies.localFileRepository.createWorkingDirectory()
-
-                let workingDirectoryURL = dependencies.localFileRepository.workingDirectoryURL
-
-                let zipFileURL = URL.documents.appendingPathComponent(fileName)
-
-                try await dependencies.localFileRepository.unzipToWorkingDirectory(
-                    from: zipFileURL
-                )
-
-                // Load project metadata
-                let projectMetaData: ProjectArchiveModel = try .init(
-                    in: workingDirectoryURL
-                )
-
-                // Load the thubnail
-                let data = try Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
-                )
-
-                let title = zipFileURL.deletingPathExtension().lastPathComponent
-
-                _fileList.append(
-                    .init(
-                        title: title,
-                        createdAt: projectMetaData.createdAt,
-                        updatedAt: projectMetaData.updatedAt,
-                        thumbnail: UIImage(data: data),
-                        fileURL: zipFileURL
-                    )
-                )
-            } catch {
-                Logger.error(error)
-            }
-        }
-
-        _fileList.sort { $0.updatedAt > $1.updatedAt }
+    func deleteFileForFileView(
+        fileURL: URL,
+        currentOpenFileURL: URL
+    ) throws {
+        try fileCoordinator.deleteFileForFileView(
+            fileURL: fileURL,
+            currentOpenFileURL: currentOpenFileURL
+        )
     }
 }

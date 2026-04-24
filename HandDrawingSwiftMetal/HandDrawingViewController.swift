@@ -16,12 +16,7 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
-    var zipFileURL: URL {
-        FileManager.documentsFileURL(
-            projectName: viewModel.project.projectName,
-            suffix: viewModel.fileSuffix
-        )
-    }
+    var zipFileURL: URL { viewModel.projectDocumentURL }
 
     @IBOutlet private weak var contentView: HandDrawingContentView!
 
@@ -461,42 +456,38 @@ private extension HandDrawingViewController {
         let fileView = FileView(
             list: viewModel.fileList,
             selectedFileURL: zipFileURL,
+            currentOpenFileURL: zipFileURL,
             onRenameSelected: { [weak self] oldURL, newName in
                 guard let self else { return oldURL }
-
-                let ext = oldURL.pathExtension
-
-                func makeURL(_ name: String) -> URL {
-                    FileManager.documentsFileURL(projectName: name, suffix: ext)
+                return try self.viewModel.renameFileForFileView(
+                    oldFileURL: oldURL,
+                    newName: newName,
+                    currentOpenFileURL: self.zipFileURL
+                )
+            },
+            onDeleteSelected: { [weak self] fileURL in
+                guard let self else { return }
+                try self.viewModel.deleteFileForFileView(
+                    fileURL: fileURL,
+                    currentOpenFileURL: self.zipFileURL
+                )
+            },
+            onCreateNew: { [weak self] name in
+                guard let self else { return }
+                do {
+                    let url = try await self.viewModel.createNewEmptyProjectFile(
+                        proposedName: name,
+                        device: self.sharedDevice,
+                        commandQueue: self.canvasView.sharedCommandQueue,
+                        saveCanvasAction: { [weak self] w in
+                            try await self?.saveFiles(to: w)
+                        }
+                    )
+                    self.presentedViewController?.dismiss(animated: true)
+                    self.loadCanvas(zipFileURL: url)
+                } catch {
+                    self.showAlert(error)
                 }
-
-                let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-                let baseName = trimmed.isEmpty ? oldURL.deletingPathExtension().lastPathComponent : trimmed
-
-                var candidateName = baseName
-                var candidateURL = makeURL(candidateName)
-                var suffixIndex = 2
-
-                while FileManager.default.fileExists(atPath: candidateURL.path) && candidateURL != oldURL {
-                    candidateName = "\(baseName)_\(suffixIndex)"
-                    candidateURL = makeURL(candidateName)
-                    suffixIndex += 1
-                }
-
-                let newURL = candidateURL
-
-                // Rename on disk
-                try FileManager.default.moveItem(at: oldURL, to: newURL)
-
-                // Update current project name if renaming the currently-open file
-                if oldURL == self.zipFileURL {
-                    self.viewModel.project.update(projectName: candidateName, updatedAt: Date())
-                }
-
-                // Update file list model
-                self.viewModel.renameFileItem(oldFileURL: oldURL, newFileURL: newURL, newTitle: candidateName)
-
-                return newURL
             },
             onTapItem: { [weak self] zipFileURL in
                 self?.presentedViewController?.dismiss(animated: true)
