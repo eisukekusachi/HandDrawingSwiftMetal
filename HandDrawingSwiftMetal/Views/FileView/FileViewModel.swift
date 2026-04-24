@@ -15,34 +15,37 @@ final class FileViewModel: ObservableObject {
     @Published var list: [LocalFileItem]
     @Published var selectedIndex: Int?
 
-    @Published var isShowingRenameAlert = false
-    @Published var isShowingDeleteConfirm = false
-    @Published var isShowingNewFileAlert = false
+    @Published var isShowingRenameDialog = false
+    @Published var isShowingDeleteConfirmDialog = false
+    @Published var isShowingNewFileDialog = false
     @Published var isShowingErrorAlert = false
     @Published var errorAlertMessage = ""
-    @Published var renameDraft = ""
-    @Published var newFileNameDraft = "Untitled"
+    @Published var draftName = ""
+    @Published var newFileName = "Untitled"
 
-    private var onTapItem: ((URL) -> Void)?
-    private var onRenameSelected: ((URL, String) async throws -> URL)?
-    private var onDeleteSelected: ((URL) async throws -> Void)?
-    private var onCreateNew: ((String) async throws -> Void)?
+    private var renameAction: ((URL, String) async throws -> URL)?
+    private var deleteAction: ((URL) async throws -> Void)?
+    private var createAction: ((String) async throws -> Void)?
+    private var selectAction: ((URL) -> Void)?
+
     private var currentOpenFileURL: URL?
     private var didConfigure = false
 
-    var canCreateNew: Bool { onCreateNew != nil }
+    var canCreateNew: Bool { createAction != nil }
 
     var renameDisabled: Bool {
-        onRenameSelected == nil || selectedIndex == nil
+        renameAction == nil || selectedIndex == nil
     }
 
     var deleteDisabled: Bool {
         guard
-            onDeleteSelected != nil,
+            deleteAction != nil,
             let i = selectedIndex,
             i < list.count
         else { return true }
+
         if let currentOpenFileURL, list[i].fileURL == currentOpenFileURL { return true }
+
         return false
     }
 
@@ -53,110 +56,102 @@ final class FileViewModel: ObservableObject {
 
     func configure(
         list: [LocalFileItem],
-        selectedFileURL: URL? = nil,
         currentOpenFileURL: URL? = nil,
-        onRenameSelected: ((URL, String) async throws -> URL)? = nil,
-        onDeleteSelected: ((URL) async throws -> Void)? = nil,
-        onCreateNew: ((String) async throws -> Void)? = nil,
-        onTapItem: @escaping (URL) -> Void
+        selectedFileURL: URL? = nil,
+        renameAction: ((URL, String) async throws -> URL)? = nil,
+        deleteAction: ((URL) async throws -> Void)? = nil,
+        createAction: ((String) async throws -> Void)? = nil,
+        selectAction: @escaping (URL) -> Void
     ) {
         self.list = list
-        self.onTapItem = onTapItem
-        self.onRenameSelected = onRenameSelected
-        self.onDeleteSelected = onDeleteSelected
-        self.onCreateNew = onCreateNew
+        self.selectAction = selectAction
+        self.renameAction = renameAction
+        self.deleteAction = deleteAction
+        self.createAction = createAction
         self.currentOpenFileURL = currentOpenFileURL
         self.selectedIndex = selectedFileURL.flatMap { url in
             list.firstIndex(where: { $0.fileURL == url })
         }
     }
+}
 
-    func tapGridItem(at index: Int) {
+extension FileViewModel {
+    func onTapItem(at index: Int) {
         guard index < list.count else { return }
+
         if selectedIndex == index {
-            onTapItem?(list[index].fileURL)
+            selectAction?(list[index].fileURL)
         } else {
             selectedIndex = index
         }
     }
 
-    func beginRename() {
-        guard let selectedIndex, selectedIndex < list.count else { return }
-        renameDraft = list[selectedIndex].title
-        isShowingRenameAlert = true
+    func onTapNewButton() {
+        newFileName = Calendar.currentDate
+        isShowingNewFileDialog = true
     }
 
-    func applyRename() {
-        let newName = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !newName.isEmpty else { return }
+    func onTapRenameButton() {
         guard
+            let selectedIndex,
+            selectedIndex < list.count
+        else { return }
+
+        draftName = list[selectedIndex].title
+        isShowingRenameDialog = true
+    }
+}
+
+extension FileViewModel {
+    func applyNewFile() async throws {
+        let newName = newFileName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard
+            let createAction,
+            !newName.isEmpty
+        else { return }
+
+        try await createAction(newName)
+    }
+
+    func applyRename() async throws {
+        let newName = draftName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard
+            let renameAction,
+            !newName.isEmpty,
             let index = selectedIndex,
-            index < list.count,
-            let onRenameSelected
+            index < list.count
         else { return }
 
         let oldURL = list[index].fileURL
-        let oldTitle = list[index].title
 
-        var next = list
-        next[index].update(title: newName, updatedAt: Date())
-        list = next
+        let newURL = try await renameAction(oldURL, newName)
 
-        Task { @MainActor in
-            do {
-                let newURL = try await onRenameSelected(oldURL, newName)
-                var updated = self.list
-                updated[index].update(
-                    title: newURL.deletingPathExtension().lastPathComponent,
-                    fileURL: newURL,
-                    updatedAt: Date()
-                )
-                self.list = updated
-            } catch {
-                var reverted = self.list
-                reverted[index].update(title: oldTitle, fileURL: oldURL, updatedAt: Date())
-                self.list = reverted
-            }
-        }
+        let newList = self.list
+        newList[index].update(
+            title: newURL.baseName,
+            fileURL: newURL,
+            updatedAt: Date()
+        )
+        list = newList
     }
 
-    func beginNewFile() {
-        newFileNameDraft = "Untitled"
-        isShowingNewFileAlert = true
-    }
-
-    func applyNewFile() {
-        let name = newFileNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty, let onCreateNew else { return }
-        Task { @MainActor in
-            do {
-                try await onCreateNew(name)
-            } catch {
-                self.errorAlertMessage = error.localizedDescription
-                self.isShowingErrorAlert = true
-            }
-        }
-    }
-
-    func applyDelete() {
+    func applyDelete() async throws {
         guard
-            let onDeleteSelected,
+            let deleteAction,
             let index = selectedIndex,
             index < list.count
         else { return }
 
         let fileURL = list[index].fileURL
-        Task { @MainActor in
-            do {
-                try await onDeleteSelected(fileURL)
-                var next = self.list
-                next.remove(at: index)
-                self.list = next
-                self.selectedIndex = nil
-            } catch {
-                self.errorAlertMessage = error.localizedDescription
-                self.isShowingErrorAlert = true
-            }
-        }
+
+        try await deleteAction(fileURL)
+
+        var newList = list
+        newList.remove(at: index)
+        list = newList
+
+        selectedIndex = nil
     }
 }

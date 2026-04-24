@@ -30,10 +30,6 @@ extension URL {
         return url
     }
 
-    var fileName: String {
-        self.deletingPathExtension().lastPathComponent
-    }
-
     func allFileURLs(suffix: String = "") -> [URL] {
         do {
             let urls = try FileManager.default.contentsOfDirectory(

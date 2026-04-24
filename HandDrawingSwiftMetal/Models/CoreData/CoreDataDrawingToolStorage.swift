@@ -57,6 +57,12 @@ extension CoreDataDrawingToolStorage {
         drawingTool.eraserDiameter = eraserDiameter
     }
 
+    func initializeData() {
+        drawingTool.type = .brush
+        drawingTool.brushDiameter = 8
+        drawingTool.eraserDiameter = 8
+    }
+
     func update(_ entity: DrawingToolEntity) {
 
         drawingTool.setId(entity.id ?? UUID())

@@ -13,13 +13,18 @@ struct FileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    private let initialList: [LocalFileItem]
-    private let selectedFileURL: URL?
+    private let list: [LocalFileItem]
+
+    /// Active file URL
     private let currentOpenFileURL: URL?
-    private let onRenameSelected: ((URL, String) async throws -> URL)?
-    private let onDeleteSelected: ((URL) async throws -> Void)?
-    private let onCreateNew: ((String) async throws -> Void)?
-    private let onTapItem: (URL) -> Void
+
+    /// Highlighted file URL
+    private let selectedFileURL: URL?
+
+    private let createAction: ((String) async throws -> Void)?
+    private let renameAction: ((URL, String) async throws -> URL)?
+    private let deleteAction: ((URL) async throws -> Void)?
+    private let selectAction: (URL) -> Void
 
     private var columns: [GridItem] {
         let spacing: CGFloat = 12
@@ -35,20 +40,20 @@ struct FileView: View {
 
     init(
         list: [LocalFileItem],
-        selectedFileURL: URL? = nil,
         currentOpenFileURL: URL? = nil,
-        onRenameSelected: ((URL, String) async throws -> URL)? = nil,
-        onDeleteSelected: ((URL) async throws -> Void)? = nil,
-        onCreateNew: ((String) async throws -> Void)? = nil,
-        onTapItem: @escaping (URL) -> Void
+        selectedFileURL: URL? = nil,
+        createAction: ((String) async throws -> Void)? = nil,
+        renameAction: ((URL, String) async throws -> URL)? = nil,
+        deleteAction: ((URL) async throws -> Void)? = nil,
+        selectAction: @escaping (URL) -> Void
     ) {
-        self.initialList = list
+        self.list = list
         self.selectedFileURL = selectedFileURL
         self.currentOpenFileURL = currentOpenFileURL
-        self.onRenameSelected = onRenameSelected
-        self.onDeleteSelected = onDeleteSelected
-        self.onCreateNew = onCreateNew
-        self.onTapItem = onTapItem
+        self.createAction = createAction
+        self.renameAction = renameAction
+        self.deleteAction = deleteAction
+        self.selectAction = selectAction
     }
 
     var body: some View {
@@ -61,7 +66,7 @@ struct FileView: View {
                             isSelected: viewModel.selectedIndex == index
                         )
                         .onTapGesture {
-                            viewModel.tapGridItem(at: index)
+                            viewModel.onTapItem(at: index)
                         }
                     }
                 }
@@ -79,32 +84,32 @@ struct FileView: View {
                 }
             }
             .alertWithTextField(
-                title: "Rename",
-                textFieldPrompt: "Name",
-                message: "Enter a new name",
-                confirmButtonTitle: "OK",
-                text: $viewModel.renameDraft,
-                isPresented: $viewModel.isShowingRenameAlert,
-                onConfirm: { viewModel.applyRename() }
+                title: String(localized: "Rename"),
+                textFieldPrompt: String(localized: "Name"),
+                message: String(localized: "Enter a new name"),
+                confirmButtonTitle: String(localized: "OK"),
+                text: $viewModel.draftName,
+                isPresented: $viewModel.isShowingRenameDialog,
+                onConfirm: { renameItem() }
             )
             .alertWithTextField(
-                title: "New file",
-                textFieldPrompt: "File name",
-                message: "Enter a name for the new file",
-                confirmButtonTitle: "Create",
-                text: $viewModel.newFileNameDraft,
-                isPresented: $viewModel.isShowingNewFileAlert,
-                onConfirm: { viewModel.applyNewFile() }
+                title: String(localized: "New file"),
+                textFieldPrompt: String(localized: "File name"),
+                message: String(localized: "Enter a name for the new file"),
+                confirmButtonTitle: String(localized: "Create"),
+                text: $viewModel.newFileName,
+                isPresented: $viewModel.isShowingNewFileDialog,
+                onConfirm: { newItem() }
             )
             .alertDestructiveConfirmation(
-                title: "Delete this file?",
-                message: "This file will be removed from the device",
+                title: String(localized: "Delete this file?"),
+                message: String(localized: "This file will be removed from the device"),
                 destructiveButtonTitle: "Delete",
-                isPresented: $viewModel.isShowingDeleteConfirm,
-                onDestructive: { viewModel.applyDelete() }
+                isPresented: $viewModel.isShowingDeleteConfirmDialog,
+                onDestructive: { deleteItem() }
             )
             .alert(
-                title: "Error",
+                title: String(localized: "Error"),
                 message: $viewModel.errorAlertMessage,
                 isPresented: $viewModel.isShowingErrorAlert
             )
@@ -112,14 +117,48 @@ struct FileView: View {
         .navigationViewStyle(.stack)
         .onFirstAppear {
             viewModel.configure(
-                list: initialList,
-                selectedFileURL: selectedFileURL,
+                list: list,
                 currentOpenFileURL: currentOpenFileURL,
-                onRenameSelected: onRenameSelected,
-                onDeleteSelected: onDeleteSelected,
-                onCreateNew: onCreateNew,
-                onTapItem: onTapItem
+                selectedFileURL: selectedFileURL,
+                renameAction: renameAction,
+                deleteAction: deleteAction,
+                createAction: createAction,
+                selectAction: selectAction
             )
+        }
+    }
+}
+
+private extension FileView {
+
+    func newItem() {
+        Task {
+            do {
+                try await viewModel.applyNewFile()
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
+        }
+    }
+    func renameItem() {
+        Task {
+            do {
+                try await viewModel.applyRename()
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
+        }
+    }
+    func deleteItem() {
+        Task {
+            do {
+                try await viewModel.applyDelete()
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
         }
     }
 }
@@ -130,19 +169,19 @@ private extension FileView {
         HStack(spacing: 20) {
             if viewModel.canCreateNew {
                 Button(
-                    action: { viewModel.beginNewFile() },
+                    action: { viewModel.onTapNewButton() },
                     label: { Image(systemName: "plus.circle") }
                 )
             }
 
             Button(
-                action: { viewModel.beginRename() },
+                action: { viewModel.onTapRenameButton() },
                 label: { Image(systemName: "pencil") }
             )
             .disabled(viewModel.renameDisabled)
 
             Button(
-                action: { viewModel.isShowingDeleteConfirm = true },
+                action: { viewModel.isShowingDeleteConfirmDialog = true },
                 label: { Image(systemName: "trash") }
             )
             .tint(.red)
@@ -177,14 +216,16 @@ private extension FileView {
                         .font(.system(size: 44, weight: .regular))
                         .foregroundStyle(placeholderTint.opacity(0.85))
 
-                    Text("Not saved yet")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(placeholderTint)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(3)
-                        .minimumScaleFactor(0.8)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                    Text(
+                        String(localized: "Not saved yet")
+                    )
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(placeholderTint)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
 
                     Spacer()
                 }
@@ -202,7 +243,10 @@ private extension FileView {
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 3)
+                .stroke(
+                    isSelected ? Color.accentColor : Color.clear,
+                    lineWidth: 3
+                )
         )
         .overlay(alignment: .topTrailing) {
             if isSelected {
@@ -214,7 +258,9 @@ private extension FileView {
         }
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color.accentColor.opacity(0.10) : Color.clear)
+                .fill(
+                    isSelected ? Color.accentColor.opacity(0.10) : Color.clear
+                )
         )
     }
 }
@@ -237,11 +283,11 @@ private extension FileView {
                 fileURL: URL(fileURLWithPath: "")
             )
         ],
-        selectedFileURL: nil,
         currentOpenFileURL: nil,
-        onRenameSelected: { url, _ in url },
-        onDeleteSelected: { _ in },
-        onCreateNew: { _ in },
-        onTapItem: { _ in }
+        selectedFileURL: nil,
+        createAction: { _ in },
+        renameAction: { url, _ in url },
+        deleteAction: { _ in },
+        selectAction: { _ in }
     )
 }

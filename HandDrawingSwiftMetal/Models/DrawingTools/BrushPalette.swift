@@ -7,6 +7,16 @@
 
 import UIKit
 
+fileprivate let initializeColors: [UIColor] = [
+    .black.withAlphaComponent(0.8),
+    .gray.withAlphaComponent(0.8),
+    .red.withAlphaComponent(0.8),
+    .blue.withAlphaComponent(0.8),
+    .green.withAlphaComponent(0.8),
+    .yellow.withAlphaComponent(0.8),
+    .purple.withAlphaComponent(0.8)
+]
+
 final class BrushPalette: ObservableObject {
 
     private(set) var id: UUID
@@ -16,7 +26,7 @@ final class BrushPalette: ObservableObject {
 
     public init(
         id: UUID = UUID(),
-        colors: [UIColor] = [.black],
+        colors: [UIColor] = initializeColors,
         index: Int = 0
     ) {
         self.id = id
@@ -28,6 +38,11 @@ final class BrushPalette: ObservableObject {
 }
 
 extension BrushPalette {
+
+    func initalizeData() {
+        self.colors = initializeColors
+        self.index = 0
+    }
 
     func setId(_ id: UUID) {
         self.id = id

@@ -7,6 +7,17 @@
 
 import UIKit
 
+fileprivate let initializeAlphas: [Int] = [
+    255,
+    225,
+    200,
+    175,
+    150,
+    125,
+    100,
+    50
+]
+
 final class EraserPalette: ObservableObject {
 
     private(set) var id: UUID
@@ -16,7 +27,7 @@ final class EraserPalette: ObservableObject {
 
     public init(
         id: UUID = UUID(),
-        alphas: [Int] = [255],
+        alphas: [Int] = initializeAlphas,
         index: Int = 0
     ) {
         self.id = id
@@ -28,6 +39,11 @@ final class EraserPalette: ObservableObject {
 }
 
 extension EraserPalette {
+
+    func initalizeData() {
+        self.alphas = initializeAlphas
+        self.index = 0
+    }
 
     func setId(_ id: UUID) {
         self.id = id

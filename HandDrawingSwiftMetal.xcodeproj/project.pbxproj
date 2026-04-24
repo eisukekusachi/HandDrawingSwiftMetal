@@ -36,6 +36,8 @@
 		D442BCFD2F93220E00C55A4C /* TextureLayerCanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D442BCFC2F93220E00C55A4C /* TextureLayerCanvasView */; };
 		D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */; };
 		D442BD072F937F4D00C55A4C /* UndoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */; };
+		D44624652F9C546B00BE4E8A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D44624642F9C546B00BE4E8A /* Localizable.xcstrings */; };
+		D44624672F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44624662F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
@@ -145,6 +147,8 @@
 		D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataDrawingToolStorage.swift; sourceTree = "<group>"; };
 		D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSErrorExtensions.swift; sourceTree = "<group>"; };
 		D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoCoordinator.swift; sourceTree = "<group>"; };
+		D44624642F9C546B00BE4E8A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		D44624662F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinatorSaveContent.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
@@ -311,6 +315,7 @@
 			isa = PBXGroup;
 			children = (
 				D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */,
+				D44624662F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift */,
 				D49C69352F23CD7700B66608 /* FileManager.swift */,
 				D49C69392F246BA800B66608 /* LocalFileItem.swift */,
 				D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */,
@@ -364,6 +369,7 @@
 				D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */,
 				D49C691D2F23A3F400B66608 /* ProjectStorage.xcdatamodeld */,
 				D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */,
+				D44624642F9C546B00BE4E8A /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -648,6 +654,7 @@
 			files = (
 				D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */,
 				D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */,
+				D44624652F9C546B00BE4E8A /* Localizable.xcstrings in Resources */,
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
 				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,
@@ -714,6 +721,7 @@
 				D48CA07C2F3C18D3008C6E9E /* UndoDrawing.swift in Sources */,
 				D48CA07D2F3C18D3008C6E9E /* UndoAlphaObject.swift in Sources */,
 				D48CA07E2F3C18D3008C6E9E /* UndoAdditionObject.swift in Sources */,
+				D44624672F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */,
 				D48CA09C2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift in Sources */,
 				D4F525712EAC616600439FFF /* FileOutput.swift in Sources */,
@@ -879,6 +887,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -933,6 +942,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};

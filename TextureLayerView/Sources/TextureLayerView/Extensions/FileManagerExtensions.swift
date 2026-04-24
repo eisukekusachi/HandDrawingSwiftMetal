@@ -21,11 +21,6 @@ extension FileManager {
         try FileManager.createDirectory(url)
     }
 
-    /// The URL of a canvas file stored in the Documents directory
-    static func documentsFileURL(projectName: String, suffix: String) -> URL {
-        URL.documents.appendingPathComponent(projectName + "." + suffix)
-    }
-
     static func contentsOfDirectory(_ url: URL) -> [URL] {
         (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
     }

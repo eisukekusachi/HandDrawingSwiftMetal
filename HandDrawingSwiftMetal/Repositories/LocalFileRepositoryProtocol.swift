@@ -11,7 +11,8 @@ protocol LocalFileRepositoryProtocol: Sendable {
 
     var workingDirectoryURL: URL { get }
 
-    func createWorkingDirectory() throws
+    @discardableResult
+    func createWorkingDirectory() throws -> URL
 
     func removeWorkingDirectory() throws
 

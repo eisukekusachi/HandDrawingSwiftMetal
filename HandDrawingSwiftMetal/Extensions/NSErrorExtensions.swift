@@ -28,3 +28,11 @@ extension NSError {
         )
     }
 }
+
+extension Error {
+
+    var nsErrorDescription: String {
+        let ns = self as NSError
+        return ns.localizedFailureReason ?? ns.localizedDescription
+    }
+}

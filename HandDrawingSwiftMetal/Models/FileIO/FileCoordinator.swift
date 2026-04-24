@@ -20,140 +20,261 @@ final class FileCoordinator: ObservableObject {
     /// Suffix for project files in Documents (e.g. `zip`), from `ProjectConfiguration`.
     private(set) var fileSuffix: String = ""
 
-    private let dependencies: HandDrawingViewDependencies
-    private var localFile: LocalFileRepositoryProtocol { dependencies.localFileRepository }
-    private var textureDocuments: TextureLayersDocumentsRepositoryProtocol { dependencies.textureLayersDocumentsRepository }
     private let thumbnailName: String = "thumbnail.png"
+
+    private let dependencies: HandDrawingViewDependencies
 
     init(dependencies: HandDrawingViewDependencies) {
         self.dependencies = dependencies
     }
 
-    func applyProjectFileConfiguration(_ configuration: ProjectConfiguration) {
-        fileSuffix = configuration.fileSuffix
-    }
+    /// Replaces `fileList` from zips in Documents (metadata + thumbnails). Uses `fileSuffix` from configuration.
+    func setupFileList(
+        configuration: ProjectConfiguration
+    ) async {
+        self.fileSuffix = configuration.fileSuffix
 
-    // MARK: - Open project: Documents path & list row
+        var fileNames: [String] = []
 
-    /// `projectName` with optional `projectName.ext` when `fileSuffix` is non-empty (matches `HandDrawingViewModel`’s old behavior).
-    func preferredFileNameInDocuments(forProjectName projectName: String) -> String {
-        if fileSuffix.isEmpty {
-            return projectName
-        }
-        return projectName + "." + fileSuffix
-    }
-
-    /// URL of the zip (or project file) for the current project name in Documents.
-    func documentURLForProjectName(_ projectName: String) -> URL {
-        if fileSuffix.isEmpty {
-            return URL.documents.appendingPathComponent(projectName)
-        }
-        return FileManager.documentsFileURL(projectName: projectName, suffix: fileSuffix)
-    }
-
-    func localFileItem(for project: ProjectData, thumbnail: UIImage?) -> LocalFileItem {
-        let name = preferredFileNameInDocuments(forProjectName: project.projectName)
-        return .init(
-            title: project.projectName,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt,
-            thumbnail: thumbnail,
-            fileURL: URL.documents.appendingPathComponent(name)
-        )
-    }
-
-    /// A `Documents` URL for a new project file that does not exist yet. Appends `_2`, `_3`, … on name collision.
-    /// - Parameter proposedBaseName: File name without extension (e.g. `MySketch`).
-    func makeUniqueNewProjectDocumentURL(proposedBaseName: String) throws -> URL {
-        let trimmed = proposedBaseName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            throw NSError(
-                domain: "HandDrawingSwiftMetal",
-                code: -2,
-                userInfo: [NSLocalizedDescriptionKey: "Please enter a file name."]
-            )
-        }
-        let base = Self.sanitizedProjectBaseName(trimmed)
-        guard !base.isEmpty else {
-            throw NSError(
-                domain: "HandDrawingSwiftMetal",
-                code: -3,
-                userInfo: [NSLocalizedDescriptionKey: "Invalid file name."]
-            )
+        URL.documents.allFileURLs(suffix: configuration.fileSuffix).map {
+            $0.lastPathComponent
+        }.forEach {
+            fileNames.append($0)
         }
 
-        func makeURL(_ name: String) -> URL {
-            if fileSuffix.isEmpty {
-                return URL.documents.appendingPathComponent(name)
+        var items: [LocalFileItem] = []
+
+        for fileName in fileNames {
+            do {
+                defer { try? dependencies.localFileRepository.removeWorkingDirectory() }
+                let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+
+                let zipFileURL = URL.documents.appendingPathComponent(fileName)
+
+                try await dependencies.localFileRepository.unzipToWorkingDirectory(
+                    from: zipFileURL
+                )
+
+                let projectMetaData: ProjectArchiveModel = try .init(
+                    in: workingDirectoryURL
+                )
+
+                let thumbnailURL = workingDirectoryURL.appendingPathComponent(thumbnailName)
+                let thumbnailData = try? Data(contentsOf: thumbnailURL)
+
+                items.append(
+                    .init(
+                        title: zipFileURL.baseName,
+                        createdAt: projectMetaData.createdAt,
+                        updatedAt: projectMetaData.updatedAt,
+                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                        fileURL: zipFileURL
+                    )
+                )
+
+            } catch {
+                // Old/externally-created zips may not contain `thumbnail.png`.
+                // Missing thumbnails should not be treated as an error here.
+                Logger.error(error)
             }
-            return FileManager.documentsFileURL(projectName: name, suffix: fileSuffix)
         }
 
-        var candidateName = base
-        var candidateURL = makeURL(candidateName)
-        var suffixIndex = 2
-        while FileManager.default.fileExists(atPath: candidateURL.path) {
-            candidateName = "\(base)_\(suffixIndex)"
-            candidateURL = makeURL(candidateName)
-            suffixIndex += 1
-        }
-        return candidateURL
+        items.sort { $0.updatedAt > $1.updatedAt }
+        fileList = items
     }
 
-    private static func sanitizedProjectBaseName(_ raw: String) -> String {
-        var s = raw
-        for ch in ["/", "\\", ":", "?", "%", "*", "|", "\"", "<", ">"] {
-            s = s.replacingOccurrences(of: ch, with: "_")
-        }
-        return s
-    }
-
-    // MARK: - Texture layers (document repository)
-
-    func restorePersistedTextureLayersInDocuments(
-        _ data: TextureLayersModel,
+    func initializeStorageByRestoring(
+        textureLayers: TextureLayersModel,
         device: MTLDevice
     ) throws {
-        try textureDocuments.restoreStorageFromWorkingDirectory(
-            textureLayers: data,
+        try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
+            textureLayers: textureLayers,
             device: device
         )
     }
 
-    func createAndInitializeTextureLayers(
+    func initializeStorage(
+        textureLayers: TextureLayersModel,
         device: MTLDevice,
-        textureSize: CGSize,
         commandQueue: MTLCommandQueue
-    ) async -> TextureLayersModel {
-        let data = TextureLayersModel(textureSize: textureSize)
-        do {
-            try await textureDocuments.initializeStorage(
-                textureLayers: data,
-                device: device,
-                commandQueue: commandQueue
-            )
-        } catch {
-            fatalError("Failed to initialize storage")
-        }
-        return data
-    }
-
-    /// Reset canvas: new in-memory layer stack and backing Metal storage.
-    func createNewTextureLayers(
-        device: MTLDevice,
-        textureSize: CGSize,
-        commandQueue: MTLCommandQueue
-    ) async throws -> TextureLayersModel {
-        let data = TextureLayersModel(textureSize: textureSize)
-        try await textureDocuments.initializeStorage(
-            textureLayers: data,
+    ) async throws {
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+            textureLayers: textureLayers,
             device: device,
             commandQueue: commandQueue
         )
-        return data
+    }
+}
+
+extension FileCoordinator {
+
+    func saveProject(
+        content: FileCoordinatorSaveContent,
+        to zipFileURL: URL
+    ) async throws {
+        defer {
+            try? dependencies.localFileRepository.removeWorkingDirectory()
+        }
+        let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+
+        try await saveCanvasToWorkingDirectory(
+            textureLayersState: content.textureLayersState,
+            thumbnail: content.thumbnail,
+            to: workingDirectoryURL
+        )
+
+        try DrawingToolArchiveModel(content.drawingTool).write(in: workingDirectoryURL)
+        try BrushPaletteArchiveModel(content.brushPalette).write(in: workingDirectoryURL)
+        try EraserPaletteArchiveModel(content.eraserPalette).write(in: workingDirectoryURL)
+        try ProjectArchiveModel(content.project).write(in: workingDirectoryURL)
+
+        try dependencies.localFileRepository.zipWorkingDirectory(to: zipFileURL)
     }
 
-    // MARK: - Unzipped / temp working directory (before zip or after unpack)
+    func loadProject(
+        device: MTLDevice?,
+        textureLayersState: TextureLayersState,
+        from zipFileURL: URL,
+        action: (URL) async throws -> Void
+    ) async throws {
+        guard let `device` else { return }
+        defer {
+            try? dependencies.localFileRepository.removeWorkingDirectory()
+        }
+        let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+
+        try await dependencies.localFileRepository.unzipToWorkingDirectory(from: zipFileURL)
+
+        try await loadCanvasFromWorkingDirectory(
+            device: device,
+            from: workingDirectoryURL,
+            into: textureLayersState
+        )
+
+        try await action(
+            workingDirectoryURL
+        )
+    }
+}
+
+extension FileCoordinator {
+    func upsertFileList(_ file: LocalFileItem) {
+        var items = fileList
+        if let index = items.firstIndex(where: { $0.title == file.title }) {
+            items[index] = file
+        } else {
+            items.append(file)
+        }
+        items.sort { $0.updatedAt > $1.updatedAt }
+        fileList = items
+    }
+
+    /// Renames on disk; if the renamed file is the one currently open, updates `project`; syncs `fileList`.
+    @discardableResult
+    func renameFile(
+        oldFileURL: URL,
+        newName: String,
+        currentOpenFileURL: URL,
+        project: ProjectData
+    ) throws -> URL {
+        guard
+            let index = fileList.firstIndex(where: { $0.fileURL == oldFileURL })
+        else { return oldFileURL }
+
+        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let baseName = trimmedName.isEmpty ? oldFileURL.baseName : trimmedName
+
+        let newFileURL = URL.uniqueURL(
+            baseName: baseName,
+            fileSuffix: fileSuffix,
+            excludeURL: oldFileURL
+        )
+
+        if newFileURL == oldFileURL {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "The file name is the same as the current name")
+            )
+            throw error
+        }
+
+        try FileManager.default.moveItem(at: oldFileURL, to: newFileURL)
+
+        let items = fileList
+        items[index].update(
+            title: newFileURL.baseName,
+            fileURL: newFileURL,
+            updatedAt: Date()
+        )
+        fileList = items
+
+        return newFileURL
+    }
+
+    /// Removes the zip in Documents and drops it from `fileList` (cannot delete the open file).
+    func deleteFile(
+        fileURL: URL,
+        currentOpenFileURL: URL
+    ) throws {
+        if fileURL == currentOpenFileURL {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "The currently open file cannot be deleted")
+            )
+            throw error
+        }
+
+        try FileManager.default.removeItem(at: fileURL)
+
+        var items = fileList
+        items.removeAll { $0.fileURL == fileURL }
+        fileList = items
+    }
+
+    func currentFileItem(
+        for project: ProjectData,
+        thumbnail: UIImage?
+    ) -> LocalFileItem {
+        .init(
+            title: project.currentProjectName,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+            thumbnail: thumbnail,
+            fileURL: FileManager.zipFileURL(
+                projectName: project.currentProjectName,
+                suffix: fileSuffix
+            )
+        )
+    }
+}
+
+private extension FileCoordinator {
+    func fileItem(
+        workingDirectoryURL: URL,
+        fileName: String
+    ) async throws -> LocalFileItem {
+        let zipFileURL = URL.documents.appendingPathComponent(fileName)
+
+        try await dependencies.localFileRepository.unzipToWorkingDirectory(
+            from: zipFileURL
+        )
+
+        let projectMetaData: ProjectArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+
+        let thumbnailData = try Data(
+            contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
+        )
+
+        return .init(
+            title: zipFileURL.baseName,
+            createdAt: projectMetaData.createdAt,
+            updatedAt: projectMetaData.updatedAt,
+            thumbnail: UIImage(data: thumbnailData),
+            fileURL: zipFileURL
+        )
+    }
 
     func saveCanvasToWorkingDirectory(
         textureLayersState: TextureLayersState,
@@ -175,7 +296,7 @@ final class FileCoordinator: ObservableObject {
 
         do {
             for layer in textureLayersState.layers {
-                try await textureDocuments.copyTexture(
+                try await dependencies.textureLayersDocumentsRepository.copyTexture(
                     id: layer.id,
                     to: workingDirectoryURL
                 )
@@ -210,248 +331,21 @@ final class FileCoordinator: ObservableObject {
     func loadCanvasFromWorkingDirectory(
         device: MTLDevice,
         from workingDirectoryURL: URL,
-        into state: TextureLayersState
+        into textureLayersState: TextureLayersState
     ) async throws {
         let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
             in: workingDirectoryURL
         )
-        let data: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+        let newTextureLayers: TextureLayersModel = try .init(model: textureLayersArchiveModel)
 
-        guard try await textureDocuments.restoreStorage(
+        guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
             url: workingDirectoryURL,
-            textureLayers: data,
+            textureLayers: newTextureLayers,
             device: device
         ) else {
             return
         }
 
-        state.update(data)
-    }
-
-    // MARK: - Project zip session metadata (in working directory before `zipWorkingDirectory`)
-
-    func writeSessionMetadataToWorkingDirectory(
-        _ workingDirectoryURL: URL,
-        drawingTool: DrawingTool,
-        brushPalette: BrushPalette,
-        eraserPalette: EraserPalette,
-        project: ProjectData
-    ) throws {
-        try DrawingToolArchiveModel(drawingTool).write(in: workingDirectoryURL)
-        try BrushPaletteArchiveModel(brushPalette).write(in: workingDirectoryURL)
-        try EraserPaletteArchiveModel(eraserPalette).write(in: workingDirectoryURL)
-        try ProjectArchiveModel(project).write(in: workingDirectoryURL)
-    }
-
-    // MARK: - Zip save / load (working directory)
-
-    /// Creates a working directory, runs `work` to write project data, then zips it to `zipFileURL`. Removes the working directory when done.
-    func saveZippedProject(
-        to zipFileURL: URL,
-        work: (URL) async throws -> Void
-    ) async throws {
-        defer { try? localFile.removeWorkingDirectory() }
-        try localFile.createWorkingDirectory()
-        let working = localFile.workingDirectoryURL
-        try await work(working)
-        try localFile.zipWorkingDirectory(to: zipFileURL)
-    }
-
-    /// Unzips `zipFileURL` into a working directory, then runs `work`. Removes the working directory when done.
-    func loadUnzippedProject(
-        from zipFileURL: URL,
-        work: (URL) async throws -> Void
-    ) async throws {
-        defer { try? localFile.removeWorkingDirectory() }
-        try localFile.createWorkingDirectory()
-        try await localFile.unzipToWorkingDirectory(from: zipFileURL)
-        let working = localFile.workingDirectoryURL
-        try await work(working)
-    }
-
-    // MARK: - File list (Documents / project zips)
-
-    /// Replaces `fileList` from zips in Documents (metadata + thumbnails). Uses `fileSuffix` from configuration.
-    func refreshFileListFromDocuments() async {
-        let configuredSuffix = fileSuffix
-        var fileNames: [String] = []
-
-        URL.documents.allFileURLs(suffix: configuredSuffix).map {
-            $0.lastPathComponent
-        }.forEach {
-            fileNames.append($0)
-        }
-
-        var items: [LocalFileItem] = []
-
-        for fileName in fileNames {
-            do {
-                defer { try? localFile.removeWorkingDirectory() }
-                try localFile.createWorkingDirectory()
-
-                let workingDirectoryURL = localFile.workingDirectoryURL
-                let zipFileURL = URL.documents.appendingPathComponent(fileName)
-
-                try await localFile.unzipToWorkingDirectory(
-                    from: zipFileURL
-                )
-
-                let projectMetaData: ProjectArchiveModel = try .init(
-                    in: workingDirectoryURL
-                )
-
-                let data = try Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
-                )
-
-                let title = zipFileURL.deletingPathExtension().lastPathComponent
-
-                items.append(
-                    .init(
-                        title: title,
-                        createdAt: projectMetaData.createdAt,
-                        updatedAt: projectMetaData.updatedAt,
-                        thumbnail: UIImage(data: data),
-                        fileURL: zipFileURL
-                    )
-                )
-            } catch {
-                Logger.error(error)
-            }
-        }
-
-        items.sort { $0.updatedAt > $1.updatedAt }
-        fileList = items
-    }
-
-    func upsertFileList(_ file: LocalFileItem) {
-        var items = fileList
-        if let index = items.firstIndex(where: { $0.title == file.title }) {
-            items[index] = file
-        } else {
-            items.append(file)
-        }
-        items.sort { $0.updatedAt > $1.updatedAt }
-        fileList = items
-    }
-
-    func renameFileListItem(
-        oldFileURL: URL,
-        newFileURL: URL,
-        newTitle: String
-    ) {
-        guard let index = fileList.firstIndex(where: { $0.fileURL == oldFileURL }) else { return }
-        let items = fileList
-        items[index].update(
-            title: newTitle,
-            fileURL: newFileURL,
-            updatedAt: Date()
-        )
-        fileList = items
-    }
-
-    func removeFileItem(fileURL: URL) {
-        var items = fileList
-        items.removeAll { $0.fileURL == fileURL }
-        fileList = items
-    }
-
-    // MARK: - FileView: rename / delete in Documents
-
-    /// Renames on disk; if the renamed file is the one currently open, updates `project`; syncs `fileList`.
-    @discardableResult
-    func renameFileForFileView(
-        oldFileURL: URL,
-        newName: String,
-        currentOpenFileURL: URL,
-        project: ProjectData
-    ) throws -> URL {
-        let candidateURL = try renameProjectZipInDocuments(oldFileURL: oldFileURL, newName: newName)
-        let candidateName = candidateURL.deletingPathExtension().lastPathComponent
-        if oldFileURL == currentOpenFileURL {
-            project.update(projectName: candidateName, updatedAt: Date())
-        }
-        renameFileListItem(
-            oldFileURL: oldFileURL,
-            newFileURL: candidateURL,
-            newTitle: candidateName
-        )
-        return candidateURL
-    }
-
-    /// Removes the zip in Documents and drops it from `fileList` (cannot delete the open file).
-    func deleteFileForFileView(
-        fileURL: URL,
-        currentOpenFileURL: URL
-    ) throws {
-        try deleteProjectZipInDocuments(
-            fileURL: fileURL,
-            currentOpenFileURL: currentOpenFileURL
-        )
-        removeFileItem(fileURL: fileURL)
-    }
-
-    /// Renames a project zip in Documents. If a file with the target name exists, appends `_2`, `_3`, …
-    @discardableResult
-    func renameProjectZipInDocuments(
-        oldFileURL: URL,
-        newName: String
-    ) throws -> URL {
-        try renameProjectZipInDocuments(oldFileURL: oldFileURL, newName: newName, fileSuffix: fileSuffix)
-    }
-
-    @discardableResult
-    func renameProjectZipInDocuments(
-        oldFileURL: URL,
-        newName: String,
-        fileSuffix: String
-    ) throws -> URL {
-        let ext: String
-        if oldFileURL.pathExtension.isEmpty {
-            ext = fileSuffix
-        } else {
-            ext = oldFileURL.pathExtension
-        }
-
-        func makeURL(_ name: String) -> URL {
-            FileManager.documentsFileURL(projectName: name, suffix: ext)
-        }
-
-        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let baseName: String
-        if trimmed.isEmpty {
-            baseName = oldFileURL.deletingPathExtension().lastPathComponent
-        } else {
-            baseName = trimmed
-        }
-
-        var candidateName = baseName
-        var candidateURL = makeURL(candidateName)
-        var suffixIndex = 2
-
-        while FileManager.default.fileExists(atPath: candidateURL.path) && candidateURL != oldFileURL {
-            candidateName = "\(baseName)_\(suffixIndex)"
-            candidateURL = makeURL(candidateName)
-            suffixIndex += 1
-        }
-
-        try FileManager.default.moveItem(at: oldFileURL, to: candidateURL)
-        return candidateURL
-    }
-
-    /// Removes a project zip unless it is the one currently open.
-    func deleteProjectZipInDocuments(
-        fileURL: URL,
-        currentOpenFileURL: URL
-    ) throws {
-        if fileURL == currentOpenFileURL {
-            let error = NSError(
-                domain: "HandDrawingSwiftMetal",
-                code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "The currently open file cannot be deleted."]
-            )
-            throw error
-        }
-        try FileManager.default.removeItem(at: fileURL)
+        textureLayersState.update(newTextureLayers)
     }
 }
