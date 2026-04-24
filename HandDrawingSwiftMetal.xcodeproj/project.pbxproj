@@ -41,6 +41,8 @@
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
 		D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */; };
 		D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AAD2AF63A2A00CA4438 /* FileView.swift */; };
+		D4513AB02AF63A5000CA4438 /* FileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AB12AF63A5000CA4438 /* FileViewModel.swift */; };
+		D4513AB22AF63A6000CA4438 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AB32AF63A6000CA4438 /* ViewExtensions.swift */; };
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
@@ -70,7 +72,6 @@
 		D49C692C2F23A76400B66608 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C692B2F23A76400B66608 /* Logger.swift */; };
 		D49C69362F23CD7700B66608 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69352F23CD7700B66608 /* FileManager.swift */; };
 		D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69392F246BA800B66608 /* LocalFileItem.swift */; };
-		D4FC0F022F94AA0100C55A4C /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */; };
 		D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */; };
 		D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */; };
 		D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D49C69462F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld */; };
@@ -96,6 +97,7 @@
 		D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256E2EAC614B00439FFF /* FileInput.swift */; };
 		D4F525712EAC616600439FFF /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525702EAC616600439FFF /* FileOutput.swift */; };
 		D4F525732EAC96BE00439FFF /* ToastMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525722EAC96BE00439FFF /* ToastMessage.swift */; };
+		D4FC0F022F94AA0100C55A4C /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +151,8 @@
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
 		D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingViewController.xib; sourceTree = "<group>"; };
 		D4513AAD2AF63A2A00CA4438 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
+		D4513AB12AF63A5000CA4438 /* FileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileViewModel.swift; sourceTree = "<group>"; };
+		D4513AB32AF63A6000CA4438 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
@@ -178,7 +182,6 @@
 		D49C692B2F23A76400B66608 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		D49C69352F23CD7700B66608 /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		D49C69392F246BA800B66608 /* LocalFileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileItem.swift; sourceTree = "<group>"; };
-		D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinator.swift; sourceTree = "<group>"; };
 		D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectArchiveModel.swift; sourceTree = "<group>"; };
 		D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileConvertible.swift; sourceTree = "<group>"; };
 		D49C69472F2EE29C00B66608 /* TextureLayerStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TextureLayerStorage.xcdatamodel; sourceTree = "<group>"; };
@@ -208,6 +211,7 @@
 		D4F5256E2EAC614B00439FFF /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
 		D4F525702EAC616600439FFF /* FileOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutput.swift; sourceTree = "<group>"; };
 		D4F525722EAC96BE00439FFF /* ToastMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastMessage.swift; sourceTree = "<group>"; };
+		D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -334,6 +338,7 @@
 			isa = PBXGroup;
 			children = (
 				D4513AAD2AF63A2A00CA4438 /* FileView.swift */,
+				D4513AB12AF63A5000CA4438 /* FileViewModel.swift */,
 			);
 			path = FileView;
 			sourceTree = "<group>";
@@ -349,6 +354,7 @@
 				D4168DAF2E594EE0007F7904 /* UIColorExtensions.swift */,
 				D4168F212E59F14A007F7904 /* UIImageExtensions.swift */,
 				D432447B2F8FBB7000B3EB04 /* URLExtensions.swift */,
+				D4513AB32AF63A6000CA4438 /* ViewExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -717,6 +723,8 @@
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
+				D4513AB02AF63A5000CA4438 /* FileViewModel.swift in Sources */,
+				D4513AB22AF63A6000CA4438 /* ViewExtensions.swift in Sources */,
 				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
 				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,

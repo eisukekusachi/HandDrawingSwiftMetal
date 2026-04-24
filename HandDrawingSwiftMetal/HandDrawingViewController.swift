@@ -473,21 +473,23 @@ private extension HandDrawingViewController {
                 )
             },
             onCreateNew: { [weak self] name in
-                guard let self else { return }
-                do {
-                    let url = try await self.viewModel.createNewEmptyProjectFile(
-                        proposedName: name,
-                        device: self.sharedDevice,
-                        commandQueue: self.canvasView.sharedCommandQueue,
-                        saveCanvasAction: { [weak self] w in
-                            try await self?.saveFiles(to: w)
-                        }
+                guard let self else {
+                    throw NSError(
+                        domain: "HandDrawingSwiftMetal",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "The view controller is no longer available."]
                     )
-                    self.presentedViewController?.dismiss(animated: true)
-                    self.loadCanvas(zipFileURL: url)
-                } catch {
-                    self.showAlert(error)
                 }
+                let url = try await self.viewModel.createNewEmptyProjectFile(
+                    proposedName: name,
+                    device: self.sharedDevice,
+                    commandQueue: self.canvasView.sharedCommandQueue,
+                    saveCanvasAction: { [weak self] w in
+                        try await self?.saveFiles(to: w)
+                    }
+                )
+                self.presentedViewController?.dismiss(animated: true)
+                self.loadCanvas(zipFileURL: url)
             },
             onTapItem: { [weak self] zipFileURL in
                 self?.presentedViewController?.dismiss(animated: true)

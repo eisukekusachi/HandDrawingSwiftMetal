@@ -5,29 +5,21 @@
 //  Created by Eisuke Kusachi on 2023/11/04.
 //
 
-import CanvasView
 import SwiftUI
 
 struct FileView: View {
 
-    private let onTapItem: ((URL) -> Void)
-    private let onRenameSelected: ((URL, String) async throws -> URL)?
-    private let onDeleteSelected: ((URL) async throws -> Void)?
-    private let onCreateNew: ((String) async throws -> Void)?
-    private let currentOpenFileURL: URL?
-
+    @StateObject private var viewModel = FileViewModel()
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    @State private var list: [LocalFileItem]
-    @State private var selectedIndex: Int?
-    @State private var isShowingRenameAlert: Bool = false
-    @State private var isShowingDeleteConfirm: Bool = false
-    @State private var isShowingErrorAlert: Bool = false
-    @State private var errorAlertMessage: String = ""
-    @State private var renameDraft: String = ""
-    @State private var isShowingNewFileAlert: Bool = false
-    @State private var newFileNameDraft: String = "Untitled"
+    private let initialList: [LocalFileItem]
+    private let selectedFileURL: URL?
+    private let currentOpenFileURL: URL?
+    private let onRenameSelected: ((URL, String) async throws -> URL)?
+    private let onDeleteSelected: ((URL) async throws -> Void)?
+    private let onCreateNew: ((String) async throws -> Void)?
+    private let onTapItem: (URL) -> Void
 
     private var columns: [GridItem] {
         let spacing: CGFloat = 12
@@ -48,183 +40,124 @@ struct FileView: View {
         onRenameSelected: ((URL, String) async throws -> URL)? = nil,
         onDeleteSelected: ((URL) async throws -> Void)? = nil,
         onCreateNew: ((String) async throws -> Void)? = nil,
-        onTapItem: @escaping ((URL) -> Void)
+        onTapItem: @escaping (URL) -> Void
     ) {
-        self.onTapItem = onTapItem
+        self.initialList = list
+        self.selectedFileURL = selectedFileURL
+        self.currentOpenFileURL = currentOpenFileURL
         self.onRenameSelected = onRenameSelected
         self.onDeleteSelected = onDeleteSelected
         self.onCreateNew = onCreateNew
-        self.currentOpenFileURL = currentOpenFileURL
-        self._list = State(initialValue: list)
-        self._selectedIndex = State(
-            initialValue: selectedFileURL.flatMap { url in
-                list.firstIndex(where: { $0.fileURL == url })
-            }
-        )
+        self.onTapItem = onTapItem
     }
 
     var body: some View {
-        let deleteDisabled: Bool = {
-            guard
-                onDeleteSelected != nil,
-                let i = selectedIndex,
-                i < list.count
-            else { return true }
-            if let currentOpenFileURL, list[i].fileURL == currentOpenFileURL { return true }
-            return false
-        }()
-        return NavigationView {
+        NavigationView {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(0 ..< list.count, id: \.self) { index in
-                        itemView(item: list[index], isSelected: selectedIndex == index)
-                            .onTapGesture {
-                                if selectedIndex == index {
-                                    onTapItem(list[index].fileURL)
-                                } else {
-                                    selectedIndex = index
-                                }
-                            }
+                    ForEach(0 ..< viewModel.list.count, id: \.self) { index in
+                        itemView(
+                            item: viewModel.list[index],
+                            isSelected: viewModel.selectedIndex == index
+                        )
+                        .onTapGesture {
+                            viewModel.tapGridItem(at: index)
+                        }
                     }
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
             .padding(.vertical, 24)
-            .navigationTitle("Files")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    HStack(spacing: 20) {
-                        if onCreateNew != nil {
-                            Button(action: {
-                                newFileNameDraft = "Untitled"
-                                isShowingNewFileAlert = true
-                            }) {
-                                Image(systemName: "plus.circle")
-                            }
-                            .accessibilityLabel("New file")
-                        }
-
-                        Button(action: {
-                            guard let selectedIndex else { return }
-                            renameDraft = list[selectedIndex].title
-                            isShowingRenameAlert = true
-                        }) {
-                            Image(systemName: "pencil")
-                        }
-                        .accessibilityLabel("Rename")
-                        .disabled(onRenameSelected == nil || selectedIndex == nil)
-
-                        Button(action: { isShowingDeleteConfirm = true }) {
-                            Image(systemName: "trash")
-                        }
-                        .accessibilityLabel("Delete")
-                        .tint(.red)
-                        .disabled(deleteDisabled)
-                    }
+                    leadingToolbarContent()
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .blendMode(.destinationOut)
-                        }
-                        .compositingGroup()
-                        .frame(width: 28, height: 28)
-                    }
-                    .accessibilityLabel("Close")
+                    trailingToolbarContent()
                 }
             }
-            .alert("Rename", isPresented: $isShowingRenameAlert) {
-                TextField("Name", text: $renameDraft)
-                Button("Cancel", role: .cancel) {}
-                Button("OK") {
-                    let newName = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !newName.isEmpty else { return }
-                    guard
-                        let selectedIndex,
-                        let onRenameSelected
-                    else { return }
-
-                    let oldURL = list[selectedIndex].fileURL
-                    let oldTitle = list[selectedIndex].title
-
-                    // Immediate UI update
-                    list[selectedIndex].update(title: newName, updatedAt: Date())
-
-                    Task { @MainActor in
-                        do {
-                            let newURL = try await onRenameSelected(oldURL, newName)
-                            list[selectedIndex].update(
-                                title: newURL.deletingPathExtension().lastPathComponent,
-                                fileURL: newURL,
-                                updatedAt: Date()
-                            )
-                        } catch {
-                            // Revert if rename failed
-                            list[selectedIndex].update(title: oldTitle, fileURL: oldURL, updatedAt: Date())
-                        }
-                    }
-                }
-            } message: {
-                Text("Enter a new name.")
-            }
-            .alert("New file", isPresented: $isShowingNewFileAlert) {
-                TextField("File name", text: $newFileNameDraft)
-                Button("Cancel", role: .cancel) {}
-                Button("Create") {
-                    let name = newFileNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !name.isEmpty, let onCreateNew else { return }
-                    Task { @MainActor in
-                        do {
-                            try await onCreateNew(name)
-                        } catch {
-                            errorAlertMessage = error.localizedDescription
-                            isShowingErrorAlert = true
-                        }
-                    }
-                }
-            } message: {
-                Text("Enter a name for the new file (without extension). If the name exists, a suffix like _2 is added.")
-            }
-            .alert("Delete this file?", isPresented: $isShowingDeleteConfirm) {
-                Button("Cancel", role: .cancel) {}
-                Button("Delete", role: .destructive) {
-                    guard
-                        let onDeleteSelected,
-                        let index = selectedIndex
-                    else { return }
-
-                    let fileURL = list[index].fileURL
-                    Task { @MainActor in
-                        do {
-                            try await onDeleteSelected(fileURL)
-                            list.remove(at: index)
-                            selectedIndex = nil
-                        } catch {
-                            errorAlertMessage = error.localizedDescription
-                            isShowingErrorAlert = true
-                        }
-                    }
-                }
-            } message: {
-                Text("This file will be removed from the device. This can’t be undone.")
-            }
-            .alert("Error", isPresented: $isShowingErrorAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(errorAlertMessage)
-            }
+            .alertWithTextField(
+                title: "Rename",
+                textFieldPrompt: "Name",
+                message: "Enter a new name",
+                confirmButtonTitle: "OK",
+                text: $viewModel.renameDraft,
+                isPresented: $viewModel.isShowingRenameAlert,
+                onConfirm: { viewModel.applyRename() }
+            )
+            .alertWithTextField(
+                title: "New file",
+                textFieldPrompt: "File name",
+                message: "Enter a name for the new file",
+                confirmButtonTitle: "Create",
+                text: $viewModel.newFileNameDraft,
+                isPresented: $viewModel.isShowingNewFileAlert,
+                onConfirm: { viewModel.applyNewFile() }
+            )
+            .alertDestructiveConfirmation(
+                title: "Delete this file?",
+                message: "This file will be removed from the device",
+                destructiveButtonTitle: "Delete",
+                isPresented: $viewModel.isShowingDeleteConfirm,
+                onDestructive: { viewModel.applyDelete() }
+            )
+            .alert(
+                title: "Error",
+                message: $viewModel.errorAlertMessage,
+                isPresented: $viewModel.isShowingErrorAlert
+            )
         }
         .navigationViewStyle(.stack)
+        .onFirstAppear {
+            viewModel.configure(
+                list: initialList,
+                selectedFileURL: selectedFileURL,
+                currentOpenFileURL: currentOpenFileURL,
+                onRenameSelected: onRenameSelected,
+                onDeleteSelected: onDeleteSelected,
+                onCreateNew: onCreateNew,
+                onTapItem: onTapItem
+            )
+        }
+    }
+}
+
+private extension FileView {
+    @ViewBuilder
+    func leadingToolbarContent() -> some View {
+        HStack(spacing: 20) {
+            if viewModel.canCreateNew {
+                Button(
+                    action: { viewModel.beginNewFile() },
+                    label: { Image(systemName: "plus.circle") }
+                )
+            }
+
+            Button(
+                action: { viewModel.beginRename() },
+                label: { Image(systemName: "pencil") }
+            )
+            .disabled(viewModel.renameDisabled)
+
+            Button(
+                action: { viewModel.isShowingDeleteConfirm = true },
+                label: { Image(systemName: "trash") }
+            )
+            .tint(.red)
+            .disabled(viewModel.deleteDisabled)
+        }
     }
 
-    private func itemView(item: LocalFileItem, isSelected: Bool) -> some View {
+    func trailingToolbarContent() -> some View {
+        Button(
+            action: { dismiss() },
+            label: { Image(systemName: "xmark.circle.fill") }
+        )
+    }
+
+    func itemView(item: LocalFileItem, isSelected: Bool) -> some View {
         ZStack(alignment: .bottom) {
             Rectangle()
                 .fill(Color(red: 0.92, green: 0.92, blue: 0.92))
@@ -234,13 +167,25 @@ struct FileView: View {
                     .resizable()
                     .scaledToFit()
             } else {
-                VStack {
+                let placeholderTint = Color(red: 0.22, green: 0.24, blue: 0.28)
+
+                VStack(spacing: 10) {
                     Spacer()
+
                     Image(systemName: "questionmark.circle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .opacity(0.5)
+                        .symbolRenderingMode(.hierarchical)
+                        .font(.system(size: 44, weight: .regular))
+                        .foregroundStyle(placeholderTint.opacity(0.85))
+
+                    Text("Not saved yet")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(placeholderTint)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.8)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+
                     Spacer()
                 }
             }
