@@ -9,11 +9,11 @@ import SwiftUI
 
 struct FileView: View {
 
-    @StateObject private var viewModel = FileViewModel()
+    @ObservedObject private var fileCoordinator: FileCoordinator
+    @StateObject private var viewModel: FileViewModel
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    private let list: [LocalFileItem]
 
     /// Active file URL
     private let currentOpenFileURL: URL?
@@ -39,7 +39,7 @@ struct FileView: View {
     }
 
     init(
-        list: [LocalFileItem],
+        fileCoordinator: FileCoordinator,
         currentOpenFileURL: URL? = nil,
         selectedFileURL: URL? = nil,
         createAction: ((String) async throws -> Void)? = nil,
@@ -47,7 +47,8 @@ struct FileView: View {
         deleteAction: ((URL) async throws -> Void)? = nil,
         selectAction: @escaping (URL) -> Void
     ) {
-        self.list = list
+        self._fileCoordinator = ObservedObject(wrappedValue: fileCoordinator)
+        self._viewModel = StateObject(wrappedValue: FileViewModel(fileCoordinator: fileCoordinator))
         self.selectedFileURL = selectedFileURL
         self.currentOpenFileURL = currentOpenFileURL
         self.createAction = createAction
@@ -60,9 +61,9 @@ struct FileView: View {
         NavigationView {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(0 ..< viewModel.list.count, id: \.self) { index in
+                    ForEach(Array(fileCoordinator.fileList.enumerated()), id: \.element.id) { index, item in
                         itemView(
-                            item: viewModel.list[index],
+                            item: item,
                             isSelected: viewModel.selectedIndex == index
                         )
                         .onTapGesture {
@@ -117,7 +118,6 @@ struct FileView: View {
         .navigationViewStyle(.stack)
         .onFirstAppear {
             viewModel.configure(
-                list: list,
                 currentOpenFileURL: currentOpenFileURL,
                 selectedFileURL: selectedFileURL,
                 renameAction: renameAction,
@@ -167,12 +167,10 @@ private extension FileView {
     @ViewBuilder
     func leadingToolbarContent() -> some View {
         HStack(spacing: 20) {
-            if viewModel.canCreateNew {
-                Button(
-                    action: { viewModel.onTapNewButton() },
-                    label: { Image(systemName: "plus.circle") }
-                )
-            }
+            Button(
+                action: { viewModel.onTapNewButton() },
+                label: { Image(systemName: "plus.circle") }
+            )
 
             Button(
                 action: { viewModel.onTapRenameButton() },
@@ -266,23 +264,31 @@ private extension FileView {
 }
 
 #Preview {
-    FileView(
-        list: [
+    let dependencies = HandDrawingViewDependencies(
+        localFileRepository: MockLocalFileRepository()
+    )
+    let fileCoordinator = FileCoordinator(
+        fileList: [
             .init(
                 title: "Test",
                 createdAt: Date(),
                 updatedAt: Date(),
                 thumbnail: nil,
-                fileURL: URL(fileURLWithPath: "")
+                suffix: "zip"
             ),
             .init(
                 title: "Test Test Test Test Test Test Test Test Test Test Test Test",
                 createdAt: Date(),
                 updatedAt: Date(),
                 thumbnail: nil,
-                fileURL: URL(fileURLWithPath: "")
+                suffix: "zip"
             )
         ],
+        dependencies: dependencies,
+        fileSuffix: "zip"
+    )
+    return FileView(
+        fileCoordinator: fileCoordinator,
         currentOpenFileURL: nil,
         selectedFileURL: nil,
         createAction: { _ in },

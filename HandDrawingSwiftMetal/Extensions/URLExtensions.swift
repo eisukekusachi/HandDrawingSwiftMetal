@@ -112,7 +112,7 @@ extension URL {
     static func uniqueURL(
         baseName: String,
         fileSuffix: String,
-        excludeURL: URL?
+        excludeURL: URL? = nil
     ) -> URL {
         uniqueURL(
             baseName: baseName,
@@ -125,7 +125,7 @@ extension URL {
     static func uniqueURL(
         baseName: String,
         fileSuffix: String,
-        excludeURL: URL?,
+        excludeURL: URL? = nil,
         exists: (URL) -> Bool
     ) -> URL {
         var newFileURL = FileManager.zipFileURL(projectName: baseName, suffix: fileSuffix)
@@ -137,5 +137,13 @@ extension URL {
         }
 
         return newFileURL
+    }
+
+    static func trimmedName(
+        oldName: String,
+        newName: String
+    ) -> String {
+        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedName.isEmpty ? oldName : trimmedName
     }
 }

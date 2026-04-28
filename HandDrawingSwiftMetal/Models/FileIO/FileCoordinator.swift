@@ -24,8 +24,18 @@ final class FileCoordinator: ObservableObject {
 
     private let dependencies: HandDrawingViewDependencies
 
-    init(dependencies: HandDrawingViewDependencies) {
+    private let fileManager: FileManagerWrapping
+
+    init(
+        fileList: [LocalFileItem] = [],
+        dependencies: HandDrawingViewDependencies,
+        fileSuffix: String = "",
+        fileManagerWrapper: FileManagerWrapping = FileManagerWrapper()
+    ) {
+        self.fileList = fileList
         self.dependencies = dependencies
+        self.fileSuffix = fileSuffix
+        self.fileManager = fileManagerWrapper
     }
 
     /// Replaces `fileList` from zips in Documents (metadata + thumbnails). Uses `fileSuffix` from configuration.
@@ -68,13 +78,12 @@ final class FileCoordinator: ObservableObject {
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
                         thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                        fileURL: zipFileURL
+                        suffix: fileSuffix
                     )
                 )
 
             } catch {
-                // Old/externally-created zips may not contain `thumbnail.png`.
-                // Missing thumbnails should not be treated as an error here.
+                // Projects that have never been saved may not contain 'thumbnail.png'
                 Logger.error(error)
             }
         }
@@ -158,6 +167,7 @@ extension FileCoordinator {
 }
 
 extension FileCoordinator {
+
     func upsertFileList(_ file: LocalFileItem) {
         var items = fileList
         if let index = items.firstIndex(where: { $0.title == file.title }) {
@@ -165,40 +175,18 @@ extension FileCoordinator {
         } else {
             items.append(file)
         }
-        items.sort { $0.updatedAt > $1.updatedAt }
         fileList = items
     }
 
-    /// Renames on disk; if the renamed file is the one currently open, updates `project`; syncs `fileList`.
-    @discardableResult
+    /// Renames the file on disk and updates the corresponding entry in the file list
     func renameFile(
+        index: Int,
         oldFileURL: URL,
-        newName: String,
-        currentOpenFileURL: URL,
-        project: ProjectData
-    ) throws -> URL {
-        guard
-            let index = fileList.firstIndex(where: { $0.fileURL == oldFileURL })
-        else { return oldFileURL }
+        newFileURL: URL
+    ) throws {
+        guard index >= 0 && index < fileList.count else { return }
 
-        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let baseName = trimmedName.isEmpty ? oldFileURL.baseName : trimmedName
-
-        let newFileURL = URL.uniqueURL(
-            baseName: baseName,
-            fileSuffix: fileSuffix,
-            excludeURL: oldFileURL
-        )
-
-        if newFileURL == oldFileURL {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "The file name is the same as the current name")
-            )
-            throw error
-        }
-
-        try FileManager.default.moveItem(at: oldFileURL, to: newFileURL)
+        try fileManager.moveItem(at: oldFileURL, to: newFileURL)
 
         let items = fileList
         items[index].update(
@@ -207,44 +195,27 @@ extension FileCoordinator {
             updatedAt: Date()
         )
         fileList = items
-
-        return newFileURL
     }
 
-    /// Removes the zip in Documents and drops it from `fileList` (cannot delete the open file).
+    /// Deletes the file from disk and reflects the change by removing it from the file list
     func deleteFile(
-        fileURL: URL,
-        currentOpenFileURL: URL
+        fileURL: URL
     ) throws {
-        if fileURL == currentOpenFileURL {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "The currently open file cannot be deleted")
-            )
-            throw error
-        }
-
-        try FileManager.default.removeItem(at: fileURL)
+        try fileManager.removeItem(at: fileURL)
 
         var items = fileList
         items.removeAll { $0.fileURL == fileURL }
         fileList = items
     }
 
-    func currentFileItem(
-        for project: ProjectData,
-        thumbnail: UIImage?
-    ) -> LocalFileItem {
-        .init(
-            title: project.currentProjectName,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt,
-            thumbnail: thumbnail,
-            fileURL: FileManager.zipFileURL(
-                projectName: project.currentProjectName,
-                suffix: fileSuffix
-            )
-        )
+    func sortFileList() {
+        var items = fileList
+        items.sort { $0.updatedAt > $1.updatedAt }
+        fileList = items
+    }
+
+    func index(url: URL) -> Int? {
+        fileList.firstIndex(where: { $0.fileURL == url })
     }
 }
 
@@ -272,7 +243,7 @@ private extension FileCoordinator {
             createdAt: projectMetaData.createdAt,
             updatedAt: projectMetaData.updatedAt,
             thumbnail: UIImage(data: thumbnailData),
-            fileURL: zipFileURL
+            suffix: fileSuffix
         )
     }
 

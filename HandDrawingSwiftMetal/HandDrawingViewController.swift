@@ -401,7 +401,7 @@ private extension HandDrawingViewController {
 private extension HandDrawingViewController {
     func showFileView() {
         let fileView = FileView(
-            list: viewModel.fileList,
+            fileCoordinator: viewModel.fileCoordinator,
             currentOpenFileURL: zipFileURL,
             selectedFileURL: zipFileURL,
             createAction: { [weak self] name in
@@ -518,6 +518,7 @@ private extension HandDrawingViewController {
                         thumbnail: thumbnail
                     )
                 )
+                self.viewModel.sortFileList()
             },
             zipFileURL: zipFileURL
         )

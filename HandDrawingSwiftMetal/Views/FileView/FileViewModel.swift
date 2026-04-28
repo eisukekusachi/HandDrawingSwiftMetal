@@ -12,7 +12,8 @@ import UIKit
 @MainActor
 final class FileViewModel: ObservableObject {
 
-    @Published var list: [LocalFileItem]
+    let fileCoordinator: FileCoordinator
+
     @Published var selectedIndex: Int?
 
     @Published var isShowingRenameDialog = false
@@ -29,9 +30,6 @@ final class FileViewModel: ObservableObject {
     private var selectAction: ((URL) -> Void)?
 
     private var currentOpenFileURL: URL?
-    private var didConfigure = false
-
-    var canCreateNew: Bool { createAction != nil }
 
     var renameDisabled: Bool {
         renameAction == nil || selectedIndex == nil
@@ -41,46 +39,43 @@ final class FileViewModel: ObservableObject {
         guard
             deleteAction != nil,
             let i = selectedIndex,
-            i < list.count
+            i >= 0 && i < fileCoordinator.fileList.count,
+            fileCoordinator.fileList[i].fileURL != currentOpenFileURL
         else { return true }
-
-        if let currentOpenFileURL, list[i].fileURL == currentOpenFileURL { return true }
 
         return false
     }
 
-    init() {
-        self.list = []
+    init(fileCoordinator: FileCoordinator) {
+        self.fileCoordinator = fileCoordinator
         self.selectedIndex = nil
     }
 
     func configure(
-        list: [LocalFileItem],
         currentOpenFileURL: URL? = nil,
         selectedFileURL: URL? = nil,
         renameAction: ((URL, String) async throws -> URL)? = nil,
         deleteAction: ((URL) async throws -> Void)? = nil,
         createAction: ((String) async throws -> Void)? = nil,
-        selectAction: @escaping (URL) -> Void
+        selectAction: ((URL) -> Void)? = nil
     ) {
-        self.list = list
         self.selectAction = selectAction
         self.renameAction = renameAction
         self.deleteAction = deleteAction
         self.createAction = createAction
         self.currentOpenFileURL = currentOpenFileURL
         self.selectedIndex = selectedFileURL.flatMap { url in
-            list.firstIndex(where: { $0.fileURL == url })
+            fileCoordinator.index(url: url)
         }
     }
 }
 
 extension FileViewModel {
     func onTapItem(at index: Int) {
-        guard index < list.count else { return }
+        guard index < fileCoordinator.fileList.count else { return }
 
         if selectedIndex == index {
-            selectAction?(list[index].fileURL)
+            selectAction?(fileCoordinator.fileList[index].fileURL)
         } else {
             selectedIndex = index
         }
@@ -94,24 +89,17 @@ extension FileViewModel {
     func onTapRenameButton() {
         guard
             let selectedIndex,
-            selectedIndex < list.count
+            selectedIndex < fileCoordinator.fileList.count
         else { return }
 
-        draftName = list[selectedIndex].title
+        draftName = fileCoordinator.fileList[selectedIndex].title
         isShowingRenameDialog = true
     }
 }
 
 extension FileViewModel {
     func applyNewFile() async throws {
-        let newName = newFileName.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard
-            let createAction,
-            !newName.isEmpty
-        else { return }
-
-        try await createAction(newName)
+        try await createAction?(newFileName)
     }
 
     func applyRename() async throws {
@@ -121,36 +109,25 @@ extension FileViewModel {
             let renameAction,
             !newName.isEmpty,
             let index = selectedIndex,
-            index < list.count
+            index < fileCoordinator.fileList.count
         else { return }
 
-        let oldURL = list[index].fileURL
-
+        let oldURL = fileCoordinator.fileList[index].fileURL
         let newURL = try await renameAction(oldURL, newName)
 
-        let newList = self.list
-        newList[index].update(
-            title: newURL.baseName,
-            fileURL: newURL,
-            updatedAt: Date()
-        )
-        list = newList
+        selectedIndex = fileCoordinator.index(url: newURL)
     }
 
     func applyDelete() async throws {
         guard
             let deleteAction,
             let index = selectedIndex,
-            index < list.count
+            index < fileCoordinator.fileList.count
         else { return }
 
-        let fileURL = list[index].fileURL
+        let fileURL = fileCoordinator.fileList[index].fileURL
 
         try await deleteAction(fileURL)
-
-        var newList = list
-        newList.remove(at: index)
-        list = newList
 
         selectedIndex = nil
     }

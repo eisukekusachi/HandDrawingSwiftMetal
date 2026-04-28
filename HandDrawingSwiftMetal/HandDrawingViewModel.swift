@@ -41,10 +41,16 @@ final class HandDrawingViewModel: ObservableObject {
 
     /// Current file for displaying in the file list
     func currentFileItem(thumbnail: UIImage?) -> LocalFileItem {
-        fileCoordinator.currentFileItem(for: project, thumbnail: thumbnail)
+        .init(
+            title: project.currentProjectName,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+            thumbnail: thumbnail,
+            suffix: fileCoordinator.fileSuffix
+        )
     }
 
-    private let fileCoordinator: FileCoordinator
+    let fileCoordinator: FileCoordinator
 
     private let projectStorage: CoreDataProjectStorage
     private let drawingToolStorage: CoreDataDrawingToolStorage
@@ -304,6 +310,14 @@ extension HandDrawingViewModel {
             }
         }
     }
+
+    func upsertFileList(_ file: LocalFileItem) {
+        fileCoordinator.upsertFileList(file)
+    }
+
+    func sortFileList() {
+        fileCoordinator.sortFileList()
+    }
 }
 
 extension HandDrawingViewModel {
@@ -356,6 +370,8 @@ extension HandDrawingViewModel {
             currentFileItem(thumbnail: nil)
         )
 
+        sortFileList()
+
         return targetURL
     }
 
@@ -365,34 +381,50 @@ extension HandDrawingViewModel {
         newName: String,
         currentOpenFileURL: URL
     ) throws -> URL {
-        let newURL = try fileCoordinator.renameFile(
+        guard
+            let index = fileCoordinator.index(url: oldFileURL)
+        else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
+            throw error
+        }
+
+        let newFileURL = URL.uniqueURL(
+            baseName: URL.trimmedName(oldName: oldFileURL.baseName, newName: newName),
+            fileSuffix: fileCoordinator.fileSuffix
+        )
+
+        try fileCoordinator.renameFile(
+            index: index,
             oldFileURL: oldFileURL,
-            newName: newName,
-            currentOpenFileURL: currentOpenFileURL,
-            project: project
+            newFileURL: newFileURL
         )
 
         if oldFileURL == currentOpenFileURL {
             project.update(
-                projectName: newURL.baseName,
+                projectName: newFileURL.baseName,
                 updatedAt: Date()
             )
         }
 
-        return newURL
+        return newFileURL
     }
 
     func onTapDeleteButton(
         fileURL: URL,
         currentOpenFileURL: URL
     ) throws {
+        guard fileURL != currentOpenFileURL else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "The currently open file cannot be deleted")
+            )
+            throw error
+        }
         try fileCoordinator.deleteFile(
-            fileURL: fileURL,
-            currentOpenFileURL: currentOpenFileURL
+            fileURL: fileURL
         )
-    }
-
-    func upsertFileList(_ file: LocalFileItem) {
-        fileCoordinator.upsertFileList(file)
     }
 }

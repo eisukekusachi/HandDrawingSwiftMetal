@@ -50,6 +50,10 @@
 		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
 		D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */; };
 		D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */; };
+		D4732C792FA0EDBB00119C55 /* FileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C782FA0EDBB00119C55 /* FileViewModelTests.swift */; };
+		D4732C7D2FA0EE6700119C55 /* FileCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C7C2FA0EE6700119C55 /* FileCoordinatorTests.swift */; };
+		D4732C802FA0EE9900119C55 /* URLExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C7F2FA0EE9900119C55 /* URLExtensionsTests.swift */; };
+		D4732C832FA1048A00119C55 /* MockLocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA06C2F3C18D3008C6E9E /* UndoVisibilityObject.swift */; };
@@ -82,6 +86,8 @@
 		D49C69572F2F685300B66608 /* CoreDataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69562F2F685300B66608 /* CoreDataStorage.swift */; };
 		D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
+		D4BBCC022FA211EE00C55A4C /* FileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */; };
+		D4BBCC042FA211EF00C55A4C /* MockFileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */; };
@@ -161,6 +167,10 @@
 		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
 		D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewDependencies.swift; sourceTree = "<group>"; };
+		D4732C782FA0EDBB00119C55 /* FileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileViewModelTests.swift; sourceTree = "<group>"; };
+		D4732C7C2FA0EE6700119C55 /* FileCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinatorTests.swift; sourceTree = "<group>"; };
+		D4732C7F2FA0EE9900119C55 /* URLExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensionsTests.swift; sourceTree = "<group>"; };
+		D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLocalFileRepository.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
 		D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaObject.swift; sourceTree = "<group>"; };
@@ -193,6 +203,8 @@
 		D49C69562F2F685300B66608 /* CoreDataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStorage.swift; sourceTree = "<group>"; };
 		D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
+		D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerWrapper.swift; sourceTree = "<group>"; };
+		D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
@@ -315,6 +327,7 @@
 			isa = PBXGroup;
 			children = (
 				D4FC0F012F94AA0100C55A4C /* FileCoordinator.swift */,
+				D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */,
 				D44624662F9CD55400BE4E8A /* FileCoordinatorSaveContent.swift */,
 				D49C69352F23CD7700B66608 /* FileManager.swift */,
 				D49C69392F246BA800B66608 /* LocalFileItem.swift */,
@@ -341,6 +354,56 @@
 			children = (
 				D4513AAD2AF63A2A00CA4438 /* FileView.swift */,
 				D4513AB12AF63A5000CA4438 /* FileViewModel.swift */,
+			);
+			path = FileView;
+			sourceTree = "<group>";
+		};
+		D4732C7A2FA0EE4E00119C55 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D4732C7B2FA0EE5700119C55 /* FileIO */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D4732C7B2FA0EE5700119C55 /* FileIO */ = {
+			isa = PBXGroup;
+			children = (
+				D4732C7C2FA0EE6700119C55 /* FileCoordinatorTests.swift */,
+			);
+			path = FileIO;
+			sourceTree = "<group>";
+		};
+		D4732C7E2FA0EE8D00119C55 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D4732C7F2FA0EE9900119C55 /* URLExtensionsTests.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D4732C812FA1043E00119C55 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */,
+				D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		D4732C842FA1B6A700119C55 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D426FC612E5C4B2700CC116D /* Components */,
+				D4732C852FA1B6BD00119C55 /* FileView */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D4732C852FA1B6BD00119C55 /* FileView */ = {
+			isa = PBXGroup;
+			children = (
+				D4732C782FA0EDBB00119C55 /* FileViewModelTests.swift */,
 			);
 			path = FileView;
 			sourceTree = "<group>";
@@ -477,6 +540,7 @@
 			isa = PBXGroup;
 			children = (
 				D47FD3E52E2B20C600F3F514 /* Extensions */,
+				D4732C812FA1043E00119C55 /* Mocks */,
 				D4F525742EAC96C600439FFF /* Models */,
 				D4F5256B2EAC60F200439FFF /* Repositories */,
 				D47FD3E62E2B20E800F3F514 /* Resources */,
@@ -499,7 +563,9 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC612E5C4B2700CC116D /* Components */,
+				D4732C7E2FA0EE8D00119C55 /* Extensions */,
+				D4732C7A2FA0EE4E00119C55 /* Models */,
+				D4732C842FA1B6A700119C55 /* Views */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 			);
 			path = HandDrawingSwiftMetalTests;
@@ -713,6 +779,8 @@
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
 				D48CA0752F3C18D3008C6E9E /* UndoSelectionObject.swift in Sources */,
 				D48CA0762F3C18D3008C6E9E /* UndoDrawingObject.swift in Sources */,
+				D4732C832FA1048A00119C55 /* MockLocalFileRepository.swift in Sources */,
+				D4BBCC042FA211EF00C55A4C /* MockFileManagerWrapper.swift in Sources */,
 				D48CA0772F3C18D3008C6E9E /* UndoMoveObject.swift in Sources */,
 				D48CA0782F3C18D3008C6E9E /* UndoTextureId.swift in Sources */,
 				D48CA0792F3C18D3008C6E9E /* UndoRedoObjectPair.swift in Sources */,
@@ -767,6 +835,7 @@
 				D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */,
 				D49C693A2F246BA900B66608 /* LocalFileItem.swift in Sources */,
 				D4FC0F022F94AA0100C55A4C /* FileCoordinator.swift in Sources */,
+				D4BBCC022FA211EE00C55A4C /* FileManagerWrapper.swift in Sources */,
 				D49C693C2F249C6B00B66608 /* ProjectArchiveModel.swift in Sources */,
 				D426FC602E5C0A8B00CC116D /* DrawingToolArchiveModel.swift in Sources */,
 				D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */,
@@ -788,6 +857,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */,
+				D4732C792FA0EDBB00119C55 /* FileViewModelTests.swift in Sources */,
+				D4732C802FA0EE9900119C55 /* URLExtensionsTests.swift in Sources */,
+				D4732C7D2FA0EE6700119C55 /* FileCoordinatorTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
 				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,

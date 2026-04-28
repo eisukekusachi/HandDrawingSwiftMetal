@@ -8,7 +8,7 @@
 import UIKit
 
 public class LocalFileItem: Identifiable {
-    public let id: UUID = UUID()
+    public let id: UUID
     public var title: String
     public var createdAt: Date
     public var updatedAt: Date
@@ -19,17 +19,27 @@ public class LocalFileItem: Identifiable {
     private var _fileURL: URL
 
     public init(
+        id: UUID = UUID(),
         title: String,
-        createdAt: Date,
-        updatedAt: Date,
-        thumbnail: UIImage?,
-        fileURL: URL
+        createdAt: Date = .init(),
+        updatedAt: Date = .init(),
+        thumbnail: UIImage? = nil,
+        suffix: String = "",
+        fileURL: URL? = nil
     ) {
+        self.id = id
         self.title = title
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.thumbnail = thumbnail
-        self._fileURL = fileURL
+        if let fileURL {
+            self._fileURL = fileURL
+        } else {
+            self._fileURL = FileManager.zipFileURL(
+                projectName: title,
+                suffix: suffix
+            )
+        }
     }
 
     func update(
