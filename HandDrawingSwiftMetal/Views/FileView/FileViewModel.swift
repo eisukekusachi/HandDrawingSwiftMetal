@@ -32,8 +32,8 @@ final class FileViewModel: ObservableObject {
     var renameDisabled: Bool {
         guard
             renameAction != nil,
-            let i = selectedIndex,
-            i >= 0 && i < fileCoordinator.fileList.count
+            let index = selectedIndex,
+            let _ = fileCoordinator.item(index)
         else { return true }
 
         return false
@@ -42,9 +42,9 @@ final class FileViewModel: ObservableObject {
     var deleteDisabled: Bool {
         guard
             deleteAction != nil,
-            let i = selectedIndex,
-            i >= 0 && i < fileCoordinator.fileList.count,
-            fileCoordinator.fileList[i].fileURL != currentOpenFileURL
+            let index = selectedIndex,
+            let item = fileCoordinator.item(index),
+            item.fileURL != currentOpenFileURL
         else { return true }
 
         return false
@@ -76,10 +76,12 @@ final class FileViewModel: ObservableObject {
 
 extension FileViewModel {
     func onTapItem(at index: Int) {
-        guard index < fileCoordinator.fileList.count else { return }
+        guard
+            let item = fileCoordinator.item(index)
+        else { return }
 
         if selectedIndex == index {
-            selectAction?(fileCoordinator.fileList[index].fileURL)
+            selectAction?(item.fileURL)
         } else {
             selectedIndex = index
         }
@@ -92,11 +94,11 @@ extension FileViewModel {
 
     func onTapRenameButton() {
         guard
-            let selectedIndex,
-            selectedIndex < fileCoordinator.fileList.count
+            let index = selectedIndex,
+            let item = fileCoordinator.item(index)
         else { return }
 
-        draftName = fileCoordinator.fileList[selectedIndex].title
+        draftName = item.title
         isShowingRenameDialog = true
     }
 }
@@ -113,10 +115,10 @@ extension FileViewModel {
             let renameAction,
             !newName.isEmpty,
             let index = selectedIndex,
-            index >= 0 && index < fileCoordinator.fileList.count
+            let item = fileCoordinator.item(index)
         else { return }
 
-        let oldURL = fileCoordinator.fileList[index].fileURL
+        let oldURL = item.fileURL
         let newURL = try await renameAction(oldURL, newName)
 
         selectedIndex = fileCoordinator.index(url: newURL)
@@ -126,12 +128,10 @@ extension FileViewModel {
         guard
             let deleteAction,
             let index = selectedIndex,
-            index < fileCoordinator.fileList.count
+            let item = fileCoordinator.item(index)
         else { return }
 
-        let fileURL = fileCoordinator.fileList[index].fileURL
-
-        try await deleteAction(fileURL)
+        try await deleteAction(item.fileURL)
 
         selectedIndex = nil
     }

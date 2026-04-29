@@ -38,6 +38,13 @@ final class FileCoordinator: ObservableObject {
         self.fileManager = fileManagerWrapper
     }
 
+    func item(_ index: Int) -> LocalFileItem? {
+        guard index >= 0 && index < fileList.count else {
+            return nil
+        }
+        return fileList[index]
+    }
+
     func setupFileList(
         configuration: ProjectConfiguration
     ) async {
