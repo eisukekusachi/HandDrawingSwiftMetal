@@ -113,7 +113,6 @@ extension FileViewModel {
 
         guard
             let renameAction,
-            !newName.isEmpty,
             let index = selectedIndex,
             let item = fileCoordinator.item(index)
         else { return }
