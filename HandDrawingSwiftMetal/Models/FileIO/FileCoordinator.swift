@@ -82,7 +82,7 @@ final class FileCoordinator: ObservableObject {
                 )
 
             } catch {
-                // Projects that have never been saved may not contain 'thumbnail.png'
+                // Errors here indicate unzip, project metadata loading/decoding, or other unexpected I/O failures
                 Logger.error(error)
             }
         }
