@@ -113,7 +113,7 @@ extension FileViewModel {
             let renameAction,
             !newName.isEmpty,
             let index = selectedIndex,
-            index < fileCoordinator.fileList.count
+            index >= 0 && index < fileCoordinator.fileList.count
         else { return }
 
         let oldURL = fileCoordinator.fileList[index].fileURL
