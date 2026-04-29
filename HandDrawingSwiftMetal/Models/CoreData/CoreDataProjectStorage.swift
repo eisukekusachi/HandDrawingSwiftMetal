@@ -26,7 +26,7 @@ final class CoreDataProjectStorage {
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
-            self.project.$projectName.map { _ in () }.eraseToAnyPublisher(),
+            self.project.$currentProjectName.map { _ in () }.eraseToAnyPublisher(),
             self.project.$updatedAt.map { _ in () }.eraseToAnyPublisher(),
             self.project.$createdAt.map { _ in () }.eraseToAnyPublisher()
         )
@@ -59,25 +59,21 @@ extension CoreDataProjectStorage {
         }
     }
 
-    func update(directoryURL: URL) throws {
+    func update(directoryURL: URL, projectName: String) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
             let result = try? ProjectArchiveModel(in: directoryURL)
         else {
-            let nsError = NSError(
-                domain: String(describing: Self.self),
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
-                    "directoryURL": directoryURL.path
-                ]
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(format: String(localized: "Failed to find file in %@."), directoryURL.absoluteString)
             )
-            Logger.error(nsError)
-            throw nsError
+            Logger.error(error)
+            throw error
         }
 
         project.update(
-            projectName: result.projectName,
+            projectName: projectName,
             createdAt: result.createdAt,
             updatedAt: result.updatedAt
         )
@@ -91,7 +87,7 @@ private extension CoreDataProjectStorage {
             let request = storage.fetchRequest()
         else { return }
 
-        let projectName = target.projectName
+        let projectName = target.currentProjectName
         let createdAt = target.createdAt
         let updatedAt = target.updatedAt
 

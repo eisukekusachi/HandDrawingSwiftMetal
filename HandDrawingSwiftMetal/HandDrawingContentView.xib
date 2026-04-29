@@ -20,7 +20,6 @@
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
-                <outlet property="newButton" destination="ML0-1y-T1Z" id="LCz-ss-GSK"/>
                 <outlet property="redoButton" destination="UCl-eJ-tD6" id="kxf-0N-cn7"/>
                 <outlet property="resetTransformButton" destination="IVg-Dj-hIn" id="dWm-1g-ASc"/>
                 <outlet property="saveButton" destination="Ugs-EZ-K7D" id="HVF-Y2-eRP"/>
@@ -42,7 +41,7 @@
                     <buttonConfiguration key="configuration" style="plain" title="Reset zoom"/>
                 </button>
                 <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P50-DK-emi">
-                    <rect key="frame" x="152.66666666666663" y="117.99999999999999" width="224.33333333333337" height="34.333333333333329"/>
+                    <rect key="frame" x="175.66666666666663" y="117.99999999999999" width="201.33333333333337" height="34.333333333333329"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ugs-EZ-K7D">
                             <rect key="frame" x="0.0" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
@@ -55,20 +54,15 @@
                             <buttonConfiguration key="configuration" style="plain" image="square.3.layers.3d" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ve-sD-YOE">
-                            <rect key="frame" x="99.333333333333343" y="0.0" width="48.333333333333343" height="34.333333333333336"/>
+                            <rect key="frame" x="99.333333333333343" y="0.0" width="47.333333333333343" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
+                            <buttonConfiguration key="configuration" style="plain" image="document.badge.plus.fill" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
-                            <rect key="frame" x="147.66666666666666" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
+                            <rect key="frame" x="146.66666666666666" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" image="photo" catalog="system"/>
                             <buttonConfiguration key="configuration" style="plain" image="photo" catalog="system"/>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ML0-1y-T1Z">
-                            <rect key="frame" x="202.33333333333334" y="0.0" width="22" height="34.333333333333336"/>
-                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal" image="plus.square.fill.on.square.fill" catalog="system"/>
                         </button>
                     </subviews>
                 </stackView>
@@ -181,10 +175,9 @@
     <resources>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
+        <image name="document.badge.plus.fill" catalog="system" width="120" height="128"/>
         <image name="photo" catalog="system" width="128" height="93"/>
-        <image name="plus.square.fill.on.square.fill" catalog="system" width="128" height="120"/>
         <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
-        <image name="square.and.arrow.down" catalog="system" width="114" height="128"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

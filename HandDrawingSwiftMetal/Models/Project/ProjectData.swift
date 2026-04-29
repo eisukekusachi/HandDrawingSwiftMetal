@@ -9,7 +9,7 @@ import Foundation
 
 final class ProjectData {
 
-    @Published public var projectName: String
+    @Published public var currentProjectName: String
     @Published public var createdAt: Date
     @Published public var updatedAt: Date
 
@@ -18,7 +18,7 @@ final class ProjectData {
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
-        self.projectName = projectName
+        self.currentProjectName = projectName
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -29,7 +29,7 @@ final class ProjectData {
         updatedAt: Date? = nil
     ) {
         if let projectName {
-            self.projectName = projectName
+            self.currentProjectName = projectName
         }
         if let createdAt {
             self.createdAt = createdAt
@@ -40,7 +40,7 @@ final class ProjectData {
     }
 
     func updateAll(newProjectName: String) {
-        self.projectName = newProjectName
+        self.currentProjectName = newProjectName
         self.createdAt = Date()
         self.updatedAt = Date()
     }

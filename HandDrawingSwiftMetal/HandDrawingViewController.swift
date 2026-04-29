@@ -16,12 +16,7 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
-    var zipFileURL: URL {
-        FileManager.documentsFileURL(
-            projectName: viewModel.project.projectName,
-            suffix: viewModel.fileSuffix
-        )
-    }
+    var zipFileURL: URL { viewModel.zipFileURL }
 
     @IBOutlet private weak var contentView: HandDrawingContentView!
 
@@ -30,7 +25,6 @@ class HandDrawingViewController: UIViewController {
     private var configuration: ProjectConfiguration = .init(canvasConfiguration: .init())
 
     private let dialogPresenter = DialogPresenter()
-    private let newCanvasDialogPresenter = NewCanvasDialogPresenter()
 
     private var textureLayerPopup: UIHostingController<AnyView>?
     private var textureLayerPresenter = PopupViewPresenter()
@@ -94,7 +88,6 @@ class HandDrawingViewController: UIViewController {
         addEvents()
         bindData()
         layoutViews()
-        setupNewCanvasDialogPresenter()
 
         drawingRenderers.forEach {
             $0.value.setup(
@@ -148,30 +141,6 @@ class HandDrawingViewController: UIViewController {
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
     }
-
-    func newCanvas() async throws {
-        try await viewModel.onNewCanvas(
-            device: sharedDevice,
-            commandQueue: canvasView.sharedCommandQueue
-        )
-        try await initializeCanvas(viewModel.textureSize)
-        canvasView.resetTransforming()
-    }
-
-    func saveFiles(to workingDirectoryURL: URL) async throws {
-        try await viewModel.onSaveFiles(
-            thumbnail: canvasView.thumbnail,
-            to: workingDirectoryURL
-        )
-    }
-
-    func loadFiles(in workingDirectoryURL: URL) async throws {
-        try await viewModel.onLoadFiles(
-            device: canvasView.sharedDevice,
-            from: workingDirectoryURL
-        )
-        try await initializeCanvas(viewModel.textureSize)
-    }
 }
 
 private extension HandDrawingViewController {
@@ -197,35 +166,12 @@ private extension HandDrawingViewController {
     }
 
     func initializeCanvas(_ textureSize: CGSize) async throws {
-
         try await canvasView.initializeCanvas(textureSize)
 
         // Initialize the textures used for Undo
         await undoCoordinator.initializeDrawingUndoTextures(
             textureSize
         )
-    }
-
-    func setupNewCanvasDialogPresenter() {
-        newCanvasDialogPresenter.onTapButton = {
-            Task { [weak self] in
-                guard let `self` else { return }
-
-                defer { self.showActivityIndicator(false) }
-                self.showActivityIndicator(true)
-
-                do {
-                    try await self.newCanvas()
-
-                    self.viewModel.resetCoreData()
-
-                    self.updateDrawingComponents()
-
-                } catch {
-                    self.showAlert(error)
-                }
-            }
-        }
     }
 
     func bindData() {
@@ -326,10 +272,6 @@ private extension HandDrawingViewController {
             self?.contentView.exportImageButton.debounce()
             self?.saveImage()
         }
-        contentView.tapNewButton = { [weak self] in
-            guard let `self` else { return }
-            self.newCanvasDialogPresenter.presentAlert(on: self)
-        }
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
             self.viewModel.toggleDrawingTool()
@@ -383,7 +325,7 @@ private extension HandDrawingViewController {
 
             if let popup = textureLayerPopup {
                 baseView.addSubview(popup.view)
-  
+
                 popup.view.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
@@ -459,14 +401,54 @@ private extension HandDrawingViewController {
 private extension HandDrawingViewController {
     func showFileView() {
         let fileView = FileView(
-            list: viewModel.fileList,
-            onTapItem: { [weak self] zipFileURL in
-                self?.presentedViewController?.dismiss(animated: true)
-                self?.loadCanvas(zipFileURL: zipFileURL)
+            fileCoordinator: viewModel.fileCoordinator,
+            currentOpenFileURL: zipFileURL,
+            selectedFileURL: zipFileURL,
+            createAction: { [weak self] name in
+                guard let `self` else { return }
+                let zipFileURL = try await self.viewModel.createNewCanvas(
+                    fileName: name,
+                    device: self.sharedDevice,
+                    commandQueue: self.canvasView.sharedCommandQueue
+                )
+                self.loadCanvas(zipFileURL: zipFileURL)
+                self.presentedViewController?.dismiss(animated: true)
+            },
+            renameAction: { [weak self] index, newName in
+                guard let `self` else {
+                    throw NSError(
+                        title: String(localized: "Error"),
+                        message: String(localized: "Invalid Value")
+                    )
+                }
+                return try self.viewModel.renameCanvas(
+                    index: index,
+                    newName: newName,
+                    currentOpenFileURL: self.zipFileURL
+                )
+            },
+            deleteAction: { [weak self] index in
+                guard let `self` else { return }
+                try self.viewModel.deleteCanvas(
+                    index: index,
+                    currentOpenFileURL: self.zipFileURL
+                )
+            },
+            selectAction: { [weak self] zipFileURL in
+                guard let `self` else { return }
+                self.loadCanvas(zipFileURL: zipFileURL)
+                self.presentedViewController?.dismiss(animated: true)
             }
         )
 
         let vc = UIHostingController(rootView: fileView)
+        vc.modalPresentationStyle = .pageSheet
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.selectedDetentIdentifier = .large
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
+        }
 
         present(vc, animated: true)
     }
@@ -510,33 +492,38 @@ private extension HandDrawingViewController {
 private extension HandDrawingViewController {
 
     func loadCanvas(zipFileURL: URL) {
-        self.viewModel.onLoadCanvas(
+        self.viewModel.loadCanvas(
+            device: sharedDevice,
             zipFileURL: zipFileURL,
-            action: { [weak self] workingDirectoryURL in
-                try await self?.loadFiles(
-                    in: workingDirectoryURL
-                )
-            },
             completion: { [weak self] in
-                self?.updateDrawingComponents()
+                guard let `self` else { return }
+                Task {
+                    do {
+                        try await self.initializeCanvas(self.viewModel.textureSize)
+                        self.updateDrawingComponents()
+                    } catch {
+                        self.showAlert(error)
+                    }
+                }
             }
         )
     }
+
     func saveCanvas() {
-        viewModel.onSaveCanvas(
-            saveCanvasAction: { [weak self] tmpWorkingDirectoryURL in
-                try await self?.saveFiles(
-                    to: tmpWorkingDirectoryURL
-                )
-            },
+        viewModel.saveCanvas(
+            thumbnail: canvasView.thumbnail,
             completion: { [weak self] in
                 guard
                     let `self`,
                     let thumbnail = self.canvasView.thumbnail
                 else { return }
+
                 self.viewModel.upsertFileList(
-                    self.viewModel.currentFile(thumbnail: thumbnail)
+                    self.viewModel.currentFileItem(
+                        thumbnail: thumbnail
+                    )
                 )
+                self.viewModel.sortFileList()
             },
             zipFileURL: zipFileURL
         )

@@ -16,7 +16,6 @@ final class HandDrawingContentView: UIView {
     @IBOutlet private weak var resetTransformButton: UIButton!
     @IBOutlet private weak var saveButton: UIButton!
     @IBOutlet private weak var loadButton: UIButton!
-    @IBOutlet private weak var newButton: UIButton!
 
     @IBOutlet private weak var brushDiameterSlider: UISlider!
     @IBOutlet private weak var eraserDiameterSlider: UISlider!
@@ -114,7 +113,6 @@ final class HandDrawingContentView: UIView {
         resetTransformButton.isUserInteractionEnabled = isUserInteractionEnabled
         saveButton.isUserInteractionEnabled = isUserInteractionEnabled
         loadButton.isUserInteractionEnabled = isUserInteractionEnabled
-        newButton.isUserInteractionEnabled = isUserInteractionEnabled
 
         brushDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
         eraserDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
@@ -152,10 +150,6 @@ private extension HandDrawingContentView {
 
         exportImageButton.addAction(.init { [weak self] _ in
             self?.tapExportImageButton?()
-        }, for: .touchUpInside)
-
-        newButton.addAction(.init { [weak self] _ in
-            self?.tapNewButton?()
         }, for: .touchUpInside)
 
         drawingToolButton.addAction(.init { [weak self] _ in

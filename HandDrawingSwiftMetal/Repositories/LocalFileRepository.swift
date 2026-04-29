@@ -20,8 +20,9 @@ final class LocalFileRepository: LocalFileRepositoryProtocol {
 
 extension LocalFileRepository {
 
-    func createWorkingDirectory() throws {
+    func createWorkingDirectory() throws -> URL {
         try FileManager.createNewDirectory(workingDirectoryURL)
+        return workingDirectoryURL
     }
 
     func removeWorkingDirectory() throws {
