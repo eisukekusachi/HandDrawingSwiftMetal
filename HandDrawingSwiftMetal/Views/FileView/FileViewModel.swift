@@ -26,8 +26,16 @@ final class FileViewModel: ObservableObject {
 
     private var currentOpenFileURL: URL?
 
+    private var canCreate = false
     private var canRename = false
     private var canDelete = false
+
+    var createDisabled: Bool {
+        guard
+            canCreate
+        else { return true }
+        return false
+    }
 
     var renameDisabled: Bool {
         guard
@@ -56,11 +64,13 @@ final class FileViewModel: ObservableObject {
     func configure(
         currentOpenFileURL: URL? = nil,
         selectedFileURL: URL? = nil,
+        canCreate: Bool = false,
         canRename: Bool = false,
         canDelete: Bool = false,
         selectAction: ((URL) -> Void)? = nil
     ) {
         self.selectAction = selectAction
+        self.canCreate = canCreate
         self.canRename = canRename
         self.canDelete = canDelete
         self.currentOpenFileURL = currentOpenFileURL

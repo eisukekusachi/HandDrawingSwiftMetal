@@ -16,6 +16,57 @@ struct FileViewModelTests {
 
     @Suite
     @MainActor
+    struct CreateDisabled {
+
+        private func fileCoordinator(
+            fileURLs: [URL] = []
+        ) -> FileCoordinator {
+            let dependencies = HandDrawingViewDependencies(
+                localFileRepository: MockLocalFileRepository()
+            )
+            let items: [LocalFileItem] = fileURLs.map { url in
+                LocalFileItem(
+                    title: url.baseName,
+                    fileURL: url
+                )
+            }
+            return FileCoordinator(
+                fileList: items,
+                dependencies: dependencies,
+                fileSuffix: "zip",
+                fileManagerWrapper: MockFileManagerWrapper()
+            )
+        }
+
+        @Test
+        func `Verify that create is enabled when createAction exists`() {
+            let subject: Subject = .init(
+                fileCoordinator: fileCoordinator()
+            )
+
+            subject.configure(
+                canCreate: true
+            )
+
+            #expect(subject.createDisabled == false)
+        }
+
+        @Test
+        func `Verify that create is disabled when createAction is nil`() {
+            let subject: Subject = .init(
+                fileCoordinator: fileCoordinator()
+            )
+
+            subject.configure(
+                canCreate: false
+            )
+
+            #expect(subject.createDisabled == true)
+        }
+    }
+
+    @Suite
+    @MainActor
     struct DeleteDisabled {
 
         private func fileCoordinator(

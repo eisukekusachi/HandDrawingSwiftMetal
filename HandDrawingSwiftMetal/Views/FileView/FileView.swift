@@ -120,6 +120,7 @@ struct FileView: View {
             viewModel.configure(
                 currentOpenFileURL: currentOpenFileURL,
                 selectedFileURL: selectedFileURL,
+                canCreate: createAction != nil,
                 canRename: renameAction != nil,
                 canDelete: deleteAction != nil,
                 selectAction: selectAction
@@ -181,6 +182,7 @@ private extension FileView {
                 action: { viewModel.onTapNewButton() },
                 label: { Image(systemName: "plus.circle") }
             )
+            .disabled(viewModel.createDisabled)
 
             Button(
                 action: { viewModel.onTapRenameButton() },
