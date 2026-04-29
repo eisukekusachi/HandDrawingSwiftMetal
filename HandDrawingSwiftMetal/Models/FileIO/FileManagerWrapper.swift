@@ -13,7 +13,7 @@ protocol FileManagerWrapping: Sendable {
     func removeItem(at url: URL) throws
 }
 
-/// A implementation of `FileManagerWrapping` that delegates to `FileManager.default`
+/// An implementation of `FileManagerWrapping` that delegates to `FileManager.default`
 struct FileManagerWrapper: FileManagerWrapping {
     func moveItem(at sourceURL: URL, to destinationURL: URL) throws {
         try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
