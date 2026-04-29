@@ -15,7 +15,6 @@ final class FileViewModel: ObservableObject {
     let fileCoordinator: FileCoordinator
 
     @Published var selectedIndex: Int?
-
     @Published var isShowingRenameDialog = false
     @Published var isShowingDeleteConfirmDialog = false
     @Published var isShowingNewFileDialog = false

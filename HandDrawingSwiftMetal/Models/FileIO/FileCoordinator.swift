@@ -14,10 +14,10 @@ import UIKit
 @MainActor
 final class FileCoordinator: ObservableObject {
 
-    /// Zips in Documents (for `FileView`) with thumbnails and project metadata in memory.
+    /// Zips in Documents with thumbnails and project metadata in memory
     @Published private(set) var fileList: [LocalFileItem] = []
 
-    /// Suffix for project files in Documents (e.g. `zip`), from `ProjectConfiguration`.
+    /// Suffix for project files in Documents
     private(set) var fileSuffix: String = ""
 
     private let thumbnailName: String = "thumbnail.png"
@@ -38,7 +38,6 @@ final class FileCoordinator: ObservableObject {
         self.fileManager = fileManagerWrapper
     }
 
-    /// Replaces `fileList` from zips in Documents (metadata + thumbnails). Uses `fileSuffix` from configuration.
     func setupFileList(
         configuration: ProjectConfiguration
     ) async {
@@ -167,7 +166,7 @@ extension FileCoordinator {
 }
 
 extension FileCoordinator {
-
+    /// Updates an existing item if the title matches, or appends a new one if not found
     func upsertFileList(_ file: LocalFileItem) {
         var items = fileList
         if let index = items.firstIndex(where: { $0.title == file.title }) {
@@ -208,12 +207,14 @@ extension FileCoordinator {
         fileList = items
     }
 
+    /// Sorts the file list in descending order based on the last updated date
     func sortFileList() {
         var items = fileList
         items.sort { $0.updatedAt > $1.updatedAt }
         fileList = items
     }
 
+    /// Returns the index of the first item that matches the specified file URL
     func index(url: URL) -> Int? {
         fileList.firstIndex(where: { $0.fileURL == url })
     }

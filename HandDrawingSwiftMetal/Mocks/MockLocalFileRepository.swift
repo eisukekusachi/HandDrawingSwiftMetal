@@ -12,7 +12,7 @@ struct MockLocalFileRepository: LocalFileRepositoryProtocol, @unchecked Sendable
 
     init() {
         self.workingDirectoryURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("UT_FileCoordinator_WorkingDirectory_\(UUID().uuidString)")
+            .appendingPathComponent("workingDirectory_\(UUID().uuidString)")
     }
 
     @discardableResult

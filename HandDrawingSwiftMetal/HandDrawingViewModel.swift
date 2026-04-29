@@ -322,7 +322,6 @@ extension HandDrawingViewModel {
 
 extension HandDrawingViewModel {
 
-    /// New blank project file on disk: unique URL, new canvas, default tools, then save and list row.
     func onTapCreateButton(
         fileName: String,
         device: MTLDevice,

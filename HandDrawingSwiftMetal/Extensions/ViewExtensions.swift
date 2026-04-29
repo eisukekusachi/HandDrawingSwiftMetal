@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension View {
-    /// Alert with a single-line `TextField`, Cancel, and a confirm button.
+    /// Alert with a single-line `TextField`, Cancel, and a confirm button
     func alertWithTextField(
         title: String,
         textFieldPrompt: String,
@@ -54,7 +54,7 @@ extension View {
         )
     }
 
-    /// Single dismiss button. `message` is read when the alert is shown.
+    /// Single dismiss button
     func alert(
         title: String,
         message: Binding<String>,
