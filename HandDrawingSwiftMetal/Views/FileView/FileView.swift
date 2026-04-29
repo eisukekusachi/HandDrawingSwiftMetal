@@ -130,51 +130,6 @@ struct FileView: View {
 }
 
 private extension FileView {
-
-    func newItem() {
-        Task {
-            do {
-                guard let createAction else { return }
-                try await createAction(viewModel.newFileName)
-            } catch {
-                viewModel.errorAlertMessage = error.nsErrorDescription
-                viewModel.isShowingErrorAlert = true
-            }
-        }
-    }
-    func renameItem() {
-        Task {
-            do {
-                guard
-                    let renameAction,
-                    let index = viewModel.selectedIndex
-                else { return }
-                let newURL = try await renameAction(index, viewModel.draftName)
-                viewModel.selectedIndex = fileCoordinator.index(url: newURL)
-            } catch {
-                viewModel.errorAlertMessage = error.nsErrorDescription
-                viewModel.isShowingErrorAlert = true
-            }
-        }
-    }
-    func deleteItem() {
-        Task {
-            do {
-                guard
-                    let deleteAction,
-                    let index = viewModel.selectedIndex
-                else { return }
-                try await deleteAction(index)
-                viewModel.selectedIndex = nil
-            } catch {
-                viewModel.errorAlertMessage = error.nsErrorDescription
-                viewModel.isShowingErrorAlert = true
-            }
-        }
-    }
-}
-
-private extension FileView {
     @ViewBuilder
     func leadingToolbarContent() -> some View {
         HStack(spacing: 20) {
@@ -272,6 +227,53 @@ private extension FileView {
                     isSelected ? Color.accentColor.opacity(0.10) : Color.clear
                 )
         )
+    }
+}
+
+private extension FileView {
+
+    func newItem() {
+        Task {
+            do {
+                guard let createAction else { return }
+                try await createAction(viewModel.newFileName)
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
+        }
+    }
+
+    func renameItem() {
+        Task {
+            do {
+                guard
+                    let renameAction,
+                    let index = viewModel.selectedIndex
+                else { return }
+                let newURL = try await renameAction(index, viewModel.draftName)
+                viewModel.selectedIndex = fileCoordinator.index(url: newURL)
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
+        }
+    }
+
+    func deleteItem() {
+        Task {
+            do {
+                guard
+                    let deleteAction,
+                    let index = viewModel.selectedIndex
+                else { return }
+                try await deleteAction(index)
+                viewModel.selectedIndex = nil
+            } catch {
+                viewModel.errorAlertMessage = error.nsErrorDescription
+                viewModel.isShowingErrorAlert = true
+            }
+        }
     }
 }
 
