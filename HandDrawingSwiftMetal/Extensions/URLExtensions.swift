@@ -50,6 +50,17 @@ extension URL {
             return []
         }
     }
+}
+
+extension URL {
+
+    static func trimmedName(
+        oldName: String,
+        newName: String
+    ) -> String {
+        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedName.isEmpty ? oldName : trimmedName
+    }
 
     static func sanitizedName(_ raw: String) -> String {
         var string = raw
@@ -77,7 +88,9 @@ extension URL {
             exists: { FileManager.default.fileExists(atPath: $0.path) }
         )
     }
+}
 
+extension URL {
     /// Returns a unique file URL in Documents by appending `_2`, `_3`, ... when needed.
     /// This function is pure except for the injected `exists` predicate.
     static func uniqueProjectURLInDocuments(
@@ -137,13 +150,5 @@ extension URL {
         }
 
         return newFileURL
-    }
-
-    static func trimmedName(
-        oldName: String,
-        newName: String
-    ) -> String {
-        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedName.isEmpty ? oldName : trimmedName
     }
 }
