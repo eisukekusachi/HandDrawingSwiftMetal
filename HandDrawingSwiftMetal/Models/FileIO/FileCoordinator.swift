@@ -221,32 +221,6 @@ extension FileCoordinator {
 }
 
 private extension FileCoordinator {
-    func fileItem(
-        workingDirectoryURL: URL,
-        fileName: String
-    ) async throws -> LocalFileItem {
-        let zipFileURL = URL.documents.appendingPathComponent(fileName)
-
-        try await dependencies.localFileRepository.unzipToWorkingDirectory(
-            from: zipFileURL
-        )
-
-        let projectMetaData: ProjectArchiveModel = try .init(
-            in: workingDirectoryURL
-        )
-
-        let thumbnailData = try Data(
-            contentsOf: workingDirectoryURL.appendingPathComponent(thumbnailName)
-        )
-
-        return .init(
-            title: zipFileURL.baseName,
-            createdAt: projectMetaData.createdAt,
-            updatedAt: projectMetaData.updatedAt,
-            thumbnail: UIImage(data: thumbnailData),
-            suffix: fileSuffix
-        )
-    }
 
     func saveCanvasToWorkingDirectory(
         textureLayersState: TextureLayersState,
