@@ -16,8 +16,6 @@ import UIKit
 
 class HandDrawingViewController: UIViewController {
 
-    var zipFileURL: URL { viewModel.zipFileURL }
-
     @IBOutlet private weak var contentView: HandDrawingContentView!
 
     @IBOutlet private weak var activityIndicatorView: UIView!
@@ -402,8 +400,8 @@ private extension HandDrawingViewController {
     func showFileView() {
         let fileView = FileView(
             fileCoordinator: viewModel.fileCoordinator,
-            currentOpenFileURL: zipFileURL,
-            selectedFileURL: zipFileURL,
+            currentOpenFileURL: viewModel.zipFileURL,
+            selectedFileURL: viewModel.zipFileURL,
             createAction: { [weak self] name in
                 guard let `self` else { return }
                 let zipFileURL = try await self.viewModel.createNewCanvas(
@@ -424,14 +422,14 @@ private extension HandDrawingViewController {
                 return try self.viewModel.renameCanvas(
                     index: index,
                     newName: newName,
-                    currentOpenFileURL: self.zipFileURL
+                    currentOpenFileURL: self.viewModel.zipFileURL
                 )
             },
             deleteAction: { [weak self] index in
                 guard let `self` else { return }
                 try self.viewModel.deleteCanvas(
                     index: index,
-                    currentOpenFileURL: self.zipFileURL
+                    currentOpenFileURL: self.viewModel.zipFileURL
                 )
             },
             selectAction: { [weak self] zipFileURL in
@@ -525,7 +523,7 @@ private extension HandDrawingViewController {
                 )
                 self.viewModel.sortFileList()
             },
-            zipFileURL: zipFileURL
+            zipFileURL: viewModel.zipFileURL
         )
     }
 
