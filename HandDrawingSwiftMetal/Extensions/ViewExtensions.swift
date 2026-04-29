@@ -14,7 +14,7 @@ extension View {
         textFieldPrompt: String,
         message: String,
         confirmButtonTitle: String,
-        cancelButtonTitle: String = "Cancel",
+        cancelButtonTitle: String = String(localized: "Cancel"),
         text: Binding<String>,
         isPresented: Binding<Bool>,
         onConfirm: @escaping () -> Void
@@ -38,7 +38,7 @@ extension View {
         title: String,
         message: String,
         destructiveButtonTitle: String,
-        cancelButtonTitle: String = "Cancel",
+        cancelButtonTitle: String = String(localized: "Cancel"),
         isPresented: Binding<Bool>,
         onDestructive: @escaping () -> Void
     ) -> some View {
@@ -58,7 +58,7 @@ extension View {
     func alert(
         title: String,
         message: Binding<String>,
-        buttonTitle: String = "OK",
+        buttonTitle: String = String(localized: "OK"),
         isPresented: Binding<Bool>
     ) -> some View {
         modifier(
