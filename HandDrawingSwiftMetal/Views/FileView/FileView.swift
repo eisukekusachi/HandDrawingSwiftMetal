@@ -22,8 +22,8 @@ struct FileView: View {
     private let selectedFileURL: URL?
 
     private let createAction: ((String) async throws -> Void)?
-    private let renameAction: ((URL, String) async throws -> URL)?
-    private let deleteAction: ((URL) async throws -> Void)?
+    private let renameAction: ((Int, String) async throws -> URL)?
+    private let deleteAction: ((Int) async throws -> Void)?
     private let selectAction: (URL) -> Void
 
     private var columns: [GridItem] {
@@ -43,8 +43,8 @@ struct FileView: View {
         currentOpenFileURL: URL? = nil,
         selectedFileURL: URL? = nil,
         createAction: ((String) async throws -> Void)? = nil,
-        renameAction: ((URL, String) async throws -> URL)? = nil,
-        deleteAction: ((URL) async throws -> Void)? = nil,
+        renameAction: ((Int, String) async throws -> URL)? = nil,
+        deleteAction: ((Int) async throws -> Void)? = nil,
         selectAction: @escaping (URL) -> Void
     ) {
         self._fileCoordinator = ObservedObject(wrappedValue: fileCoordinator)
@@ -120,9 +120,8 @@ struct FileView: View {
             viewModel.configure(
                 currentOpenFileURL: currentOpenFileURL,
                 selectedFileURL: selectedFileURL,
-                renameAction: renameAction,
-                deleteAction: deleteAction,
-                createAction: createAction,
+                canRename: renameAction != nil,
+                canDelete: deleteAction != nil,
                 selectAction: selectAction
             )
         }
@@ -134,7 +133,8 @@ private extension FileView {
     func newItem() {
         Task {
             do {
-                try await viewModel.applyNewFile()
+                guard let createAction else { return }
+                try await createAction(viewModel.newFileName)
             } catch {
                 viewModel.errorAlertMessage = error.nsErrorDescription
                 viewModel.isShowingErrorAlert = true
@@ -144,7 +144,12 @@ private extension FileView {
     func renameItem() {
         Task {
             do {
-                try await viewModel.applyRename()
+                guard
+                    let renameAction,
+                    let index = viewModel.selectedIndex
+                else { return }
+                let newURL = try await renameAction(index, viewModel.draftName)
+                viewModel.selectedIndex = fileCoordinator.index(url: newURL)
             } catch {
                 viewModel.errorAlertMessage = error.nsErrorDescription
                 viewModel.isShowingErrorAlert = true
@@ -154,7 +159,12 @@ private extension FileView {
     func deleteItem() {
         Task {
             do {
-                try await viewModel.applyDelete()
+                guard
+                    let deleteAction,
+                    let index = viewModel.selectedIndex
+                else { return }
+                try await deleteAction(index)
+                viewModel.selectedIndex = nil
             } catch {
                 viewModel.errorAlertMessage = error.nsErrorDescription
                 viewModel.isShowingErrorAlert = true
@@ -292,7 +302,7 @@ private extension FileView {
         currentOpenFileURL: nil,
         selectedFileURL: nil,
         createAction: { _ in },
-        renameAction: { url, _ in url },
+        renameAction: { _, _ in URL(fileURLWithPath: "/tmp/example.zip") },
         deleteAction: { _ in },
         selectAction: { _ in }
     )

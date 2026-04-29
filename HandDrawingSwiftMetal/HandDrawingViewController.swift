@@ -406,7 +406,7 @@ private extension HandDrawingViewController {
             selectedFileURL: zipFileURL,
             createAction: { [weak self] name in
                 guard let `self` else { return }
-                let zipFileURL = try await self.viewModel.onTapCreateButton(
+                let zipFileURL = try await self.viewModel.createNewCanvas(
                     fileName: name,
                     device: self.sharedDevice,
                     commandQueue: self.canvasView.sharedCommandQueue
@@ -414,18 +414,23 @@ private extension HandDrawingViewController {
                 self.loadCanvas(zipFileURL: zipFileURL)
                 self.presentedViewController?.dismiss(animated: true)
             },
-            renameAction: { [weak self] oldURL, newName in
-                guard let `self` else { return oldURL }
-                return try self.viewModel.onTapRenameButton(
-                    oldFileURL: oldURL,
+            renameAction: { [weak self] index, newName in
+                guard let `self` else {
+                    throw NSError(
+                        title: String(localized: "Error"),
+                        message: String(localized: "Invalid Value")
+                    )
+                }
+                return try self.viewModel.renameCanvas(
+                    index: index,
                     newName: newName,
                     currentOpenFileURL: self.zipFileURL
                 )
             },
-            deleteAction: { [weak self] fileURL in
+            deleteAction: { [weak self] index in
                 guard let `self` else { return }
-                try self.viewModel.onTapDeleteButton(
-                    fileURL: fileURL,
+                try self.viewModel.deleteCanvas(
+                    index: index,
                     currentOpenFileURL: self.zipFileURL
                 )
             },

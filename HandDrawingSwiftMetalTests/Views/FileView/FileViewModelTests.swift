@@ -50,7 +50,7 @@ struct FileViewModelTests {
             subject.configure(
                 currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
-                deleteAction: { _ in }
+                canDelete: true
             )
 
             #expect(subject.selectedIndex == 1)
@@ -69,7 +69,7 @@ struct FileViewModelTests {
             subject.configure(
                 currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
-                deleteAction: nil
+                canDelete: false
             )
 
             #expect(subject.deleteDisabled == true)
@@ -87,7 +87,7 @@ struct FileViewModelTests {
             subject.configure(
                 currentOpenFileURL: urlA,
                 selectedFileURL: nil,
-                deleteAction: { _ in }
+                canDelete: true
             )
 
             #expect(subject.selectedIndex == nil)
@@ -108,7 +108,7 @@ struct FileViewModelTests {
             subject.configure(
                 currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
-                deleteAction: { _ in }
+                canDelete: true
             )
 
             subject.selectedIndex = index
@@ -128,7 +128,7 @@ struct FileViewModelTests {
             subject.configure(
                 currentOpenFileURL: urlA,
                 selectedFileURL: urlA,
-                deleteAction: { _ in }
+                canDelete: true
             )
 
             #expect(subject.selectedIndex == 0)
@@ -171,7 +171,7 @@ struct FileViewModelTests {
 
             subject.configure(
                 selectedFileURL: urlA,
-                renameAction: { url, _ in url }
+                canRename: true
             )
 
             #expect(subject.selectedIndex == 0)
@@ -189,7 +189,7 @@ struct FileViewModelTests {
 
             subject.configure(
                 selectedFileURL: urlA,
-                renameAction: nil
+                canRename: false
             )
 
             #expect(subject.selectedIndex == 0)
@@ -207,7 +207,7 @@ struct FileViewModelTests {
 
             subject.configure(
                 selectedFileURL: nil,
-                renameAction: { url, _ in url }
+                canRename: true
             )
 
             #expect(subject.selectedIndex == nil)
@@ -227,7 +227,7 @@ struct FileViewModelTests {
 
             subject.configure(
                 selectedFileURL: urlA,
-                renameAction: { url, _ in url }
+                canRename: true
             )
 
             subject.selectedIndex = index

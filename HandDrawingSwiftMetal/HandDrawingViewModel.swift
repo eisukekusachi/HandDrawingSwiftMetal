@@ -311,18 +311,7 @@ extension HandDrawingViewModel {
         }
     }
 
-    func upsertFileList(_ file: LocalFileItem) {
-        fileCoordinator.upsertFileList(file)
-    }
-
-    func sortFileList() {
-        fileCoordinator.sortFileList()
-    }
-}
-
-extension HandDrawingViewModel {
-
-    func onTapCreateButton(
+    func createNewCanvas(
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -375,13 +364,14 @@ extension HandDrawingViewModel {
     }
 
     @discardableResult
-    func onTapRenameButton(
-        oldFileURL: URL,
+    func renameCanvas(
+        index: Int,
         newName: String,
         currentOpenFileURL: URL
     ) throws -> URL {
         guard
-            let index = fileCoordinator.index(url: oldFileURL)
+            let item = fileCoordinator.item(index),
+            let index = fileCoordinator.index(url: item.fileURL)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -389,6 +379,8 @@ extension HandDrawingViewModel {
             )
             throw error
         }
+
+        let oldFileURL = item.fileURL
 
         let normalizedName = URL.normalizedName(
             oldName: oldFileURL.baseName,
@@ -417,19 +409,31 @@ extension HandDrawingViewModel {
         return newFileURL
     }
 
-    func onTapDeleteButton(
-        fileURL: URL,
+    func deleteCanvas(
+        index: Int,
         currentOpenFileURL: URL
     ) throws {
-        guard fileURL != currentOpenFileURL else {
+        guard
+            let item = fileCoordinator.item(index),
+                item.fileURL != currentOpenFileURL
+        else {
             let error = NSError(
                 title: String(localized: "Error"),
-                message: String(localized: "The currently open file cannot be deleted")
+                message: String(localized: "Invalid Value")
             )
             throw error
         }
+
         try fileCoordinator.deleteFile(
-            fileURL: fileURL
+            fileURL: item.fileURL
         )
+    }
+
+    func upsertFileList(_ file: LocalFileItem) {
+        fileCoordinator.upsertFileList(file)
+    }
+
+    func sortFileList() {
+        fileCoordinator.sortFileList()
     }
 }
