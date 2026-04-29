@@ -7,6 +7,9 @@
     "Create" : {
 
     },
+    "Delete" : {
+      "extractionState" : "manual"
+    },
     "Delete this file?" : {
 
     },

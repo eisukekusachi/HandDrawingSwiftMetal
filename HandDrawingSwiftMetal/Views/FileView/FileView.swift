@@ -105,7 +105,7 @@ struct FileView: View {
             .alertDestructiveConfirmation(
                 title: String(localized: "Delete this file?"),
                 message: String(localized: "This file will be removed from the device"),
-                destructiveButtonTitle: "Delete",
+                destructiveButtonTitle: String(localized: "Delete"),
                 isPresented: $viewModel.isShowingDeleteConfirmDialog,
                 onDestructive: { deleteItem() }
             )
