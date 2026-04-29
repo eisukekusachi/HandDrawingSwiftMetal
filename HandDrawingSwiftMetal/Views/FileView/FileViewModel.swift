@@ -30,7 +30,13 @@ final class FileViewModel: ObservableObject {
     private var currentOpenFileURL: URL?
 
     var renameDisabled: Bool {
-        renameAction == nil || selectedIndex == nil
+        guard
+            renameAction != nil,
+            let i = selectedIndex,
+            i >= 0 && i < fileCoordinator.fileList.count
+        else { return true }
+
+        return false
     }
 
     var deleteDisabled: Bool {

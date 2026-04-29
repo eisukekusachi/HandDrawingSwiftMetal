@@ -161,35 +161,51 @@ struct FileViewModelTests {
         }
 
         @Test
-        func `Verify that rename is disabled when renameAction is nil`() {
-            let urlA = URL(fileURLWithPath: "/tmp/UT_rename_disabled_no_action_a.zip")
-            let urlB = URL(fileURLWithPath: "/tmp/UT_rename_disabled_no_action_b.zip")
+        func `Verify that rename is enabled when renameAction exists and a row is selected`() {
+            let urlA = URL(fileURLWithPath: "/tmp/a.zip")
+            let urlB = URL(fileURLWithPath: "/tmp/b.zip")
 
             let subject: Subject = .init(
                 fileCoordinator: fileCoordinator(fileURLs: [urlA, urlB])
             )
 
             subject.configure(
-                currentOpenFileURL: nil,
-                selectedFileURL: urlB,
+                selectedFileURL: urlA,
+                renameAction: { url, _ in url }
+            )
+
+            #expect(subject.selectedIndex == 0)
+            #expect(subject.renameDisabled == false)
+        }
+
+        @Test
+        func `Verify that rename is disabled when renameAction is nil`() {
+            let urlA = URL(fileURLWithPath: "/tmp/a.zip")
+            let urlB = URL(fileURLWithPath: "/tmp/b.zip")
+
+            let subject: Subject = .init(
+                fileCoordinator: fileCoordinator(fileURLs: [urlA, urlB])
+            )
+
+            subject.configure(
+                selectedFileURL: urlA,
                 renameAction: nil
             )
 
-            #expect(subject.selectedIndex == 1)
+            #expect(subject.selectedIndex == 0)
             #expect(subject.renameDisabled == true)
         }
 
         @Test
         func `Verify that rename is disabled when no row is selected`() {
-            let urlA = URL(fileURLWithPath: "/tmp/UT_rename_disabled_no_selection_a.zip")
-            let urlB = URL(fileURLWithPath: "/tmp/UT_rename_disabled_no_selection_b.zip")
+            let urlA = URL(fileURLWithPath: "/tmp/a.zip")
+            let urlB = URL(fileURLWithPath: "/tmp/b.zip")
 
             let subject: Subject = .init(
                 fileCoordinator: fileCoordinator(fileURLs: [urlA, urlB])
             )
 
             subject.configure(
-                currentOpenFileURL: nil,
                 selectedFileURL: nil,
                 renameAction: { url, _ in url }
             )
@@ -198,23 +214,25 @@ struct FileViewModelTests {
             #expect(subject.renameDisabled == true)
         }
 
-        @Test
-        func `Verify that rename is enabled when renameAction exists and a row is selected`() {
-            let urlA = URL(fileURLWithPath: "/tmp/UT_rename_enabled_a.zip")
-            let urlB = URL(fileURLWithPath: "/tmp/UT_rename_enabled_b.zip")
+        @Test(
+            arguments: [-1, 2]
+        )
+        func `Verify that rename is disabled when selectedIndex is out of bounds`(index: Int) {
+            let urlA = URL(fileURLWithPath: "/tmp/a.zip")
+            let urlB = URL(fileURLWithPath: "/tmp/b.zip")
 
             let subject: Subject = .init(
                 fileCoordinator: fileCoordinator(fileURLs: [urlA, urlB])
             )
 
             subject.configure(
-                currentOpenFileURL: nil,
                 selectedFileURL: urlA,
                 renameAction: { url, _ in url }
             )
 
-            #expect(subject.selectedIndex == 0)
-            #expect(subject.renameDisabled == false)
+            subject.selectedIndex = index
+
+            #expect(subject.renameDisabled == true)
         }
     }
 }
