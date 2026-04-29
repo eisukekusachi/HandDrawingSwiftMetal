@@ -390,13 +390,15 @@ extension HandDrawingViewModel {
             throw error
         }
 
-        let sanitizedName = URL.sanitizedName(
-            URL.trimmedName(oldName: oldFileURL.baseName, newName: newName)
+        let normalizedName = URL.normalizedName(
+            oldName: oldFileURL.baseName,
+            newName: newName
         )
 
         let newFileURL = URL.uniqueURL(
-            baseName: URL.trimmedName(oldName: oldFileURL.baseName, newName: sanitizedName),
-            fileSuffix: fileCoordinator.fileSuffix
+            baseName: normalizedName,
+            fileSuffix: fileCoordinator.fileSuffix,
+            excludeURL: oldFileURL
         )
 
         try fileCoordinator.renameFile(
