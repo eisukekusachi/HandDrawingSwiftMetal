@@ -39,7 +39,7 @@ final class BrushPalette: ObservableObject {
 
 extension BrushPalette {
 
-    func initalizeData() {
+    func initializeData() {
         self.colors = initializeColors
         self.index = 0
     }

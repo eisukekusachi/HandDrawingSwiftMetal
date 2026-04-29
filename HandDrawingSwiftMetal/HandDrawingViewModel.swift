@@ -345,8 +345,8 @@ extension HandDrawingViewModel {
         textureLayersState.update(newTextureLayersState)
 
         drawingToolStorage.initializeData()
-        brushPalette.initalizeData()
-        eraserPalette.initalizeData()
+        brushPalette.initializeData()
+        eraserPalette.initializeData()
         project.update(
             projectName: targetURL.baseName,
             createdAt: Date(),

@@ -40,7 +40,7 @@ final class EraserPalette: ObservableObject {
 
 extension EraserPalette {
 
-    func initalizeData() {
+    func initializeData() {
         self.alphas = initializeAlphas
         self.index = 0
     }
