@@ -71,6 +71,14 @@ private extension TouchGestureState {
             let last = history.last
         else { return nil }
 
+        // If the touch has already ended, treat it as a drawing gesture even if it was very short.
+        // This prevents short strokes (e.g. after large zoom) from being ignored, while still
+        // avoiding accidental marks when the user is about to start a two-finger pinch.
+        if last.phase == .ended || last.phase == .cancelled {
+            return .drawing
+        }
+
+        // Otherwise, wait a short grace period to distinguish drawing from two-finger transforming.
         if (last.timestamp - first.timestamp) >= drawingGestureRecognitionSecond {
             return .drawing
         }
