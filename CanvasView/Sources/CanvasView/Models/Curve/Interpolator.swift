@@ -66,6 +66,8 @@ enum Interpolator {
 
         let duration = max(duration, 0)
 
+        guard duration != 0 else { return [] }
+
         for t in 0 ..< duration {
             let normalizedValue = CGFloat(Float(t) / Float(duration))
             result.append(difference * normalizedValue + begin)

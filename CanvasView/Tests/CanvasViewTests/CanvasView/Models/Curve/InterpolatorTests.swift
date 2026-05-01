@@ -27,13 +27,14 @@ struct InterpolatorTests {
             )
 
             #expect(result.count == 4)
-
-            #expect(result == [
-                .init(x: 0.0, y: 0.0),
-                .init(x: 7.34375, y: 7.03125),
-                .init(x: 13.75, y: 11.25),
-                .init(x: 18.28125, y: 9.84375)
-            ])
+            #expect(
+                result == [
+                    .init(x: 0.0, y: 0.0),
+                    .init(x: 7.34375, y: 7.03125),
+                    .init(x: 13.75, y: 11.25),
+                    .init(x: 18.28125, y: 9.84375)
+                ]
+            )
         }
 
         @Test
@@ -49,14 +50,15 @@ struct InterpolatorTests {
 
             // Because the end point is added, the result is the duration plus 1
             #expect(result.count == 5)
-
-            #expect(result == [
-                .init(x: 0.0, y: 0.0),
-                .init(x: 7.34375, y: 7.03125),
-                .init(x: 13.75, y: 11.25),
-                .init(x: 18.28125, y: 9.84375),
-                .init(x: 20.0, y: 0.0)
-            ])
+            #expect(
+                result == [
+                    .init(x: 0.0, y: 0.0),
+                    .init(x: 7.34375, y: 7.03125),
+                    .init(x: 13.75, y: 11.25),
+                    .init(x: 18.28125, y: 9.84375),
+                    .init(x: 20.0, y: 0.0)
+                ]
+            )
         }
 
         @Test
@@ -71,10 +73,11 @@ struct InterpolatorTests {
             )
 
             #expect(result.count == 1)
-
-            #expect(result == [
-                .init(x: 0.0, y: 0.0)
-            ])
+            #expect(
+                result == [
+                    .init(x: 0.0, y: 0.0)
+                ]
+            )
         }
 
         @Test
@@ -90,11 +93,12 @@ struct InterpolatorTests {
 
             // Because the end point is added, the result is the duration plus 1
             #expect(result.count == 2)
-
-            #expect(result == [
-                .init(x: 0, y: 0),
-                .init(x: 20, y: 0)
-            ])
+            #expect(
+                result == [
+                    .init(x: 0, y: 0),
+                    .init(x: 20, y: 0)
+                ]
+            )
         }
 
         @Test
@@ -109,8 +113,6 @@ struct InterpolatorTests {
             )
 
             #expect(result.isEmpty)
-
-            #expect(result == [])
         }
 
         @Test
@@ -126,16 +128,16 @@ struct InterpolatorTests {
 
             // Because the end point is added, the result is the duration plus 1
             #expect(result.count == 1)
-
-            #expect(result == [
-                .init(x: 20, y: 0)
-            ])
+            #expect(
+                result == [
+                    .init(x: 20, y: 0)
+                ]
+            )
         }
     }
 
     @Suite
     struct LinearInterpolation {
-
         @Test
         func `Create linear interpolation values`() {
             let result = Subject.createLinearInterpolationValues(
@@ -146,13 +148,14 @@ struct InterpolatorTests {
             )
 
             #expect(result.count == 4)
-
-            #expect(result == [
-                0.0,
-                2.5,
-                5.0,
-                7.5
-            ])
+            #expect(
+                result == [
+                    0.0,
+                    2.5,
+                    5.0,
+                    7.5
+                ]
+            )
         }
 
         @Test
@@ -166,14 +169,15 @@ struct InterpolatorTests {
 
             // Because the end point is added, the result is the duration plus 1
             #expect(result.count == 5)
-
-            #expect(result == [
-                0.0,
-                2.5,
-                5.0,
-                7.5,
-                10.0
-            ])
+            #expect(
+                result == [
+                    0.0,
+                    2.5,
+                    5.0,
+                    7.5,
+                    10.0
+                ]
+            )
         }
 
         @Test
@@ -186,10 +190,11 @@ struct InterpolatorTests {
             )
 
             #expect(result.count == 1)
-
-            #expect(result == [
-                0.0
-            ])
+            #expect(
+                result == [
+                    0.0
+                ]
+            )
         }
 
         @Test
@@ -202,11 +207,12 @@ struct InterpolatorTests {
             )
 
             #expect(result.count == 2)
-
-            #expect(result == [
-                0.0,
-                10.0
-            ])
+            #expect(
+                result == [
+                    0.0,
+                    10.0
+                ]
+            )
         }
 
         @Test
@@ -219,8 +225,6 @@ struct InterpolatorTests {
             )
 
             #expect(result.isEmpty)
-
-            #expect(result == [])
         }
 
         @Test
@@ -232,11 +236,7 @@ struct InterpolatorTests {
                 shouldAddEndPoint: true
             )
 
-            #expect(result.count == 1)
-
-            #expect(result == [
-                10.0
-            ])
+            #expect(result.isEmpty)
         }
     }
 }
