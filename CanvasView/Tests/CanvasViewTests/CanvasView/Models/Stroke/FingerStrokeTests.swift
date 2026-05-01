@@ -69,13 +69,13 @@ struct FingerStrokeTests {
         subject.appendTouchPointToDictionary([touchID0: .generate(phase: .began)])
         subject.appendTouchPointToDictionary([touchID1: .generate(phase: .began)])
 
-        // No elements are removed since their touchPhase is not .eneded.
+        // No elements are removed since their touchPhase is not .ended.
         subject.removeEndedTouchArrayFromDictionary()
         #expect(subject.touchHistories.count == 2)
 
         subject.appendTouchPointToDictionary([touchID0: .generate(phase: .moved)])
 
-        // No elements are removed since their touchPhase is not .eneded.
+        // No elements are removed since their touchPhase is not .ended.
         subject.removeEndedTouchArrayFromDictionary()
         #expect(subject.touchHistories.count == 2)
 
@@ -88,7 +88,7 @@ struct FingerStrokeTests {
         subject.appendTouchPointToDictionary([touchID1: .generate(phase: .ended)])
 
         subject.removeEndedTouchArrayFromDictionary()
-        #expect(subject.touchHistories.isEmpty == true)
+        #expect(subject.touchHistories.isEmpty)
     }
 
     @Test
@@ -127,13 +127,13 @@ struct FingerStrokeTests {
         subject.setStoreKeyForDrawing()
         subject.updateDrawingLineEndPoint()
 
-        #expect(subject.touchHistories.isEmpty == false)
+        #expect(!subject.touchHistories.isEmpty)
         #expect(subject.drawingTouchID == touchID0)
         #expect(subject.drawingLineEndPoint == touchPoint)
 
         subject.reset()
 
-        #expect(subject.touchHistories.isEmpty == true)
+        #expect(subject.touchHistories.isEmpty)
         #expect(subject.drawingTouchID == nil)
         #expect(subject.drawingLineEndPoint == nil)
     }
