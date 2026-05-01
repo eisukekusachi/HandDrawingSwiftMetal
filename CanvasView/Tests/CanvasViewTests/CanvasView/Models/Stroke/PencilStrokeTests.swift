@@ -61,7 +61,7 @@ struct PencilStrokeTests {
         #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) ==  thirdActualTouches + [fourthEstimatedTouch])
     }
 
-    struct drawingPointsTests {
+    struct DrawingPointsTests {
         @Test
         func `Retrieves elements from the array starting from the specified element`() {
             let actualTouchPoints: [TouchPoint] = [
@@ -81,7 +81,7 @@ struct PencilStrokeTests {
                 .generate(location: .init(x: 2, y: 2), phase: .moved, estimationUpdateIndex: 2)
             ])
 
-            #expect(subject.drawingPoints(after: actualTouchPoints[2]) == [])
+            #expect(subject.drawingPoints(after: actualTouchPoints[2]).isEmpty)
         }
 
         @Test
@@ -108,7 +108,7 @@ struct PencilStrokeTests {
         }
     }
 
-    struct setLatestEstimatedTouchPoint {
+    struct SetLatestEstimatedTouchPoint {
         @Test
         func `Assigns a value to latestEstimatedTouchPoint`() {
             let subject = Subject(
@@ -259,7 +259,7 @@ struct PencilStrokeTests {
 
         subject.reset()
 
-        #expect(subject.actualTouchPointArray == [])
+        #expect(subject.actualTouchPointArray.isEmpty)
         #expect(subject.latestEstimatedTouchPoint == nil)
         #expect(subject.latestEstimationUpdateIndex == nil)
         #expect(subject.drawingLineEndPoint == nil)

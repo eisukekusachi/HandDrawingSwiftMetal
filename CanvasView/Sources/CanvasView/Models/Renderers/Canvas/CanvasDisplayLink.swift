@@ -19,6 +19,10 @@ public final class CanvasDisplayLink {
 
     public var displayLink: CADisplayLink?
 
+    deinit {
+        displayLink?.invalidate()
+    }
+
     public init(isPaused: Bool = true) {
         displayLink = CADisplayLink(target: self, selector: #selector(displayLinkFrame))
         displayLink?.add(to: .current, forMode: .common)
@@ -38,22 +42,15 @@ public final class CanvasDisplayLink {
             displayLink?.isPaused = true
         }
     }
-
-    public func stop() {
-        displayLink?.isPaused = true
-    }
 }
 
-extension CanvasDisplayLink {
+private extension CanvasDisplayLink {
 
-    @objc private func displayLinkFrame() {
+    @objc func displayLinkFrame() {
         updateSubject.send()
     }
-}
 
-extension CanvasDisplayLink {
-
-    private func isCurrentlyDrawing(_ touchPhase: UITouch.Phase?) -> Bool {
+    func isCurrentlyDrawing(_ touchPhase: UITouch.Phase?) -> Bool {
         switch touchPhase {
         case .began, .moved, .stationary: return true
         default: return false

@@ -24,14 +24,6 @@ final class HandDrawingViewModel: ObservableObject {
 
     let textureLayersState: TextureLayersState = TextureLayersState()
 
-    private let textureLayerStorage: CoreDataTextureLayerStorage
-
-    private let textureLayersStorageController: PersistenceController = PersistenceController(
-        xcdatamodeldName: "TextureLayerStorage"
-    )
-
-    var fileList: [LocalFileItem] { fileCoordinator.fileList }
-
     var zipFileURL: URL {
         FileManager.zipFileURL(
             projectName: project.currentProjectName,
@@ -52,11 +44,15 @@ final class HandDrawingViewModel: ObservableObject {
 
     let fileCoordinator: FileCoordinator
 
+    private let textureLayerStorage: CoreDataTextureLayerStorage
     private let projectStorage: CoreDataProjectStorage
     private let drawingToolStorage: CoreDataDrawingToolStorage
     private let brushPaletteStorage: CoreDataBrushPaletteStorage
     private let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
+    private let textureLayersStorageController: PersistenceController = PersistenceController(
+        xcdatamodeldName: "TextureLayerStorage"
+    )
     private let projectStorageController: PersistenceController
     private let drawingToolStorageController: PersistenceController
 

@@ -14,19 +14,23 @@ struct DefaultDrawingCurveTests {
     private typealias Subject = DefaultDrawingCurve
 
     @Suite
-    struct IsFirstCurveNeededTest {
+    struct FirstCurveTest {
         @Test
         func `Verify that it returns true when DefaultDrawingCurve has three points`() {
             let subject = Subject()
 
             subject.append(points: [.generate()], touchPhase: .began)
-            #expect(subject.isFirstCurveNeeded() == false)
+            #expect(subject.isFirstCurveNeeded == false)
 
             subject.append(points: [.generate()], touchPhase: .moved)
-            #expect(subject.isFirstCurveNeeded() == false)
+            #expect(subject.isFirstCurveNeeded == false)
 
             subject.append(points: [.generate()], touchPhase: .moved)
-            #expect(subject.isFirstCurveNeeded() == true)
+
+            #expect(subject.count == 3)
+
+            // The first curve is drawn if isFirstCurveNeeded is true
+            #expect(subject.isFirstCurveNeeded == true)
         }
 
         @Test
@@ -40,14 +44,17 @@ struct DefaultDrawingCurveTests {
                 .generate()
             ], touchPhase: .moved)
 
-            #expect(subject.isFirstCurveNeeded() == true)
+            #expect(subject.count >= 3)
+
+            // The first curve is drawn if isFirstCurveNeeded is true
+            #expect(subject.isFirstCurveNeeded == true)
         }
     }
 
     @Suite
-    struct DrawingCurveTest {
+    struct CurveTest {
         @Test
-        func `Verify the creation of curve points`() {
+        func `Verify that it generates all curve points for a completed stroke`() {
             let subject = Subject()
 
             let points: [GrayscaleDotPoint] = [
@@ -58,7 +65,10 @@ struct DefaultDrawingCurveTests {
                 .init(location: .init(x: 40, y: 40), brightness: 40, diameter: 40, blurSize: 40)
             ]
 
-            subject.append(points: points, touchPhase: .ended)
+            subject.append(
+                points: points,
+                touchPhase: .ended
+            )
 
             #expect(
                 subject.curvePoints(
@@ -198,7 +208,13 @@ struct DefaultDrawingCurveTests {
             subject.append(points: [], touchPhase: .ended)
             #expect(subject.makeLastCurvePoints(duration: 2) == [])
 
-            #expect(subject.curvePoints(firstDuration: 2, intermediateDuration: 2, lastDuration: 2) == [])
+            #expect(
+                subject.curvePoints(
+                    firstDuration: 2,
+                    intermediateDuration: 2,
+                    lastDuration: 2
+                ) == []
+            )
         }
     }
 
@@ -212,15 +228,17 @@ struct DefaultDrawingCurveTests {
             #expect(subject.touchPhase == .cancelled)
             #expect(subject.hasFirstCurveBeenDrawn == false)
 
-            subject.append(points: [
-                .generate(),
-                .generate(),
-                .generate(),
-                .generate()
-            ], touchPhase: .moved)
+            subject.append(
+                points: [
+                    .generate(),
+                    .generate(),
+                    .generate()
+                ],
+                touchPhase: .moved
+            )
             subject.markFirstCurveAsDrawn()
 
-            #expect(subject.count == 4)
+            #expect(subject.count == 3)
             #expect(subject.touchPhase == .moved)
             #expect(subject.hasFirstCurveBeenDrawn == true)
 

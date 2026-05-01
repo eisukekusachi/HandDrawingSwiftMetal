@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
-import Combine
 import Foundation
 
 /// iterator for realtime drawing with `UITouch.Phase`
@@ -13,11 +12,11 @@ protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
     var touchPhase: TouchPhase { get }
 
-    func isFirstCurveNeeded() -> Bool
+    var isFirstCurveNeeded: Bool { get }
+
+    var curvePoints: [GrayscaleDotPoint] { get }
 
     func markFirstCurveAsDrawn()
-
-    func curvePoints() -> [GrayscaleDotPoint]
 
     func append(
         points: [GrayscaleDotPoint],
@@ -29,6 +28,10 @@ protocol DrawingCurve: Iterator<GrayscaleDotPoint> {
 
 extension DrawingCurve {
 
+    var curvePoints: [GrayscaleDotPoint] {
+        curvePoints()
+    }
+
     func curvePoints(
         firstDuration: Int? = nil,
         intermediateDuration: Int? = nil,
@@ -38,7 +41,7 @@ extension DrawingCurve {
 
         guard array.count >= 3 else { return [] }
 
-        if isFirstCurveNeeded() {
+        if isFirstCurveNeeded {
             result.append(
                 contentsOf: makeFirstCurvePoints(duration: firstDuration)
             )
@@ -56,14 +59,6 @@ extension DrawingCurve {
         }
 
         return result
-    }
-
-    func curvePoints() -> [GrayscaleDotPoint] {
-        curvePoints(
-            firstDuration: nil,
-            intermediateDuration: nil,
-            lastDuration: nil
-        )
     }
 
     /// Makes an array of first curve points from an iterator

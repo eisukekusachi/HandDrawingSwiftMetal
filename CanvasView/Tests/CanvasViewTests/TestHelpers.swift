@@ -12,6 +12,8 @@ import UIKit
 
 /// Repeatedly evaluates `condition` at the given interval until it becomes `true` or the timeout is reached
 struct TestHelpers {
+    @MainActor
+    private static var touchCache: [Int: UITouchDummy] = [:]
 
     static func waitUntil(
         _ condition: () -> Bool,
@@ -31,6 +33,10 @@ struct TestHelpers {
     /// `TouchID` is based on `ObjectIdentifier(UITouch)`, so tests need a real touch instance.
     @MainActor
     static func makeTouchID(seed: Int) -> TouchID {
+        if let cached = touchCache[seed] {
+            return TouchID(cached)
+        }
+
         let touch = UITouchDummy(
             location: .zero,
             previousLocation: .zero,
@@ -51,9 +57,10 @@ struct TestHelpers {
             estimatedPropertiesExpectingUpdates: [],
             estimationUpdateIndex: seed as NSNumber
         )
+        touchCache[seed] = touch
         return TouchID(touch)
     }
-/*
+
     @MainActor
     static func makeTouchHistories(_ histories: [Int: [TouchPoint]]) -> TouchHistoriesOnScreen {
         Dictionary(
@@ -62,5 +69,4 @@ struct TestHelpers {
             }
         )
     }
-*/
 }
