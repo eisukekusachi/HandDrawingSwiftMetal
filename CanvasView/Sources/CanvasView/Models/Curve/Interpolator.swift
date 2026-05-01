@@ -22,6 +22,8 @@ enum Interpolator {
 
         let duration = max(duration, 0)
 
+        guard duration != 0 else { return [] }
+
         var t: Float = 0.0
         let step: Float = duration != 0 ? (1.0 / Float(duration)) : 0.0
 
