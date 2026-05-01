@@ -99,6 +99,7 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
+		D4F09CF82FA51271007DD2DF /* HandDrawingSwiftMetalTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = D4F09CF72FA51271007DD2DF /* HandDrawingSwiftMetalTests.xctestplan */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
 		D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */; };
 		D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256E2EAC614B00439FFF /* FileInput.swift */; };
@@ -220,6 +221,7 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D4F09CF72FA51271007DD2DF /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = SOURCE_ROOT; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
 		D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepository.swift; sourceTree = "<group>"; };
 		D4F5256E2EAC614B00439FFF /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 				D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
+				D4F09CF72FA51271007DD2DF /* HandDrawingSwiftMetalTests.xctestplan */,
 			);
 			path = HandDrawingSwiftMetal;
 			sourceTree = "<group>";
@@ -721,6 +724,7 @@
 				D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */,
 				D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */,
 				D44624652F9C546B00BE4E8A /* Localizable.xcstrings in Resources */,
+				D4F09CF82FA51271007DD2DF /* HandDrawingSwiftMetalTests.xctestplan in Resources */,
 				D4E1ECE92752388E00D4A23D /* LaunchScreen.storyboard in Resources */,
 				D4E1ECE62752388E00D4A23D /* Assets.xcassets in Resources */,
 				D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */,

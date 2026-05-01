@@ -1,0 +1,52 @@
+{
+  "configurations" : [
+    {
+      "id" : "97C57C2B-599C-4271-80D7-414CD4649CA1",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:TextureLayerView",
+        "identifier" : "TextureLayerViewTests",
+        "name" : "TextureLayerViewTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:HandDrawingSwiftMetal.xcodeproj",
+        "identifier" : "D4E1ECEE2752388E00D4A23D",
+        "name" : "HandDrawingSwiftMetalTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:TextureLayerCanvasView",
+        "identifier" : "TextureLayerCanvasViewTests",
+        "name" : "TextureLayerCanvasViewTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:CanvasView",
+        "identifier" : "CanvasViewTests",
+        "name" : "CanvasViewTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:HandDrawingSwiftMetal.xcodeproj",
+        "identifier" : "D4E1ECF82752388E00D4A23D",
+        "name" : "HandDrawingSwiftMetalUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
