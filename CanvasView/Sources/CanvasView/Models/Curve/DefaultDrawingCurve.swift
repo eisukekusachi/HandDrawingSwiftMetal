@@ -5,7 +5,6 @@
 //  Created by Eisuke Kusachi on 2024/07/28.
 //
 
-import Combine
 import UIKit
 
 /// iterator for creating a curve in real-time using touch phases
@@ -16,7 +15,7 @@ final class DefaultDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     }
 
     /// Checks whether the first curve has ever been drawn during the drawing process
-    func isFirstCurveNeeded() -> Bool {
+    var isFirstCurveNeeded: Bool {
         return array.count >= 3 && !hasFirstCurveBeenDrawn
     }
 

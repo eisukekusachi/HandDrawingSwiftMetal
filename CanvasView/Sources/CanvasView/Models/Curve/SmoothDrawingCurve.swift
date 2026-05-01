@@ -16,7 +16,7 @@ final class SmoothDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     }
 
     /// Checks whether the first curve has ever been drawn during the drawing process
-    func isFirstCurveNeeded() -> Bool {
+    var isFirstCurveNeeded: Bool {
         return array.count >= 3 && !hasFirstCurveBeenDrawn
     }
 

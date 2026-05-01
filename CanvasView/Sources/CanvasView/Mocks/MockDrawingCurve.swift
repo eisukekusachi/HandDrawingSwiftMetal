@@ -12,8 +12,8 @@ import UIKit
 final class MockDrawingCurve: Iterator<GrayscaleDotPoint>, DrawingCurve {
     var touchPhase: TouchPhase = .cancelled
 
-    func isFirstCurveNeeded() -> Bool {
-        return false
+    var isFirstCurveNeeded: Bool {
+        false
     }
 
     func markFirstCurveAsDrawn() {}
