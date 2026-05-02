@@ -14,7 +14,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:HandDrawingSwiftMetalTests.xctestplan"
+            reference = "container:HandDrawingSwiftMetalTests/HandDrawingSwiftMetalTests.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>
