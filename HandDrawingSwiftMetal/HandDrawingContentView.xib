@@ -56,7 +56,7 @@
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ve-sD-YOE">
                             <rect key="frame" x="99.333333333333343" y="0.0" width="47.333333333333343" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <buttonConfiguration key="configuration" style="plain" image="document.badge.plus.fill" catalog="system"/>
+                            <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
                             <rect key="frame" x="146.66666666666666" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
@@ -175,7 +175,7 @@
     <resources>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
-        <image name="document.badge.plus.fill" catalog="system" width="120" height="128"/>
+        <image name="square.and.arrow.down" catalog="system" width="110" height="128"/>
         <image name="photo" catalog="system" width="128" height="93"/>
         <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
         <image name="square.and.arrow.up" catalog="system" width="110" height="128"/>
