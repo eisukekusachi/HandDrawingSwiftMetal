@@ -248,6 +248,10 @@ extension CanvasView: PencilInputGestureRecognizerSender {
     }
 
     func sendPencilActualTouches(_ touches: Set<UITouch>, on view: UIView) {
+        guard viewModel.canvasTexture != nil else {
+            Logger.error("Failed to access canvas texture because it has not been initialized. Call initializeCanvas(_:) first.")
+            return
+        }
         viewModel.onPencilGestureDetected(
             actualTouches: touches,
             view: view
