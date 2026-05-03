@@ -139,7 +139,7 @@ public extension EraserDrawingRenderer {
             )
         else {
             Logger.error(
-                "Failed to create buffers \(curvePoints.count) points, \(drawingTexture.size)"
+                "Failed to create buffers \(curvePoints.count) points, \(lineDrawnTexture.size)"
             )
             _displayRealtimeDrawingTexture = false
             return
