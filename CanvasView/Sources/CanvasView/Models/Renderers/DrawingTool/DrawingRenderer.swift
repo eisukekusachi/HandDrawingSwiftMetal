@@ -13,7 +13,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer: AnyObject {
 
-    /// `true` after ``drawStroke`` last completed a full raster pass this stroke. Early returns (e.g. no curve samples yet) leave the previous value so the UI does not flicker.
+    /// `true` after ``drawStroke`` last completed a full raster pass this stroke
     var displayRealtimeDrawingTexture: Bool { get }
 
     var diameter: Int { get }
@@ -29,7 +29,7 @@ public protocol DrawingRenderer: AnyObject {
     /// Pen drawing has started
     func beginPencilStroke(curveSpaceScale: CGFloat)
 
-    /// Appends stroke points in texture space; ``strokeCurveSpaceScale`` is applied internally before the curve stores samples.
+    /// Appends stroke points
     func appendStrokePoints(
         strokePoints: [GrayscaleDotPoint],
         touchPhase: TouchPhase
