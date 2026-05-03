@@ -139,6 +139,11 @@ class HandDrawingViewController: UIViewController {
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
     }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        syncTextureLayerPopupArrow()
+    }
 }
 
 private extension HandDrawingViewController {
@@ -312,11 +317,6 @@ private extension HandDrawingViewController {
                     AnyView(EmptyView())
                 }
             }
-            popupView.presenter.arrowX(
-                contentView.layerButton,
-                to: contentView,
-                dialogWidth: 300
-            )
 
             textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
             textureLayerPopup?.view.backgroundColor = .white
@@ -325,18 +325,46 @@ private extension HandDrawingViewController {
                 baseView.addSubview(popup.view)
 
                 popup.view.translatesAutoresizingMaskIntoConstraints = false
-                NSLayoutConstraint.activate([
-                    popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor),
-                    popup.view.centerXAnchor.constraint(equalTo: contentView.layerButton.centerXAnchor),
-                    popup.view.widthAnchor.constraint(equalToConstant: 300),
-                    popup.view.heightAnchor.constraint(equalToConstant: 300)
-                ])
+                let safe = baseView.safeAreaLayoutGuide
+                let top = popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor)
+                let width = popup.view.widthAnchor.constraint(equalToConstant: 300)
+                let height = popup.view.heightAnchor.constraint(equalToConstant: 300)
+                let leadingMin = popup.view.leadingAnchor.constraint(
+                    greaterThanOrEqualTo: safe.leadingAnchor,
+                    constant: 8
+                )
+                let trailingMax = popup.view.trailingAnchor.constraint(
+                    lessThanOrEqualTo: safe.trailingAnchor,
+                    constant: -8
+                )
+                let centerX = popup.view.centerXAnchor.constraint(
+                    equalTo: contentView.layerButton.centerXAnchor
+                )
+                centerX.priority = .defaultHigh
+                NSLayoutConstraint.activate([top, width, height, leadingMin, trailingMax, centerX])
+
+                baseView.layoutIfNeeded()
+                textureLayerPresenter.updateArrowTip(
+                    fromTarget: contentView.layerButton,
+                    popupRootView: popup.view
+                )
             }
             textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
         }
 
         addBrushPalette()
         addEraserPalette()
+    }
+
+    func syncTextureLayerPopupArrow() {
+        guard
+            let popup = textureLayerPopup,
+            popup.view.superview != nil
+        else { return }
+        textureLayerPresenter.updateArrowTip(
+            fromTarget: contentView.layerButton,
+            popupRootView: popup.view
+        )
     }
 
     func addBrushPalette() {

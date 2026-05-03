@@ -24,14 +24,15 @@ import SwiftUI
         isUserInteractionEnabled = isEnabled
     }
 
-    func arrowX(_ target: UIView, to destination: UIView, dialogWidth: CGFloat) {
-        let targetViewCenterX = target.convert(
-            target.bounds, to: destination
-        ).midX
-        let layerViewX = targetViewCenterX - dialogWidth * 0.5
-        let centerX = targetViewCenterX - layerViewX
-
-        self.arrowX = centerX
+    /// Sets the arrow tip horizontal position in `popupRootView` coordinates so it stays under `target`
+    func updateArrowTip(fromTarget target: UIView, popupRootView: UIView) {
+        self.arrowX = target.convert(
+            .init(
+                x: target.bounds.midX,
+                y: target.bounds.midY
+            ),
+            to: popupRootView
+        ).x
     }
 }
 
