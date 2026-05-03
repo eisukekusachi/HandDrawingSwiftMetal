@@ -13,7 +13,7 @@ extension CGAffineTransform {
     /// Magnitude of the linear part (rotation × uniform scale), ignoring translation.
     /// Matches the scale term used in ``inverted(flipY:)``.
     var uniformLinearScale: CGFloat {
-        sqrt(a * a + c * c)
+        hypot(a, c)
     }
 
     // Generates a matrix from a center point and two points
@@ -109,7 +109,7 @@ extension CGAffineTransform {
     func inverted(
         flipY: Bool = false
     ) -> Self {
-        let currentScale = sqrt(a * a + c * c)
+        let currentScale = hypot(a, c)
         let angle = atan2(b, a)
         let inverseScale = 1.0 / currentScale
         let newA = cos(angle) * inverseScale
