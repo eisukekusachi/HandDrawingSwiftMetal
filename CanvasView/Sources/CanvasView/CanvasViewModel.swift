@@ -365,15 +365,15 @@ extension CanvasViewModel {
         diameter: CGFloat
     ) -> [GrayscaleDotPoint] {
         pointArray.map {
-            let textureLocation = CGAffineTransform.texturePoint(
-                screenPoint: $0.preciseLocation,
-                matrix: transforming.matrix.inverted(flipY: true),
-                textureSize: textureSize,
-                drawableSize: displayTextureSize,
-                frameSize: frameSize
-            )
-            return .init(
-                location: textureLocation,
+            .init(
+                location: CGAffineTransform.texturePoint(
+                    screenPoint: $0.preciseLocation,
+                    matrix: transforming.matrix.inverted(flipY: true),
+                    textureSize: textureSize,
+                    drawableSize: displayTextureSize,
+                    frameSize: frameSize
+                )
+,
                 brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
                 diameter: diameter
             )
