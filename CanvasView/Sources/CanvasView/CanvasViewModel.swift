@@ -404,8 +404,7 @@ extension CanvasViewModel {
     }
 
     private func strokeCurveSpaceScale(from matrix: CGAffineTransform) -> CGFloat {
-        let s = matrix.uniformLinearScale
-        return min(max(s, 1), 64)
+        min(max(matrix.uniformLinearScale, 1), 64)
     }
 
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
