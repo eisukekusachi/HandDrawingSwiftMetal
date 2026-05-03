@@ -24,10 +24,10 @@ public protocol DrawingRenderer: AnyObject {
     func initializeTextures(_ textureSize: CGSize)
 
     /// Finger drawing has started
-    func beginFingerStroke(curveSpaceScale: CGFloat)
+    func beginFingerStroke(curveSpaceScale: CGFloat?)
 
     /// Pen drawing has started
-    func beginPencilStroke(curveSpaceScale: CGFloat)
+    func beginPencilStroke(curveSpaceScale: CGFloat?)
 
     /// Appends stroke points
     func appendStrokePoints(
