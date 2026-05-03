@@ -172,13 +172,6 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard
-            canvasTexture != nil
-        else {
-            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
-            return
-        }
-
         inputState.update(.finger)
 
         // Return if a pen input is in progress
@@ -250,14 +243,6 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard
-            canvasTexture != nil
-        else {
-            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
-            return
-        }
-
-
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
             cancelFingerDrawing()
