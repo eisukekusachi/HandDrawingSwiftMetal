@@ -37,6 +37,8 @@ public final class EraserDrawingRenderer: DrawingRenderer {
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
+    private var strokeCurveSpaceScale: CGFloat = 1
+
     public init() {}
 }
 
@@ -85,11 +87,13 @@ public extension EraserDrawingRenderer {
         self.alpha = alpha
     }
 
-    func beginFingerStroke() {
+    func beginFingerStroke(curveSpaceScale: CGFloat) {
+        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
         drawingCurve = SmoothDrawingCurve()
     }
 
-    func beginPencilStroke() {
+    func beginPencilStroke(curveSpaceScale: CGFloat) {
+        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
         drawingCurve = DefaultDrawingCurve()
     }
 
@@ -117,7 +121,7 @@ public extension EraserDrawingRenderer {
             let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: drawingCurve.curvePoints(),
+                points: grayscaleCurvePointsInTextureCoordinates(drawingCurve),
                 alpha: alpha,
                 textureSize: lineDrawnTexture.size,
                 with: renderer.device
@@ -174,11 +178,31 @@ public extension EraserDrawingRenderer {
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
         clearTextures(with: commandBuffer)
         drawingCurve = nil
+        strokeCurveSpaceScale = 1
         _displayRealtimeDrawingTexture = false
     }
 }
 
 private extension EraserDrawingRenderer {
+
+    static func clampedCurveSpaceScale(_ value: CGFloat) -> CGFloat {
+        min(max(value, 1), 64)
+    }
+
+    func grayscaleCurvePointsInTextureCoordinates(_ curve: DrawingCurve) -> [GrayscaleDotPoint] {
+        let scaled = curve.curvePoints()
+        guard strokeCurveSpaceScale != 1 else { return scaled }
+        let inv = 1 / strokeCurveSpaceScale
+        return scaled.map {
+            GrayscaleDotPoint(
+                location: CGPoint(x: $0.location.x * inv, y: $0.location.y * inv),
+                brightness: $0.brightness,
+                diameter: $0.diameter,
+                blurSize: $0.blurSize
+            )
+        }
+    }
+
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
         guard let renderer else { return }
 

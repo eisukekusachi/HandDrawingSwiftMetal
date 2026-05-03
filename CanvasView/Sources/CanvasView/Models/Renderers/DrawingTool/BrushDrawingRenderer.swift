@@ -33,6 +33,9 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
+    /// Texture-space coordinates sent to ``DrawingCurve`` are multiplied by this for the current stroke; ``drawStroke`` divides them back out before building Metal buffers.
+    private var strokeCurveSpaceScale: CGFloat = 1
+
     public init() {}
 }
 
@@ -80,11 +83,13 @@ public extension BrushDrawingRenderer {
         self.color = color
     }
 
-    func beginFingerStroke() {
+    func beginFingerStroke(curveSpaceScale: CGFloat) {
+        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
         drawingCurve = SmoothDrawingCurve()
     }
 
-    func beginPencilStroke() {
+    func beginPencilStroke(curveSpaceScale: CGFloat) {
+        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
         drawingCurve = DefaultDrawingCurve()
     }
 
@@ -111,7 +116,7 @@ public extension BrushDrawingRenderer {
             let baseTexture,
             let realtimeDrawingTexture,
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: drawingCurve.curvePoints(),
+                points: grayscaleCurvePointsInTextureCoordinates(drawingCurve),
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
                 with: renderer.device
@@ -161,11 +166,31 @@ public extension BrushDrawingRenderer {
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
         clearTextures(with: commandBuffer)
         drawingCurve = nil
+        strokeCurveSpaceScale = 1
         _displayRealtimeDrawingTexture = false
     }
 }
 
 private extension BrushDrawingRenderer {
+
+    static func clampedCurveSpaceScale(_ value: CGFloat) -> CGFloat {
+        min(max(value, 1), 64)
+    }
+
+    func grayscaleCurvePointsInTextureCoordinates(_ curve: DrawingCurve) -> [GrayscaleDotPoint] {
+        let scaled = curve.curvePoints()
+        guard strokeCurveSpaceScale != 1 else { return scaled }
+        let inv = 1 / strokeCurveSpaceScale
+        return scaled.map {
+            GrayscaleDotPoint(
+                location: CGPoint(x: $0.location.x * inv, y: $0.location.y * inv),
+                brightness: $0.brightness,
+                diameter: $0.diameter,
+                blurSize: $0.blurSize
+            )
+        }
+    }
+
     func clearTextures(with commandBuffer: MTLCommandBuffer) {
         guard let renderer else { return }
 

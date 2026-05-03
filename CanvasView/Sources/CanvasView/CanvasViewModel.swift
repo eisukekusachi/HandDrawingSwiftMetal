@@ -71,6 +71,9 @@ final class CanvasViewModel {
 
     private let transforming = Transforming()
 
+    /// Uniform canvas scale captured once per stroke; stroke points are multiplied by this before Bézier sampling.
+    private var activeStrokeCurveSpaceScale: CGFloat = 1
+
     init(
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
@@ -148,6 +151,7 @@ extension CanvasViewModel {
     }
 
     func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+        activeStrokeCurveSpaceScale = 1
         self.drawingRenderer = drawingRenderer
         self.drawingRenderer?.prepareNextStroke()
     }
@@ -204,7 +208,8 @@ extension CanvasViewModel {
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
 
-                drawingRenderer.beginFingerStroke()
+                activeStrokeCurveSpaceScale = Self.strokeCurveSpaceScale(from: transforming.matrix)
+                drawingRenderer.beginFingerStroke(curveSpaceScale: activeStrokeCurveSpaceScale)
             }
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
@@ -215,7 +220,8 @@ extension CanvasViewModel {
                     textureSize: currentTextureSize,
                     displayTextureSize: displayTextureSize,
                     frameSize: frameSize,
-                    diameter: CGFloat(drawingRenderer.diameter)
+                    diameter: CGFloat(drawingRenderer.diameter),
+                    curveSpaceScale: activeStrokeCurveSpaceScale
                 ),
                 touchPhase: pointArray.currentTouchPhase
             )
@@ -287,7 +293,8 @@ extension CanvasViewModel {
         if actualTouches.contains(where: { $0.phase == .began }) {
             strokeEventSubject.send(.pencilStrokeBegan)
 
-            drawingRenderer.beginPencilStroke()
+            activeStrokeCurveSpaceScale = Self.strokeCurveSpaceScale(from: transforming.matrix)
+            drawingRenderer.beginPencilStroke(curveSpaceScale: activeStrokeCurveSpaceScale)
         }
 
         pencilStroke.appendActualTouches(
@@ -304,7 +311,8 @@ extension CanvasViewModel {
                 textureSize: currentTextureSize,
                 displayTextureSize: displayTextureSize,
                 frameSize: frameSize,
-                diameter: CGFloat(drawingRenderer.diameter)
+                diameter: CGFloat(drawingRenderer.diameter),
+                curveSpaceScale: activeStrokeCurveSpaceScale
             ),
             touchPhase: pointArray.currentTouchPhase
         )
@@ -367,16 +375,21 @@ extension CanvasViewModel {
         textureSize: CGSize,
         displayTextureSize: CGSize,
         frameSize: CGSize,
-        diameter: CGFloat
+        diameter: CGFloat,
+        curveSpaceScale: CGFloat
     ) -> [GrayscaleDotPoint] {
         pointArray.map {
-            .init(
-                location: CGAffineTransform.texturePoint(
-                    screenPoint: $0.preciseLocation,
-                    matrix: transforming.matrix.inverted(flipY: true),
-                    textureSize: textureSize,
-                    drawableSize: displayTextureSize,
-                    frameSize: frameSize
+            let textureLocation = CGAffineTransform.texturePoint(
+                screenPoint: $0.preciseLocation,
+                matrix: transforming.matrix.inverted(flipY: true),
+                textureSize: textureSize,
+                drawableSize: displayTextureSize,
+                frameSize: frameSize
+            )
+            return .init(
+                location: CGPoint(
+                    x: textureLocation.x * curveSpaceScale,
+                    y: textureLocation.y * curveSpaceScale
                 ),
                 brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
                 diameter: diameter
@@ -384,7 +397,13 @@ extension CanvasViewModel {
         }
     }
 
+    private static func strokeCurveSpaceScale(from matrix: CGAffineTransform) -> CGFloat {
+        let s = matrix.uniformLinearScale
+        return min(max(s, 1), 64)
+    }
+
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
+        activeStrokeCurveSpaceScale = 1
         inputState.reset()
         touchGesture.reset()
 
@@ -407,6 +426,7 @@ extension CanvasViewModel {
     }
 
     private func cancelFingerDrawing() {
+        activeStrokeCurveSpaceScale = 1
         fingerStroke.reset()
 
         transforming.resetMatrix()

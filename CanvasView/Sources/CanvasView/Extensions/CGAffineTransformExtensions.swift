@@ -5,9 +5,17 @@
 //  Created by Eisuke Kusachi on 2023/03/31.
 //
 
+import CoreGraphics
 import Foundation
 
 extension CGAffineTransform {
+
+    /// Magnitude of the linear part (rotation × uniform scale), ignoring translation.
+    /// Matches the scale term used in ``inverted(flipY:)``.
+    var uniformLinearScale: CGFloat {
+        sqrt(a * a + c * c)
+    }
+
     // Generates a matrix from a center point and two points
     static func makeMatrix(
         center: CGPoint,
