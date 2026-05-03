@@ -319,9 +319,10 @@ private extension HandDrawingViewController {
             }
 
             textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
-            textureLayerPopup?.view.backgroundColor = .white
 
             if let popup = textureLayerPopup {
+                popup.view.backgroundColor = .clear
+                popup.view.isOpaque = false
                 baseView.addSubview(popup.view)
 
                 popup.view.translatesAutoresizingMaskIntoConstraints = false
