@@ -13,6 +13,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer: AnyObject {
 
+    /// `true` after ``drawStroke`` last completed a full raster pass this stroke. Early returns (e.g. no curve samples yet) leave the previous value so the UI does not flicker.
     var displayRealtimeDrawingTexture: Bool { get }
 
     var diameter: Int { get }

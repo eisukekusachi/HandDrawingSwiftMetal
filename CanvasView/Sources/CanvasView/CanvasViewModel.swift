@@ -342,11 +342,17 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
-            canvasRenderer.applyRealtimeDrawingTexture(
-                realtimeDrawingTexture,
-                to: currentTexture,
-                with: commandBuffer
-            )
+            if drawingRenderer.displayRealtimeDrawingTexture {
+                canvasRenderer.applyRealtimeDrawingTexture(
+                    realtimeDrawingTexture,
+                    to: currentTexture,
+                    with: commandBuffer
+                )
+            } else {
+                Logger.error(
+                    "CanvasViewModel: stroke ended but drawStroke did not complete this frame — skipping applyRealtimeDrawingTexture so currentTexture is not cleared"
+                )
+            }
 
             // Reset parameters on drawing completion
             prepareNextStroke(commandBuffer: commandBuffer)

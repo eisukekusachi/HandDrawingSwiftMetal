@@ -114,14 +114,31 @@ public extension BrushDrawingRenderer {
             let drawingTexture,
             let grayscaleTexture,
             let baseTexture,
-            let realtimeDrawingTexture,
+            let realtimeDrawingTexture
+        else {
+            _displayRealtimeDrawingTexture = false
+            return
+        }
+
+        let curvePoints = grayscaleCurvePointsInTextureCoordinates(drawingCurve)
+        if curvePoints.isEmpty {
+            return
+        }
+
+        guard
             let buffers = MTLBuffers.makeGrayscalePointBuffers(
-                points: grayscaleCurvePointsInTextureCoordinates(drawingCurve),
+                points: curvePoints,
                 alpha: color.alpha,
                 textureSize: drawingTexture.size,
                 with: renderer.device
             )
-        else { return }
+        else {
+            Logger.error(
+                "Failed to create buffers \(curvePoints.count) points, \(drawingTexture.size)"
+            )
+            _displayRealtimeDrawingTexture = false
+            return
+        }
 
         renderer.drawGrayPointBuffersWithMaxBlendMode(
             buffers: buffers,
