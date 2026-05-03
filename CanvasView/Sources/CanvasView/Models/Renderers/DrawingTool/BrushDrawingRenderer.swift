@@ -33,8 +33,10 @@ public final class BrushDrawingRenderer: DrawingRenderer {
     /// An iterator that manages a single curve being drawn in realtime
     private var drawingCurve: DrawingCurve?
 
-    /// Texture-space coordinates sent to ``DrawingCurve`` are multiplied by this for the current stroke; ``drawStroke`` divides them back out before building Metal buffers.
-    private var strokeCurveSpaceScale: CGFloat = 1
+    /// A scale for rendering short lines.
+    /// By scaling the coordinates before calculating the curve and then dividing the result by the same scale,
+    /// it becomes possible to draw even extremely short segments.
+    private var strokeCurveScale: CGFloat = 1
 
     public init() {}
 }
@@ -84,12 +86,12 @@ public extension BrushDrawingRenderer {
     }
 
     func beginFingerStroke(curveSpaceScale: CGFloat) {
-        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
+        strokeCurveScale = curveSpaceScale
         drawingCurve = SmoothDrawingCurve()
     }
 
     func beginPencilStroke(curveSpaceScale: CGFloat) {
-        strokeCurveSpaceScale = Self.clampedCurveSpaceScale(curveSpaceScale)
+        strokeCurveScale = curveSpaceScale
         drawingCurve = DefaultDrawingCurve()
     }
 
@@ -98,7 +100,17 @@ public extension BrushDrawingRenderer {
         touchPhase: TouchPhase
     ) {
         drawingCurve?.append(
-            points: strokePoints,
+            points: strokePoints.map {
+                GrayscaleDotPoint(
+                    location: CGPoint(
+                        x: $0.location.x * strokeCurveScale,
+                        y: $0.location.y * strokeCurveScale
+                    ),
+                    brightness: $0.brightness,
+                    diameter: $0.diameter,
+                    blurSize: $0.blurSize
+                )
+            },
             touchPhase: touchPhase
         )
     }
@@ -183,24 +195,22 @@ public extension BrushDrawingRenderer {
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
         clearTextures(with: commandBuffer)
         drawingCurve = nil
-        strokeCurveSpaceScale = 1
+        strokeCurveScale = 1
         _displayRealtimeDrawingTexture = false
     }
 }
 
 private extension BrushDrawingRenderer {
 
-    static func clampedCurveSpaceScale(_ value: CGFloat) -> CGFloat {
-        min(max(value, 1), 64)
-    }
-
     func grayscaleCurvePointsInTextureCoordinates(_ curve: DrawingCurve) -> [GrayscaleDotPoint] {
-        let scaled = curve.curvePoints()
-        guard strokeCurveSpaceScale != 1 else { return scaled }
-        let inv = 1 / strokeCurveSpaceScale
-        return scaled.map {
+        let inverseScale = 1 / strokeCurveScale
+
+        return curve.curvePoints().map {
             GrayscaleDotPoint(
-                location: CGPoint(x: $0.location.x * inv, y: $0.location.y * inv),
+                location: CGPoint(
+                    x: $0.location.x * inverseScale,
+                    y: $0.location.y * inverseScale
+                ),
                 brightness: $0.brightness,
                 diameter: $0.diameter,
                 blurSize: $0.blurSize

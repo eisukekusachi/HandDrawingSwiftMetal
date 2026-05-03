@@ -23,14 +23,13 @@ public protocol DrawingRenderer: AnyObject {
     /// Sets up textures for realtime drawing
     func initializeTextures(_ textureSize: CGSize)
 
-    /// Finger drawing has started.
-    /// - Parameter curveSpaceScale: Multiplier applied to texture-space stroke coordinates before Bézier sampling for this stroke (reversed when rasterizing). Use ``1`` when no extra scaling is needed.
+    /// Finger drawing has started
     func beginFingerStroke(curveSpaceScale: CGFloat)
 
-    /// Pen drawing has started. See ``beginFingerStroke(curveSpaceScale:)``.
+    /// Pen drawing has started
     func beginPencilStroke(curveSpaceScale: CGFloat)
 
-    /// Appends stroke points
+    /// Appends stroke points in texture space; ``strokeCurveSpaceScale`` is applied internally before the curve stores samples.
     func appendStrokePoints(
         strokePoints: [GrayscaleDotPoint],
         touchPhase: TouchPhase
