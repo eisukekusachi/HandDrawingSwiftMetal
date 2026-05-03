@@ -208,7 +208,7 @@ extension CanvasViewModel {
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
 
-                activeStrokeCurveSpaceScale = Self.strokeCurveSpaceScale(from: transforming.matrix)
+                activeStrokeCurveSpaceScale = strokeCurveSpaceScale(from: transforming.matrix)
                 drawingRenderer.beginFingerStroke(curveSpaceScale: activeStrokeCurveSpaceScale)
             }
 
@@ -293,7 +293,7 @@ extension CanvasViewModel {
         if actualTouches.contains(where: { $0.phase == .began }) {
             strokeEventSubject.send(.pencilStrokeBegan)
 
-            activeStrokeCurveSpaceScale = Self.strokeCurveSpaceScale(from: transforming.matrix)
+            activeStrokeCurveSpaceScale = strokeCurveSpaceScale(from: transforming.matrix)
             drawingRenderer.beginPencilStroke(curveSpaceScale: activeStrokeCurveSpaceScale)
         }
 
@@ -403,7 +403,7 @@ extension CanvasViewModel {
         }
     }
 
-    private static func strokeCurveSpaceScale(from matrix: CGAffineTransform) -> CGFloat {
+    private func strokeCurveSpaceScale(from matrix: CGAffineTransform) -> CGFloat {
         let s = matrix.uniformLinearScale
         return min(max(s, 1), 64)
     }
