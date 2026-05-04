@@ -104,18 +104,22 @@ public extension EraserDrawingRenderer {
         strokePoints: [GrayscaleDotPoint],
         touchPhase: TouchPhase
     ) {
+        let points: [GrayscaleDotPoint] = strokeCurveScale == 1 ?
+        strokePoints :
+        strokePoints.map {
+            GrayscaleDotPoint(
+                location: CGPoint(
+                    x: $0.location.x * strokeCurveScale,
+                    y: $0.location.y * strokeCurveScale
+                ),
+                brightness: $0.brightness,
+                diameter: $0.diameter,
+                blurSize: $0.blurSize
+            )
+        }
+
         drawingCurve?.append(
-            points: strokePoints.map {
-                GrayscaleDotPoint(
-                    location: CGPoint(
-                        x: $0.location.x * strokeCurveScale,
-                        y: $0.location.y * strokeCurveScale
-                    ),
-                    brightness: $0.brightness,
-                    diameter: $0.diameter,
-                    blurSize: $0.blurSize
-                )
-            },
+            points: points,
             touchPhase: touchPhase
         )
     }
