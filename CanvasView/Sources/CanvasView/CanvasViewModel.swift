@@ -172,13 +172,6 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard
-            canvasTexture != nil
-        else {
-            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
-            return
-        }
-
         inputState.update(.finger)
 
         // Return if a pen input is in progress
@@ -204,7 +197,9 @@ extension CanvasViewModel {
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
 
-                drawingRenderer.beginFingerStroke()
+                drawingRenderer.beginFingerStroke(
+                    strokeCurveScale: transforming.matrix.uniformLinearScale
+                )
             }
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
@@ -248,14 +243,6 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        guard
-            canvasTexture != nil
-        else {
-            Logger.error( "canvasView is not initialized. Call initializeCanvas(_:) before use")
-            return
-        }
-
-
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
             cancelFingerDrawing()
@@ -287,7 +274,9 @@ extension CanvasViewModel {
         if actualTouches.contains(where: { $0.phase == .began }) {
             strokeEventSubject.send(.pencilStrokeBegan)
 
-            drawingRenderer.beginPencilStroke()
+            drawingRenderer.beginPencilStroke(
+                strokeCurveScale: transforming.matrix.uniformLinearScale
+            )
         }
 
         pencilStroke.appendActualTouches(
@@ -334,11 +323,17 @@ extension CanvasViewModel {
 
         // The finalization process is performed when drawing is completed
         if isFinishedDrawing {
-            canvasRenderer.applyRealtimeDrawingTexture(
-                realtimeDrawingTexture,
-                to: currentTexture,
-                with: commandBuffer
-            )
+            if drawingRenderer.displayRealtimeDrawingTexture {
+                canvasRenderer.applyRealtimeDrawingTexture(
+                    realtimeDrawingTexture,
+                    to: currentTexture,
+                    with: commandBuffer
+                )
+            } else {
+                Logger.error(
+                    "CanvasViewModel: stroke ended but drawStroke did not complete this frame — skipping applyRealtimeDrawingTexture so currentTexture is not cleared"
+                )
+            }
 
             // Reset parameters on drawing completion
             prepareNextStroke(commandBuffer: commandBuffer)

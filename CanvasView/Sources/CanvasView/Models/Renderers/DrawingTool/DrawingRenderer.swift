@@ -13,6 +13,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 @MainActor
 public protocol DrawingRenderer: AnyObject {
 
+    /// `true` after ``drawStroke`` last completed a full raster pass this stroke
     var displayRealtimeDrawingTexture: Bool { get }
 
     var diameter: Int { get }
@@ -23,10 +24,10 @@ public protocol DrawingRenderer: AnyObject {
     func initializeTextures(_ textureSize: CGSize)
 
     /// Finger drawing has started
-    func beginFingerStroke()
+    func beginFingerStroke(strokeCurveScale: CGFloat?)
 
     /// Pen drawing has started
-    func beginPencilStroke()
+    func beginPencilStroke(strokeCurveScale: CGFloat?)
 
     /// Appends stroke points
     func appendStrokePoints(
@@ -44,4 +45,10 @@ public protocol DrawingRenderer: AnyObject {
     /// Prepares for the next stroke
     func prepareNextStroke()
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer)
+}
+
+public extension DrawingRenderer {
+    func clampedStrokeCurveScale(_ value: CGFloat) -> CGFloat {
+        min(max(value, 1), 64)
+    }
 }

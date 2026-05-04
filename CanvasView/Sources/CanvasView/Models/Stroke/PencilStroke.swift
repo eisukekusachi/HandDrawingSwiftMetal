@@ -66,12 +66,13 @@ extension PencilStroke {
     func appendActualTouches(actualTouches: [TouchPoint]) {
         actualTouchPointArray.append(contentsOf: actualTouches)
 
-        if isPenOffScreen(actualTouches: actualTouches),
-           let latestEstimatedTouchPoint {
-            // It appears that the actual touch values do not include an .ended phase,
-            // so an estimated value with an .ended phase is added
-            self.actualTouchPointArray.append(latestEstimatedTouchPoint)
-        }
+        guard
+            !actualTouches.contains(where: { $0.phase == .ended || $0.phase == .cancelled }),
+            isPenOffScreen(actualTouches: actualTouches),
+            let latestEstimatedTouchPoint
+        else { return }
+
+        actualTouchPointArray.append(latestEstimatedTouchPoint)
     }
 
     func reset() {

@@ -56,9 +56,8 @@ struct PencilStrokeTests {
             actualTouches: thirdActualTouches
         )
 
-        // It appears that an actual touch does not include an `.ended` phase,
-        // so an estimated value with the `.ended` phase is added at the end.
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) ==  thirdActualTouches + [fourthEstimatedTouch])
+        // When actual values still omit `.ended`, pen-off-screen logic appends the estimated lift sample once.
+        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == thirdActualTouches + [fourthEstimatedTouch])
     }
 
     struct DrawingPointsTests {
@@ -148,84 +147,193 @@ struct PencilStrokeTests {
         }
     }
 
-    @Test
-    func `Assigns a value to drawingLineEndPoint`() {
-        let touchPoint0: TouchPoint = .generate(
-            location: .init(x: 0, y: 0),
-            phase: .began,
-            estimationUpdateIndex: 0
-        )
-        let touchPoint1: TouchPoint = .generate(
-            location: .init(x: 1, y: 1),
-            phase: .moved,
-            estimationUpdateIndex: 1
-        )
+    struct AppendActualTouches {
+        @Test
+        func `Assigns a value to drawingLineEndPoint`() {
+            let touchPoint0: TouchPoint = .generate(
+                location: .init(x: 0, y: 0),
+                phase: .began,
+                estimationUpdateIndex: 0
+            )
+            let touchPoint1: TouchPoint = .generate(
+                location: .init(x: 1, y: 1),
+                phase: .moved,
+                estimationUpdateIndex: 1
+            )
 
-        let subject = Subject(
-            drawingLineEndPoint: touchPoint0
-        )
+            let subject = Subject(
+                drawingLineEndPoint: touchPoint0
+            )
 
-        subject.appendActualTouches(actualTouches: [touchPoint1])
+            subject.appendActualTouches(actualTouches: [touchPoint1])
 
-        // drawingLineEndPoint remains unchanged
-        #expect(subject.drawingLineEndPoint == touchPoint0)
+            // drawingLineEndPoint remains unchanged
+            #expect(subject.drawingLineEndPoint == touchPoint0)
 
-        // The last element of actualTouchPointArray is assigned to drawingLineEndPoint
-        subject.setDrawingLineEndPoint()
-        #expect(subject.drawingLineEndPoint == touchPoint1)
-    }
+            // The last element of actualTouchPointArray is assigned to drawingLineEndPoint
+            subject.setDrawingLineEndPoint()
+            #expect(subject.drawingLineEndPoint == touchPoint1)
+        }
 
-    @Test
-    func `Appends touchPoints to ActualTouches`() {
-        let actualTouchPoint0: TouchPoint = .generate(
-            location: .init(x: 0, y: 0),
-            phase: .began,
-            estimationUpdateIndex: 0
-        )
-        let actualTouchPoint1: TouchPoint = .generate(
-            location: .init(x: 1, y: 1),
-            phase: .moved,
-            estimationUpdateIndex: 1
-        )
-        let actualTouchPoint2: TouchPoint = .generate(
-            location: .init(x: 2, y: 2),
-            phase: .moved,
-            estimationUpdateIndex: 2
-        )
+        @Test
+        func `Appends touchPoints to ActualTouches`() {
+            let actualTouchPoint0: TouchPoint = .generate(
+                location: .init(x: 0, y: 0),
+                phase: .began,
+                estimationUpdateIndex: 0
+            )
+            let actualTouchPoint1: TouchPoint = .generate(
+                location: .init(x: 1, y: 1),
+                phase: .moved,
+                estimationUpdateIndex: 1
+            )
+            let actualTouchPoint2: TouchPoint = .generate(
+                location: .init(x: 2, y: 2),
+                phase: .moved,
+                estimationUpdateIndex: 2
+            )
 
-        let estimatedTouchPoint2: TouchPoint = .generate(
-            location: .init(x: 2, y: 2),
-            phase: .ended,
-            estimationUpdateIndex: 2
-        )
-        let estimatedTouchPoint3: TouchPoint = .generate(
-            location: .init(x: 3, y: 3),
-            phase: .ended,
-            estimationUpdateIndex: nil
-        )
+            let estimatedTouchPoint2: TouchPoint = .generate(
+                location: .init(x: 2, y: 2),
+                phase: .ended,
+                estimationUpdateIndex: 2
+            )
+            let estimatedTouchPoint3: TouchPoint = .generate(
+                location: .init(x: 3, y: 3),
+                phase: .ended,
+                estimationUpdateIndex: nil
+            )
 
-        let subject = Subject(
-            actualTouchPointArray: [
-                actualTouchPoint0
-            ],
-            latestEstimatedTouchPoint: estimatedTouchPoint2
-        )
+            let subject = Subject(
+                actualTouchPointArray: [
+                    actualTouchPoint0
+                ],
+                latestEstimatedTouchPoint: estimatedTouchPoint2
+            )
 
-        // Apple Pencil sends estimated values before the actual values
-        subject.setLatestEstimatedTouchPoint(estimatedTouchPoint3)
+            // Apple Pencil sends estimated values before the actual values
+            subject.setLatestEstimatedTouchPoint(estimatedTouchPoint3)
 
-        subject.appendActualTouches(actualTouches: [actualTouchPoint1])
-        #expect(subject.actualTouchPointArray == [
-            actualTouchPoint0, actualTouchPoint1
-        ])
+            subject.appendActualTouches(actualTouches: [actualTouchPoint1])
+            #expect(subject.actualTouchPointArray == [
+                actualTouchPoint0, actualTouchPoint1
+            ])
 
-        // If the estimationUpdateIndex of the latest estimated value matches the estimationUpdateIndex of the latest element in actualTouches,
-        // and the latest estimated value’s touchPhase is .ended,
-        // the latest estimated value is added to actualTouches.
-        subject.appendActualTouches(actualTouches: [actualTouchPoint2])
-        #expect(subject.actualTouchPointArray == [
-            actualTouchPoint0, actualTouchPoint1, actualTouchPoint2, estimatedTouchPoint3
-        ])
+            // Estimated `.ended` is appended once when actualTouchPoints has no `.ended`, `.cancelled`
+            subject.appendActualTouches(actualTouches: [actualTouchPoint2])
+            #expect(subject.actualTouchPointArray == [
+                actualTouchPoint0, actualTouchPoint1, actualTouchPoint2, estimatedTouchPoint3
+            ])
+        }
+
+        @Test
+        func `Does not append estimated end when actual batch includes ended`() {
+            let began = TouchPoint.generate(
+                location: .init(x: 0, y: 0),
+                phase: .began,
+                estimationUpdateIndex: 0
+            )
+            let moved = TouchPoint.generate(
+                location: .init(x: 1, y: 1),
+                phase: .moved,
+                estimationUpdateIndex: 1
+            )
+            let endedActual = TouchPoint.generate(
+                location: .init(x: 2, y: 2),
+                phase: .ended,
+                estimationUpdateIndex: nil
+            )
+            let endedEstimated = TouchPoint.generate(
+                location: .init(x: 99, y: 99),
+                phase: .ended,
+                estimationUpdateIndex: 1
+            )
+
+            let subject = Subject(
+                actualTouchPointArray: [began, moved],
+                latestEstimatedTouchPoint: endedEstimated
+            )
+
+            subject.appendActualTouches(actualTouches: [endedActual])
+
+            #expect(subject.actualTouchPointArray == [began, moved, endedActual])
+        }
+
+        @Test
+        func `Does not append estimated end when actual batch includes cancelled`() {
+            let began = TouchPoint.generate(
+                location: .init(x: 0, y: 0),
+                phase: .began,
+                estimationUpdateIndex: 0
+            )
+            let cancelledActual = TouchPoint.generate(
+                location: .init(x: 1, y: 1),
+                phase: .cancelled,
+                estimationUpdateIndex: nil
+            )
+            let endedEstimated = TouchPoint.generate(
+                location: .init(x: 88, y: 88),
+                phase: .ended,
+                estimationUpdateIndex: 0
+            )
+
+            let subject = Subject(
+                actualTouchPointArray: [began],
+                latestEstimatedTouchPoint: endedEstimated
+            )
+
+            subject.appendActualTouches(actualTouches: [cancelledActual])
+
+            #expect(subject.actualTouchPointArray == [began, cancelledActual])
+        }
+
+        @Test
+        func `Does not duplicate estimated end when moved and ended arrive in one actual batch`() {
+            let actualTouchPoint0 = TouchPoint.generate(
+                location: .init(x: 0, y: 0),
+                phase: .began,
+                estimationUpdateIndex: 0
+            )
+            let actualTouchPoint1 = TouchPoint.generate(
+                location: .init(x: 1, y: 1),
+                phase: .moved,
+                estimationUpdateIndex: 1
+            )
+            let actualTouchPoint2Moved = TouchPoint.generate(
+                location: .init(x: 2, y: 2),
+                phase: .moved,
+                estimationUpdateIndex: 2
+            )
+            let actualTouchEnded = TouchPoint.generate(
+                location: .init(x: 2, y: 2),
+                phase: .ended,
+                estimationUpdateIndex: nil
+            )
+            let estimatedEnded = TouchPoint.generate(
+                location: .init(x: 3, y: 3),
+                phase: .ended,
+                estimationUpdateIndex: nil
+            )
+
+            let subject = Subject(
+                actualTouchPointArray: [actualTouchPoint0, actualTouchPoint1],
+                latestEstimatedTouchPoint: TouchPoint.generate(
+                    location: .init(x: 2, y: 2),
+                    phase: .moved,
+                    estimationUpdateIndex: 2
+                )
+            )
+            subject.setLatestEstimatedTouchPoint(estimatedEnded)
+
+            subject.appendActualTouches(actualTouches: [actualTouchPoint2Moved, actualTouchEnded])
+
+            #expect(subject.actualTouchPointArray == [
+                actualTouchPoint0,
+                actualTouchPoint1,
+                actualTouchPoint2Moved,
+                actualTouchEnded
+            ])
+        }
     }
 
     @Test
