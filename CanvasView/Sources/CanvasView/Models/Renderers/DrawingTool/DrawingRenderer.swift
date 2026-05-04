@@ -48,7 +48,7 @@ public protocol DrawingRenderer: AnyObject {
 }
 
 public extension DrawingRenderer {
-    func strokeCurveScale(from matrix: CGAffineTransform) -> CGFloat {
-        min(max(matrix.uniformLinearScale, 1), 64)
+    func clampedStrokeCurveScale(_ value: CGFloat) -> CGFloat {
+        min(max(value, 1), 64)
     }
 }

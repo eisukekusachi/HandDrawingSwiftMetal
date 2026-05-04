@@ -86,12 +86,12 @@ public extension BrushDrawingRenderer {
     }
 
     func beginFingerStroke(strokeCurveScale: CGFloat?) {
-        self.strokeCurveScale = strokeCurveScale ?? 1
+        self.strokeCurveScale = clampedStrokeCurveScale(CGFloat(strokeCurveScale ?? 1))
         drawingCurve = SmoothDrawingCurve()
     }
 
     func beginPencilStroke(strokeCurveScale: CGFloat?) {
-        self.strokeCurveScale = strokeCurveScale ?? 1
+        self.strokeCurveScale = clampedStrokeCurveScale(CGFloat(strokeCurveScale ?? 1))
         drawingCurve = DefaultDrawingCurve()
     }
 

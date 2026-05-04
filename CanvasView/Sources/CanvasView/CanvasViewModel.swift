@@ -198,7 +198,7 @@ extension CanvasViewModel {
                 fingerStroke.setStoreKeyForDrawing()
 
                 drawingRenderer.beginFingerStroke(
-                    strokeCurveScale: drawingRenderer.strokeCurveScale(from: transforming.matrix)
+                    strokeCurveScale: transforming.matrix.uniformLinearScale
                 )
             }
 
@@ -275,7 +275,7 @@ extension CanvasViewModel {
             strokeEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke(
-                strokeCurveScale: drawingRenderer.strokeCurveScale(from: transforming.matrix)
+                strokeCurveScale: transforming.matrix.uniformLinearScale
             )
         }
 
