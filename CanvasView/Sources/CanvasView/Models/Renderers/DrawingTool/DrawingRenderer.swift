@@ -24,10 +24,10 @@ public protocol DrawingRenderer: AnyObject {
     func initializeTextures(_ textureSize: CGSize)
 
     /// Finger drawing has started
-    func beginFingerStroke(curveSpaceScale: CGFloat?)
+    func beginFingerStroke(strokeCurveScale: CGFloat?)
 
     /// Pen drawing has started
-    func beginPencilStroke(curveSpaceScale: CGFloat?)
+    func beginPencilStroke(strokeCurveScale: CGFloat?)
 
     /// Appends stroke points
     func appendStrokePoints(
@@ -45,4 +45,10 @@ public protocol DrawingRenderer: AnyObject {
     /// Prepares for the next stroke
     func prepareNextStroke()
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer)
+}
+
+public extension DrawingRenderer {
+    func strokeCurveScale(from matrix: CGAffineTransform) -> CGFloat {
+        min(max(matrix.uniformLinearScale, 1), 64)
+    }
 }

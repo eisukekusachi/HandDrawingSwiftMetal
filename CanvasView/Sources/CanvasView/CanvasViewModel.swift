@@ -198,7 +198,7 @@ extension CanvasViewModel {
                 fingerStroke.setStoreKeyForDrawing()
 
                 drawingRenderer.beginFingerStroke(
-                    curveSpaceScale: strokeCurveSpaceScale(from: transforming.matrix)
+                    strokeCurveScale: drawingRenderer.strokeCurveScale(from: transforming.matrix)
                 )
             }
 
@@ -275,7 +275,7 @@ extension CanvasViewModel {
             strokeEventSubject.send(.pencilStrokeBegan)
 
             drawingRenderer.beginPencilStroke(
-                curveSpaceScale: strokeCurveSpaceScale(from: transforming.matrix)
+                strokeCurveScale: drawingRenderer.strokeCurveScale(from: transforming.matrix)
             )
         }
 
@@ -377,10 +377,6 @@ extension CanvasViewModel {
                 diameter: diameter
             )
         }
-    }
-
-    private func strokeCurveSpaceScale(from matrix: CGAffineTransform) -> CGFloat {
-        min(max(matrix.uniformLinearScale, 1), 64)
     }
 
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
