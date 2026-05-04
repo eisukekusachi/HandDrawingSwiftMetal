@@ -72,7 +72,6 @@ extension PencilStroke {
             let latestEstimatedTouchPoint
         else { return }
 
-        // Actual values did not yet include `.ended`; append the estimated lift sample once.
         actualTouchPointArray.append(latestEstimatedTouchPoint)
     }
 
