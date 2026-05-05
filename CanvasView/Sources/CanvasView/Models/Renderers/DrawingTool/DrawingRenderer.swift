@@ -23,11 +23,14 @@ public protocol DrawingRenderer: AnyObject {
     /// Sets up textures for realtime drawing
     func initializeTextures(_ textureSize: CGSize)
 
+    /// Sets curve-space scale for the stroke about to begin
+    func setStrokeCurveScale(_ scale: CGFloat)
+
     /// Finger drawing has started
-    func beginFingerStroke(strokeCurveScale: CGFloat?)
+    func beginFingerStroke()
 
     /// Pen drawing has started
-    func beginPencilStroke(strokeCurveScale: CGFloat?)
+    func beginPencilStroke()
 
     /// Appends stroke points
     func appendStrokePoints(

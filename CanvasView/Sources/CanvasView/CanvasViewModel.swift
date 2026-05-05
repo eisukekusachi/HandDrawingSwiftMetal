@@ -197,9 +197,8 @@ extension CanvasViewModel {
                 // Store the drawing-specific key in the dictionary
                 fingerStroke.setStoreKeyForDrawing()
 
-                drawingRenderer.beginFingerStroke(
-                    strokeCurveScale: transforming.matrix.uniformLinearScale
-                )
+                drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
+                drawingRenderer.beginFingerStroke()
             }
 
             let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
@@ -274,9 +273,8 @@ extension CanvasViewModel {
         if actualTouches.contains(where: { $0.phase == .began }) {
             strokeEventSubject.send(.pencilStrokeBegan)
 
-            drawingRenderer.beginPencilStroke(
-                strokeCurveScale: transforming.matrix.uniformLinearScale
-            )
+            drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
+            drawingRenderer.beginPencilStroke()
         }
 
         pencilStroke.appendActualTouches(
