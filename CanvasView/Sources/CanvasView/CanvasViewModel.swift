@@ -61,7 +61,7 @@ final class CanvasViewModel {
     }
 
     /// A class that manages drawing lines onto textures
-    private(set) var drawingRenderer: DrawingRenderer?
+    private(set) var drawingRenderer: HighPrecisionDrawingRenderer?
 
     /// Manages input from pen and finger
     private let inputState = InputState()
@@ -147,7 +147,7 @@ extension CanvasViewModel {
         self.currentTexture = texture
     }
 
-    func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+    func setDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
         self.drawingRenderer = drawingRenderer
         self.drawingRenderer?.prepareNextStroke()
     }

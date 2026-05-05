@@ -209,7 +209,7 @@ extension CanvasView {
         viewModel.setCurrentTexture(texture)
     }
 
-    public func setDrawingRenderer(_ drawingRenderer: DrawingRenderer) {
+    public func setDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
         viewModel.setDrawingRenderer(drawingRenderer)
     }
 

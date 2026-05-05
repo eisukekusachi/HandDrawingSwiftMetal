@@ -9,7 +9,8 @@ import MetalKit
 
 /// Renderer for drawing lines
 @MainActor
-public final class BrushDrawingRenderer: DrawingRenderer {
+public final class BrushDrawingRenderer: HighPrecisionDrawingRenderer {
+
     public var displayRealtimeDrawingTexture: Bool {
         _displayRealtimeDrawingTexture
     }

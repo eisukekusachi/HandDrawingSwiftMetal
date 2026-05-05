@@ -68,7 +68,7 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private let drawingRenderers: [DrawingToolType: any DrawingRenderer] = [
+    private let drawingRenderers: [DrawingToolType: any HighPrecisionDrawingRenderer] = [
         .brush: BrushDrawingRenderer(),
         .eraser: EraserDrawingRenderer()
     ]
