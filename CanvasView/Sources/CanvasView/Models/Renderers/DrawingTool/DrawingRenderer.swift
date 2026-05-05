@@ -23,9 +23,6 @@ public protocol DrawingRenderer: AnyObject {
     /// Sets up textures for realtime drawing
     func initializeTextures(_ textureSize: CGSize)
 
-    /// Sets curve-space scale for the stroke about to begin
-    func setStrokeCurveScale(_ scale: CGFloat)
-
     /// Finger drawing has started
     func beginFingerStroke()
 
@@ -48,10 +45,4 @@ public protocol DrawingRenderer: AnyObject {
     /// Prepares for the next stroke
     func prepareNextStroke()
     func prepareNextStroke(with commandBuffer: MTLCommandBuffer)
-}
-
-public extension DrawingRenderer {
-    func clampedStrokeCurveScale(_ value: CGFloat) -> CGFloat {
-        min(max(value, 1), 64)
-    }
 }

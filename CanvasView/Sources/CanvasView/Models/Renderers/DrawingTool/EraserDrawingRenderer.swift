@@ -9,7 +9,7 @@ import MetalKit
 
 /// Renderer for erasing lines
 @MainActor
-public final class EraserDrawingRenderer: DrawingRenderer {
+public final class EraserDrawingRenderer: HighPrecisionDrawingRenderer {
 
     public var displayRealtimeDrawingTexture: Bool {
         _displayRealtimeDrawingTexture
