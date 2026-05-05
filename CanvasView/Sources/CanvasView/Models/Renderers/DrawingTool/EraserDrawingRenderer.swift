@@ -222,9 +222,11 @@ public extension EraserDrawingRenderer {
 private extension EraserDrawingRenderer {
 
     func grayscaleCurvePointsInTextureCoordinates(_ curve: DrawingCurve) -> [GrayscaleDotPoint] {
-        let inverseScale = 1 / strokeCurveScale
+        let points = curve.curvePoints()
+        guard strokeCurveScale != 1 else { return points }
 
-        return curve.curvePoints().map {
+        let inverseScale = 1 / strokeCurveScale
+        return points.map {
             GrayscaleDotPoint(
                 location: CGPoint(
                     x: $0.location.x * inverseScale,
