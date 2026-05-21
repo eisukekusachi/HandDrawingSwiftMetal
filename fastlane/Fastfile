@@ -1,0 +1,28 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Run unit tests (HandDrawingSwiftMetalTests test plan on iPhone 16 simulator)"
+  lane :test do
+    run_tests(
+      project: "HandDrawingSwiftMetal.xcodeproj",
+      scheme: "HandDrawingSwiftMetalTests",
+      testplan: "HandDrawingSwiftMetalTests",
+      device: "iPhone 16"
+    )
+  end
+end

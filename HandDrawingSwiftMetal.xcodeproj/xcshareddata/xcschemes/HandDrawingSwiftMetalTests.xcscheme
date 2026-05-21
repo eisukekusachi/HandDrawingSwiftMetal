@@ -6,6 +6,36 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D4E1ECD82752388C00D4A23D"
+               BuildableName = "HandDrawingSwiftMetal.app"
+               BlueprintName = "HandDrawingSwiftMetal"
+               ReferencedContainer = "container:HandDrawingSwiftMetal.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D4E1ECEE2752388E00D4A23D"
+               BuildableName = "HandDrawingSwiftMetalTests.xctest"
+               BlueprintName = "HandDrawingSwiftMetalTests"
+               ReferencedContainer = "container:HandDrawingSwiftMetal.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
    </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
@@ -30,6 +60,15 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "D4E1ECD82752388C00D4A23D"
+            BuildableName = "HandDrawingSwiftMetal.app"
+            BlueprintName = "HandDrawingSwiftMetal"
+            ReferencedContainer = "container:HandDrawingSwiftMetal.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -41,6 +80,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "D4E1ECD82752388C00D4A23D"
+            BuildableName = "HandDrawingSwiftMetal.app"
+            BlueprintName = "HandDrawingSwiftMetal"
+            ReferencedContainer = "container:HandDrawingSwiftMetal.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -48,6 +97,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "D4E1ECD82752388C00D4A23D"
+            BuildableName = "HandDrawingSwiftMetal.app"
+            BlueprintName = "HandDrawingSwiftMetal"
+            ReferencedContainer = "container:HandDrawingSwiftMetal.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
