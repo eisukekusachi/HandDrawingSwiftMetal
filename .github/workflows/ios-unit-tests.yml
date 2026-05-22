@@ -1,11 +1,13 @@
 name: iOS unit tests
 
 on:
+  pull_request:
+    branches: ["main"]
   push:
     branches: ["main"]
 
 concurrency:
-  group: ios-unit-tests-${{ github.ref }}
+  group: ios-unit-tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
