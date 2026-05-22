@@ -23,10 +23,11 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      # Ruby from .ruby-version; Bundler from Gemfile.lock "BUNDLED WITH" (no duplicate pins in workflow)
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: .ruby-version
           bundler-cache: true
 
       - name: Run unit tests
