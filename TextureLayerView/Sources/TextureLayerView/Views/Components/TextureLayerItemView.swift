@@ -29,79 +29,83 @@ struct TextureLayerItemView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color(
-                layer.backgroundColor(isSelected)
-            )
+        Button(
+            action: {
+                didTapRow(layer)
+            },
+            label: {
+                HStack {
+                    thumbnailView
 
-            HStack {
-                if let thumbnail = layer.thumbnail {
-                    Image(uiImage: thumbnail)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(
-                            width: layer.iconSize.width,
-                            height: layer.iconSize.height
+                    Text(layer.title)
+                        .font(.subheadline)
+                        .foregroundColor(
+                            Color(
+                                layer.textColor(isSelected)
+                            )
                         )
-                        .background(Color.white)
-                        .cornerRadius(layer.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: layer.cornerRadius)
-                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
-                        )
-                        .padding(layer.padding)
-                } else {
-                    Rectangle()
-                        .foregroundColor(Color.white)
-                        .frame(
-                            width: layer.iconSize.width,
-                            height: layer.iconSize.height
-                        )
-                        .cornerRadius(layer.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: layer.cornerRadius)
-                                .stroke(.gray.opacity(0.5), lineWidth: 1.0)
-                        )
-                        .padding(layer.padding)
+
+                    Spacer()
+
+                    Text("A: \(layer.alpha)")
+                        .font(.caption2)
+                        .foregroundColor(Color(uiColor: .gray))
+
+                    Button(
+                        action: {
+                            didTapVisibleButton(layer)
+                        },
+                        label: {
+                            Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
+                                .frame(
+                                    width: layer.iconSize.width,
+                                    height: layer.iconSize.height
+                                )
+                                .foregroundColor(
+                                    Color(
+                                        layer.iconColor(isVisible: layer.isVisible, isSelected)
+                                    )
+                                )
+                        }
+                    )
+                    .buttonStyle(.plain)
+
+                    Spacer()
+                        .frame(width: layer.padding)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: layer.iconSize.height + layer.padding * 2)
+                .contentShape(Rectangle())
+            }
+        )
+        .buttonStyle(.plain)
+    }
 
-                Text(layer.title)
-                    .font(.subheadline)
-                    .foregroundColor(
-                        Color(
-                            layer.textColor(isSelected)
-                        )
-                    )
+    @ViewBuilder
+    private var thumbnailView: some View {
+        let shape = RoundedRectangle(
+            cornerRadius: layer.cornerRadius,
+            style: .continuous
+        )
 
-                Spacer()
+        ZStack {
+            shape.fill(Color.white)
 
-                Text("A: \(layer.alpha)")
-                    .font(.caption2)
-                    .foregroundColor(Color(uiColor: .gray))
-
-                Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
-                    .frame(
-                        width: layer.iconSize.width,
-                        height: layer.iconSize.height
-                    )
-                    .foregroundColor(
-                        Color(
-                            layer.iconColor(isVisible: layer.isVisible, isSelected)
-                        )
-                    )
-                    .onTapGesture {
-                        didTapVisibleButton(layer)
-                    }
-
-                Spacer()
-                    .frame(width: layer.padding)
+            if let thumbnail = layer.thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
             }
         }
-        .frame(height: layer.iconSize.height + layer.padding * 2)
-        .background(.clear)
-        .onTapGesture {
-            didTapRow(layer)
+        .frame(
+            width: layer.iconSize.width,
+            height: layer.iconSize.height
+        )
+        .clipShape(shape)
+        .overlay {
+            shape.stroke(.gray.opacity(0.5), lineWidth: 1)
         }
+        .padding(layer.padding)
     }
 }
 
