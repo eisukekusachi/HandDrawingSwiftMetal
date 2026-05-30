@@ -319,8 +319,8 @@ private extension HandDrawingViewController {
         anchorTarget: UIView
     ) -> PassthroughHostingView {
         let popupView = PopupView(textureLayerViewModel, placement: .top) { [weak self] in
-            if let view = self?.textureLayerView {
-                AnyView(view)
+            if let textureLayerView = self?.textureLayerView {
+                AnyView(textureLayerView)
             } else {
                 AnyView(EmptyView())
             }

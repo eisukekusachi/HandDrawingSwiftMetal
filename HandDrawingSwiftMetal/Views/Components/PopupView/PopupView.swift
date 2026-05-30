@@ -31,7 +31,7 @@ struct PopupView<Content: View>: View {
             trailing: 16
         ),
         backgroundColor: Color = .init(
-            uiColor: UIColor.systemGray6.withAlphaComponent(0.8)
+            uiColor: UIColor.systemGray6.withAlphaComponent(0.88)
         ),
         borderColor: Color = .primary.opacity(0.12),
         borderWidth: CGFloat = 1,
