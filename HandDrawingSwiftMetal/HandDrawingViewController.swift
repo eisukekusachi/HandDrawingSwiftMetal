@@ -24,7 +24,7 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
 
-    private var textureLayerViewModel = PopupViewModel(size: .init(width: 300, height: 300))
+    private var textureLayerViewModel = PopupViewModel(size: .init(width: 320, height: 300))
 
     private var cancellables = Set<AnyCancellable>()
 
