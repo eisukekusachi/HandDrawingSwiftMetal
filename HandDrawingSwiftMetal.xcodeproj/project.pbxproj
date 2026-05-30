@@ -58,6 +58,8 @@
 		D480E5D82FCB1B04006ABBC2 /* AnchorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D72FCB1B03006ABBC2 /* AnchorExtensions.swift */; };
 		D480E5DD2FCB1D3C006ABBC2 /* PopupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */; };
 		D480E5DF2FCB1DD6006ABBC2 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */; };
+		D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */; };
+		D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA06C2F3C18D3008C6E9E /* UndoVisibilityObject.swift */; };
 		D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0672F3C18D3008C6E9E /* UndoDeletionObject.swift */; };
@@ -177,6 +179,8 @@
 		D480E5D72FCB1B03006ABBC2 /* AnchorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorExtensions.swift; sourceTree = "<group>"; };
 		D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewModelTests.swift; sourceTree = "<group>"; };
 		D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughHostingView.swift; sourceTree = "<group>"; };
+		D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingPopupOverlayContentView.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
 		D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaObject.swift; sourceTree = "<group>"; };
@@ -350,6 +354,7 @@
 				D480E5D22FCB1AA3006ABBC2 /* PopupView */,
 				D4168DAE2E594EA9007F7904 /* Drawingtools */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
+				D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */,
 				D4DF37732E914492009B8F2A /* Throttle.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 			);
@@ -575,6 +580,7 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */,
 				D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */,
+				D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */,
 				D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */,
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
@@ -823,6 +829,7 @@
 				D4F525712EAC616600439FFF /* FileOutput.swift in Sources */,
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */,
+				D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D4513AB02AF63A5000CA4438 /* FileViewModel.swift in Sources */,
 				D4513AB22AF63A6000CA4438 /* ViewExtensions.swift in Sources */,
@@ -871,6 +878,7 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,
 				D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */,
+				D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */,
 				D480E5D42FCB1AC1006ABBC2 /* PopupView.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
 				D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */,

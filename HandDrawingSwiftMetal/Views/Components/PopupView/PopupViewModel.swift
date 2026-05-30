@@ -29,17 +29,21 @@ final class PopupViewModel: ObservableObject {
 
     let horizontalPadding: CGFloat
 
+    let placement: PopupPlacement
+
     private let popupSize: CGSize
 
     init(
         size: CGSize,
         targetSpacing: CGFloat = 16,
         horizontalPadding: CGFloat = 16,
+        placement: PopupPlacement,
         isHidden: Bool = true
     ) {
         self.popupSize = size
         self.targetSpacing = targetSpacing
         self.horizontalPadding = horizontalPadding
+        self.placement = placement
         self.isHidden = isHidden
     }
 

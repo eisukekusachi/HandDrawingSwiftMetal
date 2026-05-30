@@ -30,9 +30,7 @@ struct PopupView<Content: View>: View {
             bottom: 16,
             trailing: 16
         ),
-        backgroundColor: Color = .init(
-            uiColor: UIColor.systemGray6.withAlphaComponent(0.88)
-        ),
+        backgroundColor: Color = .init(uiColor: .viewBackground),
         borderColor: Color = .primary.opacity(0.12),
         borderWidth: CGFloat = 1,
         @ViewBuilder content: @escaping () -> Content
@@ -69,6 +67,7 @@ struct PopupView<Content: View>: View {
                             lineWidth: borderWidth
                         )
                     }
+                    .clipShape(cardShape)
                     .offset(
                         x: popupRect.minX,
                         y: popupRect.minY
@@ -107,6 +106,7 @@ private struct PopupPreview: View {
 
     @StateObject private var viewModel = PopupViewModel(
         size: .init(width: 300, height: 200),
+        placement: .top,
         isHidden: false
     )
 
