@@ -39,6 +39,9 @@ struct TextureLayerItemView: View {
 
                     Text(layer.title)
                         .font(.subheadline)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(minWidth: 0, alignment: .leading)
                         .foregroundColor(
                             Color(
                                 layer.textColor(isSelected)
