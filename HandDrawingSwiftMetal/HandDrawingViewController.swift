@@ -24,8 +24,7 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
 
-    private var textureLayerPopup: UIHostingController<AnyView>?
-    private var textureLayerPresenter = PopupViewPresenter()
+    private var textureLayerViewModel = PopupViewModel(size: .init(width: 300, height: 300))
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -138,11 +137,6 @@ class HandDrawingViewController: UIViewController {
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        syncTextureLayerPopupArrow()
     }
 }
 
@@ -260,9 +254,7 @@ private extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            guard let `self` else { return }
-            self.textureLayerPresenter.toggleView()
-            self.textureLayerPopup?.view.isHidden = self.textureLayerPresenter.isHidden
+            self?.textureLayerViewModel.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveCanvas()
@@ -310,62 +302,56 @@ private extension HandDrawingViewController {
                 canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
             ])
 
-            let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
-                if let view = self?.textureLayerView {
-                    AnyView(view)
-                } else {
-                    AnyView(EmptyView())
-                }
-            }
-
-            textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
-
-            if let popup = textureLayerPopup {
-                popup.view.backgroundColor = .clear
-                popup.view.isOpaque = false
-                baseView.addSubview(popup.view)
-
-                popup.view.translatesAutoresizingMaskIntoConstraints = false
-                let safe = baseView.safeAreaLayoutGuide
-                let top = popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor)
-                let width = popup.view.widthAnchor.constraint(equalToConstant: 300)
-                let height = popup.view.heightAnchor.constraint(equalToConstant: 300)
-                let leadingMin = popup.view.leadingAnchor.constraint(
-                    greaterThanOrEqualTo: safe.leadingAnchor,
-                    constant: 8
-                )
-                let trailingMax = popup.view.trailingAnchor.constraint(
-                    lessThanOrEqualTo: safe.trailingAnchor,
-                    constant: -8
-                )
-                let centerX = popup.view.centerXAnchor.constraint(
-                    equalTo: contentView.layerButton.centerXAnchor
-                )
-                centerX.priority = .defaultHigh
-                NSLayoutConstraint.activate([top, width, height, leadingMin, trailingMax, centerX])
-
-                baseView.layoutIfNeeded()
-                textureLayerPresenter.updateArrowTip(
-                    fromTarget: contentView.layerButton,
-                    popupRootView: popup.view
-                )
-            }
-            textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
+            let container = addTextureLayerPopup(
+                in: baseView,
+                anchorTarget: contentView.layerButton
+            )
+            baseView.layoutIfNeeded()
+            container.setNeedsLayout()
         }
 
         addBrushPalette()
         addEraserPalette()
     }
 
-    func syncTextureLayerPopupArrow() {
-        guard
-            let popup = textureLayerPopup,
-            popup.view.superview != nil
-        else { return }
-        textureLayerPresenter.updateArrowTip(
-            fromTarget: contentView.layerButton,
-            popupRootView: popup.view
-        )
+    func addTextureLayerPopup(
+        in baseView: UIView,
+        anchorTarget: UIView
+    ) -> PassthroughHostingView {
+        let popupView = PopupView(textureLayerViewModel, placement: .top) { [weak self] in
+            if let view = self?.textureLayerView {
+                AnyView(view)
+            } else {
+                AnyView(EmptyView())
+            }
+        }
+
+        let hosting = UIHostingController(rootView: AnyView(popupView))
+        hosting.view.backgroundColor = .clear
+        hosting.view.isOpaque = false
+
+        let container = PassthroughHostingView()
+        container.viewModel = textureLayerViewModel
+        container.anchorTarget = anchorTarget
+        container.backgroundColor = .clear
+        container.translatesAutoresizingMaskIntoConstraints = false
+        baseView.addSubview(container)
+
+        let safe = baseView.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            container.leadingAnchor.constraint(equalTo: safe.leadingAnchor),
+            container.trailingAnchor.constraint(equalTo: safe.trailingAnchor),
+            container.topAnchor.constraint(equalTo: safe.topAnchor),
+            container.bottomAnchor.constraint(equalTo: safe.bottomAnchor)
+        ])
+
+        addChild(hosting)
+        hosting.view.frame = container.bounds
+        hosting.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        container.addSubview(hosting.view)
+        hosting.didMove(toParent: self)
+
+        return container
     }
 
     func addBrushPalette() {
@@ -512,7 +498,7 @@ private extension HandDrawingViewController {
 
     func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerPresenter.enableComponentInteraction(isUserInteractionEnabled)
+        textureLayerViewModel.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 
@@ -573,6 +559,60 @@ private extension HandDrawingViewController {
                 )
             )
         }
+    }
+}
+
+/// Hosts a SwiftUI popup and limits UIKit hit testing to the popup's visible rectangle.
+private final class PassthroughHostingView: UIView {
+    var viewModel: PopupViewModel? {
+        didSet {
+            observeViewModel()
+            setNeedsLayout()
+        }
+    }
+
+    weak var anchorTarget: UIView?
+
+    let placement: PopupPlacement = .top
+
+    private var hitTestRect: CGRect = .zero
+    private var isHiddenCancellable: AnyCancellable?
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        syncTargetFrame()
+        syncHitTestRect()
+    }
+
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        hitTestRect.contains(point)
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let hit = super.hitTest(point, with: event)
+        return hit === self ? nil : hit
+    }
+
+    private func observeViewModel() {
+        isHiddenCancellable = viewModel?.$isHidden
+            .sink { [weak self] _ in
+                self?.setNeedsLayout()
+            }
+    }
+
+    private func syncTargetFrame() {
+        guard let viewModel, let anchorTarget else { return }
+        viewModel.targetFrame = anchorTarget.convert(anchorTarget.bounds, to: self)
+    }
+
+    private func syncHitTestRect() {
+        guard let viewModel else {
+            hitTestRect = .zero
+            return
+        }
+        hitTestRect = viewModel.isHidden
+            ? .zero
+            : viewModel.popupRect(containerWidth: bounds.width, placement: placement)
     }
 }
 

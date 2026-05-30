@@ -69,11 +69,11 @@ struct PopupView<Content: View>: View {
                             lineWidth: borderWidth
                         )
                     }
-                    .clipShape(cardShape)
                     .offset(
                         x: popupRect.minX,
                         y: popupRect.minY
                     )
+                    .allowsHitTesting(viewModel.isUserInteractionEnabled)
             }
         }
     }
