@@ -101,8 +101,7 @@ final class PassthroughHostingView: UIView {
             .filter { !$0.isHidden }
             .map { viewModel in
                 viewModel.popupRect(
-                    containerWidth: bounds.width,
-                    placement: viewModel.placement
+                    containerWidth: bounds.width
                 )
             }
     }

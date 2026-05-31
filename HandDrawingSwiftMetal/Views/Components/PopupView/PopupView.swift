@@ -49,8 +49,7 @@ struct PopupView<Content: View>: View {
         if !viewModel.isHidden {
             GeometryReader { proxy in
                 let popupRect = viewModel.popupRect(
-                    containerWidth: proxy.size.width,
-                    placement: placement
+                    containerWidth: proxy.size.width
                 )
 
                 content()

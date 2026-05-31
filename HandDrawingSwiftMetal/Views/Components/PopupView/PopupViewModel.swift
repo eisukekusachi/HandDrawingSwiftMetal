@@ -60,8 +60,7 @@ final class PopupViewModel: ObservableObject {
     }
 
     func popupRect(
-        containerWidth: CGFloat,
-        placement: PopupPlacement
+        containerWidth: CGFloat
     ) -> CGRect {
         var rect = alignPopupRectHorizontally(containerWidth: containerWidth)
         switch placement {

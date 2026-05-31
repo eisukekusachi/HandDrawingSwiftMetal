@@ -36,8 +36,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .top
+                containerWidth: containerWidth
             )
 
             // The popup stays horizontally centered on the anchor
@@ -73,8 +72,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .top
+                containerWidth: containerWidth
             )
 
             // Centering on the anchor would cross the leading inset
@@ -110,8 +108,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .top
+                containerWidth: containerWidth
             )
 
             // Centering on the anchor would cross the trailing edge of the container
@@ -150,8 +147,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .bottom
+                containerWidth: containerWidth
             )
 
             // The popup stays horizontally centered on the anchor
@@ -187,8 +183,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .bottom
+                containerWidth: containerWidth
             )
 
             // Centering on the anchor would cross the leading inset
@@ -224,8 +219,7 @@ struct PopupViewModelTests {
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth,
-                placement: .bottom
+                containerWidth: containerWidth
             )
 
             // Centering on the anchor would cross the trailing edge of the container
