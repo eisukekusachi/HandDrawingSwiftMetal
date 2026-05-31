@@ -14,10 +14,8 @@ struct HandDrawingPopupOverlayContentView: View {
     var body: some View {
         ZStack {
             ForEach(bindings) { binding in
-                if let viewModel = binding.viewModel {
-                    PopupView(viewModel, placement: viewModel.placement) {
-                        binding.content
-                    }
+                PopupView(binding.viewModel, placement: binding.viewModel.placement) {
+                    binding.content
                 }
             }
         }

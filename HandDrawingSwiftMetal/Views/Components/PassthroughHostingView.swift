@@ -9,12 +9,14 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class PopupAnchorBinding: Identifiable {
-    /// Identity for the intended one ViewModel–one popup pairing.
-    let id: ObjectIdentifier
+struct PopupAnchorBinding: Identifiable {
+    /// Identity for the intended one ViewModel–one popup pairing
+    var id: ObjectIdentifier {
+        ObjectIdentifier(viewModel)
+    }
 
-    weak var target: UIView?
-    weak var viewModel: PopupViewModel?
+    let viewModel: PopupViewModel
+    let target: UIView
     let content: AnyView
 
     init<Content: View>(
@@ -22,7 +24,6 @@ final class PopupAnchorBinding: Identifiable {
         viewModel: PopupViewModel,
         @ViewBuilder content: () -> Content
     ) {
-        self.id = ObjectIdentifier(viewModel)
         self.target = target
         self.viewModel = viewModel
         self.content = AnyView(content())
@@ -45,7 +46,7 @@ final class PassthroughHostingView: UIView {
     private var cancellables = Set<AnyCancellable>()
 
     private var popupViewModels: [PopupViewModel] {
-        anchorBindings.compactMap(\.viewModel)
+        anchorBindings.map(\.viewModel)
     }
 
     override init(frame: CGRect) {
@@ -89,10 +90,9 @@ final class PassthroughHostingView: UIView {
 
     private func syncTargetFrames() {
         for binding in anchorBindings {
-            guard let viewModel = binding.viewModel, let target = binding.target else { continue }
-            let newFrame = target.convert(target.bounds, to: self)
-            guard viewModel.targetFrame != newFrame else { continue }
-            viewModel.targetFrame = newFrame
+            let newFrame = binding.target.convert(binding.target.bounds, to: self)
+            guard binding.viewModel.targetFrame != newFrame else { continue }
+            binding.viewModel.targetFrame = newFrame
         }
     }
 
