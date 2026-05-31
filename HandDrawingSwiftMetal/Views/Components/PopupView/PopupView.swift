@@ -126,7 +126,7 @@ private struct PopupPreview: View {
 
             Button(
                 action: { viewModel.toggleView() },
-                label: { Text("Button") }
+                label: { Text(String("Button")) }
             )
             .padding()
             .anchorPreference(
@@ -149,9 +149,8 @@ private struct PopupPreview: View {
                                     .foregroundStyle(Color(uiColor: .secondaryLabel))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close")
                         }
-                        Text("Popup Content")
+                        Text(String("Popup Content"))
                             .font(.headline)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Spacer()
