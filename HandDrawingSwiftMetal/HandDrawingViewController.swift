@@ -407,10 +407,6 @@ private extension HandDrawingViewController {
             canvasView.setDrawingRenderer(renderer)
         }
     }
-
-    func handleBrushColorTap(index: Int) {
-        viewModel.brushPalette.select(index)
-    }
 }
 
 private extension HandDrawingViewController {
