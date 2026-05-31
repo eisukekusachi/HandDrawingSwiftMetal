@@ -30,7 +30,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: 10
+                horizontalPadding: 10,
+                placement: .top
             )
             subject.targetFrame = buttonRect
 
@@ -66,7 +67,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding
+                horizontalPadding: horizontalPadding,
+                placement: .top
             )
             subject.targetFrame = buttonRect
 
@@ -102,7 +104,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding
+                horizontalPadding: horizontalPadding,
+                placement: .top
             )
             subject.targetFrame = buttonRect
 
@@ -141,7 +144,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: 10
+                horizontalPadding: 10,
+                placement: .bottom
             )
             subject.targetFrame = buttonRect
 
@@ -177,7 +181,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding
+                horizontalPadding: horizontalPadding,
+                placement: .bottom
             )
             subject.targetFrame = buttonRect
 
@@ -213,7 +218,8 @@ struct PopupViewModelTests {
             let subject: Subject = .init(
                 size: popupSize,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding
+                horizontalPadding: horizontalPadding,
+                placement: .bottom
             )
             subject.targetFrame = buttonRect
 
@@ -242,7 +248,8 @@ struct PopupViewModelTests {
         @Test
         func `Default initializer hides the popup`() {
             let subject: Subject = .init(
-                size: TestHelpers.randomSize()
+                size: TestHelpers.randomSize(),
+                placement: .top
             )
 
             #expect(subject.isHidden == true)
@@ -254,6 +261,7 @@ struct PopupViewModelTests {
         func `toggleView flips isHidden`(initialState: Bool) {
             let subject: Subject = .init(
                 size: TestHelpers.randomSize(),
+                placement: .top,
                 isHidden: initialState
             )
 
@@ -268,6 +276,7 @@ struct PopupViewModelTests {
         func `hide sets isHidden to true`() {
             let subject: Subject = .init(
                 size: TestHelpers.randomSize(),
+                placement: .top,
                 isHidden: false
             )
 
@@ -283,7 +292,8 @@ struct PopupViewModelTests {
         @Test
         func `enableComponentInteraction updates isUserInteractionEnabled`() {
             let subject: Subject = .init(
-                size: TestHelpers.randomSize()
+                size: TestHelpers.randomSize(),
+                placement: .top
             )
 
             subject.enableComponentInteraction(false)
