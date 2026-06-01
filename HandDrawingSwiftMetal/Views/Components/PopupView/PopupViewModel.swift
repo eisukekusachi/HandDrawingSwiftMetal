@@ -25,7 +25,7 @@ final class PopupViewModel: ObservableObject {
     /// Bounds of the anchor target
     @Published var targetFrame: CGRect = .zero
 
-    /// Vertical gap between `targetFrame` and the popup edge.
+    /// Vertical gap between `targetFrame` and the popup edge
     private let targetSpacing: CGFloat
 
     private let horizontalPadding: CGFloat

@@ -101,7 +101,6 @@ struct TextureLayerToolbar: View {
         .padding(8)
     }
 
-    /// iOS info-button tone (`systemGray` in light appearance).
     private var closeButtonColor: UIColor {
         UIColor.systemGray
             .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))

@@ -30,7 +30,7 @@ struct PopupAnchorBinding: Identifiable {
     }
 }
 
-/// Hosts SwiftUI popups and limits UIKit hit testing to their visible rectangles.
+/// Hosts SwiftUI popups and limits UIKit hit testing to their visible rectangles
 final class PassthroughHostingView: UIView {
 
     var anchorBindings: [PopupAnchorBinding] = [] {
@@ -93,7 +93,7 @@ final class PassthroughHostingView: UIView {
         }
     }
 
-    /// Recomputes anchor frames and popup geometry. Call after rotation when anchor views have finished layout.
+    /// Recomputes anchor frames and popup geometry. Call after rotation when anchor views have finished layout
     func syncPopupLayout() {
         syncTargetFrames()
         syncHitTestRect()
