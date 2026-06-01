@@ -29,6 +29,8 @@ class HandDrawingViewController: UIViewController {
         placement: .top
     )
 
+    private weak var popupPassthroughView: PassthroughHostingView?
+
     private var cancellables = Set<AnyCancellable>()
 
     private let paletteHeight: CGFloat = 44
@@ -143,6 +145,11 @@ class HandDrawingViewController: UIViewController {
         canvasView.undoManager?.levelsOfUndo = configuration.undoCount
 
         undoCoordinator.setUndoManager(canvasView.undoManager)
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        popupPassthroughView?.syncPopupLayout()
     }
 }
 
@@ -362,22 +369,14 @@ private extension HandDrawingViewController {
         ])
 
         let hostingController = UIHostingController(
-            rootView: HandDrawingPopupOverlayContentView(
-                bindings: bindings
-            )
+            rootView: HandDrawingPopupOverlayContentView(bindings: bindings)
         )
-        hostingController.view.backgroundColor = .clear
         hostingController.view.isOpaque = false
-        addChild(hostingController)
-
-        hostingController.view.frame = passthroughHostingView.bounds
-        hostingController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        passthroughHostingView.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
+        embedHostingController(hostingController, in: passthroughHostingView)
 
         passthroughHostingView.hostingView = hostingController.view
         passthroughHostingView.anchorBindings = bindings
-        passthroughHostingView.setNeedsLayout()
+        popupPassthroughView = passthroughHostingView
     }
 
     func updateDrawingComponents() {

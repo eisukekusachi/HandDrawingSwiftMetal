@@ -60,9 +60,7 @@ final class PassthroughHostingView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        syncTargetFrames()
-        syncHitTestRect()
-        syncHostingVisibility()
+        syncPopupLayout()
     }
 
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
@@ -91,9 +89,16 @@ final class PassthroughHostingView: UIView {
     private func syncTargetFrames() {
         for binding in anchorBindings {
             let newFrame = binding.target.convert(binding.target.bounds, to: self)
-            guard binding.viewModel.targetFrame != newFrame else { continue }
             binding.viewModel.targetFrame = newFrame
         }
+    }
+
+    /// Recomputes anchor frames and popup geometry. Call after rotation when anchor views have finished layout.
+    func syncPopupLayout() {
+        syncTargetFrames()
+        syncHitTestRect()
+        syncHostingVisibility()
+        hostingView?.setNeedsLayout()
     }
 
     private func syncHitTestRect() {
