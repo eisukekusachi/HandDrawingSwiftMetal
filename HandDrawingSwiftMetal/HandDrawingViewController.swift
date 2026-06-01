@@ -316,45 +316,23 @@ private extension HandDrawingViewController {
     }
 
     func addBrushPalette() {
-        let targetView: UIView = contentView.brushPaletteView
-
         let hostingController = UIHostingController(
             rootView: BrushPaletteView(
                 palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
         )
-        hostingController.view.backgroundColor = .clear
-        targetView.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            hostingController.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
-        ])
+        embedHostingController(hostingController, in: contentView.brushPaletteView)
     }
 
     func addEraserPalette() {
-        let targetView: UIView = contentView.eraserPaletteView
-
         let hostingController = UIHostingController(
             rootView: EraserPaletteView(
                 palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
         )
-        hostingController.view.backgroundColor = .clear
-        targetView.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            hostingController.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
-        ])
+        embedHostingController(hostingController, in: contentView.eraserPaletteView)
     }
 
     func addOverlayHostingView() {
@@ -418,6 +396,26 @@ private extension HandDrawingViewController {
 }
 
 private extension HandDrawingViewController {
+
+    func embedHostingController<Content: View>(
+        _ hostingController: UIHostingController<Content>,
+        in containerView: UIView
+    ) {
+        hostingController.view.backgroundColor = .clear
+        addChild(hostingController)
+
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(hostingController.view)
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: containerView.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+
+        hostingController.didMove(toParent: self)
+    }
+
     func showFileView() {
         let fileView = FileView(
             fileCoordinator: viewModel.fileCoordinator,
