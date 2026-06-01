@@ -318,83 +318,88 @@ private extension HandDrawingViewController {
     func addBrushPalette() {
         let targetView: UIView = contentView.brushPaletteView
 
-        let brushPaletteHostingView = UIHostingController(
+        let hostingController = UIHostingController(
             rootView: BrushPaletteView(
                 palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
         )
-        brushPaletteHostingView.view.backgroundColor = .clear
-        targetView.addSubview(brushPaletteHostingView.view)
+        hostingController.view.backgroundColor = .clear
+        targetView.addSubview(hostingController.view)
 
-        brushPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            brushPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            brushPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            brushPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            brushPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+            hostingController.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
         ])
     }
 
     func addEraserPalette() {
         let targetView: UIView = contentView.eraserPaletteView
 
-        let eraserPaletteHostingView = UIHostingController(
+        let hostingController = UIHostingController(
             rootView: EraserPaletteView(
                 palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
         )
-        eraserPaletteHostingView.view.backgroundColor = .clear
-        targetView.addSubview(eraserPaletteHostingView.view)
+        hostingController.view.backgroundColor = .clear
+        targetView.addSubview(hostingController.view)
 
-        eraserPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            eraserPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            eraserPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            eraserPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            eraserPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+            hostingController.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: targetView.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
         ])
     }
 
     func addOverlayHostingView() {
+        let targetView: HandDrawingContentView = contentView
+
         let bindings: [PopupAnchorBinding] = [
             .init(
-                target: contentView.layerButton,
+                target: targetView.layerButton,
                 viewModel: textureLayerViewModel,
                 content: { textureLayerView }
             )
         ]
 
-        let container = PassthroughHostingView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(container)
+        let passthroughHostingView = PassthroughHostingView()
+        passthroughHostingView.translatesAutoresizingMaskIntoConstraints = false
+        targetView.addSubview(passthroughHostingView)
+        targetView.bringSubviewToFront(passthroughHostingView)
 
-        let safe = contentView.safeAreaLayoutGuide
+        // HandDrawingContentView.xib lays out popup anchors (layer button, palettes, etc.)
+        // against the safe area, so the overlay must use the same guide for correct popup placement.
+        let safeAreaTargetView = targetView.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
-            container.leadingAnchor.constraint(equalTo: safe.leadingAnchor),
-            container.trailingAnchor.constraint(equalTo: safe.trailingAnchor),
-            container.topAnchor.constraint(equalTo: safe.topAnchor),
-            container.bottomAnchor.constraint(equalTo: safe.bottomAnchor)
+            passthroughHostingView.leadingAnchor.constraint(equalTo: safeAreaTargetView.leadingAnchor),
+            passthroughHostingView.trailingAnchor.constraint(equalTo: safeAreaTargetView.trailingAnchor),
+            passthroughHostingView.topAnchor.constraint(equalTo: safeAreaTargetView.topAnchor),
+            passthroughHostingView.bottomAnchor.constraint(equalTo: safeAreaTargetView.bottomAnchor)
         ])
 
-        let hosting = UIHostingController(
-            rootView: HandDrawingPopupOverlayContentView(bindings: bindings)
+        let hostingController = UIHostingController(
+            rootView: HandDrawingPopupOverlayContentView(
+                bindings: bindings
+            )
         )
-        hosting.view.backgroundColor = .clear
-        hosting.view.isOpaque = false
-        addChild(hosting)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isOpaque = false
+        addChild(hostingController)
 
-        hosting.view.frame = container.bounds
-        hosting.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        container.addSubview(hosting.view)
-        hosting.didMove(toParent: self)
+        hostingController.view.frame = passthroughHostingView.bounds
+        hostingController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        passthroughHostingView.addSubview(hostingController.view)
+        hostingController.didMove(toParent: self)
 
-        contentView.bringSubviewToFront(container)
-
-        container.hostingView = hosting.view
-        container.anchorBindings = bindings
-        container.setNeedsLayout()
+        passthroughHostingView.hostingView = hostingController.view
+        passthroughHostingView.anchorBindings = bindings
+        passthroughHostingView.setNeedsLayout()
     }
 
     func updateDrawingComponents() {
