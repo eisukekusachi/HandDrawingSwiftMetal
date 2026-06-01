@@ -66,7 +66,10 @@ class HandDrawingViewController: UIViewController {
                 onRegisterUndo: { [weak self] undoObjectPair in
                     self?.undoCoordinator.registerUndo(undoObjectPair)
                 }
-            )
+            ),
+            onClose: { [weak self] in
+                self?.textureLayerViewModel.hide()
+            }
         )
     }()
 

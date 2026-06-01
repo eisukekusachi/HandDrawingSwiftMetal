@@ -11,18 +11,23 @@ public struct TextureLayerView: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
+    private let onClose: (() -> Void)?
+
     private let range: ClosedRange<Int> = 0 ... 255
 
     public init(
-        viewModel: TextureLayerViewModel
+        viewModel: TextureLayerViewModel,
+        onClose: (() -> Void)? = nil
     ) {
         self._viewModel = .init(wrappedValue: viewModel)
+        self.onClose = onClose
     }
 
     public var body: some View {
         VStack {
             TextureLayerToolbar(
-                viewModel: viewModel
+                viewModel: viewModel,
+                onClose: onClose
             )
 
             ReversedTextureLayerListView(

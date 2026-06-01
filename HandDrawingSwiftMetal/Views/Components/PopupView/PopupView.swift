@@ -136,15 +136,6 @@ private struct PopupPreview: View {
 
                 PopupView(viewModel) {
                     VStack(spacing: 0) {
-                        HStack {
-                            Spacer()
-                            Button(action: viewModel.hide) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 22))
-                                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-                            }
-                            .buttonStyle(.plain)
-                        }
                         Text(String("Popup Content"))
                             .font(.headline)
                             .frame(maxWidth: .infinity, alignment: .leading)
