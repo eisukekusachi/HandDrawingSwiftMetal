@@ -17,8 +17,6 @@ struct TextureLayerToolbar: View {
 
     private let buttonSize: CGFloat = 20
 
-    private let closeButtonSize: CGFloat = 24
-
     @State private var isTextFieldPresented: Bool = false
     @State private var textFieldTitle: String = ""
 
