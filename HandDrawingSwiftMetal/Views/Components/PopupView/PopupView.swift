@@ -11,7 +11,6 @@ struct PopupView<Content: View>: View {
 
     @ObservedObject private var viewModel: PopupViewModel
 
-    private let placement: PopupPlacement
     private let content: () -> Content
 
     private let cornerRadius: CGFloat
@@ -22,7 +21,6 @@ struct PopupView<Content: View>: View {
 
     init(
         _ viewModel: PopupViewModel,
-        placement: PopupPlacement,
         cornerRadius: CGFloat = 26,
         contentPadding: EdgeInsets = .init(
             top: 16,
@@ -36,7 +34,6 @@ struct PopupView<Content: View>: View {
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.viewModel = viewModel
-        self.placement = placement
         self.cornerRadius = cornerRadius
         self.contentPadding = contentPadding
         self.backgroundColor = backgroundColor
@@ -82,26 +79,24 @@ struct PopupView<Content: View>: View {
 }
 
 #Preview("Top Leading") {
-    PopupPreview(alignment: .topLeading, placement: .top)
+    PopupPreview(alignment: .topLeading)
 }
 
 #Preview("Top Trailing") {
-    PopupPreview(alignment: .topTrailing, placement: .top)
+    PopupPreview(alignment: .topTrailing)
 }
 
 #Preview("Bottom Leading") {
-    PopupPreview(alignment: .bottomLeading, placement: .bottom)
+    PopupPreview(alignment: .bottomLeading)
 }
 
 #Preview("Bottom Trailing") {
-    PopupPreview(alignment: .bottomTrailing, placement: .bottom)
+    PopupPreview(alignment: .bottomTrailing)
 }
 
 private struct PopupPreview: View {
 
     let alignment: Alignment
-
-    let placement: PopupPlacement
 
     @StateObject private var viewModel = PopupViewModel(
         size: .init(width: 300, height: 200),
@@ -139,7 +134,7 @@ private struct PopupPreview: View {
             GeometryReader { proxy in
                 let buttonRect = anchor.map { proxy[$0] } ?? .zero
 
-                PopupView(viewModel, placement: placement) {
+                PopupView(viewModel) {
                     VStack(spacing: 0) {
                         HStack {
                             Spacer()
