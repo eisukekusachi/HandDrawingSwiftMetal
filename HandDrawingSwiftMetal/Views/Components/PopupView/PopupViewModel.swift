@@ -36,7 +36,7 @@ final class PopupViewModel: ObservableObject {
 
     init(
         size: CGSize,
-        targetSpacing: CGFloat = 16,
+        targetSpacing: CGFloat = 8,
         horizontalPadding: CGFloat = 16,
         placement: PopupPlacement,
         isHidden: Bool = true
