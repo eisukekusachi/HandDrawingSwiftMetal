@@ -55,7 +55,6 @@
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D480E5D42FCB1AC1006ABBC2 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D32FCB1AC1006ABBC2 /* PopupView.swift */; };
 		D480E5D62FCB1ACF006ABBC2 /* PopupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D52FCB1ACD006ABBC2 /* PopupViewModel.swift */; };
-		D480E5D82FCB1B04006ABBC2 /* AnchorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D72FCB1B03006ABBC2 /* AnchorExtensions.swift */; };
 		D480E5DD2FCB1D3C006ABBC2 /* PopupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */; };
 		D480E5DF2FCB1DD6006ABBC2 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */; };
 		D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */; };
@@ -176,7 +175,6 @@
 		D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLocalFileRepository.swift; sourceTree = "<group>"; };
 		D480E5D32FCB1AC1006ABBC2 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		D480E5D52FCB1ACD006ABBC2 /* PopupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewModel.swift; sourceTree = "<group>"; };
-		D480E5D72FCB1B03006ABBC2 /* AnchorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorExtensions.swift; sourceTree = "<group>"; };
 		D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewModelTests.swift; sourceTree = "<group>"; };
 		D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughHostingView.swift; sourceTree = "<group>"; };
@@ -423,7 +421,6 @@
 		D47FD3E52E2B20C600F3F514 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				D480E5D72FCB1B03006ABBC2 /* AnchorExtensions.swift */,
 				D49C69272F23A6D900B66608 /* CalendarExtensions.swift */,
 				D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */,
 				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
@@ -809,7 +806,6 @@
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,
 				D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */,
-				D480E5D82FCB1B04006ABBC2 /* AnchorExtensions.swift in Sources */,
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
 				D48CA0752F3C18D3008C6E9E /* UndoSelectionObject.swift in Sources */,
 				D48CA0762F3C18D3008C6E9E /* UndoDrawingObject.swift in Sources */,
