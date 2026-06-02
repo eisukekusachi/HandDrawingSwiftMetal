@@ -11,6 +11,8 @@ struct TextureLayerToolbar: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
+    private let onClose: (() -> Void)?
+
     private let buttonThrottle = ButtonThrottle()
 
     private let buttonSize: CGFloat = 20
@@ -19,13 +21,15 @@ struct TextureLayerToolbar: View {
     @State private var textFieldTitle: String = ""
 
     init(
-        viewModel: TextureLayerViewModel
+        viewModel: TextureLayerViewModel,
+        onClose: (() -> Void)? = nil
     ) {
         self.viewModel = viewModel
+        self.onClose = onClose
     }
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(alignment: .center, spacing: 16) {
             Button(
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
@@ -80,8 +84,24 @@ struct TextureLayerToolbar: View {
                 Button("Cancel", action: {})
             }
             Spacer()
+
+            if let onClose {
+                Button(action: onClose) {
+                    Image(systemName: "xmark.circle.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(Color(uiColor: closeButtonColor))
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(8)
+    }
+
+    private var closeButtonColor: UIColor {
+        UIColor.systemGray
+            .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     }
 }
 

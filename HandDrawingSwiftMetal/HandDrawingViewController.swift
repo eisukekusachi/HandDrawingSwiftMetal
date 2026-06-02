@@ -24,8 +24,12 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
 
-    private var textureLayerPopup: UIHostingController<AnyView>?
-    private var textureLayerPresenter = PopupViewPresenter()
+    private var textureLayerViewModel = PopupViewModel(
+        size: .init(width: 320, height: 300),
+        placement: .top
+    )
+
+    private weak var popupPassthroughView: PassthroughHostingView?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -64,7 +68,10 @@ class HandDrawingViewController: UIViewController {
                 onRegisterUndo: { [weak self] undoObjectPair in
                     self?.undoCoordinator.registerUndo(undoObjectPair)
                 }
-            )
+            ),
+            onClose: { [weak self] in
+                self?.textureLayerViewModel.hide()
+            }
         )
     }()
 
@@ -142,7 +149,7 @@ class HandDrawingViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        syncTextureLayerPopupArrow()
+        popupPassthroughView?.syncPopupLayout()
     }
 }
 
@@ -260,9 +267,7 @@ private extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            guard let `self` else { return }
-            self.textureLayerPresenter.toggleView()
-            self.textureLayerPopup?.view.isHidden = self.textureLayerPresenter.isHidden
+            self?.textureLayerViewModel.toggleView()
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveCanvas()
@@ -278,8 +283,7 @@ private extension HandDrawingViewController {
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
             self.viewModel.toggleDrawingTool()
-
-            self.contentView.updateDrawingComponents(viewModel.drawingTool.type)
+            self.contentView.updateDrawingComponents(self.viewModel.drawingTool.type)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
             self.canvasView.setDrawingRenderer(renderer)
@@ -300,114 +304,79 @@ private extension HandDrawingViewController {
     }
 
     func layoutViews() {
-        if let baseView = contentView.baseView {
-            baseView.addSubview(canvasView)
-            canvasView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                canvasView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
-                canvasView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor),
-                canvasView.topAnchor.constraint(equalTo: baseView.topAnchor),
-                canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
-            ])
+        guard let baseView = contentView.baseView else { return }
 
-            let popupView = PopupPresenterView(presenter: textureLayerPresenter) { [weak self] in
-                if let view = self?.textureLayerView {
-                    AnyView(view)
-                } else {
-                    AnyView(EmptyView())
-                }
-            }
-
-            textureLayerPopup = UIHostingController(rootView: AnyView(popupView))
-
-            if let popup = textureLayerPopup {
-                popup.view.backgroundColor = .clear
-                popup.view.isOpaque = false
-                baseView.addSubview(popup.view)
-
-                popup.view.translatesAutoresizingMaskIntoConstraints = false
-                let safe = baseView.safeAreaLayoutGuide
-                let top = popup.view.topAnchor.constraint(equalTo: contentView.layerButton.bottomAnchor)
-                let width = popup.view.widthAnchor.constraint(equalToConstant: 300)
-                let height = popup.view.heightAnchor.constraint(equalToConstant: 300)
-                let leadingMin = popup.view.leadingAnchor.constraint(
-                    greaterThanOrEqualTo: safe.leadingAnchor,
-                    constant: 8
-                )
-                let trailingMax = popup.view.trailingAnchor.constraint(
-                    lessThanOrEqualTo: safe.trailingAnchor,
-                    constant: -8
-                )
-                let centerX = popup.view.centerXAnchor.constraint(
-                    equalTo: contentView.layerButton.centerXAnchor
-                )
-                centerX.priority = .defaultHigh
-                NSLayoutConstraint.activate([top, width, height, leadingMin, trailingMax, centerX])
-
-                baseView.layoutIfNeeded()
-                textureLayerPresenter.updateArrowTip(
-                    fromTarget: contentView.layerButton,
-                    popupRootView: popup.view
-                )
-            }
-            textureLayerPopup?.view.isHidden = textureLayerPresenter.isHidden
-        }
+        baseView.addSubview(canvasView)
+        canvasView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            canvasView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
+            canvasView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor),
+            canvasView.topAnchor.constraint(equalTo: baseView.topAnchor),
+            canvasView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor)
+        ])
 
         addBrushPalette()
         addEraserPalette()
-    }
+        addOverlayHostingView()
 
-    func syncTextureLayerPopupArrow() {
-        guard
-            let popup = textureLayerPopup,
-            popup.view.superview != nil
-        else { return }
-        textureLayerPresenter.updateArrowTip(
-            fromTarget: contentView.layerButton,
-            popupRootView: popup.view
-        )
+        contentView.layoutIfNeeded()
     }
 
     func addBrushPalette() {
-        let targetView: UIView = contentView.brushPaletteView
-
-        let brushPaletteHostingView = UIHostingController(
+        let hostingController = UIHostingController(
             rootView: BrushPaletteView(
                 palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
         )
-        brushPaletteHostingView.view.backgroundColor = .clear
-        targetView.addSubview(brushPaletteHostingView.view)
-
-        brushPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            brushPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            brushPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            brushPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            brushPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
-        ])
+        embedHostingController(hostingController, in: contentView.brushPaletteView)
     }
 
     func addEraserPalette() {
-        let targetView: UIView = contentView.eraserPaletteView
-
-        let eraserPaletteHostingView = UIHostingController(
+        let hostingController = UIHostingController(
             rootView: EraserPaletteView(
                 palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
         )
-        eraserPaletteHostingView.view.backgroundColor = .clear
-        targetView.addSubview(eraserPaletteHostingView.view)
+        embedHostingController(hostingController, in: contentView.eraserPaletteView)
+    }
 
-        eraserPaletteHostingView.view.translatesAutoresizingMaskIntoConstraints = false
+    func addOverlayHostingView() {
+        let targetView: HandDrawingContentView = contentView
+
+        let bindings: [PopupAnchorBinding] = [
+            .init(
+                target: targetView.layerButton,
+                viewModel: textureLayerViewModel,
+                content: { textureLayerView }
+            )
+        ]
+
+        let passthroughHostingView = PassthroughHostingView()
+        passthroughHostingView.translatesAutoresizingMaskIntoConstraints = false
+        targetView.addSubview(passthroughHostingView)
+        targetView.bringSubviewToFront(passthroughHostingView)
+
+        // HandDrawingContentView.xib lays out popup anchors (layer button, palettes, etc.)
+        // against the safe area, so the overlay must use the same guide for correct popup placement.
+        let safeAreaTargetView = targetView.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
-            eraserPaletteHostingView.view.leadingAnchor.constraint(equalTo: targetView.leadingAnchor),
-            eraserPaletteHostingView.view.trailingAnchor.constraint(equalTo: targetView.trailingAnchor),
-            eraserPaletteHostingView.view.topAnchor.constraint(equalTo: targetView.topAnchor),
-            eraserPaletteHostingView.view.bottomAnchor.constraint(equalTo: targetView.bottomAnchor)
+            passthroughHostingView.leadingAnchor.constraint(equalTo: safeAreaTargetView.leadingAnchor),
+            passthroughHostingView.trailingAnchor.constraint(equalTo: safeAreaTargetView.trailingAnchor),
+            passthroughHostingView.topAnchor.constraint(equalTo: safeAreaTargetView.topAnchor),
+            passthroughHostingView.bottomAnchor.constraint(equalTo: safeAreaTargetView.bottomAnchor)
         ])
+
+        let hostingController = UIHostingController(
+            rootView: HandDrawingPopupOverlayContentView(bindings: bindings)
+        )
+        hostingController.view.isOpaque = false
+        embedHostingController(hostingController, in: passthroughHostingView)
+
+        passthroughHostingView.hostingView = hostingController.view
+        passthroughHostingView.anchorBindings = bindings
+        popupPassthroughView = passthroughHostingView
     }
 
     func updateDrawingComponents() {
@@ -426,6 +395,26 @@ private extension HandDrawingViewController {
 }
 
 private extension HandDrawingViewController {
+
+    func embedHostingController<Content: View>(
+        _ hostingController: UIHostingController<Content>,
+        in containerView: UIView
+    ) {
+        hostingController.view.backgroundColor = .clear
+        addChild(hostingController)
+
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(hostingController.view)
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: containerView.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+
+        hostingController.didMove(toParent: self)
+    }
+
     func showFileView() {
         let fileView = FileView(
             fileCoordinator: viewModel.fileCoordinator,
@@ -512,7 +501,7 @@ private extension HandDrawingViewController {
 
     func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerPresenter.enableComponentInteraction(isUserInteractionEnabled)
+        textureLayerViewModel.enableComponentInteraction(isUserInteractionEnabled)
     }
 }
 

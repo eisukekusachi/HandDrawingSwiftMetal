@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
 		D41240CA2F77BE9800B757F8 /* UndoTitleObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */; };
-		D41240CC2F77D43900B757F8 /* PopupViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240CB2F77D43900B757F8 /* PopupViewPresenter.swift */; };
 		D41240D02F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */; };
 		D41240D22F77D4B700B757F8 /* UndoTextureLayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */; };
 		D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */; };
@@ -47,7 +46,6 @@
 		D4513AB22AF63A6000CA4438 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4513AB32AF63A6000CA4438 /* ViewExtensions.swift */; };
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
-		D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */; };
 		D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */; };
 		D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */; };
 		D4732C792FA0EDBB00119C55 /* FileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C782FA0EDBB00119C55 /* FileViewModelTests.swift */; };
@@ -55,6 +53,12 @@
 		D4732C802FA0EE9900119C55 /* URLExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C7F2FA0EE9900119C55 /* URLExtensionsTests.swift */; };
 		D4732C832FA1048A00119C55 /* MockLocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */; };
 		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
+		D480E5D42FCB1AC1006ABBC2 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D32FCB1AC1006ABBC2 /* PopupView.swift */; };
+		D480E5D62FCB1ACF006ABBC2 /* PopupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5D52FCB1ACD006ABBC2 /* PopupViewModel.swift */; };
+		D480E5DD2FCB1D3C006ABBC2 /* PopupViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */; };
+		D480E5DF2FCB1DD6006ABBC2 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */; };
+		D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */; };
+		D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
 		D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA06C2F3C18D3008C6E9E /* UndoVisibilityObject.swift */; };
 		D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0672F3C18D3008C6E9E /* UndoDeletionObject.swift */; };
@@ -127,7 +131,6 @@
 /* Begin PBXFileReference section */
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
 		D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTitleObject.swift; sourceTree = "<group>"; };
-		D41240CB2F77D43900B757F8 /* PopupViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewPresenter.swift; sourceTree = "<group>"; };
 		D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureInMemoryRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureLayerViewModel.swift; sourceTree = "<group>"; };
 		D4168DA82E594E4D007F7904 /* DrawingToolStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DrawingToolStorage.xcdatamodel; sourceTree = "<group>"; };
@@ -164,13 +167,18 @@
 		D4513AB32AF63A6000CA4438 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
-		D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWithArrow.swift; sourceTree = "<group>"; };
 		D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewDependencies.swift; sourceTree = "<group>"; };
 		D4732C782FA0EDBB00119C55 /* FileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileViewModelTests.swift; sourceTree = "<group>"; };
 		D4732C7C2FA0EE6700119C55 /* FileCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinatorTests.swift; sourceTree = "<group>"; };
 		D4732C7F2FA0EE9900119C55 /* URLExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensionsTests.swift; sourceTree = "<group>"; };
 		D4732C822FA1048A00119C55 /* MockLocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLocalFileRepository.swift; sourceTree = "<group>"; };
+		D480E5D32FCB1AC1006ABBC2 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
+		D480E5D52FCB1ACD006ABBC2 /* PopupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewModel.swift; sourceTree = "<group>"; };
+		D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewModelTests.swift; sourceTree = "<group>"; };
+		D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughHostingView.swift; sourceTree = "<group>"; };
+		D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingPopupOverlayContentView.swift; sourceTree = "<group>"; };
 		D48A7DD029DAB81800D235B1 /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAdditionObject.swift; sourceTree = "<group>"; };
 		D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoAlphaObject.swift; sourceTree = "<group>"; };
@@ -287,6 +295,7 @@
 		D426FC612E5C4B2700CC116D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D480E5DB2FCB1D2B006ABBC2 /* PopupView */,
 				D426FC622E5C4B3000CC116D /* Drawingtool */,
 			);
 			path = Components;
@@ -340,12 +349,12 @@
 		D42F40992B4402EC00B32707 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D480E5D22FCB1AA3006ABBC2 /* PopupView */,
 				D4168DAE2E594EA9007F7904 /* Drawingtools */,
 				D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */,
-				D46B8F6F2BDBDFBC00EF3AC2 /* PopupWithArrow.swift */,
+				D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */,
 				D4DF37732E914492009B8F2A /* Throttle.swift */,
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
-				D41240CB2F77D43900B757F8 /* PopupViewPresenter.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -443,6 +452,23 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D480E5D22FCB1AA3006ABBC2 /* PopupView */ = {
+			isa = PBXGroup;
+			children = (
+				D480E5D32FCB1AC1006ABBC2 /* PopupView.swift */,
+				D480E5D52FCB1ACD006ABBC2 /* PopupViewModel.swift */,
+			);
+			path = PopupView;
+			sourceTree = "<group>";
+		};
+		D480E5DB2FCB1D2B006ABBC2 /* PopupView */ = {
+			isa = PBXGroup;
+			children = (
+				D480E5DC2FCB1D36006ABBC2 /* PopupViewModelTests.swift */,
+			);
+			path = PopupView;
 			sourceTree = "<group>";
 		};
 		D48CA06D2F3C18D3008C6E9E /* UndoObject */ = {
@@ -551,6 +577,7 @@
 				D4E1ECDE2752388C00D4A23D /* SceneDelegate.swift */,
 				D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */,
 				D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */,
+				D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */,
 				D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */,
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
@@ -567,6 +594,7 @@
 				D4732C7E2FA0EE8D00119C55 /* Extensions */,
 				D4732C7A2FA0EE4E00119C55 /* Models */,
 				D4732C842FA1B6A700119C55 /* Views */,
+				D480E5DE2FCB1DD5006ABBC2 /* TestHelpers.swift */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 				D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */,
 			);
@@ -797,10 +825,11 @@
 				D4F525712EAC616600439FFF /* FileOutput.swift in Sources */,
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */,
+				D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */,
 				D4513AAE2AF63A2A00CA4438 /* FileView.swift in Sources */,
 				D4513AB02AF63A5000CA4438 /* FileViewModel.swift in Sources */,
 				D4513AB22AF63A6000CA4438 /* ViewExtensions.swift in Sources */,
-				D46B8F702BDBDFBC00EF3AC2 /* PopupWithArrow.swift in Sources */,
+				D480E5D62FCB1ACF006ABBC2 /* PopupViewModel.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
 				D4168DB02E594EE0007F7904 /* UIColorExtensions.swift in Sources */,
 				D49C693E2F249C9600B66608 /* LocalFileConvertible.swift in Sources */,
@@ -845,8 +874,9 @@
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,
 				D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */,
+				D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */,
+				D480E5D42FCB1AC1006ABBC2 /* PopupView.swift in Sources */,
 				D4E1ECDF2752388C00D4A23D /* SceneDelegate.swift in Sources */,
-				D41240CC2F77D43900B757F8 /* PopupViewPresenter.swift in Sources */,
 				D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */,
 				D49C691F2F23A3F400B66608 /* ProjectStorage.xcdatamodeld in Sources */,
 				D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */,
@@ -865,6 +895,8 @@
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
 				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,
+				D480E5DD2FCB1D3C006ABBC2 /* PopupViewModelTests.swift in Sources */,
+				D480E5DF2FCB1DD6006ABBC2 /* TestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

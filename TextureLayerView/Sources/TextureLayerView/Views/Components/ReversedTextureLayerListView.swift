@@ -19,9 +19,11 @@ struct ReversedTextureLayerListView: View {
                 Array((viewModel.textureLayers.layers).reversed()),
                 id: \.id
             ) { layer in
+                let isSelected = viewModel.isSelected(layer.id)
+
                 TextureLayerItemView(
                     layer: layer,
-                    isSelected: viewModel.isSelected(layer.id),
+                    isSelected: isSelected,
                     didTapRow: { targetLayer in
                         viewModel.onTapCell(
                             targetLayer.id
@@ -34,7 +36,11 @@ struct ReversedTextureLayerListView: View {
                         )
                     }
                 )
-                .listRowBackground(Color.clear)
+                .listRowBackground(
+                    Color(
+                        uiColor: layer.backgroundColor(isSelected)
+                    )
+                )
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
@@ -45,7 +51,7 @@ struct ReversedTextureLayerListView: View {
             })
             .listRowSeparator(.hidden)
         }
-        .listStyle(PlainListStyle())
+        .listStyle(.plain)
     }
 }
 
