@@ -64,10 +64,16 @@ final class PassthroughHostingView: UIView {
     }
 
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        popupHitTestRects.contains { $0.contains(point) }
+        guard popupViewModels.allSatisfy({ $0.isHidden || $0.isUserInteractionEnabled }) else {
+            return false
+        }
+        return popupHitTestRects.contains { $0.contains(point) }
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard popupViewModels.allSatisfy({ $0.isHidden || $0.isUserInteractionEnabled }) else {
+            return nil
+        }
         guard popupHitTestRects.contains(where: { $0.contains(point) }) else {
             return nil
         }
