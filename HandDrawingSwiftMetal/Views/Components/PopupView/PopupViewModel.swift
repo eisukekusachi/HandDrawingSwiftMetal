@@ -84,10 +84,20 @@ private extension PopupViewModel {
         let centeredCenterX = targetFrame.midX
         let minCenterX = halfPopupSize + horizontalPadding
         let maxCenterX = containerWidth - (halfPopupSize + horizontalPadding)
-        let centerX = min(max(centeredCenterX, minCenterX), maxCenterX)
+        let centerX: CGFloat
+        if minCenterX <= maxCenterX {
+            centerX = min(max(centeredCenterX, minCenterX), maxCenterX)
+        } else {
+            // Container too narrow to satisfy horizontal padding on both sides.
+            // Keep the popup inside the container by centering, then clamping x.
+            centerX = containerWidth / 2
+        }
+
+        let idealX = centerX - halfPopupSize
+        let clampedX = min(max(idealX, 0), max(containerWidth - popupSize.width, 0))
 
         return CGRect(
-            x: centerX - halfPopupSize,
+            x: clampedX,
             y: 0,
             width: popupSize.width,
             height: popupSize.height

@@ -123,6 +123,31 @@ struct PopupViewModelTests {
             #expect(result.minX >= 0)
             #expect(result.maxX <= containerWidth)
         }
+
+        @Test
+        func `Keeps popup within container when container is narrower than popup and padding`() {
+            let popupSize: CGSize = .init(width: 200, height: 100)
+            let buttonRect: CGRect = .init(
+                origin: .init(x: 10, y: 0),
+                size: .init(width: 20, height: 20)
+            )
+            let containerWidth: CGFloat = 120
+
+            let subject: Subject = .init(
+                size: popupSize,
+                targetSpacing: 8,
+                horizontalPadding: 16,
+                placement: .top
+            )
+            subject.targetFrame = buttonRect
+
+            let result = subject.popupRect(
+                containerWidth: containerWidth
+            )
+
+            // When the popup can't fit, keep the leading edge within the container to avoid a negative x.
+            #expect(result.minX >= 0)
+        }
     }
 
     @Suite
