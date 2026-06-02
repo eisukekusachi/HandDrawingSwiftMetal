@@ -29,59 +29,54 @@ struct TextureLayerItemView: View {
     }
 
     var body: some View {
-        Button(
-            action: {
-                didTapRow(layer)
-            },
-            label: {
-                HStack {
-                    thumbnailView
+        HStack {
+            thumbnailView
 
-                    Text(layer.title)
-                        .font(.subheadline)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .frame(minWidth: 0, alignment: .leading)
+            Text(layer.title)
+                .font(.subheadline)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(minWidth: 0, alignment: .leading)
+                .foregroundColor(
+                    Color(
+                        layer.textColor(isSelected)
+                    )
+                )
+
+            Spacer()
+
+            Text("A: \(layer.alpha)")
+                .font(.caption2)
+                .foregroundColor(Color(uiColor: .gray))
+
+            Button(
+                action: {
+                    didTapVisibleButton(layer)
+                },
+                label: {
+                    Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
+                        .frame(
+                            width: layer.iconSize.width,
+                            height: layer.iconSize.height
+                        )
                         .foregroundColor(
                             Color(
-                                layer.textColor(isSelected)
+                                layer.iconColor(isVisible: layer.isVisible, isSelected)
                             )
                         )
-
-                    Spacer()
-
-                    Text("A: \(layer.alpha)")
-                        .font(.caption2)
-                        .foregroundColor(Color(uiColor: .gray))
-
-                    Button(
-                        action: {
-                            didTapVisibleButton(layer)
-                        },
-                        label: {
-                            Image(systemName: layer.isVisible ? "eye" : "eye.slash.fill")
-                                .frame(
-                                    width: layer.iconSize.width,
-                                    height: layer.iconSize.height
-                                )
-                                .foregroundColor(
-                                    Color(
-                                        layer.iconColor(isVisible: layer.isVisible, isSelected)
-                                    )
-                                )
-                        }
-                    )
-                    .buttonStyle(.plain)
-
-                    Spacer()
-                        .frame(width: layer.padding)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: layer.iconSize.height + layer.padding * 2)
-                .contentShape(Rectangle())
-            }
-        )
-        .buttonStyle(.plain)
+            )
+            .buttonStyle(.plain)
+
+            Spacer()
+                .frame(width: layer.padding)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: layer.iconSize.height + layer.padding * 2)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            didTapRow(layer)
+        }
     }
 
     @ViewBuilder
