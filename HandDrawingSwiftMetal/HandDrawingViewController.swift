@@ -186,7 +186,7 @@ private extension HandDrawingViewController {
 
     func bindData() {
         let isStrokeSessionActive = canvasView.strokeEvents
-            .scan(false) { isActive, event in
+            .map { event in
                 switch event {
                 case .fingerStrokeBegan, .pencilStrokeBegan:
                     true
