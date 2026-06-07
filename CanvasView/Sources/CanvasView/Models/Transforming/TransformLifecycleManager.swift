@@ -7,7 +7,7 @@
 
 import Combine
 
-/// Owns transform lifecycle transitions and publishes phase changes.
+/// Owns transform lifecycle transitions and publishes phase changes
 @MainActor
 final class TransformLifecycleManager {
 
