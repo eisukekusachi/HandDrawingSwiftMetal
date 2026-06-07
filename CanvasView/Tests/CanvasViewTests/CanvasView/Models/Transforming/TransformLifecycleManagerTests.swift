@@ -18,16 +18,8 @@ struct TransformLifecycleManagerTests {
     func `beginIfIdle transitions idle to transforming`() {
         let subject = Subject()
 
-        #expect(subject.beginIfIdle())
-        #expect(subject.phase == .transforming)
-    }
-
-    @Test
-    func `beginIfIdle returns false when not idle`() {
-        let subject = Subject()
-
         subject.beginIfIdle()
-        #expect(subject.beginIfIdle() == false)
+
         #expect(subject.phase == .transforming)
     }
 
@@ -47,6 +39,8 @@ struct TransformLifecycleManagerTests {
 
         subject.beginIfIdle()
         subject.finalizeIfTransforming()
+        #expect(subject.phase == .finalizing)
+
         subject.complete()
 
         #expect(subject.phase == .idle)
@@ -57,6 +51,8 @@ struct TransformLifecycleManagerTests {
         let subject = Subject()
 
         subject.beginIfIdle()
+        #expect(subject.phase == .transforming)
+
         subject.complete()
 
         #expect(subject.phase == .transforming)
@@ -68,6 +64,8 @@ struct TransformLifecycleManagerTests {
 
         subject.beginIfIdle()
         subject.finalizeIfTransforming()
+        #expect(subject.phase == .finalizing)
+
         subject.reset()
 
         #expect(subject.phase == .idle)

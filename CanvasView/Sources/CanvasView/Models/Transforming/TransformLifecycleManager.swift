@@ -20,12 +20,10 @@ final class TransformLifecycleManager {
 
     private let phaseSubject = CurrentValueSubject<TransformLifecycle, Never>(.idle)
 
-    @discardableResult
-    func beginIfIdle() -> Bool {
-        guard case .idle = phase else { return false }
+    func beginIfIdle() {
+        guard case .idle = phase else { return }
 
         phaseSubject.send(.transforming)
-        return true
     }
 
     func finalizeIfTransforming() {
