@@ -41,7 +41,7 @@ final class TransformLifecycleManager {
         phaseSubject.send(.idle)
     }
 
-    func returnToIdle() {
+    func reset() {
         phaseSubject.send(.idle)
     }
 }

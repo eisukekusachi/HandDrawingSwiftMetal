@@ -185,16 +185,35 @@ private extension HandDrawingViewController {
     }
 
     func bindData() {
+        let isStrokeSessionActive = canvasView.strokeEvents
+            .scan(false) { isActive, event in
+                switch event {
+                case .fingerStrokeBegan, .pencilStrokeBegan:
+                    true
+                case .strokeCompleted, .strokeCancelled:
+                    false
+                }
+            }
+            .prepend(false)
+            .removeDuplicates()
+
+        Publishers.CombineLatest(
+            isStrokeSessionActive,
+            canvasView.transformLifecyclePhase.map(\.isActive)
+        )
+        .map { isStrokeActive, isTransformActive in
+            isStrokeActive || isTransformActive
+        }
+        .removeDuplicates()
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] shouldLockUI in
+            self?.enableComponentsInteraction(!shouldLockUI)
+        }
+        .store(in: &cancellables)
+
         canvasView.strokeEvents
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                switch event {
-                case .fingerStrokeBegan, .pencilStrokeBegan:
-                    self?.enableComponentsInteraction(false)
-                case .strokeCompleted, .strokeCancelled:
-                    self?.enableComponentsInteraction(true)
-                }
-
                 self?.undoCoordinator.registerDrawingUndoAfterCompletion(event)
             }
             .store(in: &cancellables)

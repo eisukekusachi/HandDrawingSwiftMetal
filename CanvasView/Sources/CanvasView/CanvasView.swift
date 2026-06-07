@@ -25,6 +25,11 @@ open class CanvasView: UIView {
     }
     private let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
+    /// Emits transform lifecycle
+    public var transformLifecyclePhase: AnyPublisher<TransformLifecycle, Never> {
+        viewModel.transformLifecyclePhase
+    }
+
     public var canvasTexture: MTLTexture? {
         viewModel.canvasTexture
     }

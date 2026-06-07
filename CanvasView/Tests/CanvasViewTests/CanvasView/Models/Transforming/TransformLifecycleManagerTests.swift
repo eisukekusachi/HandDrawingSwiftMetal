@@ -64,12 +64,12 @@ struct TransformLifecycleManagerTests {
     }
 
     @Test
-    func `returnToIdle always transitions to idle`() {
+    func `reset always transitions to idle`() {
         let subject = Subject()
 
         subject.beginIfIdle()
         subject.finalizeIfTransforming()
-        subject.returnToIdle()
+        subject.reset()
 
         #expect(subject.phase == .idle)
     }
