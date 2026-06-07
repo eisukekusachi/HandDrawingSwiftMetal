@@ -5,8 +5,6 @@
 //  Created by Eisuke Kusachi on 2026/06/07.
 //
 
-import Foundation
-
 /// Lifecycle of canvas pan/pinch: idle → transforming → finalizing → idle.
 public enum TransformLifecycle: Equatable, Sendable {
     case idle
