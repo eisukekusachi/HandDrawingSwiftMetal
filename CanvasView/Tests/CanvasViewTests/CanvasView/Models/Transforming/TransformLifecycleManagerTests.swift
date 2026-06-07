@@ -24,6 +24,18 @@ struct TransformLifecycleManagerTests {
     }
 
     @Test
+    func `beginIfIdle is a no-op when not idle`() {
+        let subject = Subject()
+
+        subject.beginIfIdle()
+        #expect(subject.phase == .transforming)
+
+        subject.beginIfIdle()
+
+        #expect(subject.phase == .transforming)
+    }
+
+    @Test
     func `finalizeIfTransforming transitions transforming to finalizing`() {
         let subject = Subject()
 
@@ -31,6 +43,15 @@ struct TransformLifecycleManagerTests {
         subject.finalizeIfTransforming()
 
         #expect(subject.phase == .finalizing)
+    }
+
+    @Test
+    func `finalizeIfTransforming is a no-op when idle`() {
+        let subject = Subject()
+
+        subject.finalizeIfTransforming()
+
+        #expect(subject.phase == .idle)
     }
 
     @Test
@@ -47,7 +68,7 @@ struct TransformLifecycleManagerTests {
     }
 
     @Test
-    func `complete is a no-op when not finalizing`() {
+    func `complete is a no-op when transforming`() {
         let subject = Subject()
 
         subject.beginIfIdle()
