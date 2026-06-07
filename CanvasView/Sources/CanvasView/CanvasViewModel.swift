@@ -71,6 +71,12 @@ final class CanvasViewModel {
 
     private let transforming = Transforming()
 
+    private let transformLifecycle = TransformLifecycleManager()
+
+    var transformLifecyclePhase: AnyPublisher<TransformLifecycle, Never> {
+        transformLifecycle.phasePublisher
+    }
+
     init(
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
@@ -160,6 +166,7 @@ extension CanvasViewModel {
     }
 
     func resetTransforming() {
+        transformLifecycle.reset()
         transforming.setMatrix(.identity)
         present()
     }
@@ -353,6 +360,39 @@ extension CanvasViewModel {
     }
 }
 
+private extension CanvasViewModel {
+    func transformCanvas() {
+        switch transformLifecycle.phase {
+        case .idle:
+            transformLifecycle.beginIfIdle()
+            transforming.initialize(fingerStroke.touchHistories)
+            fallthrough
+
+        case .transforming:
+            guard fingerStroke.hasActiveTouches else {
+                transformLifecycle.finalizeIfTransforming()
+                fallthrough
+            }
+
+            transforming.transformCanvas(
+                screenCenter: .init(
+                    x: frameSize.width * 0.5,
+                    y: frameSize.height * 0.5
+                ),
+                touchHistories: fingerStroke.touchHistories
+            )
+
+            present()
+
+        case .finalizing:
+            transforming.endTransformation()
+            transformLifecycle.complete()
+
+            present()
+        }
+    }
+}
+
 extension CanvasViewModel {
 
     private func makeStrokePoints(
@@ -385,6 +425,7 @@ extension CanvasViewModel {
         pencilStroke.reset()
 
         transforming.resetMatrix()
+        transformLifecycle.reset()
 
         drawingTouchPhaseSubject.send(nil)
 
@@ -403,32 +444,11 @@ extension CanvasViewModel {
         fingerStroke.reset()
 
         transforming.resetMatrix()
+        transformLifecycle.reset()
 
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
-
-        present()
-    }
-
-    private func transformCanvas() {
-        if transforming.isNotKeysInitialized {
-            transforming.initialize(
-                fingerStroke.touchHistories
-            )
-        }
-
-        if fingerStroke.hasActiveTouches {
-            transforming.transformCanvas(
-                screenCenter: .init(
-                    x: frameSize.width * 0.5,
-                    y: frameSize.height * 0.5
-                ),
-                touchHistories: fingerStroke.touchHistories
-            )
-        } else {
-            transforming.endTransformation()
-        }
 
         present()
     }

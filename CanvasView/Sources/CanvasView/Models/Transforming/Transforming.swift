@@ -24,14 +24,6 @@ final class Transforming {
 
 extension Transforming {
 
-    var isKeysInitialized: Bool {
-        firstKey != nil && secondKey != nil
-    }
-
-    var isNotKeysInitialized: Bool {
-        !isKeysInitialized
-    }
-
     func initialize(_ touchHistories: TouchHistoriesOnScreen) {
         guard touchHistories.count == 2 else { return }
 
