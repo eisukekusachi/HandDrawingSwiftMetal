@@ -6,7 +6,6 @@
 //
 
 import Combine
-import Foundation
 
 /// Owns transform lifecycle transitions and publishes phase changes.
 @MainActor
