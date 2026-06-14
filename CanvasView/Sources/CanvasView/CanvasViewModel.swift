@@ -440,6 +440,9 @@ private extension CanvasViewModel {
 
         fingerStroke.reset()
 
+        // TODO: Remove it in https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/231
+        strokeEventSubject.send(.strokeCancelled)
+
         transforming.resetMatrix()
         transformLifecycle.reset()
 
