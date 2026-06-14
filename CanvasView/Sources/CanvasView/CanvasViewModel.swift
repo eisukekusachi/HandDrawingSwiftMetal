@@ -164,12 +164,6 @@ extension CanvasViewModel {
             canvasTexture: canvasTexture
         )
     }
-
-    func resetTransforming() {
-        transformLifecycle.reset()
-        transforming.setMatrix(.identity)
-        present()
-    }
 }
 
 extension CanvasViewModel {
@@ -239,7 +233,7 @@ extension CanvasViewModel {
 
         // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(event: event) {
-            resetFingerGestureParameters()
+            resetAfterAllFingersReleased()
         }
     }
 
@@ -251,7 +245,8 @@ extension CanvasViewModel {
     ) {
         // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
-            cancelFingerDrawing()
+            resetFingerDrawing()
+            present()
         }
         inputState.update(.pencil)
 
@@ -341,7 +336,7 @@ extension CanvasViewModel {
             }
 
             // Reset parameters on drawing completion
-            prepareNextStroke(commandBuffer: commandBuffer)
+            resetAfterDrawingStroke(commandBuffer: commandBuffer)
 
             commandBuffer.addCompletedHandler { @Sendable _ in
                 Task { @MainActor [weak self] in
@@ -350,13 +345,18 @@ extension CanvasViewModel {
             }
         } else if isCancelledDrawing {
             // Prepare for the next drawing when the drawing is cancelled.
-            prepareNextStroke(commandBuffer: commandBuffer)
+            resetAfterDrawingStroke(commandBuffer: commandBuffer)
             strokeEventSubject.send(.strokeCancelled)
         }
 
         canvasEventSubject.send(
             displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
         )
+    }
+
+    func onResetTransform() {
+        resetTransforming()
+        present()
     }
 }
 
@@ -391,9 +391,6 @@ private extension CanvasViewModel {
             present()
         }
     }
-}
-
-extension CanvasViewModel {
 
     private func makeStrokePoints(
         from pointArray: [TouchPoint],
@@ -416,8 +413,11 @@ extension CanvasViewModel {
             )
         }
     }
+}
 
-    private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {
+private extension CanvasViewModel {
+    /// Resets input, touch history, and lifecycles after a drawing stroke is committed.
+    func resetAfterDrawingStroke(commandBuffer: MTLCommandBuffer) {
         inputState.reset()
         touchGesture.reset()
 
@@ -432,15 +432,25 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke(with: commandBuffer)
     }
 
-    private func resetFingerGestureParameters() {
+    /// Resets finger-session state after every finger has left the screen.
+    /// Only runs while `inputState` is not `.pencil`.
+    func resetAfterAllFingersReleased() {
+        inputState.reset()
         touchGesture.reset()
 
         fingerStroke.reset()
 
+        // TODO: Remove it in https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/231
+        strokeEventSubject.send(.strokeCancelled)
+
+        transforming.resetMatrix()
+        transformLifecycle.reset()
+
         drawingTouchPhaseSubject.send(nil)
     }
 
-    private func cancelFingerDrawing() {
+    /// Resets in-progress finger drawing when Apple Pencil input takes over.
+    func resetFingerDrawing() {
         fingerStroke.reset()
 
         transforming.resetMatrix()
@@ -449,7 +459,11 @@ extension CanvasViewModel {
         drawingRenderer?.prepareNextStroke()
 
         canvasRenderer.resetCommandBuffer()
+    }
 
-        present()
+    /// Resets the canvas transform to identity.
+    func resetTransforming() {
+        transformLifecycle.reset()
+        transforming.setMatrix(.identity)
     }
 }

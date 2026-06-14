@@ -69,6 +69,10 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
+    private let fingerInputGestureRecognizer: FingerInputGestureRecognizer
+
+    private let pencilInputGestureRecognizer: PencilInputGestureRecognizer
+
     public init(
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration = .init()
@@ -89,6 +93,8 @@ open class CanvasView: UIView {
             device: sharedDevice,
             commandQueue: commandQueue
         )
+        self.fingerInputGestureRecognizer = FingerInputGestureRecognizer()
+        self.pencilInputGestureRecognizer = PencilInputGestureRecognizer()
         self.canvasRenderer = .init(
             renderer: renderer,
             displayView: displayView,
@@ -120,12 +126,10 @@ open class CanvasView: UIView {
     }
 
     private func addEvents() {
-        addGestureRecognizer(
-            FingerInputGestureRecognizer(delegate: self)
-        )
-        addGestureRecognizer(
-            PencilInputGestureRecognizer(delegate: self)
-        )
+        fingerInputGestureRecognizer.setDelegate(sender: self, delegate: self)
+        pencilInputGestureRecognizer.setDelegate(sender: self, delegate: self)
+        addGestureRecognizer(fingerInputGestureRecognizer)
+        addGestureRecognizer(pencilInputGestureRecognizer)
     }
 
     private func bindData() {
@@ -206,7 +210,6 @@ open class CanvasView: UIView {
 }
 
 extension CanvasView {
-
     public func setCurrentTexture(_ texture: MTLTexture?) throws {
         guard texture?.size == viewModel.currentTextureSize else {
             throw CanvasError.textureSizeMismatch
@@ -219,7 +222,23 @@ extension CanvasView {
     }
 
     public func resetTransforming() {
-        viewModel.resetTransforming()
+        viewModel.onResetTransform()
+    }
+}
+
+extension CanvasView: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        let isCanvasInputGesture =
+        gestureRecognizer === fingerInputGestureRecognizer ||
+        gestureRecognizer === pencilInputGestureRecognizer
+        let isOtherCanvasInputGesture =
+        otherGestureRecognizer === fingerInputGestureRecognizer ||
+        otherGestureRecognizer === pencilInputGestureRecognizer
+
+        return isCanvasInputGesture && isOtherCanvasInputGesture
     }
 }
 
