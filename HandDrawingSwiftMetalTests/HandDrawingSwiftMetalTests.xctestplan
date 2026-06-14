@@ -39,13 +39,6 @@
         "identifier" : "CanvasViewTests",
         "name" : "CanvasViewTests"
       }
-    },
-    {
-      "target" : {
-        "containerPath" : "container:HandDrawingSwiftMetal.xcodeproj",
-        "identifier" : "D4E1ECF82752388E00D4A23D",
-        "name" : "HandDrawingSwiftMetalUITests"
-      }
     }
   ],
   "version" : 1
