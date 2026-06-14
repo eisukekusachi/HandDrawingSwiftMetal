@@ -14,40 +14,44 @@ import UIKit
 
 final class PencilInputGestureRecognizer: UIGestureRecognizer {
 
-    private weak var gestureDelegate: PencilInputGestureRecognizerSender?
+    private weak var sender: PencilInputGestureRecognizerSender?
 
-    init(delegate: PencilInputGestureRecognizerSender) {
+    init() {
         super.init(target: nil, action: nil)
         allowedTouchTypes = [UITouch.TouchType.pencil.rawValue as NSNumber]
         delaysTouchesBegan = false
         delaysTouchesEnded = false
-        gestureDelegate = delegate
+    }
+
+    func setDelegate(sender: PencilInputGestureRecognizerSender, delegate: UIGestureRecognizerDelegate) {
+        self.sender = sender
+        self.delegate = delegate
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
         state = .began
-        gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
         state = .changed
-        gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
         state = .ended
-        gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
         state = .cancelled
-        gestureDelegate?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
     }
 
     /// https://developer.apple.com/documentation/uikit/apple_pencil_interactions/handling_input_from_apple_pencil/
     override func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>) {
         guard let view else { return }
-        gestureDelegate?.sendPencilActualTouches(touches, on: view)
+        sender?.sendPencilActualTouches(touches, on: view)
     }
 }
