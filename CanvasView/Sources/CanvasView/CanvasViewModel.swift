@@ -164,12 +164,6 @@ extension CanvasViewModel {
             canvasTexture: canvasTexture
         )
     }
-
-    func resetTransforming() {
-        transformLifecycle.reset()
-        transforming.setMatrix(.identity)
-        present()
-    }
 }
 
 extension CanvasViewModel {
@@ -358,6 +352,11 @@ extension CanvasViewModel {
             displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
         )
     }
+
+    func onResetTransform() {
+        resetTransforming()
+        present()
+    }
 }
 
 private extension CanvasViewModel {
@@ -391,9 +390,6 @@ private extension CanvasViewModel {
             present()
         }
     }
-}
-
-extension CanvasViewModel {
 
     private func makeStrokePoints(
         from pointArray: [TouchPoint],
@@ -415,6 +411,14 @@ extension CanvasViewModel {
                 diameter: diameter
             )
         }
+    }
+}
+
+extension CanvasViewModel {
+
+    private func resetTransforming() {
+        transformLifecycle.reset()
+        transforming.setMatrix(.identity)
     }
 
     private func prepareNextStroke(commandBuffer: MTLCommandBuffer) {

@@ -210,7 +210,6 @@ open class CanvasView: UIView {
 }
 
 extension CanvasView {
-
     public func setCurrentTexture(_ texture: MTLTexture?) throws {
         guard texture?.size == viewModel.currentTextureSize else {
             throw CanvasError.textureSizeMismatch
@@ -223,7 +222,7 @@ extension CanvasView {
     }
 
     public func resetTransforming() {
-        viewModel.resetTransforming()
+        viewModel.onResetTransform()
     }
 }
 
