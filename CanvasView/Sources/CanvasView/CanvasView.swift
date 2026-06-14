@@ -231,10 +231,14 @@ extension CanvasView: UIGestureRecognizerDelegate {
         _ gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
+        let isCanvasInputGesture =
         gestureRecognizer === fingerInputGestureRecognizer ||
-        gestureRecognizer === pencilInputGestureRecognizer ||
+        gestureRecognizer === pencilInputGestureRecognizer
+        let isOtherCanvasInputGesture =
         otherGestureRecognizer === fingerInputGestureRecognizer ||
         otherGestureRecognizer === pencilInputGestureRecognizer
+
+        return isCanvasInputGesture && isOtherCanvasInputGesture
     }
 }
 
