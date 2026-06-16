@@ -65,4 +65,13 @@ extension TouchPhase {
         }
         return nil
     }
+
+    static func shouldFinalizeDrawing(from points: [TouchPoint]) -> Bool {
+        if let phase = drawingTouchPhase(points),
+           phase == .ended || phase == .cancelled {
+            return true
+        }
+
+        return points.last?.phase == .ended || points.last?.phase == .cancelled
+    }
 }

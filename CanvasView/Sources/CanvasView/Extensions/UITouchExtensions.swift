@@ -16,12 +16,11 @@ extension UITouch {
         return allTouches.allSatisfy { $0.phase == .ended || $0.phase == .cancelled }
     }
 
-    static func getFingerTouches(event: UIEvent?) -> [UITouch] {
-        var touches: [UITouch] = []
-        event?.allTouches?.forEach { touch in
+    @MainActor
+    static func fingerTouchesOnScreen(from event: UIEvent?, on view: UIView) -> TouchesOnScreen {
+        event?.allTouches?.reduce(into: TouchesOnScreen()) { touchesOnScreen, touch in
             guard touch.type != .pencil else { return }
-            touches.append(touch)
-        }
-        return touches
+            touchesOnScreen[TouchID(touch)] = TouchPoint(touch: touch, view: view)
+        } ?? [:]
     }
 }

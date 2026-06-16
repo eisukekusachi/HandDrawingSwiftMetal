@@ -173,15 +173,12 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
+        guard inputState.isNotPencil else { return }
         inputState.update(.finger)
 
-        // Return if a pen input is in progress
-        guard inputState.isNotPencil else { return }
-
-        let touchPoints = UITouch.getFingerTouches(event: event).reduce(into: [TouchID: TouchPoint]()) {
-            $0[TouchID($1)] = .init(touch: $1, view: view)
-        }
-        fingerStroke.appendTouchPointToDictionary(touchPoints)
+        fingerStroke.appendTouchPointToDictionary(
+            UITouch.fingerTouchesOnScreen(from: event, on: view)
+        )
 
         // determine the gesture from the dictionary
         switch touchGesture.update(fingerStroke.touchHistories) {
@@ -196,13 +193,13 @@ extension CanvasViewModel {
                 strokeEventSubject.send(.fingerStrokeBegan)
 
                 // Store the drawing-specific key in the dictionary
-                fingerStroke.setStoreKeyForDrawing()
+                fingerStroke.setDrawingTouchID()
 
                 drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
                 drawingRenderer.beginFingerStroke()
             }
 
-            let pointArray = fingerStroke.drawingPoints(after: fingerStroke.drawingLineEndPoint)
+            let pointArray = fingerStroke.drawingPoints(after: fingerStroke.lastDrawnTouchPoint)
 
             drawingRenderer.appendStrokePoints(
                 strokePoints: makeStrokePoints(
@@ -215,7 +212,7 @@ extension CanvasViewModel {
                 touchPhase: pointArray.currentTouchPhase
             )
 
-            fingerStroke.updateDrawingLineEndPoint()
+            fingerStroke.setLastDrawnTouchPoint()
 
             // Update the touch phase for drawing
             drawingTouchPhaseSubject.send(
@@ -229,7 +226,7 @@ extension CanvasViewModel {
         }
 
         // Remove unused finger arrays from the dictionary
-        fingerStroke.removeEndedTouchArrayFromDictionary()
+        fingerStroke.removeUnusedTouchArrayFromDictionary()
 
         // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(event: event) {
@@ -249,8 +246,6 @@ extension CanvasViewModel {
             present()
         }
         inputState.update(.pencil)
-
-        touchGesture.setDrawing()
 
         pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
@@ -285,7 +280,7 @@ extension CanvasViewModel {
                 .map { .init(touch: $0, view: view) }
         )
 
-        let pointArray = pencilStroke.drawingPoints(after: pencilStroke.drawingLineEndPoint)
+        let pointArray = pencilStroke.drawingPoints(after: pencilStroke.lastDrawnTouchPoint)
 
         drawingRenderer.appendStrokePoints(
             strokePoints: makeStrokePoints(
@@ -297,7 +292,7 @@ extension CanvasViewModel {
             ),
             touchPhase: pointArray.currentTouchPhase
         )
-        pencilStroke.setDrawingLineEndPoint()
+        pencilStroke.setLastDrawnTouchPoint()
 
         // Update the touch phase for drawing
         drawingTouchPhaseSubject.send(
@@ -308,7 +303,7 @@ extension CanvasViewModel {
     /// Called on every display-link frame while drawing is active
     func onDrawingDisplayLinkFrame() {
         guard
-            touchGesture.state == .drawing,
+            drawingTouchPhaseSubject.value != nil,
             let drawingRenderer,
             let currentTexture,
             let realtimeDrawingTexture,

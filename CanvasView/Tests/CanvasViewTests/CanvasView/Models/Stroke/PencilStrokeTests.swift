@@ -35,19 +35,19 @@ struct PencilStrokeTests {
             actualTouches: firstActualTouches
         )
 
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == firstActualTouches)
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint) == firstActualTouches)
 
-        subject.setDrawingLineEndPoint()
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).isEmpty)
+        subject.setLastDrawnTouchPoint()
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint).isEmpty)
 
         subject.appendActualTouches(
             actualTouches: secondActualTouches
         )
 
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == secondActualTouches)
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint) == secondActualTouches)
 
-        subject.setDrawingLineEndPoint()
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).isEmpty)
+        subject.setLastDrawnTouchPoint()
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint).isEmpty)
 
         subject.setLatestEstimatedTouchPoint(thirdEstimatedTouch)
         subject.setLatestEstimatedTouchPoint(fourthEstimatedTouch)
@@ -57,7 +57,7 @@ struct PencilStrokeTests {
         )
 
         // When actual values still omit `.ended`, pen-off-screen logic appends the estimated lift sample once.
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint) == thirdActualTouches + [fourthEstimatedTouch])
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint) == thirdActualTouches + [fourthEstimatedTouch])
     }
 
     struct DrawingPointsTests {
@@ -149,7 +149,7 @@ struct PencilStrokeTests {
 
     struct AppendActualTouches {
         @Test
-        func `Assigns a value to drawingLineEndPoint`() {
+        func `Assigns a value to lastDrawnTouchPoint`() {
             let touchPoint0: TouchPoint = .generate(
                 location: .init(x: 0, y: 0),
                 phase: .began,
@@ -162,17 +162,17 @@ struct PencilStrokeTests {
             )
 
             let subject = Subject(
-                drawingLineEndPoint: touchPoint0
+                lastDrawnTouchPoint: touchPoint0
             )
 
             subject.appendActualTouches(actualTouches: [touchPoint1])
 
-            // drawingLineEndPoint remains unchanged
-            #expect(subject.drawingLineEndPoint == touchPoint0)
+            // lastDrawnTouchPoint remains unchanged
+            #expect(subject.lastDrawnTouchPoint == touchPoint0)
 
-            // The last element of actualTouchPointArray is assigned to drawingLineEndPoint
-            subject.setDrawingLineEndPoint()
-            #expect(subject.drawingLineEndPoint == touchPoint1)
+            // The last element of actualTouchPointArray is assigned to lastDrawnTouchPoint
+            subject.setLastDrawnTouchPoint()
+            #expect(subject.lastDrawnTouchPoint == touchPoint1)
         }
 
         @Test
@@ -348,7 +348,7 @@ struct PencilStrokeTests {
             phase: .moved,
             estimationUpdateIndex: 1
         )
-        let drawingLineEndPoint: TouchPoint = .generate(
+        let lastDrawnTouchPoint: TouchPoint = .generate(
             location: .init(x: 2, y: 2),
             phase: .ended,
             estimationUpdateIndex: 2
@@ -357,19 +357,19 @@ struct PencilStrokeTests {
         let subject = Subject(
             actualTouchPointArray: actualTouchPoints,
             latestEstimatedTouchPoint: estimatedTouchPoint,
-            drawingLineEndPoint: drawingLineEndPoint
+            lastDrawnTouchPoint: lastDrawnTouchPoint
         )
 
         #expect(subject.actualTouchPointArray == actualTouchPoints)
         #expect(subject.latestEstimatedTouchPoint == estimatedTouchPoint)
         #expect(subject.latestEstimationUpdateIndex == estimatedTouchPoint.estimationUpdateIndex)
-        #expect(subject.drawingLineEndPoint == drawingLineEndPoint)
+        #expect(subject.lastDrawnTouchPoint == lastDrawnTouchPoint)
 
         subject.reset()
 
         #expect(subject.actualTouchPointArray.isEmpty)
         #expect(subject.latestEstimatedTouchPoint == nil)
         #expect(subject.latestEstimationUpdateIndex == nil)
-        #expect(subject.drawingLineEndPoint == nil)
+        #expect(subject.lastDrawnTouchPoint == nil)
     }
 }
