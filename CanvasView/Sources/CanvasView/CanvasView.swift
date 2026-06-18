@@ -19,15 +19,19 @@ open class CanvasView: UIView {
         )
     }
 
-    /// Emits stroke events
-    public var strokeEvents: AnyPublisher<StrokeEvent, Never> {
-        strokeEventSubject.eraseToAnyPublisher()
+    /// Emits when a stroke session was committed.
+    public var strokeSessionDidCommit: AnyPublisher<Void, Never> {
+        viewModel.strokeSessionDidCommitSubject.eraseToAnyPublisher()
     }
-    private let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
 
     /// Emits transform lifecycle
     public var transformLifecyclePhase: AnyPublisher<TransformLifecycle, Never> {
-        viewModel.transformLifecyclePhase
+        viewModel.transformLifecycle.phasePublisher.eraseToAnyPublisher()
+    }
+
+    /// Emits finger and pencil stroke lifecycle
+    public var strokeLifecyclePhase: AnyPublisher<StrokeLifecycle, Never> {
+        viewModel.strokeLifecycle.phasePublisher.eraseToAnyPublisher()
     }
 
     public var canvasTexture: MTLTexture? {
@@ -69,9 +73,9 @@ open class CanvasView: UIView {
 
     private let viewModel: CanvasViewModel
 
-    private let fingerInputGestureRecognizer: FingerInputGestureRecognizer
+    private let fingerInputGestureRecognizer = FingerInputGestureRecognizer()
 
-    private let pencilInputGestureRecognizer: PencilInputGestureRecognizer
+    private let pencilInputGestureRecognizer = PencilInputGestureRecognizer()
 
     public init(
         device: MTLDevice? = nil,
@@ -93,8 +97,6 @@ open class CanvasView: UIView {
             device: sharedDevice,
             commandQueue: commandQueue
         )
-        self.fingerInputGestureRecognizer = FingerInputGestureRecognizer()
-        self.pencilInputGestureRecognizer = PencilInputGestureRecognizer()
         self.canvasRenderer = .init(
             renderer: renderer,
             displayView: displayView,
@@ -153,25 +155,18 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // Subscribes to stroke events
-        viewModel.strokeEventSubject
-            .sink { [weak self] result in
-                self?.strokeEventSubject.send(result)
-            }
-            .store(in: &cancellables)
-
-        // Subscribes to drawing touch phase updates
-        viewModel.drawingTouchPhaseSubject
-            .sink { [weak self] touchPhase in
-                // Starts or stops the display link depending on the current touch phase
-                self?.canvasDisplayLink.run(touchPhase)
+        // Starts or stops the display link from stroke lifecycle
+        viewModel.strokeLifecycle.phasePublisher
+            .removeDuplicates()
+            .sink { [weak self] phase in
+                self?.canvasDisplayLink.run(phase)
             }
             .store(in: &cancellables)
 
         // Subscribes to the display link update
         canvasDisplayLink.update
             .sink { [weak self] in
-                self?.viewModel.onDrawingDisplayLinkFrame()
+                self?.viewModel.onRenderRealtimeDrawingTexture()
             }
             .store(in: &cancellables)
     }
@@ -186,7 +181,10 @@ open class CanvasView: UIView {
 
         // Set an initial value, as nothing is rendered when the drawing renderer is empty
         if viewModel.drawingRenderer == nil {
-            initializeDrawingRenderer(textureSize: textureSize)
+            let drawingRenderer = BrushDrawingRenderer()
+            drawingRenderer.setup(renderer: renderer)
+            drawingRenderer.initializeTextures(textureSize)
+            setDrawingRenderer(drawingRenderer)
         }
 
         // Display the initialized canvas immediately so the view does not remain
@@ -203,26 +201,26 @@ open class CanvasView: UIView {
         viewModel.updateCanvasTexture(currentTexture)
         present()
     }
-
-    public func present() {
-        viewModel.present()
-    }
 }
 
-extension CanvasView {
-    public func setCurrentTexture(_ texture: MTLTexture?) throws {
+public extension CanvasView {
+    func setCurrentTexture(_ texture: MTLTexture?) throws {
         guard texture?.size == viewModel.currentTextureSize else {
             throw CanvasError.textureSizeMismatch
         }
-        viewModel.setCurrentTexture(texture)
+        viewModel.currentTexture = texture
     }
 
-    public func setDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
-        viewModel.setDrawingRenderer(drawingRenderer)
+    func setDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
+        viewModel.updateDrawingRenderer(drawingRenderer)
     }
 
-    public func resetTransforming() {
-        viewModel.onResetTransform()
+    func resetTransforming() {
+        viewModel.onResetTransforming()
+    }
+
+    func present() {
+        viewModel.present()
     }
 }
 
@@ -280,16 +278,5 @@ extension CanvasView: PencilInputGestureRecognizerSender {
             actualTouches: touches,
             view: view
         )
-    }
-}
-
-private extension CanvasView {
-    func initializeDrawingRenderer(
-        textureSize: CGSize
-    ) {
-        let drawingRenderer = BrushDrawingRenderer()
-        drawingRenderer.setup(renderer: renderer)
-        drawingRenderer.initializeTextures(textureSize)
-        setDrawingRenderer(drawingRenderer)
     }
 }

@@ -19,14 +19,20 @@ final class CanvasViewModel {
         }
     }
 
-    /// Publishes stroke events
-    let strokeEventSubject = PassthroughSubject<StrokeEvent, Never>()
+    /// Texture to be drawn. Writable because only `CanvasView` assigns it from outside.
+    var currentTexture: MTLTexture?
 
-    /// Publishes canvas events
+    /// Emits when a stroke session was committed.
+    let strokeSessionDidCommitSubject = PassthroughSubject<Void, Never>()
+
+    /// Emits canvas events.
     let canvasEventSubject = PassthroughSubject<CanvasEvent, Never>()
 
-    /// Publishes the current touch phase during a drawing interaction
-    let drawingTouchPhaseSubject = CurrentValueSubject<UITouch.Phase?, Never>(nil)
+    /// Owns finger and pencil stroke lifecycle transitions.
+    let strokeLifecycle = StrokeLifecycleManager()
+
+    /// Owns canvas pan/pinch lifecycle transitions.
+    let transformLifecycle = TransformLifecycleManager()
 
     /// The size of the texture currently set on the canvas.
     /// A temporary value is assigned to avoid making it optional.
@@ -35,30 +41,11 @@ final class CanvasViewModel {
     /// Texture used during drawing
     private(set) var realtimeDrawingTexture: RealtimeDrawingTexture?
 
-    /// Texture to be drawn
-    private(set) var currentTexture: MTLTexture?
-
     /// Texture that combines the background color and the textures of `currentTexture`
     private(set) var canvasTexture: MTLTexture?
 
     /// A class that manages rendering to the canvas
     private let canvasRenderer: CanvasRenderer
-
-    /// Handles input from finger touches
-    private let fingerStroke = FingerStroke()
-    /// Handles input from Apple Pencil
-    private let pencilStroke = PencilStroke()
-
-    private var isFinishedDrawing: Bool {
-        drawingTouchPhaseSubject.value == .ended
-    }
-    private var isCancelledDrawing: Bool {
-        drawingTouchPhaseSubject.value == .cancelled
-    }
-
-    private var displayRealtimeDrawingTexture: Bool {
-        drawingRenderer?.displayRealtimeDrawingTexture ?? false
-    }
 
     /// A class that manages drawing lines onto textures
     private(set) var drawingRenderer: HighPrecisionDrawingRenderer?
@@ -67,15 +54,15 @@ final class CanvasViewModel {
     private let inputState = InputState()
 
     /// Manages on-screen gestures such as drag and pinch
-    private let touchGesture = TouchGestureState()
+    private let touchGestureState = TouchGestureState()
+
+    /// Handles input from finger touches
+    private let fingerStroke = FingerStroke()
+
+    /// Handles input from Apple Pencil
+    private let pencilStroke = PencilStroke()
 
     private let transforming = Transforming()
-
-    private let transformLifecycle = TransformLifecycleManager()
-
-    var transformLifecyclePhase: AnyPublisher<TransformLifecycle, Never> {
-        transformLifecycle.phasePublisher
-    }
 
     init(
         canvasRenderer: CanvasRenderer,
@@ -84,18 +71,15 @@ final class CanvasViewModel {
         self.canvasRenderer = canvasRenderer
 
         // Set the gesture recognition durations in seconds
-        self.touchGesture.setDrawingGestureRecognitionSecond(
+        self.touchGestureState.setDrawingGestureRecognitionSecond(
             configuration.drawingGestureRecognitionSecond
         )
-        self.touchGesture.setTransformingGestureRecognitionSecond(
+        self.touchGestureState.setTransformingGestureRecognitionSecond(
             configuration.transformingGestureRecognitionSecond
         )
 
         self.currentTextureSize = configuration.textureSize
     }
-}
-
-extension CanvasViewModel {
 
     func initializeCanvas(_ textureSize: CGSize) async throws {
         guard
@@ -137,32 +121,7 @@ extension CanvasViewModel {
         self.canvasTexture = canvasTexture
         self.currentTexture = currentTexture
         self.realtimeDrawingTexture = realtimeDrawingTexture
-
-        currentTextureSize = textureSize
-    }
-
-    /// Presents `canvasTexture` to the screen
-    func present() {
-        canvasRenderer.drawCanvasTextureToDisplay(
-            matrix: transforming.matrix,
-            canvasTexture: canvasTexture
-        )
-    }
-
-    func setCurrentTexture(_ texture: MTLTexture?) {
-        self.currentTexture = texture
-    }
-
-    func setDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
-        self.drawingRenderer = drawingRenderer
-        self.drawingRenderer?.prepareNextStroke()
-    }
-
-    func updateCanvasTexture(_ texture: MTLTexture?) {
-        canvasRenderer.updateCanvasTexture(
-            currentTexture: texture,
-            canvasTexture: canvasTexture
-        )
+        self.currentTextureSize = textureSize
     }
 }
 
@@ -181,54 +140,15 @@ extension CanvasViewModel {
         )
 
         // determine the gesture from the dictionary
-        switch touchGesture.update(fingerStroke.touchHistories) {
-        case .drawing:
-            guard
-                let drawingRenderer,
-                let displayTextureSize = canvasRenderer.displayTextureSize
-            else { return }
-
-            // Execute if finger drawing has not yet started
-            if fingerStroke.isFingerDrawingInactive {
-                strokeEventSubject.send(.fingerStrokeBegan)
-
-                // Store the drawing-specific key in the dictionary
-                fingerStroke.setDrawingTouchID()
-
-                drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
-                drawingRenderer.beginFingerStroke()
-            }
-
-            let pointArray = fingerStroke.drawingPoints(after: fingerStroke.lastDrawnTouchPoint)
-
-            drawingRenderer.appendStrokePoints(
-                strokePoints: makeStrokePoints(
-                    from: pointArray,
-                    textureSize: currentTextureSize,
-                    displayTextureSize: displayTextureSize,
-                    frameSize: frameSize,
-                    diameter: CGFloat(drawingRenderer.diameter)
-                ),
-                touchPhase: pointArray.currentTouchPhase
-            )
-
-            fingerStroke.setLastDrawnTouchPoint()
-
-            // Update the touch phase for drawing
-            drawingTouchPhaseSubject.send(
-                TouchPhase.drawingTouchPhase(pointArray)
-            )
-
-        case .transforming:
-            transformCanvas()
-
-        default: break
+        switch touchGestureState.update(fingerStroke.touchHistories) {
+        case .undetermined: break
+        case .drawing: fingerDraw()
+        case .transforming: transformCanvas()
         }
 
         // Remove unused finger arrays from the dictionary
         fingerStroke.removeUnusedTouchArrayFromDictionary()
 
-        // Reset all parameters when all fingers are lifted off the screen
         if UITouch.isAllFingersReleasedFromScreen(event: event) {
             resetAfterAllFingersReleased()
         }
@@ -240,13 +160,13 @@ extension CanvasViewModel {
         with event: UIEvent?,
         view: UIView
     ) {
-        // Reset parameters if a finger drawing is in progress
         if inputState.isFinger {
             resetFingerDrawing()
             present()
         }
         inputState.update(.pencil)
 
+        // Stores the latest estimated pencil touch for stroke-end detection.
         pencilStroke.setLatestEstimatedTouchPoint(
             estimatedTouches
                 .filter({ $0.type == .pencil })
@@ -261,101 +181,125 @@ extension CanvasViewModel {
         actualTouches: Set<UITouch>,
         view: UIView
     ) {
+        pencilDraw(actualTouches: actualTouches, view: view)
+    }
+
+    func onResetTransforming() {
+        resetTransforming()
+    }
+
+    /// Renders the active stroke into the realtime texture.
+    func onRenderRealtimeDrawingTexture() {
+        renderRealtimeStrokeSession()
+    }
+}
+
+private extension CanvasViewModel {
+    func fingerDraw() {
         guard
             let drawingRenderer,
             let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
-        // Execute if it’s the beginning of a touch
-        if actualTouches.contains(where: { $0.phase == .began }) {
-            strokeEventSubject.send(.pencilStrokeBegan)
-
+        switch strokeLifecycle.phase {
+        case .idle:
+            strokeLifecycle.beginIfIdle()
+            fingerStroke.setDrawingTouchID()
             drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
-            drawingRenderer.beginPencilStroke()
+            drawingRenderer.beginFingerStroke()
+            fallthrough
+
+        case .drawing:
+            let pointArray = fingerStroke.drawingPoints(
+                after: fingerStroke.lastDrawnTouchPoint
+            )
+
+            drawingRenderer.appendStrokePoints(
+                strokePoints: pointArray.map {
+                    .init(
+                        location: CGAffineTransform.texturePoint(
+                            screenPoint: $0.preciseLocation,
+                            matrix: transforming.matrix.inverted(flipY: true),
+                            textureSize: currentTextureSize,
+                            drawableSize: displayTextureSize,
+                            frameSize: frameSize
+                        ),
+                        brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                        diameter: CGFloat(drawingRenderer.diameter)
+                    )
+                },
+                touchPhase: pointArray.currentTouchPhase
+            )
+
+            fingerStroke.setLastDrawnTouchPoint()
+
+            if fingerStroke.shouldFinalizeDrawing(from: pointArray) {
+                strokeLifecycle.finalizeIfDrawing(cancelled: fingerStroke.isCancelled)
+                fallthrough
+            }
+
+        case .finalizing:
+            commitRealtimeStrokeSession()
         }
-
-        pencilStroke.appendActualTouches(
-            actualTouches: actualTouches
-                .sorted { $0.timestamp < $1.timestamp }
-                .map { .init(touch: $0, view: view) }
-        )
-
-        let pointArray = pencilStroke.drawingPoints(after: pencilStroke.lastDrawnTouchPoint)
-
-        drawingRenderer.appendStrokePoints(
-            strokePoints: makeStrokePoints(
-                from: pointArray,
-                textureSize: currentTextureSize,
-                displayTextureSize: displayTextureSize,
-                frameSize: frameSize,
-                diameter: CGFloat(drawingRenderer.diameter)
-            ),
-            touchPhase: pointArray.currentTouchPhase
-        )
-        pencilStroke.setLastDrawnTouchPoint()
-
-        // Update the touch phase for drawing
-        drawingTouchPhaseSubject.send(
-            TouchPhase.drawingTouchPhase(pointArray)
-        )
     }
 
-    /// Called on every display-link frame while drawing is active
-    func onDrawingDisplayLinkFrame() {
+    func pencilDraw(
+        actualTouches: Set<UITouch>,
+        view: UIView
+    ) {
         guard
-            drawingTouchPhaseSubject.value != nil,
             let drawingRenderer,
-            let currentTexture,
-            let realtimeDrawingTexture,
-            let commandBuffer = canvasRenderer.currentFrameCommandBuffer
+            let displayTextureSize = canvasRenderer.displayTextureSize
         else { return }
 
-        drawingRenderer.drawStroke(
-            baseTexture: currentTexture,
-            on: realtimeDrawingTexture,
-            with: commandBuffer
-        )
+        switch strokeLifecycle.phase {
+        case .idle:
+            guard actualTouches.contains(where: { $0.phase == .began }) else { return }
 
-        // The finalization process is performed when drawing is completed
-        if isFinishedDrawing {
-            if drawingRenderer.displayRealtimeDrawingTexture {
-                canvasRenderer.applyRealtimeDrawingTexture(
-                    realtimeDrawingTexture,
-                    to: currentTexture,
-                    with: commandBuffer
+            strokeLifecycle.beginIfIdle()
+            drawingRenderer.setStrokeCurveScale(transforming.matrix.uniformLinearScale)
+            drawingRenderer.beginPencilStroke()
+            fallthrough
+
+        case .drawing:
+            pencilStroke.appendActualTouches(
+                actualTouches: actualTouches
+                    .sorted { $0.timestamp < $1.timestamp }
+                    .map { .init(touch: $0, view: view) }
+            )
+
+            let pointArray = pencilStroke.drawingPoints(after: pencilStroke.lastDrawnTouchPoint)
+
+            drawingRenderer.appendStrokePoints(
+                strokePoints: pointArray.map {
+                    .init(
+                        location: CGAffineTransform.texturePoint(
+                            screenPoint: $0.preciseLocation,
+                            matrix: transforming.matrix.inverted(flipY: true),
+                            textureSize: currentTextureSize,
+                            drawableSize: displayTextureSize,
+                            frameSize: frameSize
+                        ),
+                        brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
+                        diameter: CGFloat(drawingRenderer.diameter)
+                    )
+                },
+                touchPhase: pointArray.currentTouchPhase
+            )
+            pencilStroke.setLastDrawnTouchPoint()
+
+            if TouchPhase.shouldFinalizeDrawing(from: pointArray) {
+                strokeLifecycle.finalizeIfDrawing(
+                    cancelled: pointArray.last?.phase == .cancelled
                 )
-            } else {
-                Logger.error(
-                    "CanvasViewModel: stroke ended but drawStroke did not complete this frame — skipping applyRealtimeDrawingTexture so currentTexture is not cleared"
-                )
+                fallthrough
             }
 
-            // Reset parameters on drawing completion
-            resetAfterDrawingStroke(commandBuffer: commandBuffer)
-
-            commandBuffer.addCompletedHandler { @Sendable _ in
-                Task { @MainActor [weak self] in
-                    self?.strokeEventSubject.send(.strokeCompleted)
-                }
-            }
-        } else if isCancelledDrawing {
-            // Prepare for the next drawing when the drawing is cancelled.
-            resetAfterDrawingStroke(commandBuffer: commandBuffer)
-            strokeEventSubject.send(.strokeCancelled)
+        case .finalizing:
+            commitRealtimeStrokeSession()
         }
-
-        canvasEventSubject.send(
-            displayRealtimeDrawingTexture ? .displayRealtimeDrawingTexture: .displayCurrentTexture
-        )
     }
 
-    func onResetTransform() {
-        resetTransforming()
-        present()
-    }
-}
-
-private extension CanvasViewModel {
     func transformCanvas() {
         switch transformLifecycle.phase {
         case .idle:
@@ -386,79 +330,152 @@ private extension CanvasViewModel {
             present()
         }
     }
+}
 
-    private func makeStrokePoints(
-        from pointArray: [TouchPoint],
-        textureSize: CGSize,
-        displayTextureSize: CGSize,
-        frameSize: CGSize,
-        diameter: CGFloat
-    ) -> [GrayscaleDotPoint] {
-        pointArray.map {
-            .init(
-                location: CGAffineTransform.texturePoint(
-                    screenPoint: $0.preciseLocation,
-                    matrix: transforming.matrix.inverted(flipY: true),
-                    textureSize: textureSize,
-                    drawableSize: displayTextureSize,
-                    frameSize: frameSize
-                ),
-                brightness: $0.maximumPossibleForce != 0 ? min($0.force, 1.0) : 1.0,
-                diameter: diameter
-            )
+private extension CanvasViewModel {
+    /// Renders the active stroke into the realtime texture.
+    func renderRealtimeStrokeSession() {
+        guard case .drawing = strokeLifecycle.phase else { return }
+
+        guard
+            let drawingRenderer,
+            let currentTexture,
+            let realtimeDrawingTexture,
+            let commandBuffer = canvasRenderer.currentFrameCommandBuffer
+        else { return }
+
+        drawingRenderer.drawStroke(
+            baseTexture: currentTexture,
+            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+
+        // Keep showing `currentTexture` until the first successful draw copies the base
+        // into the realtime texture. Otherwise an empty realtime texture flashes on screen.
+        guard drawingRenderer.hasDrawnToRealtimeTexture else { return }
+
+        canvasEventSubject.send(.displayRealtimeDrawingTexture)
+    }
+
+    /// Renders the final stroke into the realtime texture,
+    /// merges the realtime texture into the current texture, and ends the session.
+    func commitRealtimeStrokeSession() {
+        guard case .finalizing(cancelled: let cancelled) = strokeLifecycle.phase else { return }
+
+        guard
+            let drawingRenderer,
+            let currentTexture,
+            let realtimeDrawingTexture,
+            let commandBuffer = canvasRenderer.currentFrameCommandBuffer
+        else { return }
+
+        if cancelled {
+            canvasEventSubject.send(.displayCurrentTexture)
+            finishStrokeSession(commandBuffer: canvasRenderer.currentFrameCommandBuffer)
+            return
         }
+
+        drawingRenderer.drawStroke(
+            baseTexture: currentTexture,
+            on: realtimeDrawingTexture,
+            with: commandBuffer
+        )
+
+        if drawingRenderer.hasDrawnToRealtimeTexture {
+            canvasRenderer.applyRealtimeDrawingTexture(
+                realtimeDrawingTexture,
+                to: currentTexture,
+                with: commandBuffer
+            )
+
+            commandBuffer.addCompletedHandler { @Sendable _ in
+                Task { @MainActor [weak self] in
+                    self?.strokeSessionDidCommitSubject.send()
+                }
+            }
+        }
+
+        canvasEventSubject.send(.displayCurrentTexture)
+        finishStrokeSession(commandBuffer: commandBuffer)
+    }
+
+    /// Resets session state after a drawing stroke is committed.
+    func finishStrokeSession(commandBuffer: MTLCommandBuffer?) {
+        strokeLifecycle.complete()
+        resetAfterDrawingStroke()
+        drawingRenderer?.prepareNextStroke(with: commandBuffer)
+    }
+}
+
+extension CanvasViewModel {
+    /// Presents `canvasTexture` to the screen
+    func present() {
+        canvasRenderer.drawCanvasTextureToDisplay(
+            matrix: transforming.matrix,
+            canvasTexture: canvasTexture
+        )
+    }
+
+    func updateDrawingRenderer(_ drawingRenderer: HighPrecisionDrawingRenderer) {
+        self.drawingRenderer = drawingRenderer
+        self.drawingRenderer?.prepareNextStroke()
+    }
+
+    func updateCanvasTexture(_ texture: MTLTexture?) {
+        canvasRenderer.updateCanvasTexture(
+            currentTexture: texture,
+            canvasTexture: canvasTexture
+        )
     }
 }
 
 private extension CanvasViewModel {
     /// Resets input, touch history, and lifecycles after a drawing stroke is committed.
-    func resetAfterDrawingStroke(commandBuffer: MTLCommandBuffer) {
+    func resetAfterDrawingStroke() {
         inputState.reset()
-        touchGesture.reset()
+        touchGestureState.reset()
 
-        fingerStroke.reset()
         pencilStroke.reset()
+        fingerStroke.reset()
+        strokeLifecycle.reset()
 
         transforming.resetMatrix()
         transformLifecycle.reset()
-
-        drawingTouchPhaseSubject.send(nil)
-
-        drawingRenderer?.prepareNextStroke(with: commandBuffer)
     }
 
     /// Resets finger-session state after every finger has left the screen.
     /// Only runs while `inputState` is not `.pencil`.
     func resetAfterAllFingersReleased() {
+        if drawingRenderer?.hasDrawnToRealtimeTexture == true {
+            drawingRenderer?.prepareNextStroke()
+        }
+
         inputState.reset()
-        touchGesture.reset()
+        touchGestureState.reset()
 
         fingerStroke.reset()
-
-        // TODO: Remove it in https://github.com/eisukekusachi/HandDrawingSwiftMetal/issues/231
-        strokeEventSubject.send(.strokeCancelled)
+        strokeLifecycle.reset()
 
         transforming.resetMatrix()
         transformLifecycle.reset()
-
-        drawingTouchPhaseSubject.send(nil)
     }
 
     /// Resets in-progress finger drawing when Apple Pencil input takes over.
     func resetFingerDrawing() {
+        drawingRenderer?.prepareNextStroke()
+        canvasRenderer.resetCommandBuffer()
+
         fingerStroke.reset()
 
         transforming.resetMatrix()
         transformLifecycle.reset()
-
-        drawingRenderer?.prepareNextStroke()
-
-        canvasRenderer.resetCommandBuffer()
     }
 
     /// Resets the canvas transform to identity.
     func resetTransforming() {
-        transformLifecycle.reset()
         transforming.setMatrix(.identity)
+        transformLifecycle.reset()
+
+        present()
     }
 }

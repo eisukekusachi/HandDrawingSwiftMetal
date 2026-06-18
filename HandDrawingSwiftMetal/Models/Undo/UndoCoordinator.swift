@@ -85,30 +85,23 @@ final class UndoCoordinator {
 }
 
 extension UndoCoordinator {
-    func registerDrawingUndoAfterCompletion(_ event: StrokeEvent) {
-        switch event {
-        case .fingerStrokeBegan, .pencilStrokeBegan:
-            Task {
-                await undoDrawing?.setUndoDrawing(
-                    texture: canvasView.currentTexture
-                )
-            }
-        case .strokeCompleted:
-            Task { @MainActor in
-                guard
-                    let selectedLayer = textureLayersState.selectedLayer,
-                    let undoRedoObjectPair = try await undoDrawing?.pushUndoDrawingObject(
-                        selectedLayer: selectedLayer,
-                        texture: canvasView.currentTexture
-                    )
-                else {
-                    return
-                }
-                registerUndo(undoRedoObjectPair)
-            }
-        case .strokeCancelled:
-            break
+    func setUndoDrawingBeforeStroke() async {
+        await undoDrawing?.setUndoDrawing(
+            texture: canvasView.currentTexture
+        )
+    }
+
+    func registerDrawingUndoAfterCommit() async throws {
+        guard
+            let selectedLayer = textureLayersState.selectedLayer,
+            let undoRedoObjectPair = try await undoDrawing?.pushUndoDrawingObject(
+                selectedLayer: selectedLayer,
+                texture: canvasView.currentTexture
+            )
+        else {
+            return
         }
+        registerUndo(undoRedoObjectPair)
     }
 
     func registerUndo(
