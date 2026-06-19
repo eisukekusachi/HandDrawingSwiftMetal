@@ -97,18 +97,9 @@ final class CanvasViewModel {
         }
 
         guard
-            let canvasTexture = canvasRenderer.makeTexture(
-                textureSize,
-                label: "canvasTexture"
-            ),
-            let currentTexture = canvasRenderer.makeTexture(
-                textureSize,
-                label: "currentTexture"
-            ),
-            let realtimeDrawingTexture = canvasRenderer.makeTexture(
-                textureSize,
-                label: "realtimeDrawingTexture"
-            )
+            let canvasTexture = canvasRenderer.makeTexture(textureSize),
+            let currentTexture = canvasRenderer.makeTexture(textureSize),
+            let realtimeDrawingTexture = canvasRenderer.makeTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
