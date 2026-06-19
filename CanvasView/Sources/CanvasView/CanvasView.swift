@@ -66,7 +66,7 @@ open class CanvasView: UIView {
     /// Manages drawing onto the canvas texture and displays the result on the screen
     private let canvasRenderer: CanvasRenderer
 
-    /// Display link for realtime drawing
+    /// Display link for realtime stroke rendering
     private var canvasDisplayLink = CanvasDisplayLink()
 
     private var cancellables = Set<AnyCancellable>()
@@ -155,15 +155,17 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // Starts or stops the display link from stroke lifecycle
-        viewModel.strokeLifecycle.phasePublisher
+        // Runs the display link only while a stroke is being drawn
+        strokeLifecyclePhase
+            .map { $0 == .drawing }
             .removeDuplicates()
-            .sink { [weak self] phase in
-                self?.canvasDisplayLink.run(phase)
+            .eraseToAnyPublisher()
+            .sink { [weak self] shouldRun in
+                self?.canvasDisplayLink.run(shouldRun)
             }
             .store(in: &cancellables)
 
-        // Subscribes to the display link update
+        // Renders the active stroke into the realtime drawing texture on each frame
         canvasDisplayLink.update
             .sink { [weak self] in
                 self?.viewModel.onRenderRealtimeDrawingTexture()

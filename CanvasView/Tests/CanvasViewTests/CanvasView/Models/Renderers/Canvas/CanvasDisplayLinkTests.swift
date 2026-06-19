@@ -16,67 +16,38 @@ struct CanvasDisplayLinkTests {
     typealias Subject = CanvasDisplayLink
 
     @Test
-    func `When the stroke is drawing, the display link is unpaused`() {
+    func `When running is enabled, the display link is unpaused`() {
         let subject = Subject(isPaused: true)
 
-        subject.run(.drawing)
+        subject.run(true)
 
         #expect(subject.displayLink?.isPaused == false)
     }
 
     @Test
-    func `When the stroke is finalizing, the display link pauses without emitting`() {
+    func `When running is disabled while unpaused, the display link pauses and emits once`() {
         let subject = Subject(isPaused: true)
 
         var emitCount = 0
         let cancellable = subject.update.sink { _ in emitCount += 1 }
         defer { cancellable.cancel() }
 
-        subject.run(.drawing)
-        subject.run(.finalizing(cancelled: false))
-
-        #expect(subject.displayLink?.isPaused == true)
-        #expect(emitCount == 0)
-    }
-
-    @Test
-    func `When the stroke is finalizing while paused, the display link does not emit`() {
-        let subject = Subject(isPaused: true)
-
-        var emitCount = 0
-        let cancellable = subject.update.sink { _ in emitCount += 1 }
-        defer { cancellable.cancel() }
-
-        subject.run(.finalizing(cancelled: false))
-
-        #expect(subject.displayLink?.isPaused == true)
-        #expect(emitCount == 0)
-    }
-
-    @Test
-    func `When the stroke returns to idle while unpaused, the display link pauses and emits one final update`() {
-        let subject = Subject(isPaused: true)
-
-        var emitCount = 0
-        let cancellable = subject.update.sink { _ in emitCount += 1 }
-        defer { cancellable.cancel() }
-
-        subject.run(.drawing)
-        subject.run(.idle)
+        subject.run(true)
+        subject.run(false)
 
         #expect(subject.displayLink?.isPaused == true)
         #expect(emitCount == 1)
     }
 
     @Test
-    func `When the stroke returns to idle while paused, the display link does not emit`() {
+    func `When running is disabled while paused, the display link does not emit`() {
         let subject = Subject(isPaused: true)
 
         var emitCount = 0
         let cancellable = subject.update.sink { _ in emitCount += 1 }
         defer { cancellable.cancel() }
 
-        subject.run(.idle)
+        subject.run(false)
 
         #expect(subject.displayLink?.isPaused == true)
         #expect(emitCount == 0)
