@@ -15,13 +15,6 @@ final class StrokeLifecycleManager {
 
     var isActive: Bool { phase.isActive }
 
-    var displayLinkShouldRunPublisher: AnyPublisher<Bool, Never> {
-        phasePublisher
-            .map(\.isDrawing)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-
     var phasePublisher: AnyPublisher<StrokeLifecycle, Never> {
         phaseSubject.eraseToAnyPublisher()
     }
