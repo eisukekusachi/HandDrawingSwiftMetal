@@ -15,16 +15,9 @@ final class StrokeLifecycleManager {
 
     var isActive: Bool { phase.isActive }
 
-    /// `true` while the realtime stroke display link should run.
-    var shouldRunDisplayLink: Bool {
-        phase == .drawing
-    }
-
     var displayLinkShouldRunPublisher: AnyPublisher<Bool, Never> {
         phasePublisher
-            .map { [weak self] _ in
-                self?.shouldRunDisplayLink ?? false
-            }
+            .map(\.isDrawing)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

@@ -10,14 +10,21 @@ public enum StrokeLifecycle: Equatable, Sendable {
     case idle
     case drawing
     case finalizing(cancelled: Bool)
+}
 
-    /// `true` while drawing or committing (UI should stay locked)
-    public var isActive: Bool {
+public extension StrokeLifecycle {
+    /// `true` while drawing or committing.
+    var isActive: Bool {
         switch self {
         case .idle:
             false
         case .drawing, .finalizing:
             true
         }
+    }
+
+    /// `true` while the stroke is being drawn.
+    var isDrawing: Bool {
+        self == .drawing
     }
 }

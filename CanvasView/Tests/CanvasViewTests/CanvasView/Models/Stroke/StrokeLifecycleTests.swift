@@ -30,4 +30,23 @@ struct StrokeLifecycleTests {
             #expect(state.isActive == true)
         }
     }
+
+    @Suite
+    struct IsDrawing {
+        @Test
+        func `Verify that isDrawing is true while drawing`() {
+            #expect(StrokeLifecycle.drawing.isDrawing == true)
+        }
+
+        @Test(
+            arguments: [
+                StrokeLifecycle.idle,
+                StrokeLifecycle.finalizing(cancelled: false),
+                StrokeLifecycle.finalizing(cancelled: true)
+            ]
+        )
+        func `Verify that isDrawing is false outside drawing`(state: StrokeLifecycle) {
+            #expect(state.isDrawing == false)
+        }
+    }
 }
