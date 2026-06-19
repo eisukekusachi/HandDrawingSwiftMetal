@@ -155,11 +155,8 @@ open class CanvasView: UIView {
             }
             .store(in: &cancellables)
 
-        // Runs the display link only while a stroke is being drawn
-        strokeLifecyclePhase
-            .map { $0 == .drawing }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+        // Turns the realtime stroke display link on or off
+        viewModel.strokeLifecycle.displayLinkShouldRunPublisher
             .sink { [weak self] shouldRun in
                 self?.canvasDisplayLink.run(shouldRun)
             }
