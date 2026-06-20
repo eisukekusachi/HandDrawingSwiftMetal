@@ -216,7 +216,11 @@ private extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 Task {
-                    try? await self?.undoCoordinator.registerDrawingUndoAfterCommit()
+                    do {
+                        try await self?.undoCoordinator.registerDrawingUndoAfterCommit()
+                    } catch {
+                        Logger.error(error)
+                    }
                 }
             }
             .store(in: &cancellables)
