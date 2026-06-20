@@ -6,7 +6,6 @@
 //
 
 import Combine
-import UIKit
 import Testing
 
 @testable import CanvasView
@@ -16,45 +15,41 @@ struct CanvasDisplayLinkTests {
 
     typealias Subject = CanvasDisplayLink
 
-    @Test(
-        arguments: [
-            UITouch.Phase.began,
-            UITouch.Phase.moved,
-            UITouch.Phase.stationary
-        ]
-    )
-    func `When the finger is touching the screen, the display link is unpaused`(phase: UITouch.Phase) {
+    @Test
+    func `When running is enabled, the display link is unpaused`() {
         let subject = Subject(isPaused: true)
 
-        subject.run(phase)
+        subject.run(true)
 
         #expect(subject.displayLink?.isPaused == false)
     }
 
-    @Test(
-        arguments: [
-            UITouch.Phase.ended,
-            UITouch.Phase.cancelled,
-            UITouch.Phase.regionEntered,
-            UITouch.Phase.regionMoved,
-            UITouch.Phase.regionExited
-        ]
-    )
-    func `When the finger is lifted from the screen, the display link pauses and emits one final update`(phase: UITouch.Phase) {
+    @Test
+    func `When running is disabled while unpaused, the display link pauses and emits once`() {
         let subject = Subject(isPaused: true)
 
-        // When a value flows through the publisher, the canvas is updated
         var emitCount = 0
         let cancellable = subject.update.sink { _ in emitCount += 1 }
         defer { cancellable.cancel() }
 
-        subject.run(.moved)
-        #expect(subject.displayLink?.isPaused == false)
+        subject.run(true)
+        subject.run(false)
 
-        subject.run(phase)
-
-        // The display link stops
         #expect(subject.displayLink?.isPaused == true)
         #expect(emitCount == 1)
+    }
+
+    @Test
+    func `When running is disabled while paused, the display link does not emit`() {
+        let subject = Subject(isPaused: true)
+
+        var emitCount = 0
+        let cancellable = subject.update.sink { _ in emitCount += 1 }
+        defer { cancellable.cancel() }
+
+        subject.run(false)
+
+        #expect(subject.displayLink?.isPaused == true)
+        #expect(emitCount == 0)
     }
 }

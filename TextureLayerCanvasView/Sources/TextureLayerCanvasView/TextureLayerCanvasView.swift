@@ -48,11 +48,9 @@ import TextureLayerView
     }
 
     private func bindData() {
-        strokeEvents
-            .sink { [weak self] event in
-                if case .strokeCompleted = event {
-                    self?.completeDrawing()
-                }
+        strokeSessionDidCommit
+            .sink { [weak self] in
+                self?.completeDrawing()
             }
             .store(in: &cancellables)
     }

@@ -41,7 +41,7 @@ final class FingerInputGestureRecognizer: UIGestureRecognizer {
         guard let view else { return }
 
         // Determine if any active finger touches remain
-        let remainingDirectTouches = (event?.allTouches ?? []).filter {
+        let remainingDirectTouches = (event?.allTouches ?? touches).filter {
             $0.type == .direct &&
             $0.phase != .ended &&
             $0.phase != .cancelled
@@ -54,7 +54,7 @@ final class FingerInputGestureRecognizer: UIGestureRecognizer {
         guard let view else { return }
 
         // Determine if any active finger touches remain
-        let remainingDirectTouches = (event?.allTouches ?? []).filter {
+        let remainingDirectTouches = (event?.allTouches ?? touches).filter {
             $0.type == .direct &&
             $0.phase != .ended &&
             $0.phase != .cancelled

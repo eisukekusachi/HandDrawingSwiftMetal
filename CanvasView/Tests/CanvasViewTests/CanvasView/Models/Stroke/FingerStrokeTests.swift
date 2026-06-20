@@ -35,32 +35,32 @@ struct FingerStrokeTests {
 
         // The first key of touchHistories is assigned to drawingTouchID.
         // It is assumed that touchHistories contains only one element when this method is called.
-        subject.setStoreKeyForDrawing()
+        subject.setDrawingTouchID()
         #expect(subject.drawingTouchID == touchID)
 
         // Gets the elements from the end point to the last element.
-        let firstTouchLocations = subject.drawingPoints(after: subject.drawingLineEndPoint).map { $0.location }
+        let firstTouchLocations = subject.drawingPoints(after: subject.lastDrawnTouchPoint).map { $0.location }
         #expect(firstTouchLocations == firstTouches.map { $0.location })
 
-        subject.updateDrawingLineEndPoint()
+        subject.setLastDrawnTouchPoint()
 
         // None are retrieved since the end point is the last element.
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).map { $0.location } == [])
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint).map { $0.location } == [])
 
         subject.appendTouchPointToDictionary([touchID: secondTouches[0]])
 
         // Gets the elements from the end point to the last element.
-        let secondTouchLocations = subject.drawingPoints(after: subject.drawingLineEndPoint).map { $0.location }
+        let secondTouchLocations = subject.drawingPoints(after: subject.lastDrawnTouchPoint).map { $0.location }
         #expect(secondTouchLocations == secondTouches.map { $0.location })
 
-        subject.updateDrawingLineEndPoint()
+        subject.setLastDrawnTouchPoint()
 
         // None are retrieved since the end point is the last element.
-        #expect(subject.drawingPoints(after: subject.drawingLineEndPoint).map { $0.location } == [])
+        #expect(subject.drawingPoints(after: subject.lastDrawnTouchPoint).map { $0.location } == [])
     }
 
     @Test
-    func `Verify the behavior of removeEndedTouchArrayFromDictionary()`() {
+    func `Verify the behavior of removeUnusedTouchArrayFromDictionary()`() {
         let subject = Subject()
 
         let touchID0 = TestHelpers.makeTouchID(seed: 0)
@@ -70,24 +70,24 @@ struct FingerStrokeTests {
         subject.appendTouchPointToDictionary([touchID1: .generate(phase: .began)])
 
         // No elements are removed since their touchPhase is not .ended.
-        subject.removeEndedTouchArrayFromDictionary()
+        subject.removeUnusedTouchArrayFromDictionary()
         #expect(subject.touchHistories.count == 2)
 
         subject.appendTouchPointToDictionary([touchID0: .generate(phase: .moved)])
 
         // No elements are removed since their touchPhase is not .ended.
-        subject.removeEndedTouchArrayFromDictionary()
+        subject.removeUnusedTouchArrayFromDictionary()
         #expect(subject.touchHistories.count == 2)
 
         subject.appendTouchPointToDictionary([touchID0: .generate(phase: .ended)])
 
         // The element is removed from the dictionary when its touchPhase is .ended.
-        subject.removeEndedTouchArrayFromDictionary()
+        subject.removeUnusedTouchArrayFromDictionary()
         #expect(Set(subject.touchHistories.keys) == Set([touchID1]))
 
         subject.appendTouchPointToDictionary([touchID1: .generate(phase: .ended)])
 
-        subject.removeEndedTouchArrayFromDictionary()
+        subject.removeUnusedTouchArrayFromDictionary()
         #expect(subject.touchHistories.isEmpty)
     }
 
@@ -124,17 +124,50 @@ struct FingerStrokeTests {
             ]
         )
 
-        subject.setStoreKeyForDrawing()
-        subject.updateDrawingLineEndPoint()
+        subject.setDrawingTouchID()
+        subject.setLastDrawnTouchPoint()
 
         #expect(!subject.touchHistories.isEmpty)
         #expect(subject.drawingTouchID == touchID0)
-        #expect(subject.drawingLineEndPoint == touchPoint)
+        #expect(subject.lastDrawnTouchPoint == touchPoint)
 
         subject.reset()
 
         #expect(subject.touchHistories.isEmpty)
         #expect(subject.drawingTouchID == nil)
-        #expect(subject.drawingLineEndPoint == nil)
+        #expect(subject.lastDrawnTouchPoint == nil)
+    }
+
+    @MainActor
+    struct `Drawing cancellation` {
+        @Test
+        func `Verify that isCancelled is false when the drawing touch is not cancelled`() {
+            let subject = Subject()
+
+            let touchID = TestHelpers.makeTouchID(seed: 0)
+
+            subject.appendTouchPointToDictionary([touchID: .generate(phase: .began)])
+            subject.setDrawingTouchID()
+            #expect(subject.isCancelled == false)
+
+            subject.appendTouchPointToDictionary([touchID: .generate(phase: .moved)])
+            #expect(subject.isCancelled == false)
+
+            subject.appendTouchPointToDictionary([touchID: .generate(phase: .ended)])
+            #expect(subject.isCancelled == false)
+        }
+
+        @Test
+        func `Verify that isCancelled is true when the drawing touch is cancelled`() {
+            let subject = Subject()
+            let touchID = TestHelpers.makeTouchID(seed: 0)
+
+            subject.appendTouchPointToDictionary([touchID: .generate(phase: .began)])
+            subject.setDrawingTouchID()
+            #expect(subject.isCancelled == false)
+
+            subject.appendTouchPointToDictionary([touchID: .generate(phase: .cancelled)])
+            #expect(subject.isCancelled == true)
+        }
     }
 }

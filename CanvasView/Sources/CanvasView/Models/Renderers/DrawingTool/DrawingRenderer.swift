@@ -14,7 +14,7 @@ public typealias RealtimeDrawingTexture = MTLTexture
 public protocol DrawingRenderer: AnyObject {
 
     /// `true` after ``drawStroke`` last completed a full raster pass this stroke
-    var displayRealtimeDrawingTexture: Bool { get }
+    var hasDrawnToRealtimeTexture: Bool { get }
 
     var diameter: Int { get }
 
@@ -42,7 +42,13 @@ public protocol DrawingRenderer: AnyObject {
         with commandBuffer: MTLCommandBuffer
     )
 
-    /// Prepares for the next stroke
-    func prepareNextStroke()
-    func prepareNextStroke(with commandBuffer: MTLCommandBuffer)
+    /// Prepares for the next stroke.
+    /// When `commandBuffer` is `nil`, encodes on a new buffer and commits it.
+    func prepareNextStroke(with commandBuffer: MTLCommandBuffer?)
+}
+
+public extension DrawingRenderer {
+    func prepareNextStroke() {
+        prepareNextStroke(with: nil)
+    }
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// Manages the pen position information sent from the Apple Pencil
+/// Manages the pen position information sent from the Apple Pencil.
 final class PencilStroke {
 
     /// An array that stores real values.
@@ -15,8 +15,8 @@ final class PencilStroke {
     /// The Apple Pencil provides both estimated and actual values, but drawing is primarily based on the actual values.
     private(set) var actualTouchPointArray: [TouchPoint] = []
 
-    /// End point of the drawing line
-    private(set) var drawingLineEndPoint: TouchPoint?
+    /// The last touch point that was drawn.
+    private(set) var lastDrawnTouchPoint: TouchPoint?
 
     /// A variable that stores the latest estimated value, used for determining touch end
     private(set) var latestEstimatedTouchPoint: TouchPoint?
@@ -27,12 +27,12 @@ final class PencilStroke {
     init(
         actualTouchPointArray: [TouchPoint] = [],
         latestEstimatedTouchPoint: TouchPoint? = nil,
-        drawingLineEndPoint: TouchPoint? = nil
+        lastDrawnTouchPoint: TouchPoint? = nil
     ) {
         self.actualTouchPointArray = actualTouchPointArray.sorted { $0.timestamp < $1.timestamp }
         self.latestEstimatedTouchPoint = latestEstimatedTouchPoint
         self.latestEstimationUpdateIndex = latestEstimatedTouchPoint?.estimationUpdateIndex
-        self.drawingLineEndPoint = drawingLineEndPoint
+        self.lastDrawnTouchPoint = lastDrawnTouchPoint
     }
 }
 
@@ -56,10 +56,14 @@ extension PencilStroke {
         latestEstimationUpdateIndex = estimationUpdateIndex
     }
 
-    /// Stores the line endpoint
-    func setDrawingLineEndPoint() {
+    /// Sets `lastDrawnTouchPoint` to the last touch point in the drawing history.
+    func setLastDrawnTouchPoint() {
         guard let touchPoint = actualTouchPointArray.last else { return }
-        drawingLineEndPoint = touchPoint
+        lastDrawnTouchPoint = touchPoint
+    }
+
+    func shouldFinalizeDrawing(from pointArray: [TouchPoint]) -> Bool {
+        StrokePointState(points: pointArray).shouldFinalizeDrawing
     }
 
     /// Appends  the actual values to the array
@@ -79,7 +83,7 @@ extension PencilStroke {
         actualTouchPointArray = []
         latestEstimatedTouchPoint = nil
         latestEstimationUpdateIndex = nil
-        drawingLineEndPoint = nil
+        lastDrawnTouchPoint = nil
     }
 }
 

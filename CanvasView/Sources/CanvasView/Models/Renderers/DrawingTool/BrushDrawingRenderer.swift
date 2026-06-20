@@ -11,10 +11,10 @@ import MetalKit
 @MainActor
 public final class BrushDrawingRenderer: HighPrecisionDrawingRenderer {
 
-    public var displayRealtimeDrawingTexture: Bool {
-        _displayRealtimeDrawingTexture
+    public var hasDrawnToRealtimeTexture: Bool {
+        _hasDrawnToRealtimeTexture
     }
-    private var _displayRealtimeDrawingTexture: Bool = false
+    private var _hasDrawnToRealtimeTexture: Bool = false
 
     public var diameter: Int {
         _diameter
@@ -135,7 +135,7 @@ public extension BrushDrawingRenderer {
             let baseTexture,
             let realtimeDrawingTexture
         else {
-            _displayRealtimeDrawingTexture = false
+            _hasDrawnToRealtimeTexture = false
             return
         }
 
@@ -155,7 +155,7 @@ public extension BrushDrawingRenderer {
             Logger.error(
                 "Failed to create buffers \(curvePoints.count) points, \(drawingTexture.size)"
             )
-            _displayRealtimeDrawingTexture = false
+            _hasDrawnToRealtimeTexture = false
             return
         }
 
@@ -188,26 +188,29 @@ public extension BrushDrawingRenderer {
             with: commandBuffer
         )
 
-        _displayRealtimeDrawingTexture = true
+        _hasDrawnToRealtimeTexture = true
     }
 
-    func prepareNextStroke() {
-        guard
-            let newCommandBuffer = renderer?.newCommandBuffer
-        else { return }
-        prepareNextStroke(with: newCommandBuffer)
+    func prepareNextStroke(with commandBuffer: MTLCommandBuffer?) {
+        if let commandBuffer {
+            resetForNextStroke(with: commandBuffer)
+            return
+        }
+
+        guard let newCommandBuffer = renderer?.newCommandBuffer else { return }
+        resetForNextStroke(with: newCommandBuffer)
         newCommandBuffer.commit()
-    }
-
-    func prepareNextStroke(with commandBuffer: MTLCommandBuffer) {
-        clearTextures(with: commandBuffer)
-        drawingCurve = nil
-        strokeCurveScale = 1
-        _displayRealtimeDrawingTexture = false
     }
 }
 
 private extension BrushDrawingRenderer {
+
+    func resetForNextStroke(with commandBuffer: MTLCommandBuffer) {
+        clearTextures(with: commandBuffer)
+        drawingCurve = nil
+        strokeCurveScale = 1
+        _hasDrawnToRealtimeTexture = false
+    }
 
     func grayscaleCurvePointsInTextureCoordinates(_ curve: DrawingCurve) -> [GrayscaleDotPoint] {
         let points = curve.curvePoints()

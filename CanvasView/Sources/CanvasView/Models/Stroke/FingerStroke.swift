@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// Manages the finger position information sent from the device
+/// Manages the finger position information sent from the device.
 final class FingerStroke {
 
     /// A dictionary that manages points input from multiple fingers
@@ -16,16 +16,16 @@ final class FingerStroke {
     /// A ID currently in use in the finger drawing
     private(set) var drawingTouchID: TouchID?
 
-    /// End point of the drawing line
-    private(set) var drawingLineEndPoint: TouchPoint?
+    /// The last touch point that was drawn.
+    private(set) var lastDrawnTouchPoint: TouchPoint?
 
     convenience init(
         touchHistories: TouchHistoriesOnScreen = [:],
-        drawingLineEndPoint: TouchPoint? = nil
+        lastDrawnTouchPoint: TouchPoint? = nil
     ) {
         self.init()
         self.touchHistories = touchHistories
-        self.drawingLineEndPoint = drawingLineEndPoint
+        self.lastDrawnTouchPoint = lastDrawnTouchPoint
     }
 }
 
@@ -40,6 +40,24 @@ extension FingerStroke {
 
     var isFingerDrawingInactive: Bool {
         drawingTouchID == nil
+    }
+
+    var isCancelled: Bool {
+        guard let drawingTouchID else { return false }
+        return touchHistories[drawingTouchID]?.last?.phase == .cancelled
+    }
+
+    func shouldFinalizeDrawing(from pointArray: [TouchPoint]) -> Bool {
+        if StrokePointState(points: pointArray).shouldFinalizeDrawing {
+            return true
+        }
+
+        guard
+            let drawingTouchID,
+            let phase = touchHistories[drawingTouchID]?.last?.phase
+        else { return false }
+
+        return phase == .ended || phase == .cancelled
     }
 
     /// Gets points from the specified start element to the end
@@ -60,20 +78,21 @@ extension FingerStroke {
         return result
     }
 
-    /// Stores the line endpoint
-    func updateDrawingLineEndPoint() {
+    /// Sets `lastDrawnTouchPoint` to the last touch point in the drawing history.
+    func setLastDrawnTouchPoint() {
         guard
             let drawingTouchID,
             let touchPointArray = touchHistories[drawingTouchID]
         else { return }
 
         if let touchPoint = touchPointArray.last {
-            drawingLineEndPoint = touchPoint
+            lastDrawnTouchPoint = touchPoint
         }
     }
 
-    func setStoreKeyForDrawing() {
-        // `touchHistories` should contain only one element, so the first key is simply set.
+    /// Sets `drawingTouchID` from the touch history key used for drawing.
+    /// `touchHistories` should contain only one element when a stroke begins.
+    func setDrawingTouchID() {
         drawingTouchID = touchHistories.keys.first
     }
 
@@ -88,7 +107,7 @@ extension FingerStroke {
         }
     }
 
-    func removeEndedTouchArrayFromDictionary() {
+    func removeUnusedTouchArrayFromDictionary() {
         touchHistories.keys
             .filter {
                 touchHistories[$0]?.currentTouchPhase == .ended ||
@@ -102,6 +121,6 @@ extension FingerStroke {
     func reset() {
         touchHistories = [:]
         drawingTouchID = nil
-        drawingLineEndPoint = nil
+        lastDrawnTouchPoint = nil
     }
 }

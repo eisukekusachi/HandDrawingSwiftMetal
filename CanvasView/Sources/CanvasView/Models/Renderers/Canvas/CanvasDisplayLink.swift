@@ -5,19 +5,24 @@
 //  Created by Eisuke Kusachi on 2025/02/04.
 //
 
-import UIKit
 import Combine
+import UIKit
 
-/// Manages the displayLink for realtime drawing
+/// A `CADisplayLink` wrapper for realtime stroke rendering.
 public final class CanvasDisplayLink {
 
-    // Requesting to update the canvas emits `Void`
+    /// Emits once per frame while running, and once more when stopping after a draw session.
     public var update: AnyPublisher<Void, Never> {
         updateSubject.eraseToAnyPublisher()
     }
     private let updateSubject = PassthroughSubject<Void, Never>()
 
     public var displayLink: CADisplayLink?
+
+    /// Whether the underlying `CADisplayLink` is ticking.
+    public var isRunning: Bool {
+        displayLink?.isPaused == false
+    }
 
     deinit {
         displayLink?.invalidate()
@@ -29,18 +34,18 @@ public final class CanvasDisplayLink {
         displayLink?.isPaused = isPaused
     }
 
-    public func run(_ touchPhase: UITouch.Phase?) {
-        if isCurrentlyDrawing(touchPhase) {
+    /// Starts or stops realtime drawing frames.
+    /// Stopping after an active session emits one final update.
+    public func run(_ isRunning: Bool) {
+        if isRunning {
             displayLink?.isPaused = false
-        } else {
-            if displayLink?.isPaused == false {
-                // Since the touchEnded process remains,
-                // `updateCanvasWhileDrawing()` is executed once to handle the final update.
-                updateSubject.send()
-            }
-
-            displayLink?.isPaused = true
+            return
         }
+
+        if self.isRunning {
+            updateSubject.send()
+        }
+        displayLink?.isPaused = true
     }
 }
 
@@ -48,12 +53,5 @@ private extension CanvasDisplayLink {
 
     @objc func displayLinkFrame() {
         updateSubject.send()
-    }
-
-    func isCurrentlyDrawing(_ touchPhase: UITouch.Phase?) -> Bool {
-        switch touchPhase {
-        case .began, .moved, .stationary: return true
-        default: return false
-        }
     }
 }

@@ -185,20 +185,8 @@ private extension HandDrawingViewController {
     }
 
     func bindData() {
-        let isStrokeSessionActive = canvasView.strokeEvents
-            .map { event in
-                switch event {
-                case .fingerStrokeBegan, .pencilStrokeBegan:
-                    true
-                case .strokeCompleted, .strokeCancelled:
-                    false
-                }
-            }
-            .prepend(false)
-            .removeDuplicates()
-
         Publishers.CombineLatest(
-            isStrokeSessionActive,
+            canvasView.strokeLifecyclePhase.map(\.isActive),
             canvasView.transformLifecyclePhase.map(\.isActive)
         )
         .map { isStrokeActive, isTransformActive in
@@ -211,10 +199,29 @@ private extension HandDrawingViewController {
         }
         .store(in: &cancellables)
 
-        canvasView.strokeEvents
+        canvasView.strokeLifecyclePhase
+            .scan((StrokeLifecycle.idle, StrokeLifecycle.idle)) { previous, current in
+                (previous.1, current)
+            }
+            .sink { [weak self] previous, current in
+                if previous == .idle, current == .drawing {
+                    Task {
+                        await self?.undoCoordinator.setUndoDrawingBeforeStroke()
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
+        canvasView.strokeSessionDidCommit
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                self?.undoCoordinator.registerDrawingUndoAfterCompletion(event)
+            .sink { [weak self] in
+                Task {
+                    do {
+                        try await self?.undoCoordinator.registerDrawingUndoAfterCommit()
+                    } catch {
+                        Logger.error(error)
+                    }
+                }
             }
             .store(in: &cancellables)
 

@@ -39,7 +39,9 @@ extension DrawingCurve {
     ) -> [GrayscaleDotPoint] {
         var result: [GrayscaleDotPoint] = []
 
-        guard array.count >= 3 else { return [] }
+        if array.count < 3 {
+            return touchPhase == .ended || touchPhase == .cancelled ? array : []
+        }
 
         if isFirstCurveNeeded {
             result.append(

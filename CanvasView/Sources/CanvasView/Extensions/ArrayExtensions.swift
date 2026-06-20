@@ -22,5 +22,4 @@ extension Array where Element: Equatable {
 
         return Array(self.suffix(from: index + 1))
     }
-
 }

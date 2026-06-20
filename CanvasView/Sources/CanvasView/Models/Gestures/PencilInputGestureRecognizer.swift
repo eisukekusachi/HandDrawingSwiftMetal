@@ -42,11 +42,13 @@ final class PencilInputGestureRecognizer: UIGestureRecognizer {
         guard let view else { return }
         state = .ended
         sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilActualTouches(touches, on: view)
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let view else { return }
         state = .cancelled
         sender?.sendPencilEstimatedTouches(touches, with: event, on: view)
+        sender?.sendPencilActualTouches(touches, on: view)
     }
 
     /// https://developer.apple.com/documentation/uikit/apple_pencil_interactions/handling_input_from_apple_pencil/
