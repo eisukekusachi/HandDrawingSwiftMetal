@@ -127,7 +127,7 @@ extension CanvasViewModel {
         inputState.update(.finger)
 
         fingerStroke.appendTouchPointToDictionary(
-            UITouch.fingerTouchesOnScreen(from: event, on: view)
+            UITouch.fingerTouchesOnScreen(touches: touches, from: event, on: view)
         )
 
         // determine the gesture from the dictionary
@@ -140,7 +140,7 @@ extension CanvasViewModel {
         // Remove unused finger arrays from the dictionary
         fingerStroke.removeUnusedTouchArrayFromDictionary()
 
-        if UITouch.isAllFingersReleasedFromScreen(event: event) {
+        if UITouch.isAllFingersReleasedFromScreen(event: event, touches: touches) {
             resetAfterAllFingersReleased()
         }
     }
