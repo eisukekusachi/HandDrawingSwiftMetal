@@ -360,9 +360,9 @@ private extension CanvasViewModel {
             let commandBuffer = canvasRenderer.currentFrameCommandBuffer
         else { return }
 
-        if cancelled {
+        guard !cancelled else {
             canvasEventSubject.send(.displayCurrentTexture)
-            finishStrokeSession(commandBuffer: canvasRenderer.currentFrameCommandBuffer)
+            finishStrokeSession(commandBuffer: commandBuffer)
             return
         }
 
