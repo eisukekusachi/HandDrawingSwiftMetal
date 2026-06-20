@@ -279,7 +279,7 @@ private extension CanvasViewModel {
             )
             pencilStroke.setLastDrawnTouchPoint()
 
-            if TouchPhase.shouldFinalizeDrawing(from: pointArray) {
+            if pencilStroke.shouldFinalizeDrawing(from: pointArray) {
                 strokeLifecycle.finalizeIfDrawing(
                     cancelled: pointArray.last?.phase == .cancelled
                 )

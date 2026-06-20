@@ -48,12 +48,13 @@ extension FingerStroke {
     }
 
     func shouldFinalizeDrawing(from pointArray: [TouchPoint]) -> Bool {
-        if TouchPhase.shouldFinalizeDrawing(from: pointArray) {
+        if StrokePointState(points: pointArray).shouldFinalizeDrawing {
             return true
         }
 
-        guard let drawingTouchID,
-              let phase = touchHistories[drawingTouchID]?.last?.phase
+        guard
+            let drawingTouchID,
+            let phase = touchHistories[drawingTouchID]?.last?.phase
         else { return false }
 
         return phase == .ended || phase == .cancelled

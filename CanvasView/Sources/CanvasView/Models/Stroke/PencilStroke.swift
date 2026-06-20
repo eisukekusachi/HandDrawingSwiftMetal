@@ -62,6 +62,10 @@ extension PencilStroke {
         lastDrawnTouchPoint = touchPoint
     }
 
+    func shouldFinalizeDrawing(from pointArray: [TouchPoint]) -> Bool {
+        StrokePointState(points: pointArray).shouldFinalizeDrawing
+    }
+
     /// Appends  the actual values to the array
     func appendActualTouches(actualTouches: [TouchPoint]) {
         actualTouchPointArray.append(contentsOf: actualTouches)
