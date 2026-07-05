@@ -15,10 +15,9 @@ enum MTLTextureCreator {
     static func loadHexadecimalData(
         from url: URL
     ) throws -> [UInt8]? {
-        guard let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals else {
-            return nil
-        }
-        return hexadecimalData
+        let data = try Data(contentsOf: url)
+        guard !data.isEmpty else { return nil }
+        return [UInt8](data)
     }
 
     static func makeTexture(
