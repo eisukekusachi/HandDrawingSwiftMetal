@@ -77,7 +77,7 @@ final class TextureLayerCanvasRenderer {
 
         renderer.fillColor(
             texture: canvasTexture,
-            withRGB: backgroundColor.rgb,
+            color: backgroundColor,
             with: commandBuffer
         )
 

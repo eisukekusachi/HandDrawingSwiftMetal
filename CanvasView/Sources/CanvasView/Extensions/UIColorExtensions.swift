@@ -16,25 +16,6 @@ public extension UIColor {
         return Int(alpha * 255)
     }
 
-    var rgb: IntRGB {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        getRed(&red, green: &green, blue: &blue, alpha: nil)
-
-        return .init(Int(red * 255), Int(green * 255), Int(blue * 255))
-    }
-
-    var rgba: IntRGBA {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-
-        return .init(Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
-    }
-
     func hexString() -> String {
         var r: CGFloat = 0
         var g: CGFloat = 0
@@ -59,33 +40,6 @@ public extension UIColor {
         )
     }
 
-    convenience init(rgb: IntRGB) {
-        let red: Int = max(0, min(rgb.r, 255))
-        let green: Int = max(0, min(rgb.g, 255))
-        let blue: Int = max(0, min(rgb.b, 255))
-
-        self.init(
-            red: (CGFloat(red) / 255.0),
-            green: (CGFloat(green) / 255.0),
-            blue: (CGFloat(blue) / 255.0),
-            alpha: 1.0
-        )
-    }
-
-    convenience init(rgba: IntRGBA) {
-        let red: Int = max(0, min(rgba.r, 255))
-        let green: Int = max(0, min(rgba.g, 255))
-        let blue: Int = max(0, min(rgba.b, 255))
-        let alpha: Int = max(0, min(rgba.a, 255))
-
-        self.init(
-            red: (CGFloat(red) / 255.0),
-            green: (CGFloat(green) / 255.0),
-            blue: (CGFloat(blue) / 255.0),
-            alpha: (CGFloat(alpha) / 255.0)
-        )
-    }
-
     convenience init(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
@@ -99,5 +53,17 @@ public extension UIColor {
         let a = CGFloat(rgb & 0x000000FF) / 255
 
         self.init(red: r, green: g, blue: b, alpha: a)
+    }
+}
+
+extension UIColor {
+    var rgba: IntRGBA {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+        return .init(Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 }

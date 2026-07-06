@@ -167,7 +167,7 @@ public extension BrushDrawingRenderer {
 
         renderer.drawTexture(
             grayscaleTexture: grayscaleTexture,
-            color: color.rgb,
+            color: color,
             on: drawingTexture,
             with: commandBuffer
         )
