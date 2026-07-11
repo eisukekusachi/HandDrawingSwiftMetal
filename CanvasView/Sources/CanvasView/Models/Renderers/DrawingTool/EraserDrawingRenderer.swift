@@ -53,10 +53,10 @@ public extension EraserDrawingRenderer {
             with: renderer.device
         ) else {
             let error = NSError(
-                title: String(localized: "Error", bundle: .main),
+                title: String(localized: "Error", bundle: .module),
                 message: String(
                     localized: "Failed to create buffers",
-                    bundle: .main
+                    bundle: .module
                 )
             )
             Logger.error(error)

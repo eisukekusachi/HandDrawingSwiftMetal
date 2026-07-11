@@ -87,9 +87,10 @@ final class CanvasViewModel {
             Int(textureSize.height) >= canvasMinimumTextureLength
         else {
             let error = NSError(
-                title: String(localized: "Error"),
+                title: String(localized: "Error", bundle: .module),
                 message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)",
+                    bundle: .module
                 )
             )
             Logger.error(error)
@@ -102,8 +103,8 @@ final class CanvasViewModel {
             let realtimeDrawingTexture = canvasRenderer.makeTexture(textureSize)
         else {
             let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to create canvas textures")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to create canvas textures", bundle: .module)
             )
             Logger.error(error)
             throw error

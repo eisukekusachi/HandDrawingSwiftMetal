@@ -72,8 +72,8 @@ public enum MTLTextureCreator {
     ) throws -> MTLTexture? {
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid value")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
             )
             Logger.error(error)
             return nil
