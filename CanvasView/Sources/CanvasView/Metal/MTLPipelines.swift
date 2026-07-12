@@ -113,7 +113,7 @@ final class MTLPipelines: Sendable {
         self.mergeTextures = makeComputePipeline(
             device: device,
             library: library,
-            label: "Marge textures",
+            label: "Merge textures",
             shaderName: "merge_textures"
         )
         self.fillColor = makeComputePipeline(
