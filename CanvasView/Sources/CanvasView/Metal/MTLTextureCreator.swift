@@ -29,7 +29,7 @@ public enum MTLTextureCreator {
         guard
             let hexadecimalData = try loadHexadecimalData(from: url)
         else { return nil }
-        return try MTLTextureCreator.makeTexture(
+        return MTLTextureCreator.makeTexture(
             label: label,
             width: Int(size.width),
             height: Int(size.height),
@@ -69,7 +69,7 @@ public enum MTLTextureCreator {
         height: Int,
         from colorArray: [UInt8],
         with device: MTLDevice
-    ) throws -> MTLTexture? {
+    ) -> MTLTexture? {
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
