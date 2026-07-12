@@ -65,7 +65,7 @@ struct TouchPoint: Equatable, Sendable {
     /// An index number that lets you correlate an updated touch with the original touch
     let estimationUpdateIndex: NSNumber?
 
-    public init(
+    init(
         location: CGPoint,
         previousLocation: CGPoint,
         majorRadius: CGFloat,
@@ -109,7 +109,7 @@ struct TouchPoint: Equatable, Sendable {
 extension TouchPoint {
 
     @MainActor
-    public init(
+    init(
         touch: UITouch,
         view: UIView
     ) {
