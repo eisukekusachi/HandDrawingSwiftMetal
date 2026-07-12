@@ -92,7 +92,6 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
 
         currentFrameCommandBuffer.present(drawable)
         currentFrameCommandBuffer.commit()
-        currentFrameCommandBuffer.waitUntilCompleted()
 
         resetCommandBuffer()
     }
