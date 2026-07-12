@@ -78,7 +78,7 @@ final class MTLPipelines: Sendable {
             descriptor.colorAttachments[0].destinationAlphaBlendFactor = .one
         }
 
-        self.drawTexture = makeRenderPipelineState(device: device, library: library, label: "Draw Gray Points") { descriptor in
+        self.drawTexture = makeRenderPipelineState(device: device, library: library, label: "Draw Texture") { descriptor in
             descriptor.vertexFunction = library.makeFunction(name: "draw_texture_vertex")
             descriptor.fragmentFunction = library.makeFunction(name: "draw_texture_fragment")
             descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
