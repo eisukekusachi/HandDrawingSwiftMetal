@@ -43,8 +43,15 @@ final class MTLPipelines: Sendable {
             guard let function = library.makeFunction(name: shaderName) else {
                 fatalError("The function is not found in the library.")
             }
+            let descriptor = MTLComputePipelineDescriptor()
+            descriptor.label = label
+            descriptor.computeFunction = function
             do {
-                return try device.makeComputePipelineState(function: function)
+                return try device.makeComputePipelineState(
+                    descriptor: descriptor,
+                    options: [],
+                    reflection: nil
+                )
             } catch {
                 fatalError(error.localizedDescription)
             }
