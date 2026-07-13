@@ -36,6 +36,10 @@ kernel void colorize_grayscale_texture(uint2 gid [[ thread_position_in_grid ]],
                                        texture2d<float, access::read> srcTexture [[ texture(0) ]],
                                        texture2d<float, access::write> resultTexture [[ texture(1) ]]
                                        ) {
+    if (gid.x >= resultTexture.get_width() || gid.y >= resultTexture.get_height()) {
+        return;
+    }
+
     float4 src = srcTexture.read(gid);
 
     // The grayscale value is used as the alpha value. The array index can be any of 0 to 2.
@@ -52,6 +56,10 @@ kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
                            texture2d<float, access::write> resultTexture [[ texture(2) ]],
                            constant float &alpha [[ buffer(3) ]]
                            ) {
+    if (gid.x >= resultTexture.get_width() || gid.y >= resultTexture.get_height()) {
+        return;
+    }
+
     float4 src = srcTexture.read(gid);
     float4 dst = dstTexture.read(gid);
 
@@ -73,5 +81,9 @@ kernel void merge_textures(uint2 gid [[ thread_position_in_grid ]],
 kernel void add_color_to_texture(uint2 gid [[ thread_position_in_grid ]],
                                  constant float4 &color [[ buffer(0) ]],
                                  texture2d<float, access::write> resultTexture [[ texture(0) ]]) {
+    if (gid.x >= resultTexture.get_width() || gid.y >= resultTexture.get_height()) {
+        return;
+    }
+
     resultTexture.write(color, gid);
 }
