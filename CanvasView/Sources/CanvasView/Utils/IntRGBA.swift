@@ -1,5 +1,5 @@
 //
-//  IntRGB.swift
+//  IntRGBA.swift
 //  CanvasView
 //
 //  Created by Eisuke Kusachi on 2025/08/10.
