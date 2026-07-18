@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct IntRGBA: Equatable, Sendable {
+public struct IntRGBA: Equatable, Sendable {
     let r: Int
     let g: Int
     let b: Int

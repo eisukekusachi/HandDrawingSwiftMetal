@@ -16,14 +16,14 @@ public extension UIColor {
         return Int(alpha * 255)
     }
 
-    func hexString() -> String {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        let rgb: Int = (Int)(r*255)<<24 | (Int)(g*255)<<16 | (Int)(b*255)<<8 | (Int)(a*255)<<0
-        return String(format:"#%08x", rgb)
+    var rgba: IntRGBA {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+        return .init(Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 
     convenience init(_ red: Int, _ green: Int, _ blue: Int, _ alpha: Int = 255) {
@@ -53,17 +53,5 @@ public extension UIColor {
         let a = CGFloat(rgb & 0x000000FF) / 255
 
         self.init(red: r, green: g, blue: b, alpha: a)
-    }
-}
-
-extension UIColor {
-    var rgba: IntRGBA {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-
-        return .init(Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 }
