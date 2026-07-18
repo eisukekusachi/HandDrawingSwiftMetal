@@ -64,46 +64,6 @@ struct TouchPoint: Equatable, Sendable {
 
     /// An index number that lets you correlate an updated touch with the original touch
     let estimationUpdateIndex: NSNumber?
-
-    init(
-        location: CGPoint,
-        previousLocation: CGPoint,
-        majorRadius: CGFloat,
-        majorRadiusTolerance: CGFloat,
-        preciseLocation: CGPoint,
-        precisePreviousLocation: CGPoint,
-        tapCount: Int,
-        timestamp: TimeInterval,
-        type: UITouch.TouchType,
-        phase: UITouch.Phase,
-        force: CGFloat,
-        maximumPossibleForce: CGFloat,
-        altitudeAngle: CGFloat,
-        azimuthUnitVector: CGVector,
-        rollAngle: CGFloat,
-        estimatedProperties: UITouch.Properties,
-        estimatedPropertiesExpectingUpdates: UITouch.Properties,
-        estimationUpdateIndex: NSNumber?
-    ) {
-        self.location = location
-        self.previousLocation = previousLocation
-        self.majorRadius = majorRadius
-        self.majorRadiusTolerance = majorRadiusTolerance
-        self.preciseLocation = preciseLocation
-        self.precisePreviousLocation = precisePreviousLocation
-        self.tapCount = tapCount
-        self.timestamp = timestamp
-        self.type = type
-        self.phase = .init(phase)
-        self.force = force
-        self.maximumPossibleForce = maximumPossibleForce
-        self.altitudeAngle = altitudeAngle
-        self.azimuthUnitVector = azimuthUnitVector
-        self.rollAngle = rollAngle
-        self.estimatedProperties = estimatedProperties
-        self.estimatedPropertiesExpectingUpdates = estimatedPropertiesExpectingUpdates
-        self.estimationUpdateIndex = estimationUpdateIndex
-    }
 }
 
 extension TouchPoint {
@@ -113,41 +73,33 @@ extension TouchPoint {
         touch: UITouch,
         view: UIView
     ) {
-        self.location = touch.location(in: view)
+        let rollAngle: CGFloat
+        if #available(iOS 17.5, *) {
+            rollAngle = touch.rollAngle
+        } else {
+            rollAngle = 0
+        }
 
-        self.previousLocation = touch.previousLocation(in: view)
-
-        self.majorRadius = touch.majorRadius
-
-        self.majorRadiusTolerance = touch.majorRadiusTolerance
-
-        self.preciseLocation = touch.preciseLocation(in: view)
-
-        self.precisePreviousLocation = touch.precisePreviousLocation(in: view)
-
-        self.tapCount = touch.tapCount
-
-        self.timestamp = touch.timestamp
-
-        self.type = touch.type
-
-        self.phase = .init(touch.phase)
-
-        self.force = touch.force
-
-        self.maximumPossibleForce = touch.maximumPossibleForce
-
-        self.altitudeAngle = touch.altitudeAngle
-
-        self.azimuthUnitVector = touch.azimuthUnitVector(in: view)
-
-        if #available(iOS 17.5, *) { self.rollAngle = touch.rollAngle } else { self.rollAngle = 0 }
-
-        self.estimatedProperties = touch.estimatedProperties
-
-        self.estimatedPropertiesExpectingUpdates = touch.estimatedPropertiesExpectingUpdates
-
-        self.estimationUpdateIndex = touch.estimationUpdateIndex
+        self.init(
+            location: touch.location(in: view),
+            previousLocation: touch.previousLocation(in: view),
+            majorRadius: touch.majorRadius,
+            majorRadiusTolerance: touch.majorRadiusTolerance,
+            preciseLocation: touch.preciseLocation(in: view),
+            precisePreviousLocation: touch.precisePreviousLocation(in: view),
+            tapCount: touch.tapCount,
+            timestamp: touch.timestamp,
+            type: touch.type,
+            phase: .init(touch.phase),
+            force: touch.force,
+            maximumPossibleForce: touch.maximumPossibleForce,
+            altitudeAngle: touch.altitudeAngle,
+            azimuthUnitVector: touch.azimuthUnitVector(in: view),
+            rollAngle: rollAngle,
+            estimatedProperties: touch.estimatedProperties,
+            estimatedPropertiesExpectingUpdates: touch.estimatedPropertiesExpectingUpdates,
+            estimationUpdateIndex: touch.estimationUpdateIndex
+        )
     }
 }
 

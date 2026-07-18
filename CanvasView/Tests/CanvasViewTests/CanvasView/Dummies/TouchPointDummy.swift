@@ -5,10 +5,10 @@
 //  Created by Eisuke Kusachi on 2024/09/07.
 //
 
-import CanvasView
+@testable import CanvasView
 import UIKit
 
-public extension TouchPoint {
+extension TouchPoint {
 
     static func generate(
         location: CGPoint = .zero,
@@ -20,7 +20,7 @@ public extension TouchPoint {
         tapCount: Int = 0,
         timestamp: TimeInterval = .zero,
         type: UITouch.TouchType = .direct,
-        phase: UITouch.Phase = .cancelled,
+        phase: TouchPhase = .cancelled,
         force: CGFloat = 0,
         maximumPossibleForce: CGFloat = 0,
         altitudeAngle: CGFloat = 0,
