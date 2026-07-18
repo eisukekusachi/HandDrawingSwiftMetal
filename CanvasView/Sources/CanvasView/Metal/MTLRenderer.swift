@@ -130,6 +130,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
+    /// Colorizes an opaque grayscale texture and writes the result to `destinationTexture`.
+    /// Grayscale intensity becomes output alpha, `color` provides RGB only.
     public func drawTexture(
         grayscaleTexture: MTLTexture,
         color: UIColor,

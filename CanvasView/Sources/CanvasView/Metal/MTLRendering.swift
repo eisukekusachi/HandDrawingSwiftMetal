@@ -40,6 +40,8 @@ public protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
+    /// Colorizes an opaque grayscale texture and writes the result to `destinationTexture`.
+    /// Grayscale intensity becomes output alpha; `color` provides RGB only.
     func drawTexture(
         grayscaleTexture: MTLTexture,
         color: UIColor,
