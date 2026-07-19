@@ -367,9 +367,7 @@ private extension TextureLayersDocumentsRepository {
                 contentsOf: directoryURL.appendingPathComponent(layer.id.uuidString)
             )
 
-            guard
-                let hexadecimalData = textureData.encodedHexadecimals
-            else {
+            guard !textureData.isEmpty else {
                 let error = NSError(
                     title: String(localized: "Error"),
                     message: String(localized: "Unable to load required data")
@@ -377,6 +375,8 @@ private extension TextureLayersDocumentsRepository {
                 Logger.error(error)
                 throw error
             }
+
+            let hexadecimalData = [UInt8](textureData)
 
             let _ = try MTLTextureCreator.makeTexture(
                width: Int(textureSize.width),

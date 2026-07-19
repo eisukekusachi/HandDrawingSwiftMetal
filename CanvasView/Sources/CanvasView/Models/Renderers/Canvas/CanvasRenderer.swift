@@ -6,18 +6,19 @@
 //
 
 import Combine
+import UIKit
 @preconcurrency import MetalKit
 
 /// Draws textures on `canvasTexture` and displays it on the screen
-@MainActor public final class CanvasRenderer: ObservableObject {
+@MainActor final class CanvasRenderer: ObservableObject {
 
     /// Command buffer for a single frame
-    public var currentFrameCommandBuffer: MTLCommandBuffer? {
+    var currentFrameCommandBuffer: MTLCommandBuffer? {
         displayView.currentFrameCommandBuffer
     }
 
     /// Size of the texture rendered on the screen
-    public var displayTextureSize: CGSize? {
+    var displayTextureSize: CGSize? {
         displayView.displayTexture?.size
     }
 
@@ -39,7 +40,7 @@ import Combine
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         renderer: MTLRendering,
         displayView: CanvasDisplayable,
         backgroundColor: UIColor?,
@@ -58,18 +59,18 @@ import Combine
         if let baseBackgroundColor { self.baseBackgroundColor = baseBackgroundColor }
     }
 
-    public func setFrameSize(_ size: CGSize) {
+    func setFrameSize(_ size: CGSize) {
         self.frameSize = size
     }
 
-    public func resetCommandBuffer() {
+    func resetCommandBuffer() {
         displayView.resetCommandBuffer()
     }
 }
 
 extension CanvasRenderer {
     /// Updates `canvasTexture` using `currentTexture` and the background color
-    public func updateCanvasTexture(
+    func updateCanvasTexture(
         currentTexture: MTLTexture?,
         canvasTexture: MTLTexture?
     ) {
@@ -81,7 +82,7 @@ extension CanvasRenderer {
 
         renderer.fillColor(
             texture: canvasTexture,
-            withRGB: backgroundColor.rgb,
+            color: backgroundColor,
             with: currentFrameCommandBuffer
         )
 
@@ -107,7 +108,7 @@ extension CanvasRenderer {
     }
 
     /// Draws `canvasTexture` to the display, applying the current transform and requests a screen update
-    public func drawCanvasTextureToDisplay(
+    func drawCanvasTextureToDisplay(
         matrix: CGAffineTransform,
         canvasTexture: MTLTexture?
     ) {

@@ -25,8 +25,8 @@ public extension MTLTexture {
             let commandEncoder = commandBuffer.makeBlitCommandEncoder()
         else {
             let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to load required data")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Unable to load required data", bundle: .module)
             )
             Logger.error(error)
             throw error

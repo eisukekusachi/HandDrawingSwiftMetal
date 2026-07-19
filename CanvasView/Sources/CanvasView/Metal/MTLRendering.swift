@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import UIKit
 
 @MainActor
 public protocol MTLRendering {
@@ -39,9 +40,11 @@ public protocol MTLRendering {
         with commandBuffer: MTLCommandBuffer
     )
 
+    /// Colorizes an opaque grayscale texture and writes the result to `destinationTexture`.
+    /// Grayscale intensity becomes output alpha; `color` provides RGB only.
     func drawTexture(
         grayscaleTexture: MTLTexture,
-        color rgb: IntRGB,
+        color: UIColor,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     )
@@ -75,13 +78,7 @@ public protocol MTLRendering {
 
     func fillColor(
         texture: MTLTexture,
-        withRGB rgb: IntRGB,
-        with commandBuffer: MTLCommandBuffer
-    )
-
-    func fillColor(
-        texture: MTLTexture,
-        withRGBA rgba: IntRGBA,
+        color: UIColor,
         with commandBuffer: MTLCommandBuffer
     )
 

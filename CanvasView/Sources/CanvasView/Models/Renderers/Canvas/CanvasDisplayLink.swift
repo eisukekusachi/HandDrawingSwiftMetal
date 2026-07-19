@@ -30,7 +30,7 @@ public final class CanvasDisplayLink {
 
     public init(isPaused: Bool = true) {
         displayLink = CADisplayLink(target: self, selector: #selector(displayLinkFrame))
-        displayLink?.add(to: .current, forMode: .common)
+        displayLink?.add(to: .main, forMode: .common)
         displayLink?.isPaused = isPaused
     }
 

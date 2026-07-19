@@ -7,18 +7,14 @@
 
 @preconcurrency import MetalKit
 
-private let bytesPerPixel = 4
-private let bitsPerComponent = 8
-
 public enum MTLTextureCreator {
 
     public static func loadHexadecimalData(
         from url: URL
     ) throws -> [UInt8]? {
-        guard let hexadecimalData = try Data(contentsOf: url).encodedHexadecimals else {
-            return nil
-        }
-        return hexadecimalData
+        let data = try Data(contentsOf: url)
+        guard !data.isEmpty else { return nil }
+        return [UInt8](data)
     }
 
     public static func makeTexture(
@@ -30,7 +26,7 @@ public enum MTLTextureCreator {
         guard
             let hexadecimalData = try loadHexadecimalData(from: url)
         else { return nil }
-        return try MTLTextureCreator.makeTexture(
+        return MTLTextureCreator.makeTexture(
             label: label,
             width: Int(size.width),
             height: Int(size.height),
@@ -70,11 +66,13 @@ public enum MTLTextureCreator {
         height: Int,
         from colorArray: [UInt8],
         with device: MTLDevice
-    ) throws -> MTLTexture? {
+    ) -> MTLTexture? {
+        let bytesPerPixel = 4
+
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid value")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid value", bundle: .module)
             )
             Logger.error(error)
             return nil

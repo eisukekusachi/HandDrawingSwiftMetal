@@ -43,8 +43,15 @@ final class MTLPipelines: Sendable {
             guard let function = library.makeFunction(name: shaderName) else {
                 fatalError("The function is not found in the library.")
             }
+            let descriptor = MTLComputePipelineDescriptor()
+            descriptor.label = label
+            descriptor.computeFunction = function
             do {
-                return try device.makeComputePipelineState(function: function)
+                return try device.makeComputePipelineState(
+                    descriptor: descriptor,
+                    options: [],
+                    reflection: nil
+                )
             } catch {
                 fatalError(error.localizedDescription)
             }
@@ -78,7 +85,7 @@ final class MTLPipelines: Sendable {
             descriptor.colorAttachments[0].destinationAlphaBlendFactor = .one
         }
 
-        self.drawTexture = makeRenderPipelineState(device: device, library: library, label: "Draw Gray Points") { descriptor in
+        self.drawTexture = makeRenderPipelineState(device: device, library: library, label: "Draw Texture") { descriptor in
             descriptor.vertexFunction = library.makeFunction(name: "draw_texture_vertex")
             descriptor.fragmentFunction = library.makeFunction(name: "draw_texture_fragment")
             descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
@@ -113,7 +120,7 @@ final class MTLPipelines: Sendable {
         self.mergeTextures = makeComputePipeline(
             device: device,
             library: library,
-            label: "Marge textures",
+            label: "Merge textures",
             shaderName: "merge_textures"
         )
         self.fillColor = makeComputePipeline(

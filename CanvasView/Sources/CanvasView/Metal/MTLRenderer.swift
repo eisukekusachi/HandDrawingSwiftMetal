@@ -130,12 +130,15 @@ public final class MTLRenderer: Sendable, MTLRendering {
         encoder?.endEncoding()
     }
 
+    /// Colorizes an opaque grayscale texture and writes the result to `destinationTexture`.
+    /// Grayscale intensity becomes output alpha, `color` provides RGB only.
     public func drawTexture(
         grayscaleTexture: MTLTexture,
-        color rgb: IntRGB,
+        color: UIColor,
         on destinationTexture: MTLTexture,
         with commandBuffer: MTLCommandBuffer
     ) {
+        let rgba = color.rgba
         let threadGroupSize = MTLSize(
             width: Int(grayscaleTexture.width / canvasMinimumTextureLength),
             height: Int(grayscaleTexture.height / canvasMinimumTextureLength),
@@ -147,16 +150,16 @@ public final class MTLRenderer: Sendable, MTLRendering {
             depth: 1
         )
 
-        var rgba: [Float] = [
-            Float(rgb.r) / 255.0,
-            Float(rgb.g) / 255.0,
-            Float(rgb.b) / 255.0,
+        var rgbaComponents: [Float] = [
+            Float(rgba.r) / 255.0,
+            Float(rgba.g) / 255.0,
+            Float(rgba.b) / 255.0,
             1.0
         ]
 
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder?.setComputePipelineState(pipelines.colorize)
-        encoder?.setBytes(&rgba, length: rgba.count * MemoryLayout<Float>.size, index: 0)
+        encoder?.setBytes(&rgbaComponents, length: rgbaComponents.count * MemoryLayout<Float>.size, index: 0)
         encoder?.setTexture(grayscaleTexture, index: 0)
         encoder?.setTexture(destinationTexture, index: 1)
         encoder?.dispatchThreadgroups(threadGroupSize, threadsPerThreadgroup: threadGroupCount)
@@ -264,21 +267,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     public func fillColor(
         texture: MTLTexture,
-        withRGB rgb: IntRGB,
+        color: UIColor,
         with commandBuffer: MTLCommandBuffer
     ) {
-        fillColor(
-            texture: texture,
-            withRGBA: .init(rgb.r, rgb.g, rgb.b, 255),
-            with: commandBuffer
-        )
-    }
-
-    public func fillColor(
-        texture: MTLTexture,
-        withRGBA rgba: IntRGBA,
-        with commandBuffer: MTLCommandBuffer
-    ) {
+        let rgba = color.rgba
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = texture
         descriptor.colorAttachments[0].loadAction = .clear
@@ -313,7 +305,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         fillColor(
             texture: texture,
-            withRGBA: .init(0, 0, 0, 0),
+            color: .clear,
             with: commandBuffer
         )
     }

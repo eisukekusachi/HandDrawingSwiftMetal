@@ -16,15 +16,6 @@ public extension UIColor {
         return Int(alpha * 255)
     }
 
-    var rgb: IntRGB {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        getRed(&red, green: &green, blue: &blue, alpha: nil)
-
-        return .init(Int(red * 255), Int(green * 255), Int(blue * 255))
-    }
-
     var rgba: IntRGBA {
         var red: CGFloat = 0
         var green: CGFloat = 0
@@ -35,48 +26,11 @@ public extension UIColor {
         return .init(Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 
-    func hexString() -> String {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        let rgb: Int = (Int)(r*255)<<24 | (Int)(g*255)<<16 | (Int)(b*255)<<8 | (Int)(a*255)<<0
-        return String(format:"#%08x", rgb)
-    }
-
     convenience init(_ red: Int, _ green: Int, _ blue: Int, _ alpha: Int = 255) {
         let red: Int = max(0, min(red, 255))
         let green: Int = max(0, min(green, 255))
         let blue: Int = max(0, min(blue, 255))
         let alpha: Int = max(0, min(alpha, 255))
-
-        self.init(
-            red: (CGFloat(red) / 255.0),
-            green: (CGFloat(green) / 255.0),
-            blue: (CGFloat(blue) / 255.0),
-            alpha: (CGFloat(alpha) / 255.0)
-        )
-    }
-
-    convenience init(rgb: IntRGB) {
-        let red: Int = max(0, min(rgb.r, 255))
-        let green: Int = max(0, min(rgb.g, 255))
-        let blue: Int = max(0, min(rgb.b, 255))
-
-        self.init(
-            red: (CGFloat(red) / 255.0),
-            green: (CGFloat(green) / 255.0),
-            blue: (CGFloat(blue) / 255.0),
-            alpha: 1.0
-        )
-    }
-
-    convenience init(rgba: IntRGBA) {
-        let red: Int = max(0, min(rgba.r, 255))
-        let green: Int = max(0, min(rgba.g, 255))
-        let blue: Int = max(0, min(rgba.b, 255))
-        let alpha: Int = max(0, min(rgba.a, 255))
 
         self.init(
             red: (CGFloat(red) / 255.0),

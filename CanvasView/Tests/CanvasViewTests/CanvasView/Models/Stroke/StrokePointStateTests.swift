@@ -67,12 +67,12 @@ struct StrokePointStateTests {
 
             @Test(
                 arguments: [
-                    UITouch.Phase.began,
-                    UITouch.Phase.moved,
-                    UITouch.Phase.stationary
+                    TouchPhase.began,
+                    TouchPhase.moved,
+                    TouchPhase.stationary
                 ]
             )
-            func `Verify that shouldFinalizeDrawing is false while drawing`(phase: UITouch.Phase) {
+            func `Verify that shouldFinalizeDrawing is false while drawing`(phase: TouchPhase) {
                 let subject = Subject(
                     points: [
                         .generate(phase: phase)

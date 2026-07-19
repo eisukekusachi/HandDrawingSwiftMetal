@@ -52,19 +52,19 @@ enum ViewSize {
         textureSize: CGSize
     ) -> CGPoint {
         if textureSize != drawableSize {
-            let drawableToTextureFillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
+            let fillScale = ViewSize.getScaleToFill(drawableSize, to: textureSize)
             let drawableLocation: CGPoint = .init(
                 x: touchLocation.x * (drawableSize.width / frameSize.width),
-                y: touchLocation.y * (drawableSize.width / frameSize.width)
+                y: touchLocation.y * (drawableSize.height / frameSize.height)
             )
             return .init(
-                x: drawableLocation.x * drawableToTextureFillScale + (textureSize.width - drawableSize.width * drawableToTextureFillScale) * 0.5,
-                y: drawableLocation.y * drawableToTextureFillScale + (textureSize.height - drawableSize.height * drawableToTextureFillScale) * 0.5
+                x: drawableLocation.x * fillScale + (textureSize.width - drawableSize.width * fillScale) * 0.5,
+                y: drawableLocation.y * fillScale + (textureSize.height - drawableSize.height * fillScale) * 0.5
             )
         } else {
             return .init(
                 x: touchLocation.x * (textureSize.width / frameSize.width),
-                y: touchLocation.y * (textureSize.width / frameSize.width)
+                y: touchLocation.y * (textureSize.height / frameSize.height)
             )
         }
     }
