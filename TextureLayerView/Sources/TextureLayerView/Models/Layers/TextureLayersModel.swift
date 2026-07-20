@@ -46,7 +46,7 @@ public extension TextureLayersModel {
         self.layerIndex = model.layerIndex
         self.textureSize = model.textureSize
 
-        // Return an error if the layers are nil or the texture size is zero
+        // Return an error if the layers are empty or the texture size is zero
         if layers.isEmpty || textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),
