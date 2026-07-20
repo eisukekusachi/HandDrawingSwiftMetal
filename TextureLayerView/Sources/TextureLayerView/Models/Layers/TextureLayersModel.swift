@@ -43,7 +43,7 @@ public extension TextureLayersModel {
         model: TextureLayersArchiveModel
     ) throws {
         self.layers = model.layers
-        self.layerIndex = model.layerIndex
+        self.layerIndex = max(0, min(model.layerIndex, model.layers.count - 1))
         self.textureSize = model.textureSize
 
         // Return an error if the layers are empty or the texture size is zero
