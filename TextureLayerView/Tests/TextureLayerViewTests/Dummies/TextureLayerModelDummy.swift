@@ -6,7 +6,6 @@
 //
 
 import TextureLayerView
-import MetalKit
 
 public extension TextureLayerModel {
 
