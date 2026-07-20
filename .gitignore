@@ -34,3 +34,8 @@ Carthage/Build/
 xcuserdata/
 *.moved-aside
 !.gitkeep
+## Swift Package Manager
+**/.build/
+**/.swiftpm/
+**/Packages/
+.netrc
