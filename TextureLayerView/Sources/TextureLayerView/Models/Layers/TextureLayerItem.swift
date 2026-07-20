@@ -44,7 +44,7 @@ public struct TextureLayerItem: Identifiable {
         selectedBackgroundColor: UIColor = .black,
         iconSize: CGSize = .init(width: 32, height: 32),
         padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4,
+        cornerRadius: CGFloat = 4
     ) {
         self.id = id
         self.title = title
@@ -67,7 +67,7 @@ public extension TextureLayerItem {
         selectedBackgroundColor: UIColor = .black,
         iconSize: CGSize = .init(width: 32, height: 32),
         padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4,
+        cornerRadius: CGFloat = 4
     ) {
         self.init(
             id: model.id,
