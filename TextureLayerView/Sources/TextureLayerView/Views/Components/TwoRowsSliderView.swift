@@ -43,9 +43,8 @@ struct TwoRowsSliderView: View {
                 onEditing: { alpha in
                     viewModel.onChangeCurrentAlpha(alpha)
                 },
-                onEditingChanged: { dragging, alpha in
+                onEditingChanged: { dragging, _ in
                     viewModel.isAlphaSliderDragging = dragging
-                    viewModel.onChangeCurrentAlpha(alpha)
                 }
             )
         }
