@@ -33,7 +33,7 @@ public struct TextureLayersModel: Sendable {
         } else {
             self.layers = layers
         }
-        self.layerIndex = min(layerIndex, self.layers.count - 1)
+        self.layerIndex = max(0, min(layerIndex, self.layers.count - 1))
         self.textureSize = textureSize
     }
 }
