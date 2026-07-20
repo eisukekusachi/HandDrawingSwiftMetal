@@ -32,7 +32,7 @@ struct IntSliderView: View {
             value: Binding(
                 get: { Double(value) },
                 set: {
-                    value = Int($0)
+                    value = Int($0.rounded())
                     onEditing?(value)
                 }
             ),
