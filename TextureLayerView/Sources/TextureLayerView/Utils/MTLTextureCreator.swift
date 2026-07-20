@@ -7,9 +7,6 @@
 
 @preconcurrency import MetalKit
 
-private let bytesPerPixel = 4
-private let bitsPerComponent = 8
-
 enum MTLTextureCreator {
 
     static func loadHexadecimalData(
@@ -70,6 +67,8 @@ enum MTLTextureCreator {
         from colorArray: [UInt8],
         with device: MTLDevice
     ) throws -> MTLTexture {
+        let bytesPerPixel = 4
+
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
                 title: String(localized: "Error"),
