@@ -16,7 +16,7 @@ struct ReversedTextureLayerListView: View {
             ForEach(
                 // In drawing apps, textures stack from bottom to top,
                 // so the layer order is reversed compared to the default.
-                Array((viewModel.textureLayers.layers).reversed()),
+                viewModel.textureLayers.layers.reversed(),
                 id: \.id
             ) { layer in
                 let isSelected = viewModel.isSelected(layer.id)
