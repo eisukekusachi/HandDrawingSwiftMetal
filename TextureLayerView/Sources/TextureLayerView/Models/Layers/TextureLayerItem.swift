@@ -110,6 +110,7 @@ public extension TextureLayerItem {
         !selected ? selectedBackgroundColor : defaultBackgroundColor
     }
     func iconColor(isVisible: Bool, _ selected: Bool) -> UIColor {
-        !selected ? selectedBackgroundColor : defaultBackgroundColor
+        guard isVisible else { return .gray }
+        return textColor(selected)
     }
 }
