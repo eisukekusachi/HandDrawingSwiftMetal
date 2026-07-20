@@ -10,7 +10,7 @@ import SwiftUI
 struct IntSliderView: View {
     @Binding private var value: Int
 
-    private var range: ClosedRange<Float>
+    private var range: ClosedRange<Double>
 
     private var onEditing: ((Int) -> Void)?
     private var onEditingChanged: ((Bool, Int) -> Void)?
@@ -22,7 +22,7 @@ struct IntSliderView: View {
         onEditingChanged: ((Bool, Int) -> Void)? = nil
     ) {
         self._value = value
-        self.range = Float(range.lowerBound)...Float(range.upperBound)
+        self.range = Double(range.lowerBound)...Double(range.upperBound)
         self.onEditing = onEditing
         self.onEditingChanged = onEditingChanged
     }
@@ -30,7 +30,7 @@ struct IntSliderView: View {
     var body: some View {
         Slider(
             value: Binding(
-                get: { Float(value) },
+                get: { Double(value) },
                 set: {
                     value = Int($0)
                     onEditing?(value)
