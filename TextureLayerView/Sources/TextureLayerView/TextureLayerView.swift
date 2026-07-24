@@ -49,7 +49,7 @@ public struct TextureLayerView: View {
     }
 
     public func updateAlpha(_ alpha: Int) {
-        viewModel.onChangeCurrentAlpha(alpha)
+        viewModel.currentAlpha = alpha
     }
 }
 
