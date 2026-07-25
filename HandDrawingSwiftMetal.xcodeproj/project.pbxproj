@@ -103,6 +103,7 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
+		D4A1B0052F96000500C55A4C /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4A1B0032F96000300C55A4C /* PaletteEditView */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
 		D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */; };
 		D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256E2EAC614B00439FFF /* FileInput.swift */; };
@@ -228,6 +229,7 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D4A64A4F2FF9282C00BFC24A /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
 		D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = "<group>"; };
 		D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepository.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */,
 				D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */,
 				D442BCFD2F93220E00C55A4C /* TextureLayerCanvasView in Frameworks */,
+				D4A1B0052F96000500C55A4C /* PaletteEditView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +545,7 @@
 		D4E1ECD02752388C00D4A23D = {
 			isa = PBXGroup;
 			children = (
+				D4A64A4F2FF9282C00BFC24A /* PaletteEditView */,
 				D49432EC2F9319F0003A25BA /* TextureLayerCanvasView */,
 				D4F0BF042E38F78900C3E441 /* CanvasView */,
 				D46A2CE32E424E7000D638AE /* TextureLayerView */,
@@ -656,6 +660,7 @@
 				D4F0BF052E38F79600C3E441 /* CanvasView */,
 				D46A2CE42E424E8900D638AE /* TextureLayerView */,
 				D442BCFC2F93220E00C55A4C /* TextureLayerCanvasView */,
+				D4A1B0032F96000300C55A4C /* PaletteEditView */,
 			);
 			productName = HandDrawingSwiftMetal;
 			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
@@ -731,6 +736,7 @@
 			mainGroup = D4E1ECD02752388C00D4A23D;
 			packageReferences = (
 				D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				D4A1B0022F96000200C55A4C /* XCLocalSwiftPackageReference "PaletteEditView" */,
 			);
 			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
 			projectDirPath = "";
@@ -1257,6 +1263,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		D4A1B0022F96000200C55A4C /* XCLocalSwiftPackageReference "PaletteEditView" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PaletteEditView;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1285,6 +1298,11 @@
 		D4F0BF052E38F79600C3E441 /* CanvasView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CanvasView;
+		};
+		D4A1B0032F96000300C55A4C /* PaletteEditView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D4A1B0022F96000200C55A4C /* XCLocalSwiftPackageReference "PaletteEditView" */;
+			productName = PaletteEditView;
 		};
 /* End XCSwiftPackageProductDependency section */
 
