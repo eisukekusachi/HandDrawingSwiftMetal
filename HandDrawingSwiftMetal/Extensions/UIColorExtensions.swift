@@ -10,9 +10,7 @@ import UIKit
 extension UIColor {
 
     static var viewBackground: UIColor {
-        UIColor.systemGray6
-            .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
-            .withAlphaComponent(0.88)
+        UIColor.systemGray6.withAlphaComponent(0.88)
     }
 
     convenience init?(hex: String) {

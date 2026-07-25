@@ -7,6 +7,7 @@
 
 import Combine
 import CanvasView
+import PaletteEditView
 import UIKit
 import TextureLayerView
 
@@ -21,6 +22,34 @@ final class HandDrawingViewModel: ObservableObject {
     let drawingTool: DrawingTool = .init()
     let brushPalette: BrushPalette
     let eraserPalette: EraserPalette
+
+    lazy var colorPaletteState = ColorPaletteState(onChanged: { [weak self] color in
+        guard let `self` else { return }
+        let components = color.paletteRGBAComponents()
+        let normalizedColor = UIColor(
+            paletteRed: components.red,
+            green: components.green,
+            blue: components.blue,
+            alpha: components.alpha
+        )
+        self.brushPalette.update(
+            color: normalizedColor,
+            at: self.brushPalette.selectedIndex
+        )
+        self.onBrushColorEdited?(normalizedColor)
+    })
+
+    lazy var alphaPaletteState = AlphaPaletteState(onChanged: { [weak self] alpha in
+        guard let `self` else { return }
+        self.eraserPalette.update(
+            alpha: alpha,
+            at: self.eraserPalette.selectedIndex
+        )
+        self.onEraserAlphaEdited?(alpha)
+    })
+
+    var onBrushColorEdited: ((UIColor) -> Void)?
+    var onEraserAlphaEdited: ((Int) -> Void)?
 
     let textureLayersState: TextureLayersState = TextureLayersState()
 

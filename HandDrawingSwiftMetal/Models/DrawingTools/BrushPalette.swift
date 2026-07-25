@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/08/23.
 //
 
+import PaletteEditView
 import UIKit
 
 fileprivate let initializeColors: [UIColor] = [
@@ -17,23 +18,27 @@ fileprivate let initializeColors: [UIColor] = [
     .purple.withAlphaComponent(0.8)
 ]
 
-final class BrushPalette: ObservableObject {
+final class BrushPalette: ObservableObject, ColorPaletteColorSource {
 
     private(set) var id: UUID
 
+    var selectedColor: UIColor {
+        color ?? .black
+    }
+
     @Published private(set) var colors: [UIColor] = []
-    @Published private(set) var index: Int = 0
+    @Published private(set) var selectedIndex: Int = 0
 
     public init(
         id: UUID = UUID(),
         colors: [UIColor] = initializeColors,
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         self.id = id
 
         let newColors = colors.isEmpty ? [.black] : colors
         self.colors = newColors
-        self.index = max(0, min(index, newColors.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
 }
 
@@ -41,7 +46,7 @@ extension BrushPalette {
 
     func initializeData() {
         self.colors = initializeColors
-        self.index = 0
+        self.selectedIndex = 0
     }
 
     func setId(_ id: UUID) {
@@ -49,29 +54,35 @@ extension BrushPalette {
     }
 
     var color: UIColor? {
-        guard index < colors.count else { return nil }
-        return colors[index]
+        guard selectedIndex < colors.count else { return nil }
+        return colors[selectedIndex]
     }
 
     func color(at index: Int) -> UIColor? {
         self.colors.indices.contains(index) ? colors[index] : nil
     }
 
-    func select(_ index: Int) {
-        self.index = index
+    @discardableResult
+    func select(_ index: Int) -> Bool {
+        guard colors.indices.contains(index) else { return false }
+        let didReselect = selectedIndex == index
+        selectedIndex = index
+        return didReselect
     }
 
     func insert(_ color: UIColor, at index: Int) {
         guard (0 ... colors.count).contains(index) else { return }
-        colors.insert(color, at: index)
+        var updated = colors
+        updated.insert(color, at: index)
+        colors = updated
     }
 
     func update(
         colors: [UIColor] = [],
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         self.colors = colors.isEmpty ? [.black] : colors
-        self.index = max(0, min(index, self.colors.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, self.colors.count - 1))
     }
 
     func update(
@@ -79,11 +90,21 @@ extension BrushPalette {
         at index: Int
     ) {
         guard colors.indices.contains(index) else { return }
-        colors[index] = color
+        var updated = colors
+        updated[index] = color
+        colors = updated
     }
 
     func remove(at index: Int) {
         guard colors.indices.contains(index) && colors.count > 1 else { return }
-        colors.remove(at: index)
+        var updated = colors
+        updated.remove(at: index)
+        colors = updated
+
+        if selectedIndex > index {
+            selectedIndex -= 1
+        } else if selectedIndex >= updated.count {
+            selectedIndex = updated.count - 1
+        }
     }
 }

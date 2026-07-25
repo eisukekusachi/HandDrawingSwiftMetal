@@ -16,25 +16,25 @@ struct BrushPaletteTests {
     func testInitWithEmptyColors() async throws {
         let palette = BrushPalette(
             colors: [],
-            index: -1
+            selectedIndex: -1
         )
 
         #expect(palette.colors == [.black])
-        #expect(palette.index == 0)
+        #expect(palette.selectedIndex == 0)
     }
 
     @Test("Confirms selecting a color changes the current color")
     func testSelect() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
-        #expect(palette.index == 0)
+        #expect(palette.selectedIndex == 0)
         #expect(palette.color == .black)
 
         palette.select(1)
-        #expect(palette.index == 1)
+        #expect(palette.selectedIndex == 1)
         #expect(palette.color == .red)
     }
 
@@ -42,7 +42,7 @@ struct BrushPaletteTests {
     func testInsert() async throws {
         let palette = BrushPalette(
             colors: [.black],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.insert(.blue, at: 0)
@@ -53,13 +53,13 @@ struct BrushPaletteTests {
     func testUpdateColorsAndIndex() async throws {
         let palette = BrushPalette(
             colors: [.black, .lightGray, .gray, .white],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.update(colors: [.red, .green], index: 1)
+        palette.update(colors: [.red, .green], selectedIndex: 1)
 
         #expect(palette.colors == [.red, .green])
-        #expect(palette.index == 1)
+        #expect(palette.selectedIndex == 1)
         #expect(palette.color == .green)
     }
 
@@ -67,7 +67,7 @@ struct BrushPaletteTests {
     func testUpdateColorAtIndex() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.update(color: .blue, at: 1)
@@ -78,7 +78,7 @@ struct BrushPaletteTests {
     func testRemove() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.remove(at: 0)
@@ -88,5 +88,16 @@ struct BrushPaletteTests {
         palette.remove(at: 0)
         #expect(palette.colors.count == 1)
         #expect(palette.colors == [.red])
+    }
+
+    @Test("Confirms reselecting the same color returns true")
+    func testReselect() async throws {
+        let palette = BrushPalette(
+            colors: [.black, .red],
+            selectedIndex: 1
+        )
+
+        #expect(palette.select(1) == true)
+        #expect(palette.select(0) == false)
     }
 }

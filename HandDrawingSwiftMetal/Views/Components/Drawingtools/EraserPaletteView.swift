@@ -19,6 +19,8 @@ struct EraserPaletteView: View {
 
     private let backgroundColor: Color
 
+    private let onTapAlpha: ((Int, Bool) -> Void)?
+
     @ObservedObject private var palette: EraserPalette
 
     @State private var checkeredImage: UIImage? = nil
@@ -28,7 +30,8 @@ struct EraserPaletteView: View {
         paletteHeight: CGFloat,
         spacing: CGFloat = 2,
         paddingVertical: CGFloat = 2,
-        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15)
+        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15),
+        onTapAlpha: ((Int, Bool) -> Void)? = nil
     ) {
         self.palette = palette
         self.paletteHeight = paletteHeight
@@ -36,6 +39,7 @@ struct EraserPaletteView: View {
         self.colorSize = paletteHeight - paddingVertical * 2
         self.spacing = spacing
         self.backgroundColor = Color(backgroundColor)
+        self.onTapAlpha = onTapAlpha
     }
 
     private func alpha(_ alpha: Int) -> CGFloat {
@@ -50,9 +54,10 @@ struct EraserPaletteView: View {
                         color: UIColor.black.withAlphaComponent(alpha(palette.alphas[i])),
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.index == i
+                        selected: palette.selectedIndex == i
                     ) {
-                        palette.select(i)
+                        let didReselect = palette.select(i)
+                        onTapAlpha?(i, didReselect)
                     }
                 }
             }
@@ -85,7 +90,7 @@ private struct Preview: View {
                     alphas: [
                         255, 225, 200, 175, 150, 125, 100, 50, 25
                     ],
-                    index: 3
+                    selectedIndex: 3
                 ),
                 paletteHeight: paletteHeight
             )

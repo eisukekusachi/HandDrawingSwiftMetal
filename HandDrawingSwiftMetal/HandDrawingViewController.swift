@@ -7,6 +7,7 @@
 
 import CanvasView
 import Combine
+import PaletteEditView
 import SwiftUI
 import TextureLayerCanvasView
 import TextureLayerView
@@ -27,6 +28,16 @@ class HandDrawingViewController: UIViewController {
     private var textureLayerViewModel = PopupViewModel(
         width: 320,
         height: 300
+    )
+
+    private var colorPaletteEditPopupViewModel = PopupViewModel(
+        width: 350,
+        height: colorPaletteEditViewHeight
+    )
+
+    private var alphaPaletteEditPopupViewModel = PopupViewModel(
+        width: 350,
+        height: alphaPaletteEditViewHeight
     )
 
     private weak var popupPassthroughView: PassthroughHostingView?
@@ -245,17 +256,25 @@ private extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.brushPalette.$index
+        viewModel.onBrushColorEdited = { [weak self] color in
+            (self?.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(color)
+        }
+
+        viewModel.onEraserAlphaEdited = { [weak self] alpha in
+            (self?.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(alpha)
+        }
+
+        viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
+                guard let self, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
                 (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(newColor)
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPalette.$index
+        viewModel.eraserPalette.$selectedIndex
             .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
+                guard let self, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
                 (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(newAlpha)
             }
@@ -307,9 +326,15 @@ private extension HandDrawingViewController {
             self?.saveImage()
         }
         contentView.tapDrawingToolButton = { [weak self] in
-            guard let `self` else { return }
+            guard let self else { return }
+
+            let wasPaletteEditPopupVisible =
+                !self.colorPaletteEditPopupViewModel.isHidden ||
+                !self.alphaPaletteEditPopupViewModel.isHidden
+
             self.viewModel.toggleDrawingTool()
             self.contentView.updateDrawingComponents(self.viewModel.drawingTool.type)
+            self.updatePalettePopupOnToolSwitch(wasVisible: wasPaletteEditPopupVisible)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
             self.canvasView.setDrawingRenderer(renderer)
@@ -352,7 +377,13 @@ private extension HandDrawingViewController {
         let hostingController = UIHostingController(
             rootView: BrushPaletteView(
                 palette: viewModel.brushPalette,
-                paletteHeight: paletteHeight
+                paletteHeight: paletteHeight,
+                onTapColor: { [weak self] index, didReselect in
+                    self?.handleBrushPaletteColorTap(
+                        index: index,
+                        didReselect: didReselect
+                    )
+                }
             )
         )
         embedHostingController(hostingController, in: contentView.brushPaletteView)
@@ -362,7 +393,13 @@ private extension HandDrawingViewController {
         let hostingController = UIHostingController(
             rootView: EraserPaletteView(
                 palette: viewModel.eraserPalette,
-                paletteHeight: paletteHeight
+                paletteHeight: paletteHeight,
+                onTapAlpha: { [weak self] index, didReselect in
+                    self?.handleEraserPaletteAlphaTap(
+                        index: index,
+                        didReselect: didReselect
+                    )
+                }
             )
         )
         embedHostingController(hostingController, in: contentView.eraserPaletteView)
@@ -377,6 +414,46 @@ private extension HandDrawingViewController {
                 viewModel: textureLayerViewModel,
                 placement: .top,
                 content: { textureLayerView }
+            ),
+            .init(
+                target: targetView.brushPaletteView,
+                viewModel: colorPaletteEditPopupViewModel,
+                placement: .bottom,
+                content: {
+                    ColorPaletteEditView(
+                        colorSource: self.viewModel.brushPalette,
+                        paletteState: self.viewModel.colorPaletteState,
+                        onRemove: { [weak self] in
+                            self?.removeBrushPaletteColor()
+                        },
+                        onDuplicate: { [weak self] in
+                            self?.addBrushPaletteColor()
+                        }
+                    )
+                },
+                onClose: { [weak self] in
+                    self?.colorPaletteEditPopupViewModel.hide()
+                }
+            ),
+            .init(
+                target: targetView.eraserPaletteView,
+                viewModel: alphaPaletteEditPopupViewModel,
+                placement: .bottom,
+                content: {
+                    AlphaPaletteEditView(
+                        alphaSource: self.viewModel.eraserPalette,
+                        paletteState: self.viewModel.alphaPaletteState,
+                        onRemove: { [weak self] in
+                            self?.removeEraserPaletteAlpha()
+                        },
+                        onDuplicate: { [weak self] in
+                            self?.addEraserPaletteAlpha()
+                        }
+                    )
+                },
+                onClose: { [weak self] in
+                    self?.alphaPaletteEditPopupViewModel.hide()
+                }
             )
         ]
 
@@ -529,6 +606,103 @@ private extension HandDrawingViewController {
     func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
         textureLayerViewModel.enableComponentInteraction(isUserInteractionEnabled)
+        colorPaletteEditPopupViewModel.enableComponentInteraction(isUserInteractionEnabled)
+        alphaPaletteEditPopupViewModel.enableComponentInteraction(isUserInteractionEnabled)
+    }
+}
+
+private extension HandDrawingViewController {
+
+    func updatePalettePopupOnToolSwitch(wasVisible: Bool) {
+        guard wasVisible else { return }
+
+        colorPaletteEditPopupViewModel.hide()
+        alphaPaletteEditPopupViewModel.hide()
+
+        switch viewModel.drawingTool.type {
+        case .brush:
+            showColorPalettePopup(selectedIndex: viewModel.brushPalette.selectedIndex)
+        case .eraser:
+            showAlphaPalettePopup(selectedIndex: viewModel.eraserPalette.selectedIndex)
+        }
+    }
+
+    func handleBrushPaletteColorTap(index: Int, didReselect: Bool) {
+        if colorPaletteEditPopupViewModel.isHidden {
+            guard didReselect else { return }
+            showColorPalettePopup(selectedIndex: index)
+            return
+        }
+
+        if didReselect {
+            colorPaletteEditPopupViewModel.hide()
+        }
+    }
+
+    func handleEraserPaletteAlphaTap(index: Int, didReselect: Bool) {
+        if alphaPaletteEditPopupViewModel.isHidden {
+            guard didReselect else { return }
+            showAlphaPalettePopup(selectedIndex: index)
+            return
+        }
+
+        if didReselect {
+            alphaPaletteEditPopupViewModel.hide()
+        }
+    }
+
+    func showColorPalettePopup(selectedIndex: Int) {
+        viewModel.brushPalette.select(selectedIndex)
+        alphaPaletteEditPopupViewModel.hide()
+        colorPaletteEditPopupViewModel.bringToFront()
+        colorPaletteEditPopupViewModel.isHidden = false
+        popupPassthroughView?.syncPopupLayout()
+    }
+
+    func showAlphaPalettePopup(selectedIndex: Int) {
+        viewModel.eraserPalette.select(selectedIndex)
+        colorPaletteEditPopupViewModel.hide()
+        alphaPaletteEditPopupViewModel.bringToFront()
+        alphaPaletteEditPopupViewModel.isHidden = false
+        popupPassthroughView?.syncPopupLayout()
+    }
+
+    func addBrushPaletteColor() {
+        let palette = viewModel.brushPalette
+        guard
+            palette.colors.count < 64,
+            let color = palette.color
+        else { return }
+
+        palette.insert(color, at: palette.selectedIndex + 1)
+    }
+
+    func addEraserPaletteAlpha() {
+        let palette = viewModel.eraserPalette
+        guard
+            palette.alphas.count < 64,
+            let alpha = palette.alpha
+        else { return }
+
+        palette.insert(alpha, at: palette.selectedIndex + 1)
+    }
+
+    func removeBrushPaletteColor() {
+        let palette = viewModel.brushPalette
+        guard palette.colors.count > 1 else { return }
+
+        let selectedIndex = palette.selectedIndex
+        palette.remove(at: selectedIndex)
+        palette.select(min(selectedIndex, max(0, palette.colors.count - 1)))
+    }
+
+    func removeEraserPaletteAlpha() {
+        let palette = viewModel.eraserPalette
+        guard palette.alphas.count > 1 else { return }
+
+        let selectedIndex = palette.selectedIndex
+        palette.remove(at: selectedIndex)
+        palette.select(min(selectedIndex, max(0, palette.alphas.count - 1)))
     }
 }
 

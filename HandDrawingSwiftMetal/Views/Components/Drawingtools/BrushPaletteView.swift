@@ -19,6 +19,8 @@ struct BrushPaletteView: View {
 
     private let backgroundColor: Color
 
+    private let onTapColor: ((Int, Bool) -> Void)?
+
     @ObservedObject private var palette: BrushPalette
 
     @State private var checkeredImage: UIImage? = nil
@@ -28,7 +30,8 @@ struct BrushPaletteView: View {
         paletteHeight: CGFloat,
         spacing: CGFloat = 2,
         paddingVertical: CGFloat = 2,
-        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15)
+        backgroundColor: UIColor = .lightGray.withAlphaComponent(0.15),
+        onTapColor: ((Int, Bool) -> Void)? = nil
     ) {
         self.palette = palette
         self.paletteHeight = paletteHeight
@@ -36,6 +39,7 @@ struct BrushPaletteView: View {
         self.colorSize = paletteHeight - paddingVertical * 2
         self.spacing = spacing
         self.backgroundColor = Color(backgroundColor)
+        self.onTapColor = onTapColor
     }
 
     var body: some View {
@@ -46,9 +50,10 @@ struct BrushPaletteView: View {
                         color: palette.colors[i],
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.index == i
+                        selected: palette.selectedIndex == i
                     ) {
-                        palette.select(i)
+                        let didReselect = palette.select(i)
+                        onTapColor?(i, didReselect)
                     }
                 }
             }
@@ -89,7 +94,7 @@ private struct Preview: View {
                         UIColor.blue.withAlphaComponent(0.25),
                         UIColor.green.withAlphaComponent(0.25)
                     ],
-                    index: 5
+                    selectedIndex: 5
                 ),
                 paletteHeight: paletteHeight
             )
