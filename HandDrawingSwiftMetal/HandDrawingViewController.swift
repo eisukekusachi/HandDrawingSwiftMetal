@@ -25,8 +25,8 @@ class HandDrawingViewController: UIViewController {
     private let dialogPresenter = DialogPresenter()
 
     private var textureLayerViewModel = PopupViewModel(
-        size: .init(width: 320, height: 300),
-        placement: .top
+        width: 320,
+        height: 300
     )
 
     private weak var popupPassthroughView: PassthroughHostingView?
@@ -375,6 +375,7 @@ private extension HandDrawingViewController {
             .init(
                 target: targetView.layerButton,
                 viewModel: textureLayerViewModel,
+                placement: .top,
                 content: { textureLayerView }
             )
         ]

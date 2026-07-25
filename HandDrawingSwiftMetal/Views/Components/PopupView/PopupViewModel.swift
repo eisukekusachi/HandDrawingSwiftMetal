@@ -9,9 +9,9 @@ import Combine
 import SwiftUI
 
 enum PopupPlacement {
-    /// Popup opens downward
+    /// Places the popup directly below the anchor.
     case top
-    /// Popup opens upward
+    /// Places the popup directly above the anchor.
     case bottom
 }
 
@@ -25,26 +25,30 @@ final class PopupViewModel: ObservableObject {
     /// Bounds of the anchor target
     @Published var targetFrame: CGRect = .zero
 
+    @Published private(set) var stackingOrder: Int = 0
+
+    /// Configured popup width.
+    let width: CGFloat
+
+    /// Configured popup height.
+    @Published var height: CGFloat
+
     /// Vertical gap between `targetFrame` and the popup edge
-    private let targetSpacing: CGFloat
+    let targetSpacing: CGFloat
 
     private let horizontalPadding: CGFloat
 
-    private let placement: PopupPlacement
-
-    private let popupSize: CGSize
-
     init(
-        size: CGSize,
+        width: CGFloat,
+        height: CGFloat = 0,
         targetSpacing: CGFloat = 8,
         horizontalPadding: CGFloat = 16,
-        placement: PopupPlacement,
         isHidden: Bool = true
     ) {
-        self.popupSize = size
+        self.width = width
+        self.height = height
         self.targetSpacing = targetSpacing
         self.horizontalPadding = horizontalPadding
-        self.placement = placement
         self.isHidden = isHidden
     }
 
@@ -60,8 +64,19 @@ final class PopupViewModel: ObservableObject {
         isUserInteractionEnabled = isEnabled
     }
 
+    func bringToFront() {
+        Self.nextStackingOrder += 1
+        stackingOrder = Self.nextStackingOrder
+    }
+
+    func setHeight(_ height: CGFloat) {
+        self.height = height
+    }
+
     func popupRect(
-        containerWidth: CGFloat
+        containerWidth: CGFloat,
+        containerHeight: CGFloat? = nil,
+        placement: PopupPlacement
     ) -> CGRect {
         var rect = alignPopupRectHorizontally(containerWidth: containerWidth)
         switch placement {
@@ -70,20 +85,32 @@ final class PopupViewModel: ObservableObject {
         case .bottom:
             rect.origin.y = targetFrame.minY - rect.height - targetSpacing
         }
+
+        guard let containerHeight else { return rect }
+
+        if placement == .bottom {
+            let anchorClearanceY = targetFrame.minY - targetSpacing - rect.height
+            rect.origin.y = min(rect.origin.y, anchorClearanceY)
+        }
+
+        rect.origin.y = max(rect.origin.y, 0)
+        rect.origin.y = min(rect.origin.y, max(0, containerHeight - rect.height))
         return rect
     }
 }
 
 private extension PopupViewModel {
+    static var nextStackingOrder = 0
+
     /// Horizontally aligns the popup with `targetFrame`, clamped to container margins
-    private func alignPopupRectHorizontally(
+    func alignPopupRectHorizontally(
         containerWidth: CGFloat
     ) -> CGRect {
-        let halfPopupSize = popupSize.width / 2
+        let halfWidth = width / 2
 
         let centeredCenterX = targetFrame.midX
-        let minCenterX = halfPopupSize + horizontalPadding
-        let maxCenterX = containerWidth - (halfPopupSize + horizontalPadding)
+        let minCenterX = halfWidth + horizontalPadding
+        let maxCenterX = containerWidth - (halfWidth + horizontalPadding)
         let centerX: CGFloat
         if minCenterX <= maxCenterX {
             centerX = min(max(centeredCenterX, minCenterX), maxCenterX)
@@ -93,14 +120,14 @@ private extension PopupViewModel {
             centerX = containerWidth / 2
         }
 
-        let idealX = centerX - halfPopupSize
-        let clampedX = min(max(idealX, 0), max(containerWidth - popupSize.width, 0))
+        let idealX = centerX - halfWidth
+        let clampedX = min(max(idealX, 0), max(containerWidth - width, 0))
 
         return CGRect(
             x: clampedX,
             y: 0,
-            width: popupSize.width,
-            height: popupSize.height
+            width: width,
+            height: height
         )
     }
 }

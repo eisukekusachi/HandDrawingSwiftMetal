@@ -19,7 +19,8 @@ struct PopupViewModelTests {
     struct `Popup Rect Top Placement` {
         @Test
         func `Places popup below anchor centered when it fits in container`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 150, y: 0),
                 size: .init(width: 100, height: 20)
@@ -28,15 +29,16 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: 10,
-                placement: .top
+                horizontalPadding: 10
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .top
             )
 
             // The popup stays horizontally centered on the anchor
@@ -44,8 +46,8 @@ struct PopupViewModelTests {
             // With .top placement, the popup sits below the target
             #expect(result.minY == buttonRect.minY + buttonRect.height + targetSpacing)
             // Horizontal position stays aligned to the anchor center
-            #expect(result.minX == buttonRect.midX - popupSize.width / 2)
-            #expect(result.maxX == buttonRect.midX + popupSize.width / 2)
+            #expect(result.minX == buttonRect.midX - popupWidth / 2)
+            #expect(result.maxX == buttonRect.midX + popupWidth / 2)
 
             // The popup stays within the container horizontal insets
             #expect(result.minX >= 0)
@@ -54,7 +56,8 @@ struct PopupViewModelTests {
 
         @Test
         func `Places popup below anchor and corrects leading overflow at top leading`() {
-            let popupSize: CGSize = CGSize(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 20, y: 0),
                 size: .init(width: 100, height: 20)
@@ -64,19 +67,20 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding,
-                placement: .top
+                horizontalPadding: horizontalPadding
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .top
             )
 
             // Centering on the anchor would cross the leading inset
-            #expect(buttonRect.midX - popupSize.width / 2 == -30)
+            #expect(buttonRect.midX - popupWidth / 2 == -30)
 
             // The popup is shifted so its leading edge meets the leading inset
             #expect(result.minX == horizontalPadding)
@@ -90,7 +94,8 @@ struct PopupViewModelTests {
 
         @Test
         func `Places popup below anchor and corrects trailing overflow at top trailing`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 360, y: 0),
                 size: .init(width: 100, height: 20)
@@ -100,19 +105,20 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding,
-                placement: .top
+                horizontalPadding: horizontalPadding
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .top
             )
 
             // Centering on the anchor would cross the trailing edge of the container
-            #expect(buttonRect.midX + popupSize.width / 2 == 510)
+            #expect(buttonRect.midX + popupWidth / 2 == 510)
 
             // The popup is shifted so its trailing edge meets the trailing inset
             #expect(result.maxX == containerWidth - horizontalPadding)
@@ -126,7 +132,8 @@ struct PopupViewModelTests {
 
         @Test
         func `Keeps popup within container when container is narrower than popup and padding`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 10, y: 0),
                 size: .init(width: 20, height: 20)
@@ -134,15 +141,16 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 120
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: 8,
-                horizontalPadding: 16,
-                placement: .top
+                horizontalPadding: 16
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .top
             )
 
             // When the popup can't fit, keep the leading edge within the container to avoid a negative x.
@@ -155,7 +163,8 @@ struct PopupViewModelTests {
     struct `Popup Rect Bottom Placement` {
         @Test
         func `Places popup above anchor centered when it fits in container`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 150, y: 200),
                 size: .init(width: 100, height: 20)
@@ -164,15 +173,16 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: 10,
-                placement: .bottom
+                horizontalPadding: 10
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .bottom
             )
 
             // The popup stays horizontally centered on the anchor
@@ -180,8 +190,8 @@ struct PopupViewModelTests {
             // With .bottom placement, the popup sits above the target
             #expect(result.maxY == buttonRect.minY - targetSpacing)
             // Horizontal position stays aligned to the anchor center
-            #expect(result.minX == buttonRect.midX - popupSize.width / 2)
-            #expect(result.maxX == buttonRect.midX + popupSize.width / 2)
+            #expect(result.minX == buttonRect.midX - popupWidth / 2)
+            #expect(result.maxX == buttonRect.midX + popupWidth / 2)
 
             // The popup stays within the container horizontal insets
             #expect(result.minX >= 0)
@@ -190,7 +200,8 @@ struct PopupViewModelTests {
 
         @Test
         func `Places popup above anchor and corrects leading overflow at bottom leading`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 20, y: 200),
                 size: .init(width: 100, height: 20)
@@ -200,19 +211,20 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding,
-                placement: .bottom
+                horizontalPadding: horizontalPadding
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .bottom
             )
 
             // Centering on the anchor would cross the leading inset
-            #expect(buttonRect.midX - popupSize.width / 2 == -30)
+            #expect(buttonRect.midX - popupWidth / 2 == -30)
 
             // The popup is shifted so its leading edge meets the leading inset.
             #expect(result.minX == horizontalPadding)
@@ -226,7 +238,8 @@ struct PopupViewModelTests {
 
         @Test
         func `Places popup above anchor and corrects trailing overflow at bottom trailing`() {
-            let popupSize: CGSize = .init(width: 200, height: 100)
+            let popupWidth: CGFloat = 200
+            let popupHeight: CGFloat = 100
             let buttonRect: CGRect = .init(
                 origin: .init(x: 360, y: 200),
                 size: .init(width: 100, height: 20)
@@ -236,19 +249,20 @@ struct PopupViewModelTests {
             let containerWidth: CGFloat = 400
 
             let subject: Subject = .init(
-                size: popupSize,
+                width: popupWidth,
+                height: popupHeight,
                 targetSpacing: targetSpacing,
-                horizontalPadding: horizontalPadding,
-                placement: .bottom
+                horizontalPadding: horizontalPadding
             )
             subject.targetFrame = buttonRect
 
             let result = subject.popupRect(
-                containerWidth: containerWidth
+                containerWidth: containerWidth,
+                placement: .bottom
             )
 
             // Centering on the anchor would cross the trailing edge of the container
-            #expect(buttonRect.midX + popupSize.width / 2 == 510)
+            #expect(buttonRect.midX + popupWidth / 2 == 510)
 
             // The popup is shifted so its trailing edge meets the trailing inset.
             #expect(result.maxX == containerWidth - horizontalPadding)
@@ -266,9 +280,10 @@ struct PopupViewModelTests {
     struct `Hide Popup` {
         @Test
         func `Default initializer hides the popup`() {
+            let size = TestHelpers.randomSize()
             let subject: Subject = .init(
-                size: TestHelpers.randomSize(),
-                placement: .top
+                width: size.width,
+                height: size.height
             )
 
             #expect(subject.isHidden == true)
@@ -278,9 +293,10 @@ struct PopupViewModelTests {
             arguments: [true, false]
         )
         func `toggleView flips isHidden`(initialState: Bool) {
+            let size = TestHelpers.randomSize()
             let subject: Subject = .init(
-                size: TestHelpers.randomSize(),
-                placement: .top,
+                width: size.width,
+                height: size.height,
                 isHidden: initialState
             )
 
@@ -293,9 +309,10 @@ struct PopupViewModelTests {
 
         @Test
         func `hide sets isHidden to true`() {
+            let size = TestHelpers.randomSize()
             let subject: Subject = .init(
-                size: TestHelpers.randomSize(),
-                placement: .top,
+                width: size.width,
+                height: size.height,
                 isHidden: false
             )
 
@@ -310,9 +327,10 @@ struct PopupViewModelTests {
     struct `Enable Component Interaction` {
         @Test
         func `enableComponentInteraction updates isUserInteractionEnabled`() {
+            let size = TestHelpers.randomSize()
             let subject: Subject = .init(
-                size: TestHelpers.randomSize(),
-                placement: .top
+                width: size.width,
+                height: size.height
             )
 
             subject.enableComponentInteraction(false)

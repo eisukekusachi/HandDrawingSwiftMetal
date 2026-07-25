@@ -11,6 +11,8 @@ struct PopupView<Content: View>: View {
 
     @ObservedObject private var viewModel: PopupViewModel
 
+    private let placement: PopupPlacement
+    private let onClose: (() -> Void)?
     private let content: () -> Content
 
     private let cornerRadius: CGFloat
@@ -21,6 +23,7 @@ struct PopupView<Content: View>: View {
 
     init(
         _ viewModel: PopupViewModel,
+        placement: PopupPlacement,
         cornerRadius: CGFloat = 26,
         contentPadding: EdgeInsets = .init(
             top: 16,
@@ -31,14 +34,17 @@ struct PopupView<Content: View>: View {
         backgroundColor: Color = .init(uiColor: .viewBackground),
         borderColor: Color = .primary.opacity(0.12),
         borderWidth: CGFloat = 1,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping () -> Content,
+        onClose: (() -> Void)? = nil
     ) {
         self.viewModel = viewModel
+        self.placement = placement
         self.cornerRadius = cornerRadius
         self.contentPadding = contentPadding
         self.backgroundColor = backgroundColor
         self.borderColor = borderColor
         self.borderWidth = borderWidth
+        self.onClose = onClose
         self.content = content
     }
 
@@ -46,61 +52,99 @@ struct PopupView<Content: View>: View {
         if !viewModel.isHidden {
             GeometryReader { proxy in
                 let popupRect = viewModel.popupRect(
-                    containerWidth: proxy.size.width
+                    containerWidth: proxy.size.width,
+                    containerHeight: proxy.size.height,
+                    placement: placement
                 )
 
-                content()
-                    .padding(contentPadding)
-                    .frame(
-                        width: popupRect.width,
-                        height: popupRect.height,
-                        alignment: .topLeading
-                    )
-                    .background(backgroundColor, in: cardShape)
-                    .overlay {
-                        cardShape.strokeBorder(
-                            borderColor,
-                            lineWidth: borderWidth
-                        )
+                Color.clear
+                    .allowsHitTesting(false)
+                    .overlay(alignment: .topLeading) {
+                        popupCard(width: popupRect.width)
+                            .offset(
+                                x: popupRect.minX,
+                                y: popupRect.minY
+                            )
+                            .allowsHitTesting(viewModel.isUserInteractionEnabled)
                     }
-                    .clipShape(cardShape)
-                    .offset(
-                        x: popupRect.minX,
-                        y: popupRect.minY
-                    )
-                    .allowsHitTesting(viewModel.isUserInteractionEnabled)
             }
+            .zIndex(Double(viewModel.stackingOrder))
         }
     }
 
     private var cardShape: RoundedRectangle {
         .init(cornerRadius: cornerRadius, style: .continuous)
     }
+
+    @ViewBuilder
+    private func popupCard(width: CGFloat) -> some View {
+        popupContent
+            .padding(contentPadding)
+            .frame(
+                width: width,
+                height: viewModel.height,
+                alignment: .topLeading
+            )
+            .background(backgroundColor, in: cardShape)
+            .overlay {
+                cardShape.strokeBorder(
+                    borderColor,
+                    lineWidth: borderWidth
+                )
+            }
+            .clipShape(cardShape)
+    }
+
+    @ViewBuilder
+    private var popupContent: some View {
+        if let onClose {
+            VStack(spacing: 8) {
+                HStack {
+                    Spacer()
+                    Button(action: onClose) {
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(Color(uiColor: .systemGray))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(4)
+
+                content()
+            }
+        } else {
+            content()
+        }
+    }
 }
 
 #Preview("Top Leading") {
-    PopupPreview(alignment: .topLeading)
+    PopupPreview(alignment: .topLeading, placement: .top)
 }
 
 #Preview("Top Trailing") {
-    PopupPreview(alignment: .topTrailing)
+    PopupPreview(alignment: .topTrailing, placement: .top)
 }
 
 #Preview("Bottom Leading") {
-    PopupPreview(alignment: .bottomLeading)
+    PopupPreview(alignment: .bottomLeading, placement: .bottom)
 }
 
 #Preview("Bottom Trailing") {
-    PopupPreview(alignment: .bottomTrailing)
+    PopupPreview(alignment: .bottomTrailing, placement: .bottom)
 }
 
 private struct PopupPreview: View {
 
     let alignment: Alignment
 
+    let placement: PopupPlacement
+
     @StateObject private var viewModel = PopupViewModel(
-        size: .init(width: 300, height: 200),
-        placement: .top,
+        width: 300,
+        height: 200,
         isHidden: false
     )
 
@@ -134,7 +178,7 @@ private struct PopupPreview: View {
             GeometryReader { proxy in
                 let buttonRect = anchor.map { proxy[$0] } ?? .zero
 
-                PopupView(viewModel) {
+                PopupView(viewModel, placement: placement) {
                     VStack(spacing: 0) {
                         Text(String("Popup Content"))
                             .font(.headline)

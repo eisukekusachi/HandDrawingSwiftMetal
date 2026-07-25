@@ -16,17 +16,26 @@ struct PopupAnchorBinding: Identifiable {
     }
 
     let viewModel: PopupViewModel
+    let placement: PopupPlacement
     let target: UIView
+    let targetFrameAdjustment: UIEdgeInsets
     let content: AnyView
+    let onClose: (() -> Void)?
 
     init<Content: View>(
         target: UIView,
         viewModel: PopupViewModel,
-        @ViewBuilder content: () -> Content
+        placement: PopupPlacement,
+        targetFrameAdjustment: UIEdgeInsets = .zero,
+        @ViewBuilder content: () -> Content,
+        onClose: (() -> Void)? = nil
     ) {
         self.target = target
         self.viewModel = viewModel
+        self.placement = placement
+        self.targetFrameAdjustment = targetFrameAdjustment
         self.content = AnyView(content())
+        self.onClose = onClose
     }
 }
 
@@ -67,6 +76,9 @@ final class PassthroughHostingView: UIView {
         guard popupViewModels.allSatisfy({ $0.isHidden || $0.isUserInteractionEnabled }) else {
             return false
         }
+        if shouldPassThroughToAnchor(at: point) {
+            return false
+        }
         return popupHitTestRects.contains { $0.contains(point) }
     }
 
@@ -74,7 +86,10 @@ final class PassthroughHostingView: UIView {
         guard popupViewModels.allSatisfy({ $0.isHidden || $0.isUserInteractionEnabled }) else {
             return nil
         }
-        guard popupHitTestRects.contains(where: { $0.contains(point) }) else {
+        if shouldPassThroughToAnchor(at: point) {
+            return nil
+        }
+        guard topmostVisiblePopup(at: point) != nil else {
             return nil
         }
         let hit = super.hitTest(point, with: event)
@@ -85,7 +100,11 @@ final class PassthroughHostingView: UIView {
         cancellables.removeAll()
         for viewModel in popupViewModels {
             viewModel.$isHidden
-                .sink { [weak self] _ in
+                .removeDuplicates()
+                .sink { [weak self] isHidden in
+                    if !isHidden {
+                        viewModel.bringToFront()
+                    }
                     self?.setNeedsLayout()
                 }
                 .store(in: &cancellables)
@@ -94,8 +113,18 @@ final class PassthroughHostingView: UIView {
 
     private func syncTargetFrames() {
         for binding in anchorBindings {
-            let newFrame = binding.target.convert(binding.target.bounds, to: self)
-            binding.viewModel.targetFrame = newFrame
+            binding.viewModel.targetFrame = anchorFrame(for: binding)
+        }
+    }
+
+    private func anchorFrame(for binding: PopupAnchorBinding) -> CGRect {
+        let frame = binding.target.convert(binding.target.bounds, to: self)
+        return frame.inset(by: binding.targetFrameAdjustment)
+    }
+
+    private func shouldPassThroughToAnchor(at point: CGPoint) -> Bool {
+        anchorBindings.contains { binding in
+            !binding.viewModel.isHidden && anchorFrame(for: binding).contains(point)
         }
     }
 
@@ -108,12 +137,28 @@ final class PassthroughHostingView: UIView {
     }
 
     private func syncHitTestRect() {
-        popupHitTestRects = popupViewModels
-            .filter { !$0.isHidden }
-            .map { viewModel in
-                viewModel.popupRect(
-                    containerWidth: bounds.width
+        popupHitTestRects = anchorBindings
+            .filter { !$0.viewModel.isHidden }
+            .sorted { $0.viewModel.stackingOrder < $1.viewModel.stackingOrder }
+            .map { binding in
+                binding.viewModel.popupRect(
+                    containerWidth: bounds.width,
+                    containerHeight: bounds.height,
+                    placement: binding.placement
                 )
+            }
+    }
+
+    private func topmostVisiblePopup(at point: CGPoint) -> PopupAnchorBinding? {
+        anchorBindings
+            .filter { !$0.viewModel.isHidden }
+            .sorted { $0.viewModel.stackingOrder > $1.viewModel.stackingOrder }
+            .first { binding in
+                binding.viewModel.popupRect(
+                    containerWidth: bounds.width,
+                    containerHeight: bounds.height,
+                    placement: binding.placement
+                ).contains(point)
             }
     }
 
