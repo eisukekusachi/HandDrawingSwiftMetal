@@ -53,7 +53,7 @@ public struct AlphaPaletteEditView<AlphaSource: AlphaPaletteAlphaSource>: View {
         .onChange(of: alphaSource.selectedIndex) { _ in
             updatePaletteState(from: alphaSource.selectedAlpha)
         }
-        .onReceive(alphaSource.objectWillChange) { _ in
+        .onChange(of: alphaSource.selectedAlpha) { _ in
             updatePaletteState(from: alphaSource.selectedAlpha)
         }
     }

@@ -65,7 +65,7 @@ public extension UIColor {
     }
 }
 
-public struct PaletteRGBAComponents {
+public struct PaletteRGBAComponents: Equatable {
     public let red: Int
     public let green: Int
     public let blue: Int

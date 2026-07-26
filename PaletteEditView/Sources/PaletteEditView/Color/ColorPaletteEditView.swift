@@ -72,7 +72,7 @@ public struct ColorPaletteEditView<ColorSource: ColorPaletteColorSource>: View {
         .onChange(of: colorSource.selectedIndex) { _ in
             updatePaletteState(from: colorSource.selectedColor)
         }
-        .onReceive(colorSource.objectWillChange) { _ in
+        .onChange(of: colorSource.selectedColor.paletteRGBAComponents()) { _ in
             updatePaletteState(from: colorSource.selectedColor)
         }
         .onChange(of: paletteState.rgbColor) { _ in
