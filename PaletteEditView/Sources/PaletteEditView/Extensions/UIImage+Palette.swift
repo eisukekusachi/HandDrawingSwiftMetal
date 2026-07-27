@@ -11,35 +11,64 @@ extension UIImage {
         at location: CGPoint,
         in viewSize: CGSize
     ) -> UIColor? {
-        guard viewSize.width > 0, viewSize.height > 0 else { return nil }
-
-        let imageLocation = CGPoint(
-            x: location.x * (size.width / viewSize.width),
-            y: location.y * (size.height / viewSize.height)
-        )
-
         guard
-            imageLocation.x >= 0,
-            imageLocation.y >= 0,
-            imageLocation.x < size.width,
-            imageLocation.y < size.height,
-            let cgImage,
-            let dataProvider = cgImage.dataProvider,
-            let providerData = dataProvider.data
+            viewSize.width > 0,
+            viewSize.height > 0,
+            let cgImage
         else {
             return nil
         }
 
-        let data = CFDataGetBytePtr(providerData)
-        let pixelInfo = (Int(imageLocation.x) + Int(imageLocation.y) * Int(size.width)) * 4
+        let pixelWidth = cgImage.width
+        let pixelHeight = cgImage.height
+        guard pixelWidth > 0, pixelHeight > 0 else { return nil }
 
-        guard let data else { return nil }
+        let pixelX = Int((location.x / viewSize.width) * CGFloat(pixelWidth))
+        let pixelY = Int((location.y / viewSize.height) * CGFloat(pixelHeight))
+        guard
+            pixelX >= 0,
+            pixelY >= 0,
+            pixelX < pixelWidth,
+            pixelY < pixelHeight
+        else {
+            return nil
+        }
 
-        let red = CGFloat(data[pixelInfo]) / 255.0
-        let green = CGFloat(data[pixelInfo + 1]) / 255.0
-        let blue = CGFloat(data[pixelInfo + 2]) / 255.0
-        let alpha = CGFloat(data[pixelInfo + 3]) / 255.0
+        var pixel: [UInt8] = [0, 0, 0, 0]
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo =
+            CGImageAlphaInfo.premultipliedLast.rawValue |
+            CGBitmapInfo.byteOrder32Big.rawValue
 
-        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
+        guard let context = CGContext(
+            data: &pixel,
+            width: 1,
+            height: 1,
+            bitsPerComponent: 8,
+            bytesPerRow: 4,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo
+        ) else {
+            return nil
+        }
+
+        context.interpolationQuality = .none
+        context.translateBy(x: -CGFloat(pixelX), y: -CGFloat(pixelY))
+        context.draw(
+            cgImage,
+            in: CGRect(
+                x: 0,
+                y: 0,
+                width: pixelWidth,
+                height: pixelHeight
+            )
+        )
+
+        return UIColor(
+            red: CGFloat(pixel[0]) / 255.0,
+            green: CGFloat(pixel[1]) / 255.0,
+            blue: CGFloat(pixel[2]) / 255.0,
+            alpha: CGFloat(pixel[3]) / 255.0
+        )
     }
 }
