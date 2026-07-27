@@ -52,7 +52,7 @@ struct PickerImageView: View {
         guard let rgb = image.paletteColor(
             at: location,
             in: viewSize
-        )?.paletteRGBComponents() else { return }
+        )?.paletteRGBAComponents() else { return }
 
         rgbColor = UIColor(
             paletteRed: rgb.red,

@@ -30,11 +30,6 @@ public extension UIColor {
         )
     }
 
-    func paletteRGBComponents() -> (red: Int, green: Int, blue: Int, alpha: Int) {
-        let components = paletteRGBAComponents()
-        return (components.red, components.green, components.blue, components.alpha)
-    }
-
     func paletteRGBAComponents() -> PaletteRGBAComponents {
         guard
             let converted = cgColor.converted(

@@ -49,7 +49,7 @@ struct ColorSlidersView: View {
             updateSlidersFromColor()
         }
         .onChange(of: rgbColor) { _ in
-            let components = rgbColor.paletteRGBComponents()
+            let components = rgbColor.paletteRGBAComponents()
             if components.red != red || components.green != green || components.blue != blue {
                 updateSlidersFromColor()
             }
@@ -63,7 +63,7 @@ struct ColorSlidersView: View {
 private extension ColorSlidersView {
 
     func updateSlidersFromColor() {
-        let components = rgbColor.paletteRGBComponents()
+        let components = rgbColor.paletteRGBAComponents()
         red = components.red
         green = components.green
         blue = components.blue
@@ -71,7 +71,7 @@ private extension ColorSlidersView {
 
     func updateColorFromSliders() {
         let updated = UIColor(paletteRed: red, green: green, blue: blue, alpha: 255)
-        let current = rgbColor.paletteRGBComponents()
+        let current = rgbColor.paletteRGBAComponents()
         if current.red != red || current.green != green || current.blue != blue {
             rgbColor = updated
         }
