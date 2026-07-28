@@ -33,7 +33,7 @@ public struct AlphaPaletteEditView<AlphaSource: AlphaPaletteAlphaSource>: View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
 
-            AlphaEditSection(
+            BottomActionToolbar(
                 alpha: Binding(
                     get: { paletteState.alpha },
                     set: { paletteState.updateAlpha($0) }

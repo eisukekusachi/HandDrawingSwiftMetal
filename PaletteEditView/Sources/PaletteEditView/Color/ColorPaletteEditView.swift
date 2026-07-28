@@ -52,7 +52,7 @@ public struct ColorPaletteEditView<ColorSource: ColorPaletteColorSource>: View {
 
             Spacer(minLength: 0)
 
-            AlphaEditSection(
+            BottomActionToolbar(
                 alpha: Binding(
                     get: { paletteState.alpha },
                     set: { paletteState.updateAlpha($0) }
@@ -115,7 +115,7 @@ private struct ColorPalettePreview: View {
             colorSource: colorSource,
             paletteState: paletteState
         )
-        .frame(width: 350, height: 400)
+        .frame(width: 350, height: 500)
         .padding()
     }
 }
