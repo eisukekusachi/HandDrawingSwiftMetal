@@ -17,8 +17,6 @@ public struct ColorPaletteEditView<ColorSource: ColorPaletteColorSource>: View {
     private let onRemove: (() -> Void)?
     private let onDuplicate: (() -> Void)?
 
-    @State private var isApplyingExternalColor = false
-
     public init(
         colorSource: ColorSource,
         paletteState: ColorPaletteState,
@@ -76,7 +74,10 @@ public struct ColorPaletteEditView<ColorSource: ColorPaletteColorSource>: View {
             updatePaletteState(from: colorSource.selectedColor)
         }
         .onChange(of: paletteState.rgbColor) { _ in
-            guard !isApplyingExternalColor else { return }
+            // Skip the update if the state color matches the palette selection.
+            guard
+                paletteState.color.paletteRGBAComponents() != colorSource.selectedColor.paletteRGBAComponents()
+            else { return }
             paletteState.updateColor()
         }
     }
@@ -86,16 +87,8 @@ private extension ColorPaletteEditView {
     func updatePaletteState(from color: UIColor) {
         let incoming = color.paletteRGBAComponents()
         let current = paletteState.color.paletteRGBAComponents()
-        guard
-            incoming.red != current.red
-                || incoming.green != current.green
-                || incoming.blue != current.blue
-                || incoming.alpha != current.alpha
-        else { return }
-
-        isApplyingExternalColor = true
+        guard incoming != current else { return }
         paletteState.setColor(color)
-        isApplyingExternalColor = false
     }
 }
 
