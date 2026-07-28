@@ -21,6 +21,9 @@ fileprivate let initializeAlphas: [Int] = [
 
 final class EraserPalette: ObservableObject, AlphaPaletteAlphaSource {
 
+    static let minAlphaCount = 1
+    static let maxAlphaCount = 64
+
     private(set) var id: UUID
 
     var selectedAlpha: Int {
@@ -59,6 +62,14 @@ extension EraserPalette {
         return alphas[selectedIndex]
     }
 
+    var canDuplicateSelected: Bool {
+        alphas.count < Self.maxAlphaCount && alpha != nil
+    }
+
+    var canRemoveSelected: Bool {
+        alphas.count > Self.minAlphaCount
+    }
+
     func alpha(at index: Int) -> Int? {
         self.alphas.indices.contains(index) ? alphas[index] : nil
     }
@@ -72,10 +83,18 @@ extension EraserPalette {
     }
 
     func insert(_ alpha: Int, at index: Int) {
-        guard (0 ... alphas.count).contains(index) else { return }
+        guard
+            alphas.count < Self.maxAlphaCount,
+            (0 ... alphas.count).contains(index)
+        else { return }
         var updated = alphas
         updated.insert(alpha, at: index)
         alphas = updated
+    }
+
+    func duplicateSelected() {
+        guard canDuplicateSelected, let alpha else { return }
+        insert(alpha, at: selectedIndex + 1)
     }
 
     func update(
@@ -97,7 +116,7 @@ extension EraserPalette {
     }
 
     func remove(at index: Int) {
-        guard alphas.indices.contains(index) && alphas.count > 1 else { return }
+        guard alphas.indices.contains(index) && alphas.count > Self.minAlphaCount else { return }
         var updated = alphas
         updated.remove(at: index)
         alphas = updated
@@ -107,5 +126,9 @@ extension EraserPalette {
         } else if selectedIndex >= updated.count {
             selectedIndex = updated.count - 1
         }
+    }
+
+    func removeSelected() {
+        remove(at: selectedIndex)
     }
 }

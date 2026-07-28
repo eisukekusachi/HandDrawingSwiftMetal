@@ -20,6 +20,9 @@ fileprivate let initializeColors: [UIColor] = [
 
 final class BrushPalette: ObservableObject, ColorPaletteColorSource {
 
+    static let minColorCount = 1
+    static let maxColorCount = 64
+
     private(set) var id: UUID
 
     var selectedColor: UIColor {
@@ -58,6 +61,14 @@ extension BrushPalette {
         return colors[selectedIndex]
     }
 
+    var canDuplicateSelected: Bool {
+        colors.count < Self.maxColorCount && color != nil
+    }
+
+    var canRemoveSelected: Bool {
+        colors.count > Self.minColorCount
+    }
+
     func color(at index: Int) -> UIColor? {
         self.colors.indices.contains(index) ? colors[index] : nil
     }
@@ -71,10 +82,18 @@ extension BrushPalette {
     }
 
     func insert(_ color: UIColor, at index: Int) {
-        guard (0 ... colors.count).contains(index) else { return }
+        guard
+            colors.count < Self.maxColorCount,
+            (0 ... colors.count).contains(index)
+        else { return }
         var updated = colors
         updated.insert(color, at: index)
         colors = updated
+    }
+
+    func duplicateSelected() {
+        guard canDuplicateSelected, let color else { return }
+        insert(color, at: selectedIndex + 1)
     }
 
     func update(
@@ -96,7 +115,7 @@ extension BrushPalette {
     }
 
     func remove(at index: Int) {
-        guard colors.indices.contains(index) && colors.count > 1 else { return }
+        guard colors.indices.contains(index) && colors.count > Self.minColorCount else { return }
         var updated = colors
         updated.remove(at: index)
         colors = updated
@@ -106,5 +125,9 @@ extension BrushPalette {
         } else if selectedIndex >= updated.count {
             selectedIndex = updated.count - 1
         }
+    }
+
+    func removeSelected() {
+        remove(at: selectedIndex)
     }
 }

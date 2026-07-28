@@ -90,6 +90,65 @@ struct BrushPaletteTests {
         #expect(palette.colors == [.red])
     }
 
+    @Test("Confirms duplicating the selected color inserts a copy after it")
+    func testDuplicateSelected() async throws {
+        let palette = BrushPalette(
+            colors: [.black, .red],
+            selectedIndex: 0
+        )
+
+        #expect(palette.canDuplicateSelected)
+        palette.duplicateSelected()
+
+        #expect(palette.colors == [.black, .black, .red])
+        #expect(palette.selectedIndex == 0)
+    }
+
+    @Test("Confirms duplicating is ignored at the max color count")
+    func testDuplicateSelectedAtMaxCount() async throws {
+        let colors = Array(repeating: UIColor.black, count: BrushPalette.maxColorCount)
+        let palette = BrushPalette(
+            colors: colors,
+            selectedIndex: 0
+        )
+
+        #expect(!palette.canDuplicateSelected)
+        palette.duplicateSelected()
+        #expect(palette.colors.count == BrushPalette.maxColorCount)
+
+        palette.insert(.red, at: 1)
+        #expect(palette.colors.count == BrushPalette.maxColorCount)
+        #expect(palette.colors == colors)
+    }
+
+    @Test("Confirms removing the selected color")
+    func testRemoveSelected() async throws {
+        let palette = BrushPalette(
+            colors: [.black, .red, .blue],
+            selectedIndex: 1
+        )
+
+        #expect(palette.canRemoveSelected)
+        palette.removeSelected()
+
+        #expect(palette.colors == [.black, .blue])
+        #expect(palette.selectedIndex == 1)
+        #expect(palette.color == .blue)
+    }
+
+    @Test("Confirms removing is ignored at the min color count")
+    func testRemoveSelectedAtMinCount() async throws {
+        let palette = BrushPalette(
+            colors: [.red],
+            selectedIndex: 0
+        )
+
+        #expect(!palette.canRemoveSelected)
+        palette.removeSelected()
+        #expect(palette.colors == [.red])
+        #expect(palette.selectedIndex == 0)
+    }
+
     @Test("Confirms reselecting the same color returns true")
     func testReselect() async throws {
         let palette = BrushPalette(

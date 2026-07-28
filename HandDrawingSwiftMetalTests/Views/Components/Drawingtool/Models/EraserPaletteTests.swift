@@ -90,6 +90,65 @@ struct EraserPaletteTests {
         #expect(palette.alphas == [128])
     }
 
+    @Test("Confirms duplicating the selected alpha inserts a copy after it")
+    func testDuplicateSelected() async throws {
+        let palette = EraserPalette(
+            alphas: [64, 128],
+            selectedIndex: 0
+        )
+
+        #expect(palette.canDuplicateSelected)
+        palette.duplicateSelected()
+
+        #expect(palette.alphas == [64, 64, 128])
+        #expect(palette.selectedIndex == 0)
+    }
+
+    @Test("Confirms duplicating is ignored at the max alpha count")
+    func testDuplicateSelectedAtMaxCount() async throws {
+        let alphas = Array(repeating: 128, count: EraserPalette.maxAlphaCount)
+        let palette = EraserPalette(
+            alphas: alphas,
+            selectedIndex: 0
+        )
+
+        #expect(!palette.canDuplicateSelected)
+        palette.duplicateSelected()
+        #expect(palette.alphas.count == EraserPalette.maxAlphaCount)
+
+        palette.insert(64, at: 1)
+        #expect(palette.alphas.count == EraserPalette.maxAlphaCount)
+        #expect(palette.alphas == alphas)
+    }
+
+    @Test("Confirms removing the selected alpha")
+    func testRemoveSelected() async throws {
+        let palette = EraserPalette(
+            alphas: [64, 128, 255],
+            selectedIndex: 1
+        )
+
+        #expect(palette.canRemoveSelected)
+        palette.removeSelected()
+
+        #expect(palette.alphas == [64, 255])
+        #expect(palette.selectedIndex == 1)
+        #expect(palette.alpha == 255)
+    }
+
+    @Test("Confirms removing is ignored at the min alpha count")
+    func testRemoveSelectedAtMinCount() async throws {
+        let palette = EraserPalette(
+            alphas: [128],
+            selectedIndex: 0
+        )
+
+        #expect(!palette.canRemoveSelected)
+        palette.removeSelected()
+        #expect(palette.alphas == [128])
+        #expect(palette.selectedIndex == 0)
+    }
+
     @Test("Confirms reselecting the same alpha returns true")
     func testReselect() async throws {
         let palette = EraserPalette(

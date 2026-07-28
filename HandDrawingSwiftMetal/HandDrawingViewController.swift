@@ -424,10 +424,10 @@ private extension HandDrawingViewController {
                         colorSource: self.viewModel.brushPalette,
                         paletteState: self.viewModel.colorPaletteState,
                         onRemove: { [weak self] in
-                            self?.removeBrushPaletteColor()
+                            self?.viewModel.brushPalette.removeSelected()
                         },
                         onDuplicate: { [weak self] in
-                            self?.addBrushPaletteColor()
+                            self?.viewModel.brushPalette.duplicateSelected()
                         }
                     )
                 },
@@ -444,10 +444,10 @@ private extension HandDrawingViewController {
                         alphaSource: self.viewModel.eraserPalette,
                         paletteState: self.viewModel.alphaPaletteState,
                         onRemove: { [weak self] in
-                            self?.removeEraserPaletteAlpha()
+                            self?.viewModel.eraserPalette.removeSelected()
                         },
                         onDuplicate: { [weak self] in
-                            self?.addEraserPaletteAlpha()
+                            self?.viewModel.eraserPalette.duplicateSelected()
                         }
                     )
                 },
@@ -667,43 +667,6 @@ private extension HandDrawingViewController {
         popupPassthroughView?.syncPopupLayout()
     }
 
-    func addBrushPaletteColor() {
-        let palette = viewModel.brushPalette
-        guard
-            palette.colors.count < 64,
-            let color = palette.color
-        else { return }
-
-        palette.insert(color, at: palette.selectedIndex + 1)
-    }
-
-    func addEraserPaletteAlpha() {
-        let palette = viewModel.eraserPalette
-        guard
-            palette.alphas.count < 64,
-            let alpha = palette.alpha
-        else { return }
-
-        palette.insert(alpha, at: palette.selectedIndex + 1)
-    }
-
-    func removeBrushPaletteColor() {
-        let palette = viewModel.brushPalette
-        guard palette.colors.count > 1 else { return }
-
-        let selectedIndex = palette.selectedIndex
-        palette.remove(at: selectedIndex)
-        palette.select(min(selectedIndex, max(0, palette.colors.count - 1)))
-    }
-
-    func removeEraserPaletteAlpha() {
-        let palette = viewModel.eraserPalette
-        guard palette.alphas.count > 1 else { return }
-
-        let selectedIndex = palette.selectedIndex
-        palette.remove(at: selectedIndex)
-        palette.select(min(selectedIndex, max(0, palette.alphas.count - 1)))
-    }
 }
 
 private extension HandDrawingViewController {
