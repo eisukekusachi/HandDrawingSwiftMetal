@@ -40,6 +40,7 @@ extension UIImage {
             CGImageAlphaInfo.premultipliedLast.rawValue |
             CGBitmapInfo.byteOrder32Big.rawValue
 
+        // A tiny 1x1 context for sampling one pixel's color.
         guard let context = CGContext(
             data: &pixel,
             width: 1,
@@ -53,7 +54,9 @@ extension UIImage {
         }
 
         context.interpolationQuality = .none
-        context.translateBy(x: -CGFloat(pixelX), y: -CGFloat(pixelY))
+        // Shift the drawn image so the target pixel lands in this 1x1 context.
+        let sampleY = pixelHeight - 1 - pixelY
+        context.translateBy(x: -CGFloat(pixelX), y: -CGFloat(sampleY))
         context.draw(
             cgImage,
             in: CGRect(
