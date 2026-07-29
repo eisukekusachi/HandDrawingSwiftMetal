@@ -35,38 +35,43 @@ extension UIImage {
             return nil
         }
 
-        var pixel: [UInt8] = [0, 0, 0, 0]
+        var pixel = [UInt8](repeating: 0, count: 4)
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo =
             CGImageAlphaInfo.premultipliedLast.rawValue |
             CGBitmapInfo.byteOrder32Big.rawValue
 
         // A tiny 1x1 context for sampling one pixel's color.
-        guard let context = CGContext(
-            data: &pixel,
-            width: 1,
-            height: 1,
-            bitsPerComponent: 8,
-            bytesPerRow: 4,
-            space: colorSpace,
-            bitmapInfo: bitmapInfo
-        ) else {
-            return nil
-        }
+        let sample = pixel.withUnsafeMutableBytes { rawBuffer -> Bool in
+            guard let baseAddress = rawBuffer.baseAddress else { return false }
+            guard let context = CGContext(
+                data: baseAddress,
+                width: 1,
+                height: 1,
+                bitsPerComponent: 8,
+                bytesPerRow: 4,
+                space: colorSpace,
+                bitmapInfo: bitmapInfo
+            ) else {
+                return false
+            }
 
-        context.interpolationQuality = .none
-        // Shift the drawn image so the target pixel lands in this 1x1 context.
-        let sampleY = pixelHeight - 1 - pixelY
-        context.translateBy(x: -CGFloat(pixelX), y: -CGFloat(sampleY))
-        context.draw(
-            cgImage,
-            in: CGRect(
-                x: 0,
-                y: 0,
-                width: pixelWidth,
-                height: pixelHeight
+            context.interpolationQuality = .none
+            // Shift the drawn image so the target pixel lands in this 1x1 context.
+            let sampleY = pixelHeight - 1 - pixelY
+            context.translateBy(x: -CGFloat(pixelX), y: -CGFloat(sampleY))
+            context.draw(
+                cgImage,
+                in: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: pixelWidth,
+                    height: pixelHeight
+                )
             )
-        )
+            return true
+        }
+        guard sample else { return nil }
 
         return UIColor(
             red: CGFloat(pixel[0]) / 255.0,
