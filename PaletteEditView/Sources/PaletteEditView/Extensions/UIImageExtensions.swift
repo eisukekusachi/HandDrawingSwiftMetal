@@ -7,7 +7,8 @@
 import UIKit
 
 extension UIImage {
-    func paletteColor(
+    /// Returns the color of the image pixel corresponding to a point in `viewSize`.
+    func pixelColor(
         at location: CGPoint,
         in viewSize: CGSize
     ) -> UIColor? {

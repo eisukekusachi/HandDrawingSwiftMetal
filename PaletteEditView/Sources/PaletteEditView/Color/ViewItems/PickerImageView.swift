@@ -49,7 +49,7 @@ struct PickerImageView: View {
     }
 
     private func pickColor(from location: CGPoint, image: UIImage, viewSize: CGSize) {
-        guard let rgb = image.paletteColor(
+        guard let rgb = image.pixelColor(
             at: location,
             in: viewSize
         )?.paletteRGBAComponents() else { return }
