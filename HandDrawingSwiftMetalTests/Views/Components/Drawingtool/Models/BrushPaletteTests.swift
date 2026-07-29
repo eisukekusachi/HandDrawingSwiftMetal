@@ -12,151 +12,153 @@ import UIKit
 @MainActor
 struct BrushPaletteTests {
 
-    @Test("Confirms default color is set to .black when initialized with no colors")
-    func testInitWithEmptyColors() async throws {
-        let palette = BrushPalette(
+    private typealias Subject = BrushPalette
+
+    @Test
+    func `Confirms default color is set to .black when initialized with no colors`() {
+        let subject = Subject(
             colors: [],
             selectedIndex: -1
         )
 
-        #expect(palette.colors == [.black])
-        #expect(palette.selectedIndex == 0)
+        #expect(subject.colors == [.black])
+        #expect(subject.selectedIndex == 0)
     }
 
-    @Test("Confirms selecting a color changes the current color")
-    func testSelect() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms selecting a color changes the current color`() {
+        let subject = Subject(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        #expect(palette.selectedIndex == 0)
-        #expect(palette.color == .black)
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .black)
 
-        palette.select(1)
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .red)
+        subject.select(1)
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .red)
     }
 
-    @Test("Confirms inserting a color at the specified index")
-    func testInsert() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms inserting a color at the specified index`() {
+        let subject = Subject(
             colors: [.black],
             selectedIndex: 0
         )
 
-        palette.insert(.blue, at: 0)
-        #expect(palette.colors == [.blue, .black])
+        subject.insert(.blue, at: 0)
+        #expect(subject.colors == [.blue, .black])
     }
 
-    @Test("Confirms it updates colors and currentIndex")
-    func testUpdateColorsAndIndex() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms it updates colors and currentIndex`() {
+        let subject = Subject(
             colors: [.black, .lightGray, .gray, .white],
             selectedIndex: 0
         )
 
-        palette.update(colors: [.red, .green], selectedIndex: 1)
+        subject.update(colors: [.red, .green], selectedIndex: 1)
 
-        #expect(palette.colors == [.red, .green])
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .green)
+        #expect(subject.colors == [.red, .green])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .green)
     }
 
-    @Test("Confirms a color can be updated at the specified index")
-    func testUpdateColorAtIndex() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms a color can be updated at the specified index`() {
+        let subject = Subject(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        palette.update(color: .blue, at: 1)
-        #expect(palette.colors == [.black, .blue])
+        subject.update(color: .blue, at: 1)
+        #expect(subject.colors == [.black, .blue])
     }
 
-    @Test("Confirms removing a color at the specified index")
-    func testRemove() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms removing a color at the specified index`() {
+        let subject = Subject(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        palette.remove(at: 0)
-        #expect(palette.colors == [.red])
+        subject.remove(at: 0)
+        #expect(subject.colors == [.red])
 
         // Cannot remove when the palette has only one color
-        palette.remove(at: 0)
-        #expect(palette.colors.count == 1)
-        #expect(palette.colors == [.red])
+        subject.remove(at: 0)
+        #expect(subject.colors.count == 1)
+        #expect(subject.colors == [.red])
     }
 
-    @Test("Confirms duplicating the selected color inserts a copy after it")
-    func testDuplicateSelected() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms duplicating the selected color inserts a copy after it`() {
+        let subject = Subject(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        #expect(palette.canDuplicateSelected)
-        palette.duplicateSelected()
+        #expect(subject.canDuplicateSelected)
+        subject.duplicateSelected()
 
-        #expect(palette.colors == [.black, .black, .red])
-        #expect(palette.selectedIndex == 0)
+        #expect(subject.colors == [.black, .black, .red])
+        #expect(subject.selectedIndex == 0)
     }
 
-    @Test("Confirms duplicating is ignored at the max color count")
-    func testDuplicateSelectedAtMaxCount() async throws {
-        let colors = Array(repeating: UIColor.black, count: BrushPalette.maxColorCount)
-        let palette = BrushPalette(
+    @Test
+    func `Confirms duplicating is ignored at the max color count`() {
+        let colors = Array(repeating: UIColor.black, count: Subject.maxColorCount)
+        let subject = Subject(
             colors: colors,
             selectedIndex: 0
         )
 
-        #expect(!palette.canDuplicateSelected)
-        palette.duplicateSelected()
-        #expect(palette.colors.count == BrushPalette.maxColorCount)
+        #expect(!subject.canDuplicateSelected)
+        subject.duplicateSelected()
+        #expect(subject.colors.count == Subject.maxColorCount)
 
-        palette.insert(.red, at: 1)
-        #expect(palette.colors.count == BrushPalette.maxColorCount)
-        #expect(palette.colors == colors)
+        subject.insert(.red, at: 1)
+        #expect(subject.colors.count == Subject.maxColorCount)
+        #expect(subject.colors == colors)
     }
 
-    @Test("Confirms removing the selected color")
-    func testRemoveSelected() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms removing the selected color`() {
+        let subject = Subject(
             colors: [.black, .red, .blue],
             selectedIndex: 1
         )
 
-        #expect(palette.canRemoveSelected)
-        palette.removeSelected()
+        #expect(subject.canRemoveSelected)
+        subject.removeSelected()
 
-        #expect(palette.colors == [.black, .blue])
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .blue)
+        #expect(subject.colors == [.black, .blue])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .blue)
     }
 
-    @Test("Confirms removing is ignored at the min color count")
-    func testRemoveSelectedAtMinCount() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms removing is ignored at the min color count`() {
+        let subject = Subject(
             colors: [.red],
             selectedIndex: 0
         )
 
-        #expect(!palette.canRemoveSelected)
-        palette.removeSelected()
-        #expect(palette.colors == [.red])
-        #expect(palette.selectedIndex == 0)
+        #expect(!subject.canRemoveSelected)
+        subject.removeSelected()
+        #expect(subject.colors == [.red])
+        #expect(subject.selectedIndex == 0)
     }
 
-    @Test("Confirms reselecting the same color returns true")
-    func testReselect() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms reselecting the same color returns true`() {
+        let subject = Subject(
             colors: [.black, .red],
             selectedIndex: 1
         )
 
-        #expect(palette.select(1) == true)
-        #expect(palette.select(0) == false)
+        #expect(subject.select(1) == true)
+        #expect(subject.select(0) == false)
     }
 }
