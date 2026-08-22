@@ -91,6 +91,12 @@ extension BrushPalette {
     func remove(at index: Int) {
         guard items.indices.contains(index) && items.count > 1 else { return }
         items.remove(at: index)
+
+        if selectedIndex > index {
+            selectedIndex -= 1
+        } else if selectedIndex >= items.count {
+            selectedIndex = items.count - 1
+        }
     }
 }
 

@@ -83,10 +83,38 @@ struct BrushPaletteTests {
 
         palette.remove(at: 0)
         #expect(palette.items.map(\.color) == [.red])
+        #expect(palette.selectedIndex == 0)
+        #expect(palette.color == .red)
 
         // Cannot remove when the palette has only one color
         palette.remove(at: 0)
         #expect(palette.items.count == 1)
         #expect(palette.items.map(\.color) == [.red])
+    }
+
+    @Test("Confirms selectedIndex moves when a preceding color is removed")
+    func testRemovePrecedingColorKeepsSelection() async throws {
+        let palette = BrushPalette(
+            colors: [.black, .red, .blue],
+            selectedIndex: 2
+        )
+
+        palette.remove(at: 0)
+        #expect(palette.items.map(\.color) == [.red, .blue])
+        #expect(palette.selectedIndex == 1)
+        #expect(palette.color == .blue)
+    }
+
+    @Test("Confirms selectedIndex is clamped when the last color is removed")
+    func testRemoveLastSelectedColorClampsIndex() async throws {
+        let palette = BrushPalette(
+            colors: [.black, .red],
+            selectedIndex: 1
+        )
+
+        palette.remove(at: 1)
+        #expect(palette.items.map(\.color) == [.black])
+        #expect(palette.selectedIndex == 0)
+        #expect(palette.color == .black)
     }
 }

@@ -83,10 +83,38 @@ struct EraserPaletteTests {
 
         palette.remove(at: 0)
         #expect(palette.items.map(\.alpha) == [128])
+        #expect(palette.selectedIndex == 0)
+        #expect(palette.alpha == 128)
 
         // Cannot remove when the palette has only one alpha
         palette.remove(at: 0)
         #expect(palette.items.count == 1)
         #expect(palette.items.map(\.alpha) == [128])
+    }
+
+    @Test("Confirms selectedIndex moves when a preceding alpha is removed")
+    func testRemovePrecedingAlphaKeepsSelection() async throws {
+        let palette = EraserPalette(
+            alphas: [64, 128, 255],
+            selectedIndex: 2
+        )
+
+        palette.remove(at: 0)
+        #expect(palette.items.map(\.alpha) == [128, 255])
+        #expect(palette.selectedIndex == 1)
+        #expect(palette.alpha == 255)
+    }
+
+    @Test("Confirms selectedIndex is clamped when the last alpha is removed")
+    func testRemoveLastSelectedAlphaClampsIndex() async throws {
+        let palette = EraserPalette(
+            alphas: [64, 128],
+            selectedIndex: 1
+        )
+
+        palette.remove(at: 1)
+        #expect(palette.items.map(\.alpha) == [64])
+        #expect(palette.selectedIndex == 0)
+        #expect(palette.alpha == 64)
     }
 }
