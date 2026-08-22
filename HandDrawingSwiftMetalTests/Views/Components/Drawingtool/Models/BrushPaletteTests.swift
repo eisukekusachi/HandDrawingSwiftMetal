@@ -12,109 +12,152 @@ import UIKit
 @MainActor
 struct BrushPaletteTests {
 
-    @Test("Confirms default color is set to .black when initialized with no colors")
-    func testInitWithEmptyColors() async throws {
-        let palette = BrushPalette(
+    typealias Subject = BrushPalette
+
+    @Test
+    func `Confirms default color is set to .black when initialized with no colors`() async throws {
+        let subject: Subject = .init(
             colors: [],
             selectedIndex: -1
         )
 
-        #expect(palette.items.map(\.color) == [.black])
-        #expect(palette.selectedIndex == 0)
+        #expect(subject.items.map(\.color) == [.black])
+        #expect(subject.selectedIndex == 0)
     }
 
-    @Test("Confirms selecting a color changes the current color")
-    func testSelect() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms selecting a color changes the current color`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        #expect(palette.selectedIndex == 0)
-        #expect(palette.color == .black)
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .black)
 
-        palette.select(1)
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .red)
+        subject.select(1)
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .red)
     }
 
-    @Test("Confirms inserting a color at the specified index")
-    func testInsert() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms inserting a color at the specified index`() async throws {
+        let subject: Subject = .init(
             colors: [.black],
             selectedIndex: 0
         )
 
-        palette.insert(.blue, at: 0)
-        #expect(palette.items.map(\.color) == [.blue, .black])
+        subject.insert(.blue, at: 0)
+        #expect(subject.items.map(\.color) == [.blue, .black])
     }
 
-    @Test("Confirms it updates colors and selectedIndex")
-    func testUpdateColorsAndIndex() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms it updates colors and selectedIndex`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .lightGray, .gray, .white],
             selectedIndex: 0
         )
 
-        palette.update(colors: [.red, .green], selectedIndex: 1)
+        subject.update(colors: [.red, .green], selectedIndex: 1)
 
-        #expect(palette.items.map(\.color) == [.red, .green])
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .green)
+        #expect(subject.items.map(\.color) == [.red, .green])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .green)
     }
 
-    @Test("Confirms a color can be updated at the specified index")
-    func testUpdateColorAtIndex() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms a color can be updated at the specified index`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        palette.update(color: .blue, at: 1)
-        #expect(palette.items.map(\.color) == [.black, .blue])
+        subject.update(color: .blue, at: 1)
+        #expect(subject.items.map(\.color) == [.black, .blue])
     }
 
-    @Test("Confirms removing a color at the specified index")
-    func testRemove() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms removing a color at the specified index`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .red],
             selectedIndex: 0
         )
 
-        palette.remove(at: 0)
-        #expect(palette.items.map(\.color) == [.red])
-        #expect(palette.selectedIndex == 0)
-        #expect(palette.color == .red)
+        subject.remove(at: 0)
+        #expect(subject.items.map(\.color) == [.red])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .red)
 
         // Cannot remove when the palette has only one color
-        palette.remove(at: 0)
-        #expect(palette.items.count == 1)
-        #expect(palette.items.map(\.color) == [.red])
+        subject.remove(at: 0)
+        #expect(subject.items.count == 1)
+        #expect(subject.items.map(\.color) == [.red])
     }
 
-    @Test("Confirms selectedIndex moves when a preceding color is removed")
-    func testRemovePrecedingColorKeepsSelection() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms selectedIndex moves when a preceding color is removed`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .red, .blue],
             selectedIndex: 2
         )
 
-        palette.remove(at: 0)
-        #expect(palette.items.map(\.color) == [.red, .blue])
-        #expect(palette.selectedIndex == 1)
-        #expect(palette.color == .blue)
+        subject.remove(at: 0)
+        #expect(subject.items.map(\.color) == [.red, .blue])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .blue)
     }
 
-    @Test("Confirms selectedIndex is clamped when the last color is removed")
-    func testRemoveLastSelectedColorClampsIndex() async throws {
-        let palette = BrushPalette(
+    @Test
+    func `Confirms selectedIndex is clamped when the last color is removed`() async throws {
+        let subject: Subject = .init(
             colors: [.black, .red],
             selectedIndex: 1
         )
 
-        palette.remove(at: 1)
-        #expect(palette.items.map(\.color) == [.black])
-        #expect(palette.selectedIndex == 0)
-        #expect(palette.color == .black)
+        subject.remove(at: 1)
+        #expect(subject.items.map(\.color) == [.black])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .black)
+    }
+
+    @Test
+    func `Confirms removing an out-of-bounds index does nothing`() async throws {
+        let subject: Subject = .init(
+            colors: [.black, .red],
+            selectedIndex: 1
+        )
+
+        subject.remove(at: -1)
+        subject.remove(at: 2)
+
+        #expect(subject.items.map(\.color) == [.black, .red])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .red)
+    }
+
+    @Test
+    func `Confirms selectedIndex stays when a following color is removed`() async throws {
+        let subject: Subject = .init(
+            colors: [.black, .red, .blue],
+            selectedIndex: 0
+        )
+
+        subject.remove(at: 2)
+        #expect(subject.items.map(\.color) == [.black, .red])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .black)
+    }
+
+    @Test
+    func `Confirms selectedIndex stays on the next color when the selected color is removed`() async throws {
+        let subject: Subject = .init(
+            colors: [.black, .red, .blue],
+            selectedIndex: 1
+        )
+
+        subject.remove(at: 1)
+        #expect(subject.items.map(\.color) == [.black, .blue])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.color == .blue)
     }
 }
