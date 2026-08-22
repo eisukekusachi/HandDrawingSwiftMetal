@@ -48,9 +48,9 @@ where Palette: ColorPaletteDisplayProtocol & ObservableObject {
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
-                ForEach(Array(palette.items.enumerated()), id: \.element.id) { index, item in
+                ForEach(palette.items.indices, id: \.self) { index in
                     ColorCircle(
-                        color: item.color,
+                        color: palette.items[index].color,
                         checkeredImage: checkeredImage,
                         size: colorSize,
                         selected: palette.selectedIndex == index

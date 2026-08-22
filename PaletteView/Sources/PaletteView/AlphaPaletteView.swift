@@ -52,9 +52,9 @@ where Palette: AlphaPaletteDisplayProtocol & ObservableObject {
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
-                ForEach(Array(palette.items.enumerated()), id: \.element.id) { index, item in
+                ForEach(palette.items.indices, id: \.self) { index in
                     ColorCircle(
-                        color: UIColor.black.withAlphaComponent(alpha(item.alpha)),
+                        color: UIColor.black.withAlphaComponent(alpha(palette.items[index].alpha)),
                         checkeredImage: checkeredImage,
                         size: colorSize,
                         selected: palette.selectedIndex == index
