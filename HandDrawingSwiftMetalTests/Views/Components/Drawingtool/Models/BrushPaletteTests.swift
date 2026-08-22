@@ -16,25 +16,25 @@ struct BrushPaletteTests {
     func testInitWithEmptyColors() async throws {
         let palette = BrushPalette(
             colors: [],
-            index: -1
+            selectedIndex: -1
         )
 
-        #expect(palette.colors == [.black])
-        #expect(palette.index == 0)
+        #expect(palette.items.map(\.color) == [.black])
+        #expect(palette.selectedIndex == 0)
     }
 
     @Test("Confirms selecting a color changes the current color")
     func testSelect() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
-        #expect(palette.index == 0)
+        #expect(palette.selectedIndex == 0)
         #expect(palette.color == .black)
 
         palette.select(1)
-        #expect(palette.index == 1)
+        #expect(palette.selectedIndex == 1)
         #expect(palette.color == .red)
     }
 
@@ -42,24 +42,24 @@ struct BrushPaletteTests {
     func testInsert() async throws {
         let palette = BrushPalette(
             colors: [.black],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.insert(.blue, at: 0)
-        #expect(palette.colors == [.blue, .black])
+        #expect(palette.items.map(\.color) == [.blue, .black])
     }
 
-    @Test("Confirms it updates colors and currentIndex")
+    @Test("Confirms it updates colors and selectedIndex")
     func testUpdateColorsAndIndex() async throws {
         let palette = BrushPalette(
             colors: [.black, .lightGray, .gray, .white],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.update(colors: [.red, .green], index: 1)
+        palette.update(colors: [.red, .green], selectedIndex: 1)
 
-        #expect(palette.colors == [.red, .green])
-        #expect(palette.index == 1)
+        #expect(palette.items.map(\.color) == [.red, .green])
+        #expect(palette.selectedIndex == 1)
         #expect(palette.color == .green)
     }
 
@@ -67,26 +67,26 @@ struct BrushPaletteTests {
     func testUpdateColorAtIndex() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.update(color: .blue, at: 1)
-        #expect(palette.colors == [.black, .blue])
+        #expect(palette.items.map(\.color) == [.black, .blue])
     }
 
     @Test("Confirms removing a color at the specified index")
     func testRemove() async throws {
         let palette = BrushPalette(
             colors: [.black, .red],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.remove(at: 0)
-        #expect(palette.colors == [.red])
+        #expect(palette.items.map(\.color) == [.red])
 
         // Cannot remove when the palette has only one color
         palette.remove(at: 0)
-        #expect(palette.colors.count == 1)
-        #expect(palette.colors == [.red])
+        #expect(palette.items.count == 1)
+        #expect(palette.items.map(\.color) == [.red])
     }
 }

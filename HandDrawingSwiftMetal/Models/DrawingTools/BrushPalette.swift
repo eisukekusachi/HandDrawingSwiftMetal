@@ -25,24 +25,16 @@ final class BrushPalette: ObservableObject, ColorPaletteDisplayProtocol {
     @Published private(set) var items: [ColorPaletteItem] = []
     @Published private(set) var selectedIndex: Int = 0
 
-    var colors: [UIColor] {
-        items.map(\.color)
-    }
-
-    var index: Int {
-        selectedIndex
-    }
-
     public init(
         id: UUID = UUID(),
         colors: [UIColor] = initializeColors,
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         self.id = id
 
         let newColors = colors.isEmpty ? [.black] : colors
         self.items = Self.makeItems(from: newColors)
-        self.selectedIndex = max(0, min(index, newColors.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
 }
 
@@ -81,11 +73,11 @@ extension BrushPalette {
 
     func update(
         colors: [UIColor] = [],
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         let newColors = colors.isEmpty ? [.black] : colors
         items = Self.makeItems(from: newColors)
-        selectedIndex = max(0, min(index, newColors.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
 
     func update(

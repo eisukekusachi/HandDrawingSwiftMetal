@@ -20,8 +20,8 @@ struct BrushPaletteArchiveModel: Codable, Sendable {
 extension BrushPaletteArchiveModel {
     @MainActor
     init(_ palette: BrushPalette) {
-        self.index = palette.index
-        self.hexColors = palette.colors.map { $0.hex() }
+        self.index = palette.selectedIndex
+        self.hexColors = palette.items.map { $0.color.hex() }
     }
 }
 

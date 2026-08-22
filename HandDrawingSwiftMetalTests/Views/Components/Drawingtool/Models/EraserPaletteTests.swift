@@ -16,25 +16,25 @@ struct EraserPaletteTests {
     func testInitWithEmptyColors() async throws {
         let palette = EraserPalette(
             alphas: [],
-            index: -1
+            selectedIndex: -1
         )
 
-        #expect(palette.alphas == [255])
-        #expect(palette.index == 0)
+        #expect(palette.items.map(\.alpha) == [255])
+        #expect(palette.selectedIndex == 0)
     }
 
     @Test("Confirms selecting an alpha changes the current alpha")
     func testSelect() async throws {
         let palette = EraserPalette(
             alphas: [64, 128],
-            index: 0
+            selectedIndex: 0
         )
 
-        #expect(palette.index == 0)
+        #expect(palette.selectedIndex == 0)
         #expect(palette.alpha == 64)
 
         palette.select(1)
-        #expect(palette.index == 1)
+        #expect(palette.selectedIndex == 1)
         #expect(palette.alpha == 128)
     }
 
@@ -42,24 +42,24 @@ struct EraserPaletteTests {
     func testInsert() async throws {
         let palette = EraserPalette(
             alphas: [128],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.insert(64, at: 0)
-        #expect(palette.alphas == [64, 128])
+        #expect(palette.items.map(\.alpha) == [64, 128])
     }
 
-    @Test("Confirms it updates alphas and currentIndex")
+    @Test("Confirms it updates alphas and selectedIndex")
     func testUpdateAlphasAndIndex() async throws {
         let palette = EraserPalette(
             alphas: [255],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.update(alphas: [32, 64, 128], index: 2)
+        palette.update(alphas: [32, 64, 128], selectedIndex: 2)
 
-        #expect(palette.alphas == [32, 64, 128])
-        #expect(palette.index == 2)
+        #expect(palette.items.map(\.alpha) == [32, 64, 128])
+        #expect(palette.selectedIndex == 2)
         #expect(palette.alpha == 128)
     }
 
@@ -67,26 +67,26 @@ struct EraserPaletteTests {
     func testUpdateAlphaAtIndex() async throws {
         let palette = EraserPalette(
             alphas: [128, 255],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.update(alpha: 64, at: 1)
-        #expect(palette.alphas == [128, 64])
+        #expect(palette.items.map(\.alpha) == [128, 64])
     }
 
     @Test("Confirms removing an alpha at the specified index")
     func testRemove() async throws {
         let palette = EraserPalette(
             alphas: [64, 128],
-            index: 0
+            selectedIndex: 0
         )
 
         palette.remove(at: 0)
-        #expect(palette.alphas == [128])
+        #expect(palette.items.map(\.alpha) == [128])
 
         // Cannot remove when the palette has only one alpha
         palette.remove(at: 0)
-        #expect(palette.alphas.count == 1)
-        #expect(palette.alphas == [128])
+        #expect(palette.items.count == 1)
+        #expect(palette.items.map(\.alpha) == [128])
     }
 }

@@ -57,7 +57,7 @@ extension CoreDataEraserPaletteStorage {
 
         palette.update(
             alphas: alphas,
-            index: index
+            selectedIndex: index
         )
     }
 
@@ -79,7 +79,7 @@ extension CoreDataEraserPaletteStorage {
         }
         palette.update(
             alphas: result.alphas,
-            index: result.index
+            selectedIndex: result.index
         )
     }
 }
@@ -92,8 +92,8 @@ private extension CoreDataEraserPaletteStorage {
         else { return }
 
         let id = target.id
-        let index = target.index
-        let alphas = target.alphas
+        let index = target.selectedIndex
+        let alphas = target.items.map(\.alpha)
 
         await context.perform { [context] in
             do {

@@ -26,24 +26,16 @@ final class EraserPalette: ObservableObject, AlphaPaletteDisplayProtocol {
     @Published private(set) var items: [AlphaPaletteItem] = []
     @Published private(set) var selectedIndex: Int = 0
 
-    var alphas: [Int] {
-        items.map(\.alpha)
-    }
-
-    var index: Int {
-        selectedIndex
-    }
-
     public init(
         id: UUID = UUID(),
         alphas: [Int] = initializeAlphas,
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         self.id = id
 
         let newAlphas = alphas.isEmpty ? [255] : alphas
         self.items = Self.makeItems(from: newAlphas)
-        self.selectedIndex = max(0, min(index, newAlphas.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, newAlphas.count - 1))
     }
 }
 
@@ -81,11 +73,11 @@ extension EraserPalette {
 
     func update(
         alphas: [Int] = [],
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         let newAlphas = alphas.isEmpty ? [255] : alphas
         items = Self.makeItems(from: newAlphas)
-        selectedIndex = max(0, min(index, newAlphas.count - 1))
+        self.selectedIndex = max(0, min(selectedIndex, newAlphas.count - 1))
     }
 
     func update(

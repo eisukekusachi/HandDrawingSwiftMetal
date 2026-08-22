@@ -15,8 +15,8 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
 extension EraserPaletteArchiveModel {
     @MainActor
     init(_ palette: EraserPalette) {
-        self.index = palette.index
-        self.alphas = palette.alphas
+        self.index = palette.selectedIndex
+        self.alphas = palette.items.map(\.alpha)
     }
 }
 

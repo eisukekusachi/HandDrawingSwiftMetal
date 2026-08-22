@@ -247,17 +247,15 @@ private extension HandDrawingViewController {
             .store(in: &cancellables)
 
         viewModel.brushPalette.$selectedIndex
-            .sink { [weak self] index in
-                guard let `self`, index < viewModel.brushPalette.colors.count else { return }
-                let newColor = viewModel.brushPalette.colors[index]
+            .sink { [weak self] _ in
+                guard let `self`, let newColor = viewModel.brushPalette.color else { return }
                 (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(newColor)
             }
             .store(in: &cancellables)
 
         viewModel.eraserPalette.$selectedIndex
-            .sink { [weak self] index in
-                guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
-                let newAlpha = viewModel.eraserPalette.alphas[index]
+            .sink { [weak self] _ in
+                guard let `self`, let newAlpha = viewModel.eraserPalette.alpha else { return }
                 (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(newAlpha)
             }
             .store(in: &cancellables)
