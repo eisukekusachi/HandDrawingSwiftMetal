@@ -27,8 +27,8 @@ final class CoreDataEraserPaletteStorage {
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
-            palette.$index.map { _ in () }.eraseToAnyPublisher(),
-            palette.$alphas.map { _ in () }.eraseToAnyPublisher()
+            palette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
+            palette.$items.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in

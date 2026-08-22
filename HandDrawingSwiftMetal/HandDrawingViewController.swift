@@ -7,6 +7,7 @@
 
 import CanvasView
 import Combine
+import PaletteView
 import SwiftUI
 import TextureLayerCanvasView
 import TextureLayerView
@@ -245,7 +246,7 @@ private extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.brushPalette.$index
+        viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.brushPalette.colors.count else { return }
                 let newColor = viewModel.brushPalette.colors[index]
@@ -253,7 +254,7 @@ private extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.eraserPalette.$index
+        viewModel.eraserPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, index < viewModel.eraserPalette.alphas.count else { return }
                 let newAlpha = viewModel.eraserPalette.alphas[index]
@@ -350,7 +351,7 @@ private extension HandDrawingViewController {
 
     func addBrushPalette() {
         let hostingController = UIHostingController(
-            rootView: BrushPaletteView(
+            rootView: ColorPaletteView(
                 palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
             )
@@ -360,7 +361,7 @@ private extension HandDrawingViewController {
 
     func addEraserPalette() {
         let hostingController = UIHostingController(
-            rootView: EraserPaletteView(
+            rootView: AlphaPaletteView(
                 palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
             )
