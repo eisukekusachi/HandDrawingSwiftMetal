@@ -45,16 +45,22 @@ where Palette: ColorPaletteDisplayProtocol & ObservableObject {
         self.onTapColor = onTapColor
     }
 
+    private var selectedItemID: UUID? {
+        guard palette.items.indices.contains(palette.selectedIndex) else { return nil }
+        return palette.items[palette.selectedIndex].id
+    }
+
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
-                ForEach(palette.items.indices, id: \.self) { index in
+                ForEach(palette.items) { item in
                     ColorCircle(
-                        color: palette.items[index].color,
+                        color: item.color,
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.selectedIndex == index
+                        selected: selectedItemID == item.id
                     ) {
+                        guard let index = palette.items.firstIndex(where: { $0.id == item.id }) else { return }
                         let didReselect = palette.selectedIndex == index
                         palette.select(index)
                         onTapColor?(index, didReselect)

@@ -45,6 +45,11 @@ where Palette: AlphaPaletteDisplayProtocol & ObservableObject {
         self.onTapAlpha = onTapAlpha
     }
 
+    private var selectedItemID: UUID? {
+        guard palette.items.indices.contains(palette.selectedIndex) else { return nil }
+        return palette.items[palette.selectedIndex].id
+    }
+
     private func alpha(_ alpha: Int) -> CGFloat {
         CGFloat(alpha) / 255.0
     }
@@ -52,13 +57,14 @@ where Palette: AlphaPaletteDisplayProtocol & ObservableObject {
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: spacing) {
-                ForEach(palette.items.indices, id: \.self) { index in
+                ForEach(palette.items) { item in
                     ColorCircle(
-                        color: UIColor.black.withAlphaComponent(alpha(palette.items[index].alpha)),
+                        color: UIColor.black.withAlphaComponent(alpha(item.alpha)),
                         checkeredImage: checkeredImage,
                         size: colorSize,
-                        selected: palette.selectedIndex == index
+                        selected: selectedItemID == item.id
                     ) {
+                        guard let index = palette.items.firstIndex(where: { $0.id == item.id }) else { return }
                         let didReselect = palette.selectedIndex == index
                         palette.select(index)
                         onTapAlpha?(index, didReselect)
