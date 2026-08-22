@@ -14,6 +14,6 @@ public protocol ColorPaletteDisplayProtocol: AnyObject {
     var selectedIndex: Int { get }
 
     /// Selects the item at `index`.
-    @discardableResult
-    func select(_ index: Int) -> Bool
+    /// Does nothing if `index` is out of bounds.
+    func select(_ index: Int)
 }

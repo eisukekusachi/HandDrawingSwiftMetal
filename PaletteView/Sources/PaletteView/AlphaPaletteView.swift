@@ -26,6 +26,7 @@ where Palette: AlphaPaletteDisplayProtocol & ObservableObject {
 
     @State private var checkeredImage: UIImage? = nil
 
+    /// - Parameter onTapAlpha: Called after a tap. The `Bool` is `true` when the current selection was tapped again.
     public init(
         palette: Palette,
         paletteHeight: CGFloat? = nil,
@@ -58,7 +59,8 @@ where Palette: AlphaPaletteDisplayProtocol & ObservableObject {
                         size: colorSize,
                         selected: palette.selectedIndex == index
                     ) {
-                        let didReselect = palette.select(index)
+                        let didReselect = palette.selectedIndex == index
+                        palette.select(index)
                         onTapAlpha?(index, didReselect)
                     }
                 }
@@ -91,11 +93,9 @@ private final class PreviewAlphaPalette: AlphaPaletteDisplayProtocol, Observable
         self.selectedIndex = selectedIndex
     }
 
-    func select(_ index: Int) -> Bool {
-        guard items.indices.contains(index) else { return false }
-        let didReselect = selectedIndex == index
+    func select(_ index: Int) {
+        guard items.indices.contains(index) else { return }
         selectedIndex = index
-        return didReselect
     }
 }
 

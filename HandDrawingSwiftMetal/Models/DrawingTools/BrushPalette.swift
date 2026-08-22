@@ -58,12 +58,9 @@ extension BrushPalette {
         items.indices.contains(index) ? items[index].color : nil
     }
 
-    @discardableResult
-    func select(_ index: Int) -> Bool {
-        guard items.indices.contains(index) else { return false }
-        let didReselect = selectedIndex == index
+    func select(_ index: Int) {
+        guard items.indices.contains(index) else { return }
         selectedIndex = index
-        return didReselect
     }
 
     func insert(_ color: UIColor, at index: Int) {

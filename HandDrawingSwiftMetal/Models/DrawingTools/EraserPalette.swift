@@ -58,12 +58,9 @@ extension EraserPalette {
         items.indices.contains(index) ? items[index].alpha : nil
     }
 
-    @discardableResult
-    func select(_ index: Int) -> Bool {
-        guard items.indices.contains(index) else { return false }
-        let didReselect = selectedIndex == index
+    func select(_ index: Int) {
+        guard items.indices.contains(index) else { return }
         selectedIndex = index
-        return didReselect
     }
 
     func insert(_ alpha: Int, at index: Int) {
