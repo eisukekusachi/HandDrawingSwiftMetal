@@ -96,6 +96,7 @@ private final class PreviewColorSource: ColorPaletteSource {
     var canRemoveSelected: Bool { true }
 }
 
+@MainActor
 private struct ColorPalettePreview: View {
     @StateObject private var viewModel: ColorPaletteEditViewModel
 
