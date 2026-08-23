@@ -6,21 +6,21 @@
 
 import UIKit
 
-public extension UIColor {
+extension UIColor {
 
     convenience init(color: UIColor, alpha: Int) {
         let components = color.rgbaComponents()
         self.init(
-            red: components.red,
+            intRed: components.red,
             green: components.green,
             blue: components.blue,
             alpha: alpha
         )
     }
 
-    convenience init(red: Int, green: Int, blue: Int, alpha: Int) {
+    convenience init(intRed: Int, green: Int, blue: Int, alpha: Int) {
         self.init(
-            red: CGFloat(min(max(0, red), 255)) / 255.0,
+            red: CGFloat(min(max(0, intRed), 255)) / 255.0,
             green: CGFloat(min(max(0, green), 255)) / 255.0,
             blue: CGFloat(min(max(0, blue), 255)) / 255.0,
             alpha: CGFloat(min(max(0, alpha), 255)) / 255.0

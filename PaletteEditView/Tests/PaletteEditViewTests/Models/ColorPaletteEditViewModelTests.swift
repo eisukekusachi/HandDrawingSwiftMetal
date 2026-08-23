@@ -75,7 +75,7 @@ struct ColorPaletteEditViewModelTests {
     @Test
     func `updateColor skips notification when color is unchanged`() {
         var callbackCount = 0
-        let color = UIColor(red: 64, green: 128, blue: 192, alpha: 200)
+        let color = UIColor(intRed: 64, green: 128, blue: 192, alpha: 200)
         let source = MockColorSource(colors: [color])
         let subject = Subject(
             colorSource: source,

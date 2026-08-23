@@ -61,7 +61,7 @@ private extension ColorPaletteEditViewModel {
         guard components != self.color.rgbaComponents() else { return false }
 
         self.color = UIColor(
-            red: components.red,
+            intRed: components.red,
             green: components.green,
             blue: components.blue,
             alpha: components.alpha

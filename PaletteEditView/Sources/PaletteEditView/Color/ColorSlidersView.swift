@@ -23,8 +23,8 @@ struct ColorSlidersView: View {
                 title: "Red",
                 value: $red,
                 gradientColors: [
-                    UIColor(red: 0, green: green, blue: blue, alpha: 255),
-                    UIColor(red: 255, green: green, blue: blue, alpha: 255)
+                    UIColor(intRed: 0, green: green, blue: blue, alpha: 255),
+                    UIColor(intRed: 255, green: green, blue: blue, alpha: 255)
                 ]
             )
 
@@ -32,8 +32,8 @@ struct ColorSlidersView: View {
                 title: "Green",
                 value: $green,
                 gradientColors: [
-                    UIColor(red: red, green: 0, blue: blue, alpha: 255),
-                    UIColor(red: red, green: 255, blue: blue, alpha: 255)
+                    UIColor(intRed: red, green: 0, blue: blue, alpha: 255),
+                    UIColor(intRed: red, green: 255, blue: blue, alpha: 255)
                 ]
             )
 
@@ -41,8 +41,8 @@ struct ColorSlidersView: View {
                 title: "Blue",
                 value: $blue,
                 gradientColors: [
-                    UIColor(red: red, green: green, blue: 0, alpha: 255),
-                    UIColor(red: red, green: green, blue: 255, alpha: 255)
+                    UIColor(intRed: red, green: green, blue: 0, alpha: 255),
+                    UIColor(intRed: red, green: green, blue: 255, alpha: 255)
                 ]
             )
         }
@@ -79,7 +79,7 @@ private extension ColorSlidersView {
         else { return }
 
         color = UIColor(
-            red: red,
+            intRed: red,
             green: green,
             blue: blue,
             alpha: components.alpha

@@ -62,7 +62,7 @@ struct PickerImageView: View {
 
         let alpha = color.rgbaComponents().alpha
         color = UIColor(
-            red: rgb.red,
+            intRed: rgb.red,
             green: rgb.green,
             blue: rgb.blue,
             alpha: alpha
