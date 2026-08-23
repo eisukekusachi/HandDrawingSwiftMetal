@@ -8,6 +8,7 @@
 import CanvasView
 import Combine
 import PaletteView
+import PopupView
 import SwiftUI
 import TextureLayerCanvasView
 import TextureLayerView
@@ -25,10 +26,7 @@ class HandDrawingViewController: UIViewController {
 
     private let dialogPresenter = DialogPresenter()
 
-    private var textureLayerViewModel = PopupViewModel(
-        size: .init(width: 320, height: 300),
-        placement: .top
-    )
+    private var textureLayerViewModel = PopupViewModel()
 
     private weak var popupPassthroughView: PassthroughHostingView?
 
@@ -292,7 +290,12 @@ private extension HandDrawingViewController {
             self?.canvasView.resetTransforming()
         }
         contentView.tapLayerButton = { [weak self] in
-            self?.textureLayerViewModel.toggleView()
+            guard let `self` else { return }
+            if self.textureLayerViewModel.isHidden {
+                self.textureLayerViewModel.show()
+            } else {
+                self.textureLayerViewModel.hide()
+            }
         }
         contentView.tapSaveButton = { [weak self] in
             self?.saveCanvas()
@@ -374,7 +377,11 @@ private extension HandDrawingViewController {
             .init(
                 target: targetView.layerButton,
                 viewModel: textureLayerViewModel,
-                content: { textureLayerView }
+                placement: .belowAnchor,
+                content: {
+                    textureLayerView
+                        .frame(height: 300)
+                }
             )
         ]
 
@@ -526,7 +533,7 @@ private extension HandDrawingViewController {
 
     func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
-        textureLayerViewModel.enableComponentInteraction(isUserInteractionEnabled)
+        popupPassthroughView?.enablePopupInteraction(isUserInteractionEnabled)
     }
 }
 

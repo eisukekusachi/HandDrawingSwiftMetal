@@ -14,28 +14,30 @@ public final class PopupViewModel: ObservableObject {
 
     @Published public private(set) var isHidden: Bool
 
-    /// Bounds of the anchor target in container coordinates.
-    @Published private(set) var targetFrame: CGRect = .zero
+    @Published public private(set) var isUserInteractionEnabled: Bool = true
 
-    @Published private(set) var stackingOrder: Int = 0
+    /// Bounds of the anchor target in container coordinates.
+    @Published public private(set) var targetFrame: CGRect = .zero
+
+    @Published public private(set) var stackingOrder: Int = 0
 
     /// Measured popup height used for positioning.
-    @Published private(set) var height: CGFloat = 0
+    @Published public private(set) var height: CGFloat = 0
 
     /// `true` when the popup should not be visible. Stays `true` while hidden, and during the short delay after `show()`. Not tied to actual layout completion.
-    @Published private(set) var isConcealed: Bool = true
+    @Published public private(set) var isConcealed: Bool = true
 
     /// Configured popup width in points.
-    let width: Int
+    public let width: Int
 
     /// Vertical gap between `targetFrame` and the popup edge
-    let targetSpacing: CGFloat
+    public let targetSpacing: CGFloat
 
     /// Horizontal gap between the container edges and the popup.
-    let horizontalPadding: CGFloat
+    public let horizontalPadding: CGFloat
 
     /// Short delay before revealing, giving layout a moment to finish. Not synced to layout.
-    let revealDelayNanoseconds: UInt64
+    public let revealDelayNanoseconds: UInt64
 
     private var revealTask: Task<Void, Never>?
 
@@ -54,7 +56,7 @@ public final class PopupViewModel: ObservableObject {
     }
 }
 
-extension PopupViewModel {
+public extension PopupViewModel {
 
     func popupRect(
         containerWidth: CGFloat,
@@ -77,7 +79,7 @@ extension PopupViewModel {
         return rect
     }
 
-    public func show(immediately: Bool = false) {
+    func show(immediately: Bool = false) {
         revealTask?.cancel()
         isHidden = false
 
@@ -95,20 +97,24 @@ extension PopupViewModel {
         }
     }
 
-    public func hide() {
+    func hide() {
         revealTask?.cancel()
         revealTask = nil
         isConcealed = true
         isHidden = true
     }
 
+    func enableComponentInteraction(_ isEnabled: Bool) {
+        isUserInteractionEnabled = isEnabled
+    }
+
     /// Sets the anchor bounds used to position this popup.
     /// Placement fails while `targetFrame` remains `.zero`.
-    public func setTargetFrame(_ frame: CGRect) {
+    func setTargetFrame(_ frame: CGRect) {
         targetFrame = frame
     }
 
-    public func bringToFront() {
+    func bringToFront() {
         Self.nextStackingOrder += 1
         stackingOrder = Self.nextStackingOrder
     }

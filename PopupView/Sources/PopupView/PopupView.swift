@@ -88,7 +88,7 @@ public struct PopupView<Content: View>: View {
                             )
                         // Concealed for a short delay so layout can finish before the popup appears.
                             .opacity(viewModel.isConcealed ? 0 : 1)
-                            .allowsHitTesting(!viewModel.isConcealed)
+                            .allowsHitTesting(!viewModel.isConcealed && viewModel.isUserInteractionEnabled)
                     }
             }
             .zIndex(Double(viewModel.stackingOrder))
