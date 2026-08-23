@@ -26,7 +26,6 @@ where Palette: ColorPaletteDisplayProtocol & ObservableObject {
 
     @State private var checkeredImage: UIImage? = nil
 
-    /// - Parameter onTapColor: Called after a tap. The `Bool` is `true` when the current selection was tapped again.
     public init(
         palette: Palette,
         paletteHeight: CGFloat? = nil,

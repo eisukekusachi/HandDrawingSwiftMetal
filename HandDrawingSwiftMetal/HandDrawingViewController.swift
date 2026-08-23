@@ -248,7 +248,6 @@ private extension HandDrawingViewController {
 
         viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
-                // `$selectedIndex` emits in `willSet`, so `brushPalette.color` is still the previous color.
                 guard let `self`, let newColor = viewModel.brushPalette.color(at: index) else { return }
                 (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(newColor)
             }
