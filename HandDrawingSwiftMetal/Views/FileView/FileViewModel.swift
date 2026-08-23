@@ -50,10 +50,17 @@ final class FileViewModel: ObservableObject {
         guard
             canDelete,
             let index = selectedIndex,
-            let item = fileCoordinator.item(index),
-            item.fileURL != currentOpenFileURL
+            fileCoordinator.item(index) != nil
         else { return true }
         return false
+    }
+
+    var isSelectedFileOpen: Bool {
+        guard
+            let index = selectedIndex,
+            let item = fileCoordinator.item(index)
+        else { return false }
+        return item.fileURL == currentOpenFileURL
     }
 
     init(fileCoordinator: FileCoordinator) {

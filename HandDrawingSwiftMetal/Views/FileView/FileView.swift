@@ -103,9 +103,15 @@ struct FileView: View {
                 onConfirm: { newItem() }
             )
             .alertDestructiveConfirmation(
-                title: String(localized: "Delete this file?"),
-                message: String(localized: "This file will be removed from the device"),
-                destructiveButtonTitle: String(localized: "Delete"),
+                title: viewModel.isSelectedFileOpen
+                    ? String(localized: "Reset this canvas?")
+                    : String(localized: "Delete this file?"),
+                message: viewModel.isSelectedFileOpen
+                    ? String(localized: "The drawing will be cleared. The file will remain.")
+                    : String(localized: "This file will be removed from the device"),
+                destructiveButtonTitle: viewModel.isSelectedFileOpen
+                    ? String(localized: "Reset")
+                    : String(localized: "Delete"),
                 isPresented: $viewModel.isShowingDeleteConfirmDialog,
                 onDestructive: { deleteItem() }
             )
@@ -267,8 +273,11 @@ private extension FileView {
                     let deleteAction,
                     let index = viewModel.selectedIndex
                 else { return }
+                let shouldKeepSelection = viewModel.isSelectedFileOpen
                 try await deleteAction(index)
-                viewModel.selectedIndex = nil
+                if !shouldKeepSelection {
+                    viewModel.selectedIndex = nil
+                }
             } catch {
                 viewModel.errorAlertMessage = error.nsErrorDescription
                 viewModel.isShowingErrorAlert = true

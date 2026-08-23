@@ -90,7 +90,7 @@ struct FileViewModelTests {
         }
 
         @Test
-        func `Verify that delete is enabled when deleteAction exists and the selection is not the open file`() {
+        func `Verify that delete is enabled when deleteAction exists and a row is selected`() {
             let urlA = URL(fileURLWithPath: "/tmp/a.zip")
             let urlB = URL(fileURLWithPath: "/tmp/b.zip")
 
@@ -99,7 +99,6 @@ struct FileViewModelTests {
             )
 
             subject.configure(
-                currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
                 canDelete: true
             )
@@ -118,7 +117,6 @@ struct FileViewModelTests {
             )
 
             subject.configure(
-                currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
                 canDelete: false
             )
@@ -136,7 +134,6 @@ struct FileViewModelTests {
             )
 
             subject.configure(
-                currentOpenFileURL: urlA,
                 selectedFileURL: nil,
                 canDelete: true
             )
@@ -157,7 +154,6 @@ struct FileViewModelTests {
             )
 
             subject.configure(
-                currentOpenFileURL: urlA,
                 selectedFileURL: urlB,
                 canDelete: true
             )
@@ -168,7 +164,7 @@ struct FileViewModelTests {
         }
 
         @Test
-        func `Verify that delete is disabled when the selected row is the currently open file`() {
+        func `Verify that the selected row is treated as the open file`() {
             let urlA = URL(fileURLWithPath: "/tmp/a.zip")
             let urlB = URL(fileURLWithPath: "/tmp/b.zip")
 
@@ -182,8 +178,27 @@ struct FileViewModelTests {
                 canDelete: true
             )
 
-            #expect(subject.selectedIndex == 0)
-            #expect(subject.deleteDisabled == true)
+            #expect(subject.isSelectedFileOpen == true)
+            #expect(subject.deleteDisabled == false)
+        }
+
+        @Test
+        func `Verify that a different selected row is not treated as the open file`() {
+            let urlA = URL(fileURLWithPath: "/tmp/a.zip")
+            let urlB = URL(fileURLWithPath: "/tmp/b.zip")
+
+            let subject: Subject = .init(
+                fileCoordinator: fileCoordinator(fileURLs: [urlA, urlB])
+            )
+
+            subject.configure(
+                currentOpenFileURL: urlA,
+                selectedFileURL: urlB,
+                canDelete: true
+            )
+
+            #expect(subject.isSelectedFileOpen == false)
+            #expect(subject.deleteDisabled == false)
         }
     }
 
