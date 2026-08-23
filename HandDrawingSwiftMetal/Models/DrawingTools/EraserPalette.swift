@@ -89,8 +89,9 @@ extension EraserPalette {
 
     func update(
         alpha: Int,
-        at index: Int
+        at index: Int? = nil
     ) {
+        let index = index ?? selectedIndex
         guard items.indices.contains(index) else { return }
         items[index] = AlphaPaletteItem(id: items[index].id, alpha: alpha)
     }

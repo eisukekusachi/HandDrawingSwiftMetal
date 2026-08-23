@@ -74,6 +74,9 @@ struct BrushPaletteTests {
 
         subject.update(color: .blue, at: 1)
         #expect(subject.items.map(\.color) == [.black, .blue])
+
+        subject.update(color: .green)
+        #expect(subject.items.map(\.color) == [.green, .blue])
     }
 
     @Test

@@ -86,10 +86,7 @@ class HandDrawingViewController: UIViewController {
         colorSource: viewModel.brushPalette,
         onChanged: { [weak self] color in
             guard let `self` else { return }
-            self.viewModel.brushPalette.update(
-                color: color,
-                at: self.viewModel.brushPalette.selectedIndex
-            )
+            self.viewModel.brushPalette.update(color: color)
             (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(color)
         }
     )
@@ -98,10 +95,7 @@ class HandDrawingViewController: UIViewController {
         alphaSource: viewModel.eraserPalette,
         onChanged: { [weak self] alpha in
             guard let `self` else { return }
-            self.viewModel.eraserPalette.update(
-                alpha: alpha,
-                at: self.viewModel.eraserPalette.selectedIndex
-            )
+            self.viewModel.eraserPalette.update(alpha: alpha)
             (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(alpha)
         }
     )
