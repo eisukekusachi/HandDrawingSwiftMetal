@@ -111,6 +111,7 @@ public extension PopupViewModel {
     /// Sets the anchor bounds used to position this popup.
     /// Placement fails while `targetFrame` remains `.zero`.
     func setTargetFrame(_ frame: CGRect) {
+        guard targetFrame != frame else { return }
         targetFrame = frame
     }
 
