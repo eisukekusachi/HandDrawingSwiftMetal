@@ -594,10 +594,20 @@ private extension HandDrawingViewController {
             },
             deleteAction: { [weak self] index in
                 guard let `self` else { return }
-                try self.viewModel.deleteCanvas(
+                let didInitializeCanvas = try await self.viewModel.deleteCanvas(
                     index: index,
-                    currentOpenFileURL: self.viewModel.zipFileURL
+                    currentOpenFileURL: self.viewModel.zipFileURL,
+                    device: self.sharedDevice,
+                    commandQueue: self.canvasView.sharedCommandQueue
                 )
+                guard didInitializeCanvas else { return }
+
+                try await self.initializeCanvas(self.viewModel.textureSize)
+                self.textureLayerView.update(
+                    self.viewModel.textureLayersState
+                )
+                self.updateDrawingComponents()
+                self.presentedViewController?.dismiss(animated: true)
             },
             selectAction: { [weak self] zipFileURL in
                 guard let `self` else { return }

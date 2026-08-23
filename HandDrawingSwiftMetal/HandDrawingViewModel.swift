@@ -320,18 +320,10 @@ extension HandDrawingViewModel {
             fileSuffix: fileCoordinator.fileSuffix
         )
 
-        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
-
-        try await fileCoordinator.initializeStorage(
-            textureLayers: newTextureLayersState,
+        try await initializeBlankCanvasContent(
             device: device,
             commandQueue: commandQueue
         )
-        textureLayersState.update(newTextureLayersState)
-
-        drawingToolStorage.initializeData()
-        brushPalette.initializeData()
-        eraserPalette.initializeData()
         project.update(
             projectName: targetURL.baseName,
             createdAt: Date(),
@@ -405,13 +397,15 @@ extension HandDrawingViewModel {
         return newFileURL
     }
 
+    @discardableResult
     func deleteCanvas(
         index: Int,
-        currentOpenFileURL: URL
-    ) throws {
+        currentOpenFileURL: URL,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws -> Bool {
         guard
-            let item = fileCoordinator.item(index),
-                item.fileURL != currentOpenFileURL
+            let item = fileCoordinator.item(index)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -420,9 +414,40 @@ extension HandDrawingViewModel {
             throw error
         }
 
-        try fileCoordinator.deleteFile(
-            fileURL: item.fileURL
-        )
+        let shouldResetCanvas = item.fileURL == currentOpenFileURL
+
+        if shouldResetCanvas {
+            activityIndicatorSubject.send(true)
+            defer { activityIndicatorSubject.send(false) }
+
+            try await initializeBlankCanvasContent(
+                device: device,
+                commandQueue: commandQueue
+            )
+            project.update(updatedAt: Date())
+
+            try await fileCoordinator.saveProject(
+                content: .init(
+                    thumbnail: nil,
+                    textureLayersState: textureLayersState,
+                    project: project,
+                    drawingTool: drawingTool,
+                    brushPalette: brushPalette,
+                    eraserPalette: eraserPalette
+                ),
+                to: currentOpenFileURL
+            )
+            upsertFileList(
+                currentFileItem(thumbnail: nil)
+            )
+            sortFileList()
+        } else {
+            try fileCoordinator.deleteFile(
+                fileURL: item.fileURL
+            )
+        }
+
+        return shouldResetCanvas
     }
 
     func upsertFileList(_ file: LocalFileItem) {
@@ -431,5 +456,23 @@ extension HandDrawingViewModel {
 
     func sortFileList() {
         fileCoordinator.sortFileList()
+    }
+
+    private func initializeBlankCanvasContent(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
+
+        try await fileCoordinator.initializeStorage(
+            textureLayers: newTextureLayersState,
+            device: device,
+            commandQueue: commandQueue
+        )
+        textureLayersState.update(newTextureLayersState)
+
+        drawingToolStorage.initializeData()
+        brushPalette.initializeData()
+        eraserPalette.initializeData()
     }
 }
