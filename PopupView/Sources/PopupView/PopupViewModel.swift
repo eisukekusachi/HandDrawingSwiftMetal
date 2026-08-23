@@ -25,7 +25,7 @@ public final class PopupViewModel: ObservableObject {
     @Published public private(set) var height: CGFloat = 0
 
     /// `true` when the popup should not be visible. Stays `true` while hidden, and during the short delay after `show()`. Not tied to actual layout completion.
-    @Published public private(set) var isConcealed: Bool = true
+    @Published public private(set) var isConcealed: Bool
 
     /// Configured popup width in points.
     public let width: Int
@@ -52,6 +52,7 @@ public final class PopupViewModel: ObservableObject {
         self.targetSpacing = targetSpacing
         self.horizontalPadding = horizontalPadding
         self.isHidden = isHidden
+        self.isConcealed = isHidden
         self.revealDelayNanoseconds = revealDelayNanoseconds
     }
 }

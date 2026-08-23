@@ -63,6 +63,22 @@ struct PopupViewModelTests {
         }
 
         @Test
+        func `Verify that isHidden: false is visible without calling show()`() {
+            let subject = Subject(isHidden: false)
+
+            #expect(!subject.isHidden)
+            #expect(!subject.isConcealed)
+        }
+
+        @Test
+        func `Verify that the default initializer stays hidden and concealed`() {
+            let subject = Subject()
+
+            #expect(subject.isHidden)
+            #expect(subject.isConcealed)
+        }
+
+        @Test
         func `Verify that hide() hides the popup`() {
             let subject = Subject()
 
