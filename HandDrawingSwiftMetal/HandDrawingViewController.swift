@@ -319,8 +319,7 @@ private extension HandDrawingViewController {
         contentView.tapLayerButton = { [weak self] in
             guard let `self` else { return }
             if self.textureLayerViewModel.isHidden {
-                self.colorPaletteEditPopupViewModel.hide()
-                self.alphaPaletteEditPopupViewModel.hide()
+                self.textureLayerViewModel.bringToFront()
                 self.textureLayerViewModel.show()
             } else {
                 self.textureLayerViewModel.hide()
@@ -523,7 +522,6 @@ private extension HandDrawingViewController {
 
     func showColorPalettePopup(selectedIndex: Int, immediately: Bool = false) {
         alphaPaletteEditPopupViewModel.hide()
-        textureLayerViewModel.hide()
         viewModel.brushPalette.select(selectedIndex)
         colorPaletteEditPopupViewModel.bringToFront()
         colorPaletteEditPopupViewModel.show(immediately: immediately)
@@ -531,7 +529,6 @@ private extension HandDrawingViewController {
 
     func showAlphaPalettePopup(selectedIndex: Int, immediately: Bool = false) {
         colorPaletteEditPopupViewModel.hide()
-        textureLayerViewModel.hide()
         viewModel.eraserPalette.select(selectedIndex)
         alphaPaletteEditPopupViewModel.bringToFront()
         alphaPaletteEditPopupViewModel.show(immediately: immediately)
