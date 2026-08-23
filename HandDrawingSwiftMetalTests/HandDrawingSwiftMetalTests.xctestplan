@@ -39,6 +39,13 @@
         "identifier" : "CanvasViewTests",
         "name" : "CanvasViewTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:PopupView",
+        "identifier" : "PopupViewTests",
+        "name" : "PopupViewTests"
+      }
     }
   ],
   "version" : 1
