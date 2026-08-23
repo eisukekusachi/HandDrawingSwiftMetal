@@ -7,6 +7,7 @@
 
 import CanvasView
 import Combine
+import PaletteEditView
 import PaletteView
 import PopupView
 import SwiftUI
@@ -27,6 +28,8 @@ class HandDrawingViewController: UIViewController {
     private let dialogPresenter = DialogPresenter()
 
     private var textureLayerViewModel = PopupViewModel()
+    private var colorPaletteEditPopupViewModel = PopupViewModel()
+    private var alphaPaletteEditPopupViewModel = PopupViewModel()
 
     private weak var popupPassthroughView: PassthroughHostingView?
 
@@ -78,6 +81,30 @@ class HandDrawingViewController: UIViewController {
         .brush: BrushDrawingRenderer(),
         .eraser: EraserDrawingRenderer()
     ]
+
+    private lazy var colorPaletteEditViewModel = ColorPaletteEditViewModel(
+        colorSource: viewModel.brushPalette,
+        onChanged: { [weak self] color in
+            guard let `self` else { return }
+            self.viewModel.brushPalette.update(
+                color: color,
+                at: self.viewModel.brushPalette.selectedIndex
+            )
+            (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(color)
+        }
+    )
+
+    private lazy var alphaPaletteEditViewModel = AlphaPaletteEditViewModel(
+        alphaSource: viewModel.eraserPalette,
+        onChanged: { [weak self] alpha in
+            guard let `self` else { return }
+            self.viewModel.eraserPalette.update(
+                alpha: alpha,
+                at: self.viewModel.eraserPalette.selectedIndex
+            )
+            (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(alpha)
+        }
+    )
 
     private let viewModel = HandDrawingViewModel()
 
@@ -292,6 +319,8 @@ private extension HandDrawingViewController {
         contentView.tapLayerButton = { [weak self] in
             guard let `self` else { return }
             if self.textureLayerViewModel.isHidden {
+                self.colorPaletteEditPopupViewModel.hide()
+                self.alphaPaletteEditPopupViewModel.hide()
                 self.textureLayerViewModel.show()
             } else {
                 self.textureLayerViewModel.hide()
@@ -310,11 +339,16 @@ private extension HandDrawingViewController {
         }
         contentView.tapDrawingToolButton = { [weak self] in
             guard let `self` else { return }
+            let wasPaletteEditPopupVisible =
+                !self.colorPaletteEditPopupViewModel.isHidden ||
+                !self.alphaPaletteEditPopupViewModel.isHidden
+
             self.viewModel.toggleDrawingTool()
             self.contentView.updateDrawingComponents(self.viewModel.drawingTool.type)
 
             guard let renderer = self.drawingRenderers[self.viewModel.drawingTool.type] else { return }
             self.canvasView.setDrawingRenderer(renderer)
+            self.updatePalettePopupOnToolSwitch(wasVisible: wasPaletteEditPopupVisible)
         }
         contentView.tapUndoButton = { [weak self] in
             self?.undoCoordinator.undo()
@@ -355,7 +389,14 @@ private extension HandDrawingViewController {
             rootView: ColorPaletteView(
                 palette: viewModel.brushPalette,
                 paletteHeight: paletteHeight
-            )
+            ) { [weak self] index, didReselect in
+                guard let `self`, didReselect else { return }
+                if self.colorPaletteEditPopupViewModel.isHidden {
+                    self.showColorPalettePopup(selectedIndex: index)
+                } else {
+                    self.colorPaletteEditPopupViewModel.hide()
+                }
+            }
         )
         embedHostingController(hostingController, in: contentView.brushPaletteView)
     }
@@ -365,7 +406,14 @@ private extension HandDrawingViewController {
             rootView: AlphaPaletteView(
                 palette: viewModel.eraserPalette,
                 paletteHeight: paletteHeight
-            )
+            ) { [weak self] index, didReselect in
+                guard let `self`, didReselect else { return }
+                if self.alphaPaletteEditPopupViewModel.isHidden {
+                    self.showAlphaPalettePopup(selectedIndex: index)
+                } else {
+                    self.alphaPaletteEditPopupViewModel.hide()
+                }
+            }
         )
         embedHostingController(hostingController, in: contentView.eraserPaletteView)
     }
@@ -381,6 +429,52 @@ private extension HandDrawingViewController {
                 content: {
                     textureLayerView
                         .frame(height: 300)
+                }
+            ),
+            .init(
+                target: targetView.brushPaletteView,
+                viewModel: colorPaletteEditPopupViewModel,
+                placement: .aboveAnchor,
+                onClose: { [weak self] in
+                    self?.colorPaletteEditPopupViewModel.hide()
+                },
+                content: {
+                    ColorPaletteEditView(
+                        viewModel: colorPaletteEditViewModel,
+                        onRemove: { [weak self] in
+                            guard let `self` else { return }
+                            self.viewModel.brushPalette.removeSelected()
+                            if let color = self.viewModel.brushPalette.color {
+                                (self.drawingRenderers[.brush] as? BrushDrawingRenderer)?.setColor(color)
+                            }
+                        },
+                        onDuplicate: { [weak self] in
+                            self?.viewModel.brushPalette.duplicateSelected()
+                        }
+                    )
+                }
+            ),
+            .init(
+                target: targetView.eraserPaletteView,
+                viewModel: alphaPaletteEditPopupViewModel,
+                placement: .aboveAnchor,
+                onClose: { [weak self] in
+                    self?.alphaPaletteEditPopupViewModel.hide()
+                },
+                content: {
+                    AlphaPaletteEditView(
+                        viewModel: alphaPaletteEditViewModel,
+                        onRemove: { [weak self] in
+                            guard let `self` else { return }
+                            self.viewModel.eraserPalette.removeSelected()
+                            if let alpha = self.viewModel.eraserPalette.alpha {
+                                (self.drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setAlpha(alpha)
+                            }
+                        },
+                        onDuplicate: { [weak self] in
+                            self?.viewModel.eraserPalette.duplicateSelected()
+                        }
+                    )
                 }
             )
         ]
@@ -409,6 +503,38 @@ private extension HandDrawingViewController {
         passthroughHostingView.hostingView = hostingController.view
         passthroughHostingView.anchorBindings = bindings
         popupPassthroughView = passthroughHostingView
+    }
+
+    func updatePalettePopupOnToolSwitch(wasVisible: Bool) {
+        guard wasVisible else { return }
+        switch viewModel.drawingTool.type {
+        case .brush:
+            showColorPalettePopup(
+                selectedIndex: viewModel.brushPalette.selectedIndex,
+                immediately: true
+            )
+        case .eraser:
+            showAlphaPalettePopup(
+                selectedIndex: viewModel.eraserPalette.selectedIndex,
+                immediately: true
+            )
+        }
+    }
+
+    func showColorPalettePopup(selectedIndex: Int, immediately: Bool = false) {
+        alphaPaletteEditPopupViewModel.hide()
+        textureLayerViewModel.hide()
+        viewModel.brushPalette.select(selectedIndex)
+        colorPaletteEditPopupViewModel.bringToFront()
+        colorPaletteEditPopupViewModel.show(immediately: immediately)
+    }
+
+    func showAlphaPalettePopup(selectedIndex: Int, immediately: Bool = false) {
+        colorPaletteEditPopupViewModel.hide()
+        textureLayerViewModel.hide()
+        viewModel.eraserPalette.select(selectedIndex)
+        alphaPaletteEditPopupViewModel.bringToFront()
+        alphaPaletteEditPopupViewModel.show(immediately: immediately)
     }
 
     func updateDrawingComponents() {
