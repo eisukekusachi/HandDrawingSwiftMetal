@@ -49,6 +49,7 @@ private final class PreviewAlphaSource: AlphaPaletteSource {
     var canRemoveSelected: Bool { true }
 }
 
+@MainActor
 private struct AlphaPalettePreview: View {
     @StateObject private var viewModel: AlphaPaletteEditViewModel
 
