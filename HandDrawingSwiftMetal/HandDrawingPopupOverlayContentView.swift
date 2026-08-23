@@ -18,7 +18,8 @@ struct HandDrawingPopupOverlayContentView: View {
                 PopupView(
                     binding.viewModel,
                     placement: binding.placement,
-                    content: { binding.content }
+                    content: { binding.content },
+                    onClose: binding.onClose
                 )
             }
         }
