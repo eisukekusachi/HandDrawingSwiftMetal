@@ -91,17 +91,12 @@ struct TextureLayerToolbar: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 20, height: 20)
-                        .foregroundStyle(Color(uiColor: closeButtonColor))
+                        .foregroundStyle(Color(uiColor: .systemGray))
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(8)
-    }
-
-    private var closeButtonColor: UIColor {
-        UIColor.systemGray
-            .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     }
 }
 
