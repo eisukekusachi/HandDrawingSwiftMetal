@@ -7,6 +7,7 @@
 import UIKit
 
 /// A source of palette data for `ColorPaletteView`.
+@MainActor
 public protocol ColorPaletteDisplayProtocol: AnyObject {
     /// The color items in the palette.
     var items: [ColorPaletteItem] { get }

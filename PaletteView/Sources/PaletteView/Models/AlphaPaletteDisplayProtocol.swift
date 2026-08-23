@@ -7,6 +7,7 @@
 import Foundation
 
 /// A source of palette data for `AlphaPaletteView`.
+@MainActor
 public protocol AlphaPaletteDisplayProtocol: AnyObject {
     /// The alpha items in the palette.
     var items: [AlphaPaletteItem] { get }
