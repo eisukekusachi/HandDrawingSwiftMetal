@@ -9,25 +9,12 @@ import Foundation
 
 extension URL {
     static var documents: URL {
-        guard
-            let url = FileManager.default.urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            ).first else {
-            fatalError("Failed to resolve Documents directory URL")
-        }
-        return url
+        resolvedDirectoryURL(.documentDirectory, name: "Documents")
     }
 
     /// A URL to store persistent and temporary data
     static var applicationSupport: URL {
-        guard let url = FileManager.default.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first else {
-            fatalError("Failed to resolve Application Support directory URL")
-        }
-        return url
+        resolvedDirectoryURL(.applicationSupportDirectory, name: "Application Support")
     }
 
     func allFileURLs(suffix: String = "") -> [URL] {
@@ -44,5 +31,22 @@ extension URL {
             Logger.error(error)
             return []
         }
+    }
+}
+
+private extension URL {
+    static func resolvedDirectoryURL(
+        _ directory: FileManager.SearchPathDirectory,
+        name: String
+    ) -> URL {
+        guard let url = FileManager.default.urls(
+            for: directory,
+            in: .userDomainMask
+        ).first else {
+            let message = "Failed to resolve \(name) directory URL"
+            Logger.error(message)
+            fatalError(message)
+        }
+        return url
     }
 }

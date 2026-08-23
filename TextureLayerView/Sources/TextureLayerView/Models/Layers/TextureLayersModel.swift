@@ -1,5 +1,5 @@
 //
-//  TextureLayersState.swift
+//  TextureLayersModel.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/08/11.
@@ -33,7 +33,7 @@ public struct TextureLayersModel: Sendable {
         } else {
             self.layers = layers
         }
-        self.layerIndex = min(layerIndex, self.layers.count - 1)
+        self.layerIndex = max(0, min(layerIndex, self.layers.count - 1))
         self.textureSize = textureSize
     }
 }
@@ -43,10 +43,10 @@ public extension TextureLayersModel {
         model: TextureLayersArchiveModel
     ) throws {
         self.layers = model.layers
-        self.layerIndex = model.layerIndex
+        self.layerIndex = max(0, min(model.layerIndex, model.layers.count - 1))
         self.textureSize = model.textureSize
 
-        // Return an error if the layers are nil or the texture size is zero
+        // Return an error if the layers are empty or the texture size is zero
         if layers.isEmpty || textureSize == .zero {
             let error = NSError(
                 title: String(localized: "Error", bundle: .main),

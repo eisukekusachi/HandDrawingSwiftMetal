@@ -99,7 +99,7 @@ extension TextureLayerModel {
         lhs.isVisible == rhs.isVisible
     }
 
-    /// Retrieve the '`LayerId` from the file name since it uses a `LayerId`
+    /// Retrieves the `LayerId` from the file name.
     static func id(fromFileName string: String?) -> LayerId {
         LayerId.init(uuidString: string ?? "") ?? LayerId()
     }

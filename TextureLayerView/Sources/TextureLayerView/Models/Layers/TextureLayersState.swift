@@ -77,6 +77,11 @@ public extension TextureLayersState {
             return false
         }
 
+        guard layers.indices.contains(index) else {
+            Logger.error(String(localized: "Unable to find index: \(index)"))
+            return false
+        }
+
         let newLayerId = layers[
             RemoveLayerIndex.nextLayerIndexAfterDeletion(index: index)
         ].id

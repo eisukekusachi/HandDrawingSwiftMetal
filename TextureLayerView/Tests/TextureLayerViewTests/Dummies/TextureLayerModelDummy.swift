@@ -5,8 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
+import Foundation
 import TextureLayerView
-import MetalKit
 
 public extension TextureLayerModel {
 

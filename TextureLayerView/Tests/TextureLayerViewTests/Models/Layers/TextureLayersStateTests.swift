@@ -74,5 +74,65 @@ struct TextureLayersStateTests {
             #expect(subject.layers.count == 2)
             #expect(subject.selectedIndex == 1)
         }
+
+        @Test
+        func `When layerIndex is negative, it is clamped to 0`() {
+            let subject = Subject(
+                textureLayers: .init(
+                    layers: [
+                        layer0,
+                        layer1,
+                        layer2
+                    ],
+                    layerIndex: -1,
+                    textureSize: textureSize
+                )
+            )
+
+            #expect(subject.layers.count == 3)
+            #expect(subject.selectedIndex == 0)
+        }
+    }
+
+    @MainActor
+    struct RemoveLayerTests {
+        let textureSize: CGSize = .init(width: 123, height: 456)
+
+        let layer0: TextureLayerModel = .init(id: LayerId(), title: "layer0", alpha: 0, isVisible: true)
+        let layer1: TextureLayerModel = .init(id: LayerId(), title: "layer1", alpha: 1, isVisible: true)
+
+        @Test
+        func `When the index is out of bounds, removeLayer returns false and layers stay unchanged`() {
+            let subject = Subject(
+                textureLayers: .init(
+                    layers: [layer0, layer1],
+                    layerIndex: 0,
+                    textureSize: textureSize
+                )
+            )
+
+            let result = subject.removeLayer(layerIndexToDelete: 2)
+
+            #expect(result == false)
+            #expect(subject.layers.count == 2)
+            #expect(subject.selectedIndex == 0)
+        }
+
+        @Test
+        func `When only one layer remains, removeLayer returns false`() {
+            let subject = Subject(
+                textureLayers: .init(
+                    layers: [layer0],
+                    layerIndex: 0,
+                    textureSize: textureSize
+                )
+            )
+
+            let result = subject.removeLayer(layerIndexToDelete: 0)
+
+            #expect(result == false)
+            #expect(subject.layers.count == 1)
+            #expect(subject.selectedIndex == 0)
+        }
     }
 }

@@ -44,7 +44,7 @@ public struct TextureLayerItem: Identifiable {
         selectedBackgroundColor: UIColor = .label,
         iconSize: CGSize = .init(width: 32, height: 32),
         padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4,
+        cornerRadius: CGFloat = 4
     ) {
         self.id = id
         self.title = title
@@ -67,7 +67,7 @@ public extension TextureLayerItem {
         selectedBackgroundColor: UIColor = .label,
         iconSize: CGSize = .init(width: 32, height: 32),
         padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4,
+        cornerRadius: CGFloat = 4
     ) {
         self.init(
             id: model.id,
@@ -110,6 +110,7 @@ public extension TextureLayerItem {
         !selected ? selectedBackgroundColor : defaultBackgroundColor
     }
     func iconColor(isVisible: Bool, _ selected: Bool) -> UIColor {
-        !selected ? selectedBackgroundColor : defaultBackgroundColor
+        guard isVisible else { return .gray }
+        return textColor(selected)
     }
 }
