@@ -53,7 +53,7 @@ public struct TextureLayerView: View {
 
     /// Updates the alpha slider without changing the selected layer.
     public func updateAlpha(_ alpha: Int) {
-        viewModel.currentAlpha = alpha
+        viewModel.setCurrentAlpha(alpha)
     }
 }
 

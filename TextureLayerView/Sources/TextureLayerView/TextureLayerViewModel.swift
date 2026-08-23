@@ -13,6 +13,8 @@ import UIKit
 @MainActor
 open class TextureLayerViewModel: ObservableObject {
 
+    static let alphaRange: ClosedRange<Int> = 0...255
+
     @Published public var currentAlpha: Int = 0
 
     @Published public var isAlphaSliderDragging: Bool = false
@@ -143,9 +145,16 @@ open class TextureLayerViewModel: ObservableObject {
 
     open func onChangeCurrentAlpha(_ alpha: Int) {
         guard let selectedLayerId = selectedLayer?.id else { return }
-        textureLayers.updateAlpha(selectedLayerId, alpha: alpha)
-        updateCurrentAlpha()
+        let clamped = Self.clampedAlpha(alpha)
+        textureLayers.updateAlpha(selectedLayerId, alpha: clamped)
+        setCurrentAlpha(clamped)
         onLayersChanged?(.changeLayerAlpha)
+    }
+
+    func setCurrentAlpha(_ alpha: Int) {
+        let clamped = Self.clampedAlpha(alpha)
+        guard currentAlpha != clamped else { return }
+        currentAlpha = clamped
     }
 }
 
@@ -199,13 +208,16 @@ public extension TextureLayerViewModel {
 
 extension TextureLayerViewModel {
 
+    static func clampedAlpha(_ alpha: Int) -> Int {
+        min(max(alphaRange.lowerBound, alpha), alphaRange.upperBound)
+    }
+
     private func updateCurrentAlpha() {
         guard
             let selectedLayerId = selectedLayer?.id,
-            let layer = textureLayers.layer(selectedLayerId),
-            currentAlpha != layer.alpha
+            let layer = textureLayers.layer(selectedLayerId)
         else { return }
 
-        currentAlpha = layer.alpha
+        setCurrentAlpha(layer.alpha)
     }
 }
