@@ -105,6 +105,12 @@ private struct PreviewView: View {
     }
 }
 
-#Preview {
+#Preview("Light") {
     PreviewView()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark") {
+    PreviewView()
+        .preferredColorScheme(.dark)
 }

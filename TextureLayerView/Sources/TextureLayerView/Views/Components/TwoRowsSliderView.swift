@@ -71,7 +71,7 @@ struct TwoRowsSliderView: View {
             Spacer()
             Text("\(title):")
                 .font(.footnote)
-                .foregroundColor(Color(uiColor: .gray))
+                .foregroundColor(Color(uiColor: .secondaryLabel))
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             Spacer()
@@ -79,7 +79,7 @@ struct TwoRowsSliderView: View {
 
             Text("\(viewModel.currentAlpha)")
                 .font(.footnote)
-                .foregroundColor(Color(uiColor: .gray))
+                .foregroundColor(Color(uiColor: .secondaryLabel))
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }

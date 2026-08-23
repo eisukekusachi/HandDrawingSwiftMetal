@@ -47,7 +47,12 @@ struct TextureLayerItemView: View {
 
             Text("A: \(layer.alpha)")
                 .font(.caption2)
-                .foregroundColor(Color(uiColor: .gray))
+                .foregroundColor(
+                    Color(
+                        layer.textColor(isSelected)
+                    )
+                    .opacity(0.7)
+                )
 
             Button(
                 action: {
