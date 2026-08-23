@@ -27,8 +27,8 @@ final class CoreDataBrushPaletteStorage {
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
-            palette.$index.map { _ in () }.eraseToAnyPublisher(),
-            palette.$colors.map { _ in () }.eraseToAnyPublisher()
+            palette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
+            palette.$items.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] in
@@ -57,7 +57,7 @@ extension CoreDataBrushPaletteStorage {
         } ?? []
         let index = max(0, min(Int(entity.index), colors.count - 1))
 
-        palette.update(colors: colors, index: index)
+        palette.update(colors: colors, selectedIndex: index)
     }
 
     func update(directoryURL: URL) throws {
@@ -78,7 +78,7 @@ extension CoreDataBrushPaletteStorage {
         }
         palette.update(
             colors: result.hexColors.map { UIColor(hex: $0) },
-            index: result.index
+            selectedIndex: result.index
         )
     }
 }
@@ -92,8 +92,8 @@ private extension CoreDataBrushPaletteStorage {
         else { return }
 
         let id: UUID = target.id
-        let index = target.index
-        let hexes = target.colors.map { $0.hex() }
+        let index = target.selectedIndex
+        let hexes = target.items.map { $0.color.hex() }
 
         await context.perform { [context] in
             do {

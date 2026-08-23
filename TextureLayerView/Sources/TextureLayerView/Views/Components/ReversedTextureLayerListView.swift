@@ -52,6 +52,18 @@ struct ReversedTextureLayerListView: View {
             .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
+        .modifier(PlainListBackground())
+    }
+}
+
+private struct PlainListBackground: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content.scrollContentBackground(.hidden)
+        } else {
+            content
+        }
     }
 }
 

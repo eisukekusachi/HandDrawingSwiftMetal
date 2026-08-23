@@ -6,6 +6,7 @@
 //
 
 import Combine
+import PopupView
 import SwiftUI
 import UIKit
 
@@ -16,16 +17,22 @@ struct PopupAnchorBinding: Identifiable {
     }
 
     let viewModel: PopupViewModel
+    let placement: PopupPlacement
     let target: UIView
+    let onClose: (() -> Void)?
     let content: AnyView
 
     init<Content: View>(
         target: UIView,
         viewModel: PopupViewModel,
+        placement: PopupPlacement,
+        onClose: (() -> Void)? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.target = target
         self.viewModel = viewModel
+        self.placement = placement
+        self.onClose = onClose
         self.content = AnyView(content())
     }
 }
@@ -81,10 +88,14 @@ final class PassthroughHostingView: UIView {
         return hit === self ? nil : hit
     }
 
+    func enablePopupInteraction(_ isEnabled: Bool) {
+        popupViewModels.forEach { $0.enableComponentInteraction(isEnabled) }
+    }
+
     private func observeViewModels() {
         cancellables.removeAll()
         for viewModel in popupViewModels {
-            viewModel.$isHidden
+            viewModel.objectWillChange
                 .sink { [weak self] _ in
                     self?.setNeedsLayout()
                 }
@@ -95,7 +106,7 @@ final class PassthroughHostingView: UIView {
     private func syncTargetFrames() {
         for binding in anchorBindings {
             let newFrame = binding.target.convert(binding.target.bounds, to: self)
-            binding.viewModel.targetFrame = newFrame
+            binding.viewModel.setTargetFrame(newFrame)
         }
     }
 
@@ -108,11 +119,13 @@ final class PassthroughHostingView: UIView {
     }
 
     private func syncHitTestRect() {
-        popupHitTestRects = popupViewModels
-            .filter { !$0.isHidden }
-            .map { viewModel in
-                viewModel.popupRect(
-                    containerWidth: bounds.width
+        popupHitTestRects = anchorBindings
+            .filter { !$0.viewModel.isHidden }
+            .map { binding in
+                binding.viewModel.popupRect(
+                    containerWidth: bounds.width,
+                    containerHeight: bounds.height,
+                    placement: binding.placement
                 )
             }
     }

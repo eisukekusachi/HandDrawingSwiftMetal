@@ -5,6 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/08/23.
 //
 
+import PaletteEditView
+import PaletteView
 import UIKit
 
 fileprivate let initializeColors: [UIColor] = [
@@ -17,31 +19,32 @@ fileprivate let initializeColors: [UIColor] = [
     .purple.withAlphaComponent(0.8)
 ]
 
-final class BrushPalette: ObservableObject {
+@MainActor
+final class BrushPalette: ObservableObject, ColorPaletteDisplayProtocol, ColorPaletteEditViewProtocol {
 
     private(set) var id: UUID
 
-    @Published private(set) var colors: [UIColor] = []
-    @Published private(set) var index: Int = 0
+    @Published private(set) var items: [ColorPaletteItem] = []
+    @Published private(set) var selectedIndex: Int = 0
 
     public init(
         id: UUID = UUID(),
         colors: [UIColor] = initializeColors,
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
         self.id = id
 
         let newColors = colors.isEmpty ? [.black] : colors
-        self.colors = newColors
-        self.index = max(0, min(index, newColors.count - 1))
+        self.items = Self.makeItems(from: newColors)
+        self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
 }
 
 extension BrushPalette {
 
     func initializeData() {
-        self.colors = initializeColors
-        self.index = 0
+        items = Self.makeItems(from: initializeColors)
+        selectedIndex = 0
     }
 
     func setId(_ id: UUID) {
@@ -49,41 +52,73 @@ extension BrushPalette {
     }
 
     var color: UIColor? {
-        guard index < colors.count else { return nil }
-        return colors[index]
+        guard selectedIndex < items.count else { return nil }
+        return items[selectedIndex].color
+    }
+
+    var selectedColor: UIColor {
+        color ?? .black
+    }
+
+    var canRemoveSelected: Bool {
+        items.count > 1
     }
 
     func color(at index: Int) -> UIColor? {
-        self.colors.indices.contains(index) ? colors[index] : nil
+        items.indices.contains(index) ? items[index].color : nil
     }
 
     func select(_ index: Int) {
-        self.index = index
+        guard items.indices.contains(index) else { return }
+        selectedIndex = index
     }
 
     func insert(_ color: UIColor, at index: Int) {
-        guard (0 ... colors.count).contains(index) else { return }
-        colors.insert(color, at: index)
+        guard (0 ... items.count).contains(index) else { return }
+        items.insert(ColorPaletteItem(color: color), at: index)
     }
 
     func update(
         colors: [UIColor] = [],
-        index: Int = 0
+        selectedIndex: Int = 0
     ) {
-        self.colors = colors.isEmpty ? [.black] : colors
-        self.index = max(0, min(index, self.colors.count - 1))
+        let newColors = colors.isEmpty ? [.black] : colors
+        items = Self.makeItems(from: newColors)
+        self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
 
     func update(
         color: UIColor,
-        at index: Int
+        at index: Int? = nil
     ) {
-        guard colors.indices.contains(index) else { return }
-        colors[index] = color
+        let index = index ?? selectedIndex
+        guard items.indices.contains(index) else { return }
+        items[index] = ColorPaletteItem(id: items[index].id, color: color)
     }
 
     func remove(at index: Int) {
-        guard colors.indices.contains(index) && colors.count > 1 else { return }
-        colors.remove(at: index)
+        guard items.indices.contains(index) && items.count > 1 else { return }
+        items.remove(at: index)
+
+        if selectedIndex > index {
+            selectedIndex -= 1
+        } else if selectedIndex >= items.count {
+            selectedIndex = items.count - 1
+        }
+    }
+
+    func removeSelected() {
+        remove(at: selectedIndex)
+    }
+
+    func duplicateSelected() {
+        guard let color else { return }
+        insert(color, at: selectedIndex + 1)
+    }
+}
+
+private extension BrushPalette {
+    static func makeItems(from colors: [UIColor]) -> [ColorPaletteItem] {
+        colors.map { ColorPaletteItem(color: $0) }
     }
 }
