@@ -180,6 +180,7 @@ private struct PreviewAnchorKey: PreferenceKey {
     }
 }
 
+@MainActor
 private struct PopupPreview: View {
     let placement: PopupPlacement
 
