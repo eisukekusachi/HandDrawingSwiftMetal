@@ -12,7 +12,7 @@ struct ColorSpectrumView: View {
 
     var body: some View {
         PickerImageView(
-            imageResource: .spectrum,
+            imageName: "spectrum",
             color: $color
         )
     }

@@ -14,10 +14,10 @@ struct PickerImageView: View {
     @Binding var color: UIColor
 
     init(
-        imageResource: ImageResource,
+        imageName: String,
         color: Binding<UIColor>
     ) {
-        let image = UIImage(resource: imageResource)
+        let image = UIImage(named: imageName, in: .module, compatibleWith: nil) ?? UIImage()
         self.image = image
         self.aspectRatio = image.size.height > 0
             ? image.size.width / image.size.height
@@ -99,14 +99,14 @@ struct PickerImageView: View {
 #if DEBUG
 private struct PickerImagePreview: View {
 
-    let imageResource: ImageResource
+    let imageName: String
 
     @State private var color: UIColor = .red
 
     var body: some View {
         VStack(spacing: 44) {
             PickerImageView(
-                imageResource: imageResource,
+                imageName: imageName,
                 color: $color
             )
             Circle()
@@ -118,12 +118,12 @@ private struct PickerImagePreview: View {
 }
 
 #Preview("Grid") {
-    PickerImagePreview(imageResource: .grid)
+    PickerImagePreview(imageName: "grid")
         .frame(width: 350, height: 400)
 }
 
 #Preview("Spectrum") {
-    PickerImagePreview(imageResource: .spectrum)
+    PickerImagePreview(imageName: "spectrum")
         .frame(width: 350, height: 400)
 }
 #endif
