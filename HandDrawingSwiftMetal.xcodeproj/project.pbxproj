@@ -85,6 +85,7 @@
 		D49C69572F2F685300B66608 /* CoreDataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69562F2F685300B66608 /* CoreDataStorage.swift */; };
 		D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
+		D4B8E1012FBC010100C55A4D /* PaletteView in Frameworks */ = {isa = PBXBuildFile; productRef = D4B8E1032FBC010100C55A4D /* PaletteView */; };
 		D4BBCC022FA211EE00C55A4C /* FileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */; };
 		D4BBCC042FA211EF00C55A4C /* MockFileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
@@ -99,7 +100,6 @@
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
-		D4B8E1012FBC010100C55A4D /* PaletteView in Frameworks */ = {isa = PBXBuildFile; productRef = D4B8E1032FBC010100C55A4D /* PaletteView */; };
 		D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */; };
 		D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256E2EAC614B00439FFF /* FileInput.swift */; };
 		D4F525712EAC616600439FFF /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525702EAC616600439FFF /* FileOutput.swift */; };
@@ -202,6 +202,7 @@
 		D49C69562F2F685300B66608 /* CoreDataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStorage.swift; sourceTree = "<group>"; };
 		D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
+		D4B8E1022FBC010100C55A4D /* PaletteView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteView; sourceTree = "<group>"; };
 		D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
@@ -220,7 +221,6 @@
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
-		D4B8E1022FBC010100C55A4D /* PaletteView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteView; sourceTree = "<group>"; };
 		D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = "<group>"; };
 		D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepository.swift; sourceTree = "<group>"; };
 		D4F5256E2EAC614B00439FFF /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
@@ -278,27 +278,18 @@
 			isa = PBXGroup;
 			children = (
 				D480E5DB2FCB1D2B006ABBC2 /* PopupView */,
-				D426FC622E5C4B3000CC116D /* Drawingtool */,
 			);
 			path = Components;
 			sourceTree = "<group>";
 		};
-		D426FC622E5C4B3000CC116D /* Drawingtool */ = {
-			isa = PBXGroup;
-			children = (
-				D426FC632E5C4B4200CC116D /* Models */,
-			);
-			path = Drawingtool;
-			sourceTree = "<group>";
-		};
-		D426FC632E5C4B4200CC116D /* Models */ = {
+		D426FC622E5C4B3000CC116D /* Drawingtools */ = {
 			isa = PBXGroup;
 			children = (
 				D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */,
 				D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */,
 				D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */,
 			);
-			path = Models;
+			path = Drawingtools;
 			sourceTree = "<group>";
 		};
 		D426FC9D2E5DD8CD00CC116D /* DrawingTools */ = {
@@ -352,6 +343,7 @@
 		D4732C7A2FA0EE4E00119C55 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D426FC622E5C4B3000CC116D /* Drawingtools */,
 				D4732C7B2FA0EE5700119C55 /* FileIO */,
 			);
 			path = Models;
@@ -1259,13 +1251,13 @@
 			package = D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
 		};
-		D4F0BF052E38F79600C3E441 /* CanvasView */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = CanvasView;
-		};
 		D4B8E1032FBC010100C55A4D /* PaletteView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PaletteView;
+		};
+		D4F0BF052E38F79600C3E441 /* CanvasView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CanvasView;
 		};
 /* End XCSwiftPackageProductDependency section */
 
