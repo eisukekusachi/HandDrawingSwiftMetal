@@ -46,6 +46,13 @@
         "identifier" : "PopupViewTests",
         "name" : "PopupViewTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:PaletteEditView",
+        "identifier" : "PaletteEditViewTests",
+        "name" : "PaletteEditViewTests"
+      }
     }
   ],
   "version" : 1
