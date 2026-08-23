@@ -74,6 +74,9 @@ struct EraserPaletteTests {
 
         subject.update(alpha: 64, at: 1)
         #expect(subject.items.map(\.alpha) == [128, 64])
+
+        subject.update(alpha: 32)
+        #expect(subject.items.map(\.alpha) == [32, 64])
     }
 
     @Test

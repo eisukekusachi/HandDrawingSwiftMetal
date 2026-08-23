@@ -89,8 +89,9 @@ extension BrushPalette {
 
     func update(
         color: UIColor,
-        at index: Int
+        at index: Int? = nil
     ) {
+        let index = index ?? selectedIndex
         guard items.indices.contains(index) else { return }
         items[index] = ColorPaletteItem(id: items[index].id, color: color)
     }
