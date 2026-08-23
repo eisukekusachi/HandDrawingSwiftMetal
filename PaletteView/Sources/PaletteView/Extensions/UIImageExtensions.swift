@@ -1,8 +1,7 @@
 //
-//  UIImageExtensions.swift
-//  HandDrawingSwiftMetal
+//  PaletteView
 //
-//  Created by Eisuke Kusachi on 2025/08/23.
+//  Created by Eisuke Kusachi on 2026/08/10.
 //
 
 import UIKit
@@ -14,8 +13,9 @@ extension UIImage {
         checkSize: CGFloat = 8,
         light: UIColor = .white,
         dark: UIColor = .lightGray,
-        scale: CGFloat = UIScreen.main.scale
+        scale: CGFloat = 0
     ) -> UIImage {
+        let scale = scale > 0 ? scale : UITraitCollection.current.displayScale
         let format = UIGraphicsImageRendererFormat()
         format.scale = scale
         format.opaque = false

@@ -12,81 +12,152 @@ import UIKit
 @MainActor
 struct EraserPaletteTests {
 
-    @Test("Confirms default alpha is set to 255 when initialized with no alphas")
-    func testInitWithEmptyColors() async throws {
-        let palette = EraserPalette(
+    typealias Subject = EraserPalette
+
+    @Test
+    func `Confirms default alpha is set to 255 when initialized with no alphas`() async throws {
+        let subject: Subject = .init(
             alphas: [],
-            index: -1
+            selectedIndex: -1
         )
 
-        #expect(palette.alphas == [255])
-        #expect(palette.index == 0)
+        #expect(subject.items.map(\.alpha) == [255])
+        #expect(subject.selectedIndex == 0)
     }
 
-    @Test("Confirms selecting an alpha changes the current alpha")
-    func testSelect() async throws {
-        let palette = EraserPalette(
+    @Test
+    func `Confirms selecting an alpha changes the current alpha`() async throws {
+        let subject: Subject = .init(
             alphas: [64, 128],
-            index: 0
+            selectedIndex: 0
         )
 
-        #expect(palette.index == 0)
-        #expect(palette.alpha == 64)
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.alpha == 64)
 
-        palette.select(1)
-        #expect(palette.index == 1)
-        #expect(palette.alpha == 128)
+        subject.select(1)
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.alpha == 128)
     }
 
-    @Test("Confirms inserting an alpha at the specified index")
-    func testInsert() async throws {
-        let palette = EraserPalette(
+    @Test
+    func `Confirms inserting an alpha at the specified index`() async throws {
+        let subject: Subject = .init(
             alphas: [128],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.insert(64, at: 0)
-        #expect(palette.alphas == [64, 128])
+        subject.insert(64, at: 0)
+        #expect(subject.items.map(\.alpha) == [64, 128])
     }
 
-    @Test("Confirms it updates alphas and currentIndex")
-    func testUpdateAlphasAndIndex() async throws {
-        let palette = EraserPalette(
+    @Test
+    func `Confirms it updates alphas and selectedIndex`() async throws {
+        let subject: Subject = .init(
             alphas: [255],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.update(alphas: [32, 64, 128], index: 2)
+        subject.update(alphas: [32, 64, 128], selectedIndex: 2)
 
-        #expect(palette.alphas == [32, 64, 128])
-        #expect(palette.index == 2)
-        #expect(palette.alpha == 128)
+        #expect(subject.items.map(\.alpha) == [32, 64, 128])
+        #expect(subject.selectedIndex == 2)
+        #expect(subject.alpha == 128)
     }
 
-    @Test("Confirms an alpha can be updated at the specified index")
-    func testUpdateAlphaAtIndex() async throws {
-        let palette = EraserPalette(
+    @Test
+    func `Confirms an alpha can be updated at the specified index`() async throws {
+        let subject: Subject = .init(
             alphas: [128, 255],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.update(alpha: 64, at: 1)
-        #expect(palette.alphas == [128, 64])
+        subject.update(alpha: 64, at: 1)
+        #expect(subject.items.map(\.alpha) == [128, 64])
     }
 
-    @Test("Confirms removing an alpha at the specified index")
-    func testRemove() async throws {
-        let palette = EraserPalette(
+    @Test
+    func `Confirms removing an alpha at the specified index`() async throws {
+        let subject: Subject = .init(
             alphas: [64, 128],
-            index: 0
+            selectedIndex: 0
         )
 
-        palette.remove(at: 0)
-        #expect(palette.alphas == [128])
+        subject.remove(at: 0)
+        #expect(subject.items.map(\.alpha) == [128])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.alpha == 128)
 
         // Cannot remove when the palette has only one alpha
-        palette.remove(at: 0)
-        #expect(palette.alphas.count == 1)
-        #expect(palette.alphas == [128])
+        subject.remove(at: 0)
+        #expect(subject.items.count == 1)
+        #expect(subject.items.map(\.alpha) == [128])
+    }
+
+    @Test
+    func `Confirms selectedIndex moves when a preceding alpha is removed`() async throws {
+        let subject: Subject = .init(
+            alphas: [64, 128, 255],
+            selectedIndex: 2
+        )
+
+        subject.remove(at: 0)
+        #expect(subject.items.map(\.alpha) == [128, 255])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.alpha == 255)
+    }
+
+    @Test
+    func `Confirms selectedIndex is clamped when the last alpha is removed`() async throws {
+        let subject: Subject = .init(
+            alphas: [64, 128],
+            selectedIndex: 1
+        )
+
+        subject.remove(at: 1)
+        #expect(subject.items.map(\.alpha) == [64])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.alpha == 64)
+    }
+
+    @Test
+    func `Confirms removing an out-of-bounds index does nothing`() async throws {
+        let subject: Subject = .init(
+            alphas: [64, 128],
+            selectedIndex: 1
+        )
+
+        subject.remove(at: -1)
+        subject.remove(at: 2)
+
+        #expect(subject.items.map(\.alpha) == [64, 128])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.alpha == 128)
+    }
+
+    @Test
+    func `Confirms selectedIndex stays when a following alpha is removed`() async throws {
+        let subject: Subject = .init(
+            alphas: [64, 128, 255],
+            selectedIndex: 0
+        )
+
+        subject.remove(at: 2)
+        #expect(subject.items.map(\.alpha) == [64, 128])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.alpha == 64)
+    }
+
+    @Test
+    func `Confirms selectedIndex stays on the next alpha when the selected alpha is removed`() async throws {
+        let subject: Subject = .init(
+            alphas: [64, 128, 255],
+            selectedIndex: 1
+        )
+
+        subject.remove(at: 1)
+        #expect(subject.items.map(\.alpha) == [64, 255])
+        #expect(subject.selectedIndex == 1)
+        #expect(subject.alpha == 255)
     }
 }

@@ -1,8 +1,7 @@
 //
-//  DoubleStrokeCircle.swift
-//  HandDrawingSwiftMetal
+//  PaletteView
 //
-//  Created by Eisuke Kusachi on 2025/08/23.
+//  Created by Eisuke Kusachi on 2026/08/10.
 //
 
 import SwiftUI
@@ -43,7 +42,7 @@ struct DoubleStrokeCircle: View {
 #Preview {
     let size: CGFloat = 44
 
-    return VStack {
+    VStack {
         ZStack {
             Circle()
                 .fill(Color(uiColor: .red))

@@ -1,11 +1,11 @@
 //
-//  ColorCircle.swift
-//  HandDrawingSwiftMetal
+//  PaletteView
 //
-//  Created by Eisuke Kusachi on 2025/08/23.
+//  Created by Eisuke Kusachi on 2026/08/10.
 //
 
 import SwiftUI
+import UIKit
 
 struct ColorCircle: View {
 
@@ -54,9 +54,9 @@ struct ColorCircle: View {
 
 #Preview {
     VStack {
-        ColorCircle(color: .red, size: 44, selected: true)
-        ColorCircle(color: .blue, size: 44)
-        ColorCircle(color: .green, size: 44)
-        ColorCircle(color: .yellow, size: 44)
+        ColorCircle(color: UIColor.red, size: 44, selected: true)
+        ColorCircle(color: UIColor.blue, size: 44)
+        ColorCircle(color: UIColor.green, size: 44)
+        ColorCircle(color: UIColor.yellow, size: 44)
     }
 }
