@@ -203,8 +203,8 @@ private struct GradientSliderPreview: View {
         GradientSlider(
             value: $value,
             gradientColors: [
-                UIColor(red: 0, green: 0, blue: 0, alpha: 255),
-                UIColor(red: 255, green: 0, blue: 0, alpha: 255)
+                UIColor(intRed: 0, green: 0, blue: 0, alpha: 255),
+                UIColor(intRed: 255, green: 0, blue: 0, alpha: 255)
             ]
         )
         .padding()
