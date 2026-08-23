@@ -421,7 +421,7 @@ private extension HandDrawingViewController {
                 placement: .belowAnchor,
                 content: {
                     textureLayerView
-                        .frame(height: 300)
+                        .frame(height: 315)
                 }
             ),
             .init(

@@ -13,8 +13,6 @@ public struct TextureLayerView: View {
 
     private let onClose: (() -> Void)?
 
-    private let range: ClosedRange<Int> = 0 ... 255
-
     public init(
         viewModel: TextureLayerViewModel,
         onClose: (() -> Void)? = nil
@@ -34,10 +32,15 @@ public struct TextureLayerView: View {
                 viewModel: viewModel
             )
 
-            TwoRowsSliderView(
-                viewModel: viewModel,
+            SliderWithStepper(
                 title: "Alpha",
-                range: range
+                value: Binding(
+                    get: { viewModel.currentAlpha },
+                    set: { viewModel.onChangeCurrentAlpha($0) }
+                ),
+                onEditingChanged: { dragging in
+                    viewModel.isAlphaSliderDragging = dragging
+                }
             )
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
@@ -102,7 +105,7 @@ private struct PreviewView: View {
         TextureLayerView(
             viewModel: viewModel
         )
-        .frame(width: 320, height: 300)
+        .frame(width: 320, height: 315)
     }
 }
 
