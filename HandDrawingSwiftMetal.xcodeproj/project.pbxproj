@@ -83,6 +83,7 @@
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4B8E1012FBC010100C55A4D /* PaletteView in Frameworks */ = {isa = PBXBuildFile; productRef = D4B8E1032FBC010100C55A4D /* PaletteView */; };
 		D4C8A2012FCC010100C55A4D /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = D4C8A2032FCC010100C55A4D /* PopupView */; };
+		D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4E2A1032FCD010100C55A4D /* PaletteEditView */; };
 		D4BBCC022FA211EE00C55A4C /* FileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */; };
 		D4BBCC042FA211EF00C55A4C /* MockFileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
@@ -197,6 +198,7 @@
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4B8E1022FBC010100C55A4D /* PaletteView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteView; sourceTree = "<group>"; };
 		D4C8A2022FCC010100C55A4D /* PopupView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PopupView; sourceTree = "<group>"; };
+		D4E2A1022FCD010100C55A4D /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
 		D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				D442BCFD2F93220E00C55A4C /* TextureLayerCanvasView in Frameworks */,
 				D4B8E1012FBC010100C55A4D /* PaletteView in Frameworks */,
 				D4C8A2012FCC010100C55A4D /* PopupView in Frameworks */,
+				D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,6 +490,7 @@
 				D46A2CE32E424E7000D638AE /* TextureLayerView */,
 				D4B8E1022FBC010100C55A4D /* PaletteView */,
 				D4C8A2022FCC010100C55A4D /* PopupView */,
+				D4E2A1022FCD010100C55A4D /* PaletteEditView */,
 				D4E1ECDB2752388C00D4A23D /* HandDrawingSwiftMetal */,
 				D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */,
 				D4E1ECFC2752388E00D4A23D /* HandDrawingSwiftMetalUITests */,
@@ -599,6 +603,7 @@
 				D442BCFC2F93220E00C55A4C /* TextureLayerCanvasView */,
 				D4B8E1032FBC010100C55A4D /* PaletteView */,
 				D4C8A2032FCC010100C55A4D /* PopupView */,
+				D4E2A1032FCD010100C55A4D /* PaletteEditView */,
 			);
 			productName = HandDrawingSwiftMetal;
 			productReference = D4E1ECD92752388C00D4A23D /* HandDrawingSwiftMetal.app */;
@@ -1223,6 +1228,10 @@
 		D4C8A2032FCC010100C55A4D /* PopupView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PopupView;
+		};
+		D4E2A1032FCD010100C55A4D /* PaletteEditView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PaletteEditView;
 		};
 		D4F0BF052E38F79600C3E441 /* CanvasView */ = {
 			isa = XCSwiftPackageProductDependency;

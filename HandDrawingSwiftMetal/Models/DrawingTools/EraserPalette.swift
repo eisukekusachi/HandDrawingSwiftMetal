@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/08/23.
 //
 
+import PaletteEditView
 import PaletteView
 import UIKit
 
@@ -19,7 +20,8 @@ fileprivate let initializeAlphas: [Int] = [
     50
 ]
 
-final class EraserPalette: ObservableObject, AlphaPaletteDisplayProtocol {
+@MainActor
+final class EraserPalette: ObservableObject, AlphaPaletteDisplayProtocol, AlphaPaletteEditViewProtocol {
 
     private(set) var id: UUID
 
@@ -54,6 +56,14 @@ extension EraserPalette {
         items.indices.contains(selectedIndex) ? items[selectedIndex].alpha : nil
     }
 
+    var selectedAlpha: Int {
+        alpha ?? 255
+    }
+
+    var canRemoveSelected: Bool {
+        items.count > 1
+    }
+
     func alpha(at index: Int) -> Int? {
         items.indices.contains(index) ? items[index].alpha : nil
     }
@@ -79,8 +89,9 @@ extension EraserPalette {
 
     func update(
         alpha: Int,
-        at index: Int
+        at index: Int? = nil
     ) {
+        let index = index ?? selectedIndex
         guard items.indices.contains(index) else { return }
         items[index] = AlphaPaletteItem(id: items[index].id, alpha: alpha)
     }
@@ -94,6 +105,15 @@ extension EraserPalette {
         } else if selectedIndex >= items.count {
             selectedIndex = items.count - 1
         }
+    }
+
+    func removeSelected() {
+        remove(at: selectedIndex)
+    }
+
+    func duplicateSelected() {
+        guard let alpha else { return }
+        insert(alpha, at: selectedIndex + 1)
     }
 }
 

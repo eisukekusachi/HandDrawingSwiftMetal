@@ -19,17 +19,20 @@ struct PopupAnchorBinding: Identifiable {
     let viewModel: PopupViewModel
     let placement: PopupPlacement
     let target: UIView
+    let onClose: (() -> Void)?
     let content: AnyView
 
     init<Content: View>(
         target: UIView,
         viewModel: PopupViewModel,
         placement: PopupPlacement,
+        onClose: (() -> Void)? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.target = target
         self.viewModel = viewModel
         self.placement = placement
+        self.onClose = onClose
         self.content = AnyView(content())
     }
 }

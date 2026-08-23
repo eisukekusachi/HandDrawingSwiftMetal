@@ -74,6 +74,9 @@ struct BrushPaletteTests {
 
         subject.update(color: .blue, at: 1)
         #expect(subject.items.map(\.color) == [.black, .blue])
+
+        subject.update(color: .green)
+        #expect(subject.items.map(\.color) == [.green, .blue])
     }
 
     @Test
@@ -159,5 +162,36 @@ struct BrushPaletteTests {
         #expect(subject.items.map(\.color) == [.black, .blue])
         #expect(subject.selectedIndex == 1)
         #expect(subject.color == .blue)
+    }
+
+    @Test
+    func `Confirms selectedColor and canRemoveSelected`() {
+        let subject: Subject = .init(
+            colors: [.red],
+            selectedIndex: 0
+        )
+
+        #expect(subject.selectedColor == .red)
+        #expect(subject.canRemoveSelected == false)
+
+        subject.insert(.blue, at: 1)
+        #expect(subject.canRemoveSelected == true)
+    }
+
+    @Test
+    func `Confirms removeSelected and duplicateSelected`() {
+        let subject: Subject = .init(
+            colors: [.black, .red],
+            selectedIndex: 0
+        )
+
+        subject.duplicateSelected()
+        #expect(subject.items.map(\.color) == [.black, .black, .red])
+        #expect(subject.selectedIndex == 0)
+
+        subject.removeSelected()
+        #expect(subject.items.map(\.color) == [.black, .red])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.color == .black)
     }
 }

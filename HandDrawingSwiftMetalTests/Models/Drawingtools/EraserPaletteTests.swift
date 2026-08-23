@@ -74,6 +74,9 @@ struct EraserPaletteTests {
 
         subject.update(alpha: 64, at: 1)
         #expect(subject.items.map(\.alpha) == [128, 64])
+
+        subject.update(alpha: 32)
+        #expect(subject.items.map(\.alpha) == [32, 64])
     }
 
     @Test
@@ -159,5 +162,36 @@ struct EraserPaletteTests {
         #expect(subject.items.map(\.alpha) == [64, 255])
         #expect(subject.selectedIndex == 1)
         #expect(subject.alpha == 255)
+    }
+
+    @Test
+    func `Confirms selectedAlpha and canRemoveSelected`() {
+        let subject: Subject = .init(
+            alphas: [128],
+            selectedIndex: 0
+        )
+
+        #expect(subject.selectedAlpha == 128)
+        #expect(subject.canRemoveSelected == false)
+
+        subject.insert(64, at: 1)
+        #expect(subject.canRemoveSelected == true)
+    }
+
+    @Test
+    func `Confirms removeSelected and duplicateSelected`() {
+        let subject: Subject = .init(
+            alphas: [64, 128],
+            selectedIndex: 0
+        )
+
+        subject.duplicateSelected()
+        #expect(subject.items.map(\.alpha) == [64, 64, 128])
+        #expect(subject.selectedIndex == 0)
+
+        subject.removeSelected()
+        #expect(subject.items.map(\.alpha) == [64, 128])
+        #expect(subject.selectedIndex == 0)
+        #expect(subject.alpha == 64)
     }
 }

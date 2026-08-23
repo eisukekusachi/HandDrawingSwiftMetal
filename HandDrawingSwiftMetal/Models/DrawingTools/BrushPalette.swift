@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/08/23.
 //
 
+import PaletteEditView
 import PaletteView
 import UIKit
 
@@ -18,7 +19,8 @@ fileprivate let initializeColors: [UIColor] = [
     .purple.withAlphaComponent(0.8)
 ]
 
-final class BrushPalette: ObservableObject, ColorPaletteDisplayProtocol {
+@MainActor
+final class BrushPalette: ObservableObject, ColorPaletteDisplayProtocol, ColorPaletteEditViewProtocol {
 
     private(set) var id: UUID
 
@@ -54,6 +56,14 @@ extension BrushPalette {
         return items[selectedIndex].color
     }
 
+    var selectedColor: UIColor {
+        color ?? .black
+    }
+
+    var canRemoveSelected: Bool {
+        items.count > 1
+    }
+
     func color(at index: Int) -> UIColor? {
         items.indices.contains(index) ? items[index].color : nil
     }
@@ -79,8 +89,9 @@ extension BrushPalette {
 
     func update(
         color: UIColor,
-        at index: Int
+        at index: Int? = nil
     ) {
+        let index = index ?? selectedIndex
         guard items.indices.contains(index) else { return }
         items[index] = ColorPaletteItem(id: items[index].id, color: color)
     }
@@ -94,6 +105,15 @@ extension BrushPalette {
         } else if selectedIndex >= items.count {
             selectedIndex = items.count - 1
         }
+    }
+
+    func removeSelected() {
+        remove(at: selectedIndex)
+    }
+
+    func duplicateSelected() {
+        guard let color else { return }
+        insert(color, at: selectedIndex + 1)
     }
 }
 
