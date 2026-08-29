@@ -8,6 +8,7 @@ import CoreGraphics
 import Testing
 @testable import PopupView
 
+@Suite(.serialized)
 @MainActor
 struct PopupViewModelTests {
     private typealias Subject = PopupViewModel
@@ -29,8 +30,10 @@ struct PopupViewModelTests {
             // The popup is still present but not visible.
             #expect(subject.isConcealed)
 
-            // Default reveal delay is 10ms. Sleep twice that so scheduling jitter does not make this flaky.
-            try await Task.sleep(nanoseconds: 20_000_000)
+            // Default reveal delay is 10ms. Sleep past it, then yield so the
+            // MainActor reveal Task can set isConcealed before we assert.
+            try await Task.sleep(nanoseconds: 50_000_000)
+            await Task.yield()
 
             // The popup is visible.
             #expect(!subject.isConcealed)
