@@ -1,0 +1,42 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Cancel" : {
+      "extractionState" : "manual"
+    },
+    "Delete" : {
+      "extractionState" : "manual"
+    },
+    "Delete this file?" : {
+      "extractionState" : "manual"
+    },
+    "Enter a new name" : {
+      "extractionState" : "manual"
+    },
+    "Name" : {
+      "extractionState" : "manual"
+    },
+    "Not saved yet" : {
+      "extractionState" : "manual"
+    },
+    "OK" : {
+      "extractionState" : "manual"
+    },
+    "Rename" : {
+      "extractionState" : "manual"
+    },
+    "Reset" : {
+      "extractionState" : "manual"
+    },
+    "Reset this canvas?" : {
+      "extractionState" : "manual"
+    },
+    "The drawing will be cleared. The file will remain." : {
+      "extractionState" : "manual"
+    },
+    "This file will be removed from the device" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.1"
+}
