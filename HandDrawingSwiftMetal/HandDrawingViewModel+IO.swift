@@ -6,6 +6,7 @@
 
 import CanvasView
 import Combine
+import FileView
 import TextureLayerView
 import UIKit
 
@@ -14,7 +15,7 @@ extension HandDrawingViewModel {
     var zipFileURL: URL {
         FileManager.zipFileURL(
             projectName: project.currentProjectName,
-            suffix: fileCoordinator.fileSuffix
+            suffix: fileList.fileSuffix
         )
     }
 
@@ -29,7 +30,7 @@ extension HandDrawingViewModel {
 
         let targetURL = try URL.uniqueProjectURLInDocuments(
             fileName: fileName,
-            fileSuffix: fileCoordinator.fileSuffix
+            fileSuffix: fileList.fileSuffix
         )
 
         try await initializeBlankCanvasContent(
@@ -42,7 +43,7 @@ extension HandDrawingViewModel {
             updatedAt: Date()
         )
 
-        try await fileCoordinator.saveProject(
+        try await saveProject(
             content: .init(
                 thumbnail: nil,
                 textureLayersState: textureLayersState,
@@ -54,11 +55,8 @@ extension HandDrawingViewModel {
             to: targetURL
         )
 
-        fileCoordinator.upsertFileList(
-            currentFileItem(thumbnail: nil)
-        )
-
-        fileCoordinator.sortFileList()
+        fileList.setItem(currentFileItem(thumbnail: nil))
+        fileList.sortItems()
 
         return targetURL
     }
@@ -70,7 +68,7 @@ extension HandDrawingViewModel {
     ) async throws {
         let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
 
-        try await fileCoordinator.initializeStorage(
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
             textureLayers: newTextureLayersState,
             device: device,
             commandQueue: commandQueue
@@ -98,9 +96,8 @@ extension HandDrawingViewModel {
             self.activityIndicatorSubject.send(true)
 
             do {
-                try await self.fileCoordinator.loadProject(
+                try await self.loadProject(
                     device: device,
-                    textureLayersState: textureLayersState,
                     from: zipFileURL
                 ) { [weak self] workingDirectoryURL in
                     guard let `self` else { return }
@@ -149,7 +146,7 @@ extension HandDrawingViewModel {
             self.activityIndicatorSubject.send(true)
 
             do {
-                try await self.fileCoordinator.saveProject(
+                try await self.saveProject(
                     content: .init(
                         thumbnail: thumbnail,
                         textureLayersState: self.textureLayersState,
@@ -160,6 +157,9 @@ extension HandDrawingViewModel {
                     ),
                     to: zipFileURL
                 )
+
+                self.fileList.setItem(self.currentFileItem(thumbnail: thumbnail))
+                self.fileList.sortItems()
 
                 completion?()
 
@@ -189,7 +189,7 @@ extension HandDrawingViewModel {
         )
         project.update(updatedAt: Date())
 
-        try await fileCoordinator.saveProject(
+        try await saveProject(
             content: .init(
                 thumbnail: nil,
                 textureLayersState: textureLayersState,
@@ -200,23 +200,15 @@ extension HandDrawingViewModel {
             ),
             to: zipFileURL
         )
-        fileCoordinator.upsertFileList(
-            currentFileItem(thumbnail: nil)
-        )
-        fileCoordinator.sortFileList()
+        fileList.setItem(currentFileItem(thumbnail: nil))
+        fileList.sortItems()
     }
 
     /// Renames a saved file on disk and updates the file list.
+    /// - Returns: The title stored in the file list after renaming.
     @discardableResult
-    func renameCanvas(
-        index: Int,
-        newName: String,
-        currentOpenFileURL: URL
-    ) throws -> URL {
-        guard
-            let item = fileCoordinator.item(index),
-            let index = fileCoordinator.index(url: item.fileURL)
-        else {
+    func renameCanvas(index: Int, newName: String) throws -> String {
+        guard let item = fileList.item(index) else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Invalid Value")
@@ -224,36 +216,171 @@ extension HandDrawingViewModel {
         }
 
         let oldFileURL = item.fileURL
-
+        let oldTitle = item.title
         let normalizedName = URL.normalizedName(
-            oldName: oldFileURL.baseName,
+            oldName: oldTitle,
             newName: newName
         )
 
-        let newFileURL = URL.uniqueURL(
-            baseName: normalizedName,
-            fileSuffix: fileCoordinator.fileSuffix,
-            excludeURL: oldFileURL
+        guard normalizedName != oldTitle else {
+            return oldTitle
+        }
+
+        let uniqueName = fileList.naming.uniqueTitle(
+            from: normalizedName,
+            existingTitles: fileList.items.map(\.title)
+        )
+        guard uniqueName != oldTitle else {
+            return oldTitle
+        }
+
+        let newFileURL = URL.fileURL(
+            in: oldFileURL.deletingLastPathComponent(),
+            name: uniqueName,
+            fileSuffix: fileList.fileSuffix
         )
 
-        try fileCoordinator.renameFile(
-            index: index,
-            oldFileURL: oldFileURL,
-            newFileURL: newFileURL
-        )
+        try dependencies.localFileRepository.moveItem(at: oldFileURL, to: newFileURL)
+        fileList.renameItem(title: oldTitle, newTitle: uniqueName)
 
-        if oldFileURL == currentOpenFileURL {
+        if oldFileURL == zipFileURL {
             project.update(
-                projectName: newFileURL.baseName,
+                projectName: uniqueName,
                 updatedAt: Date()
             )
         }
 
-        return newFileURL
+        return uniqueName
     }
 
     /// Removes a saved file from disk and the file list.
-    func deleteCanvas(fileURL: URL) throws {
-        try fileCoordinator.deleteFile(fileURL: fileURL)
+    func deleteCanvas(index: Int) throws {
+        guard let item = fileList.item(index) else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
+        }
+
+        try dependencies.localFileRepository.removeItem(at: item.fileURL)
+        fileList.deleteItem(title: item.title)
+    }
+}
+
+private extension HandDrawingViewModel {
+
+    func saveProject(
+        content: ProjectSaveContent,
+        to zipFileURL: URL
+    ) async throws {
+        defer {
+            try? dependencies.localFileRepository.removeWorkingDirectory()
+        }
+        let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+
+        try await writeCanvasToWorkingDirectory(
+            textureLayersState: content.textureLayersState,
+            thumbnail: content.thumbnail,
+            to: workingDirectoryURL
+        )
+
+        try DrawingToolArchiveModel(content.drawingTool).write(in: workingDirectoryURL)
+        try BrushPaletteArchiveModel(content.brushPalette).write(in: workingDirectoryURL)
+        try EraserPaletteArchiveModel(content.eraserPalette).write(in: workingDirectoryURL)
+        try ProjectArchiveModel(content.project).write(in: workingDirectoryURL)
+
+        try dependencies.localFileRepository.zipWorkingDirectory(to: zipFileURL)
+    }
+
+    func loadProject(
+        device: MTLDevice,
+        from zipFileURL: URL,
+        action: (URL) async throws -> Void
+    ) async throws {
+        defer {
+            try? dependencies.localFileRepository.removeWorkingDirectory()
+        }
+        let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+
+        try await dependencies.localFileRepository.unzipToWorkingDirectory(from: zipFileURL)
+
+        try await loadCanvasFromWorkingDirectory(
+            device: device,
+            from: workingDirectoryURL
+        )
+
+        try await action(workingDirectoryURL)
+    }
+
+    func writeCanvasToWorkingDirectory(
+        textureLayersState: TextureLayersState,
+        thumbnail: UIImage?,
+        to workingDirectoryURL: URL
+    ) async throws {
+        do {
+            try thumbnail?.pngData()?.write(
+                to: workingDirectoryURL.appendingPathComponent(thumbnailFileName)
+            )
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to create the thumbnail")
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        do {
+            for layer in textureLayersState.layers {
+                try await dependencies.textureLayersDocumentsRepository.copyTexture(
+                    id: layer.id,
+                    to: workingDirectoryURL
+                )
+            }
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to create the textures")
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        do {
+            try TextureLayersArchiveModel(
+                layers: textureLayersState.layers.map { .init(item: $0) },
+                layerIndex: textureLayersState.selectedIndex ?? 0,
+                textureSize: textureLayersState.textureSize
+            ).write(
+                in: workingDirectoryURL
+            )
+        } catch {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to save the texture layers")
+            )
+            Logger.error(error)
+            throw error
+        }
+    }
+
+    func loadCanvasFromWorkingDirectory(
+        device: MTLDevice,
+        from workingDirectoryURL: URL
+    ) async throws {
+        let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
+            in: workingDirectoryURL
+        )
+        let newTextureLayers: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+
+        guard try await dependencies.textureLayersDocumentsRepository.restoreStorage(
+            url: workingDirectoryURL,
+            textureLayers: newTextureLayers,
+            device: device
+        ) else {
+            return
+        }
+
+        textureLayersState.update(newTextureLayers)
     }
 }

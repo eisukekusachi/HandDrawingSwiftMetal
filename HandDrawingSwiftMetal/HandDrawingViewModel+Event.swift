@@ -7,29 +7,53 @@
 import FileView
 import Foundation
 import Metal
+import UIKit
 
 extension HandDrawingViewModel {
-    /// Builds a package `FileList` snapshot from `fileCoordinator`.
-    func makeFileList() -> FileList {
-        .init(
-            fileSuffix: fileCoordinator.fileSuffix,
-            items: fileCoordinator.fileList.map { local in
-                FileItem(
-                    createdAt: local.createdAt,
-                    updatedAt: local.updatedAt,
-                    thumbnail: local.thumbnail,
-                    fileURL: local.fileURL
-                )
+    /// Scans Documents for zip files and refreshes the file list.
+    func setupFileList() async {
+        let fileURLs = URL.documents.allFileURLs(suffix: fileList.fileSuffix)
+        let needsUnzip = fileURLs.contains { url in
+            fileList.index(fileURL: url) == nil
+        }
+
+        if needsUnzip {
+            showActivityIndicator(true)
+        }
+        defer {
+            if needsUnzip {
+                showActivityIndicator(false)
             }
-        )
+        }
+
+        await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
+            guard let self else { return nil }
+            do {
+                defer { try? dependencies.localFileRepository.removeWorkingDirectory() }
+                let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
+                try await dependencies.localFileRepository.unzipToWorkingDirectory(
+                    from: zipFileURL
+                )
+
+                let projectMetaData = try ProjectArchiveModel(in: workingDirectoryURL)
+                let thumbnailURL = workingDirectoryURL.appendingPathComponent(thumbnailFileName)
+                let thumbnailData = try? Data(contentsOf: thumbnailURL)
+
+                return FileItem(
+                    createdAt: projectMetaData.createdAt,
+                    updatedAt: projectMetaData.updatedAt,
+                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                    fileURL: zipFileURL
+                )
+            } catch {
+                Logger.error(error)
+                return nil
+            }
+        }
     }
 
-    func onTapRenameFile(
-        _ fileList: FileList,
-        index: Int,
-        newName: String
-    ) -> String? {
-        guard let item = fileList.item(index) else {
+    func onTapRenameFile(_ index: Int, _ newName: String) -> String? {
+        guard fileList.item(index) != nil else {
             showError(
                 NSError(
                     title: String(localized: "Error"),
@@ -40,14 +64,7 @@ extension HandDrawingViewModel {
         }
 
         do {
-            let oldTitle = item.title
-            let newURL = try renameCanvas(
-                index: index,
-                newName: newName,
-                currentOpenFileURL: zipFileURL
-            )
-            fileList.renameItem(title: oldTitle, newTitle: newURL.baseName)
-            return newURL.baseName
+            return try renameCanvas(index: index, newName: newName)
         } catch {
             showError(error)
             return nil
@@ -57,7 +74,6 @@ extension HandDrawingViewModel {
     /// Deletes a saved file, or clears the open canvas when that file is selected.
     /// - Returns: `true` when the open canvas was cleared and the UI should reinitialize.
     func onTapDeleteFile(
-        _ fileList: FileList,
         index: Int,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -77,47 +93,22 @@ extension HandDrawingViewModel {
                 device: device,
                 commandQueue: commandQueue
             )
-            if let local = fileCoordinator.fileList.first(where: { $0.fileURL == zipFileURL }) {
-                fileList.setItem(
-                    FileItem(
-                        createdAt: local.createdAt,
-                        updatedAt: local.updatedAt,
-                        thumbnail: local.thumbnail,
-                        fileURL: local.fileURL
-                    )
-                )
-                fileList.sortItems()
-            }
             return true
         }
 
-        try deleteCanvas(fileURL: item.fileURL)
-        fileList.deleteItem(title: item.title)
+        try deleteCanvas(index: index)
         return false
     }
 
     func onTapNewCanvas(
-        _ fileList: FileList,
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> URL {
-        let zipFileURL = try await newCanvas(
+        try await newCanvas(
             fileName: fileName,
             device: device,
             commandQueue: commandQueue
         )
-        if let local = fileCoordinator.fileList.first(where: { $0.fileURL == zipFileURL }) {
-            fileList.setItem(
-                FileItem(
-                    createdAt: local.createdAt,
-                    updatedAt: local.updatedAt,
-                    thumbnail: local.thumbnail,
-                    fileURL: local.fileURL
-                )
-            )
-            fileList.sortItems()
-        }
-        return zipFileURL
     }
 }

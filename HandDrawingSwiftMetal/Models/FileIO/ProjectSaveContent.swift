@@ -1,5 +1,4 @@
 //
-//  FileCoordinatorSaveContent.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2026/04/25.
@@ -8,7 +7,7 @@
 import UIKit
 import TextureLayerView
 
-struct FileCoordinatorSaveContent {
+struct ProjectSaveContent {
     let thumbnail: UIImage?
     let textureLayersState: TextureLayersState
     let project: ProjectData

@@ -57,14 +57,22 @@ extension LocalFileRepository {
             priority: .high
         )
     }
+
+    func removeItem(at url: URL) throws {
+        try FileManager.default.removeItem(at: url)
+    }
+
+    func moveItem(at sourceURL: URL, to destinationURL: URL) throws {
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            try FileManager.default.removeItem(at: destinationURL)
+        }
+        try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
+    }
 }
 
 extension LocalFileRepository {
 
     private func moveFiles(from sourceURL: URL, to destinationURL: URL) throws {
-        if FileManager.default.fileExists(atPath: destinationURL.path) {
-            try FileManager.default.removeItem(at: destinationURL)
-        }
-        try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
+        try moveItem(at: sourceURL, to: destinationURL)
     }
 }

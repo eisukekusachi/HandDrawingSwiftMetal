@@ -10,17 +10,14 @@ import UIKit
 
 extension HandDrawingViewController {
     func showFileView() {
-        let fileList = viewModel.makeFileList()
-
         let fileView = FileView(
-            fileList: fileList,
+            fileList: viewModel.fileList,
             eventHandler: .init(
                 onTapCreate: { [weak self] in
                     guard let self else { return }
                     Task { @MainActor in
                         do {
                             let zipFileURL = try await self.viewModel.onTapNewCanvas(
-                                fileList,
                                 fileName: Calendar.currentDate,
                                 device: self.sharedDevice,
                                 commandQueue: self.canvasView.sharedCommandQueue
@@ -34,18 +31,13 @@ extension HandDrawingViewController {
                 },
                 onTapRename: { [weak self] index, newName in
                     guard let self else { return nil }
-                    return self.viewModel.onTapRenameFile(
-                        fileList,
-                        index: index,
-                        newName: newName
-                    )
+                    return self.viewModel.onTapRenameFile(index, newName)
                 },
                 onTapDelete: { [weak self] index in
                     guard let self else { return }
                     Task { @MainActor in
                         do {
                             let didInitializeCanvas = try await self.viewModel.onTapDeleteFile(
-                                fileList,
                                 index: index,
                                 device: self.sharedDevice,
                                 commandQueue: self.canvasView.sharedCommandQueue

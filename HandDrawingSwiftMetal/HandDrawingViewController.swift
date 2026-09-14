@@ -623,19 +623,7 @@ extension HandDrawingViewController {
     func saveCanvas() {
         viewModel.saveCanvas(
             thumbnail: canvasView.thumbnail,
-            completion: { [weak self] in
-                guard
-                    let `self`,
-                    let thumbnail = self.canvasView.thumbnail
-                else { return }
-
-                self.viewModel.fileCoordinator.upsertFileList(
-                    self.viewModel.currentFileItem(
-                        thumbnail: thumbnail
-                    )
-                )
-                self.viewModel.fileCoordinator.sortFileList()
-            },
+            completion: nil,
             zipFileURL: viewModel.zipFileURL
         )
     }

@@ -25,4 +25,8 @@ protocol LocalFileRepositoryProtocol: Sendable {
     func unzipToWorkingDirectory(
         from zipFileURL: URL
     ) async throws
+
+    func removeItem(at url: URL) throws
+
+    func moveItem(at sourceURL: URL, to destinationURL: URL) throws
 }

@@ -32,4 +32,12 @@ struct MockLocalFileRepository: LocalFileRepositoryProtocol, @unchecked Sendable
     func unzipToWorkingDirectory(from zipFileURL: URL) async throws {
         // No-op
     }
+
+    func removeItem(at url: URL) throws {
+        // No-op
+    }
+
+    func moveItem(at sourceURL: URL, to destinationURL: URL) throws {
+        // No-op
+    }
 }

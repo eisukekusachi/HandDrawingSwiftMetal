@@ -7,6 +7,7 @@
 
 import Combine
 import CanvasView
+import FileView
 import UIKit
 import TextureLayerView
 
@@ -24,18 +25,19 @@ final class HandDrawingViewModel: ObservableObject {
 
     let textureLayersState: TextureLayersState = TextureLayersState()
 
+    let fileList = FileList(fileSuffix: "zip")
+
+    let thumbnailFileName = "thumbnail.png"
+
     /// Current file for displaying in the file list
-    func currentFileItem(thumbnail: UIImage?) -> LocalFileItem {
+    func currentFileItem(thumbnail: UIImage?) -> FileItem {
         .init(
-            title: project.currentProjectName,
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            suffix: fileCoordinator.fileSuffix
+            fileURL: zipFileURL
         )
     }
-
-    let fileCoordinator: FileCoordinator
 
     private let textureLayerStorage: CoreDataTextureLayerStorage
     let projectStorage: CoreDataProjectStorage
@@ -101,15 +103,14 @@ final class HandDrawingViewModel: ObservableObject {
             context: drawingToolStorageController.viewContext
         )
         self.dependencies = dependencies ?? .init()
-        self.fileCoordinator = FileCoordinator(dependencies: self.dependencies)
-        self.fileCoordinator.objectWillChange
-            .sink { [weak self] in
+        self.fileList.objectWillChange
+            .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
     }
 
-    func loadLocalDrawingComponentsData(configuration: ProjectConfiguration) {
+    func loadLocalDrawingComponentsData(configuration _: ProjectConfiguration) {
         // Fetch data from Core Data
         do {
             try fetchDataFromCoreDataIfAvailable()
@@ -117,9 +118,7 @@ final class HandDrawingViewModel: ObservableObject {
             Logger.error(error)
         }
         Task {
-            await fileCoordinator.setupFileList(
-                configuration: configuration
-            )
+            await setupFileList()
         }
     }
 
@@ -155,7 +154,7 @@ final class HandDrawingViewModel: ObservableObject {
 
         if let restoredTextureLayerDataFromCoreData {
             do {
-                try fileCoordinator.initializeStorageByRestoring(
+                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
                     textureLayers: restoredTextureLayerDataFromCoreData,
                     device: device
                 )
@@ -167,7 +166,7 @@ final class HandDrawingViewModel: ObservableObject {
                     let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
 
                     // Initialize using the configuration values when an error occurs
-                    try await fileCoordinator.initializeStorage(
+                    try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                         textureLayers: newTextureLayers,
                         device: device,
                         commandQueue: commandQueue
@@ -185,7 +184,7 @@ final class HandDrawingViewModel: ObservableObject {
             do {
                 let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
 
-                try await fileCoordinator.initializeStorage(
+                try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newTextureLayers,
                     device: device,
                     commandQueue: commandQueue
