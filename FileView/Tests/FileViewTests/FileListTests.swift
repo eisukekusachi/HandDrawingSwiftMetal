@@ -66,6 +66,28 @@ struct FileListTests {
             // Updates `updatedAt`.
             #expect(subject.items[0].updatedAt == newUpdatedAt)
         }
+
+        @Test
+        func `Verify that setItem clears thumbnail when the update has no thumbnail`() {
+            let fileURL = URL(fileURLWithPath: "/tmp/a.zip")
+            let subject: Subject = .init(fileSuffix: "zip")
+
+            subject.setItem(
+                FileItem(
+                    thumbnail: UIImage(),
+                    fileURL: fileURL
+                )
+            )
+            #expect(subject.items[0].thumbnail != nil)
+
+            subject.setItem(
+                FileItem(
+                    thumbnail: nil,
+                    fileURL: fileURL
+                )
+            )
+            #expect(subject.items[0].thumbnail == nil)
+        }
     }
 
     @Suite

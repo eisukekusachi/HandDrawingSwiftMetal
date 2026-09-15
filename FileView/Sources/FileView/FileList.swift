@@ -72,7 +72,7 @@ extension FileList {
         if let index = items.firstIndex(where: { $0.title == item.title }) {
             items[index].update(
                 updatedAt: item.updatedAt,
-                thumbnail: item.thumbnail
+                thumbnail: .set(item.thumbnail)
             )
         } else {
             items.append(item)

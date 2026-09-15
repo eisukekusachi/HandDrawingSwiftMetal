@@ -17,6 +17,14 @@ public class FileItem: Identifiable {
 
     public var title: String { fileURL.baseName }
 
+    /// How `update(thumbnail:)` should treat the thumbnail.
+    enum ThumbnailUpdate {
+        /// Leave the current thumbnail as-is.
+        case unchanged
+        /// Replace the thumbnail (`nil` clears it).
+        case set(UIImage?)
+    }
+
     public init(
         createdAt: Date = .init(),
         updatedAt: Date = .init(),
@@ -32,10 +40,16 @@ public class FileItem: Identifiable {
     func update(
         fileURL: URL? = nil,
         updatedAt: Date? = nil,
-        thumbnail: UIImage? = nil
+        thumbnail: ThumbnailUpdate = .unchanged
     ) {
         if let fileURL { self.fileURL = fileURL }
         if let updatedAt { self.updatedAt = updatedAt }
-        if let thumbnail { self.thumbnail = thumbnail }
+
+        switch thumbnail {
+        case .unchanged:
+            break
+        case .set(let image):
+            self.thumbnail = image
+        }
     }
 }
