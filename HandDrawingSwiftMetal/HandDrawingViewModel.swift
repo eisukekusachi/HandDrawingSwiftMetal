@@ -62,11 +62,6 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let alertSubject = PassthroughSubject<any Error, Never>()
 
-    var toast: AnyPublisher<ToastMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
-    }
-    let toastSubject = PassthroughSubject<ToastMessage, Never>()
-
     private var cancellables = Set<AnyCancellable>()
 
     let dependencies: HandDrawingViewDependencies

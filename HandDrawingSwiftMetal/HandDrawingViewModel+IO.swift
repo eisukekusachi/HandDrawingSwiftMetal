@@ -25,9 +25,6 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> URL {
-        activityIndicatorSubject.send(true)
-        defer { activityIndicatorSubject.send(false) }
-
         let targetURL = try URL.uniqueProjectURLInDocuments(
             fileName: fileName,
             fileSuffix: fileList.fileSuffix
@@ -63,97 +60,52 @@ extension HandDrawingViewModel {
 
     /// Loads a saved canvas zip into the editor.
     func loadCanvas(
-        device: MTLDevice?,
-        zipFileURL: URL,
-        completion: (() -> Void)?
-    ) {
-        Task { [weak self] in
-            guard
-                let `self`,
-                let device
-            else { return }
+        device: MTLDevice,
+        zipFileURL: URL
+    ) async throws {
+        try await loadProject(
+            device: device,
+            from: zipFileURL
+        ) { [weak self] workingDirectoryURL in
+            guard let `self` else { return }
+            try self.projectStorage.update(
+                directoryURL: workingDirectoryURL,
+                projectName: zipFileURL.baseName
+            )
+            try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
+            try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
+            try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
+        }
 
-            defer { self.activityIndicatorSubject.send(false) }
-            self.activityIndicatorSubject.send(true)
-
-            do {
-                try await self.loadProject(
-                    device: device,
-                    from: zipFileURL
-                ) { [weak self] workingDirectoryURL in
-                    guard let `self` else { return }
-                    try self.projectStorage.update(
-                        directoryURL: workingDirectoryURL,
-                        projectName: zipFileURL.baseName
-                    )
-                    try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
-                    try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
-                    try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
-                }
-
-                let textures = try? await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-                    self.textureLayersState.layers.map { $0.id },
-                    textureSize: textureLayersState.textureSize,
-                    device: device
-                )
-                textures?.forEach { texture in
-                    self.textureLayersState.updateThumbnail(texture.0, texture: texture.1)
-                }
-
-                completion?()
-
-                self.toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                self.alertSubject.send(error)
-            }
+        let textures = try? await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+            textureLayersState.layers.map { $0.id },
+            textureSize: textureLayersState.textureSize,
+            device: device
+        )
+        textures?.forEach { texture in
+            textureLayersState.updateThumbnail(texture.0, texture: texture.1)
         }
     }
 
     /// Captures the current canvas state and writes it to a zip file.
     func saveCanvas(
         thumbnail: UIImage?,
-        completion: (() -> Void)?,
         zipFileURL: URL
-    ) {
-        Task(priority: .userInitiated) { [weak self] in
-            guard let `self` else { return }
+    ) async throws {
+        try await saveProject(
+            content: .init(
+                thumbnail: thumbnail,
+                textureLayersState: textureLayersState,
+                project: project,
+                drawingTool: drawingTool,
+                brushPalette: brushPalette,
+                eraserPalette: eraserPalette
+            ),
+            to: zipFileURL
+        )
 
-            defer { self.activityIndicatorSubject.send(false) }
-            self.activityIndicatorSubject.send(true)
-
-            do {
-                try await self.saveProject(
-                    content: .init(
-                        thumbnail: thumbnail,
-                        textureLayersState: self.textureLayersState,
-                        project: self.project,
-                        drawingTool: self.drawingTool,
-                        brushPalette: self.brushPalette,
-                        eraserPalette: self.eraserPalette
-                    ),
-                    to: zipFileURL
-                )
-
-                self.fileList.setItem(self.currentFileItem(thumbnail: thumbnail))
-                self.fileList.sortItems()
-
-                completion?()
-
-                self.toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                self.alertSubject.send(error)
-            }
-        }
+        fileList.setItem(currentFileItem(thumbnail: thumbnail))
+        fileList.sortItems()
     }
 
     /// Clears the open canvas in place and overwrites the same zip.
@@ -161,9 +113,6 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        activityIndicatorSubject.send(true)
-        defer { activityIndicatorSubject.send(false) }
-
         try await initializeBlankCanvasContent(
             device: device,
             commandQueue: commandQueue
@@ -181,6 +130,7 @@ extension HandDrawingViewModel {
             ),
             to: zipFileURL
         )
+
         fileList.setItem(currentFileItem(thumbnail: nil))
         fileList.sortItems()
     }

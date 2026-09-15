@@ -15,15 +15,24 @@ extension HandDrawingViewController {
             eventHandler: .init(
                 onTapCreate: { [weak self] in
                     guard let self else { return }
+                    self.viewModel.showActivityIndicator(true)
                     Task { @MainActor in
+                        defer { self.viewModel.showActivityIndicator(false) }
+
                         do {
                             let zipFileURL = try await self.viewModel.onTapNewCanvas(
                                 fileName: Calendar.currentDate,
                                 device: self.sharedDevice,
                                 commandQueue: self.canvasView.sharedCommandQueue
                             )
-                            self.loadCanvas(zipFileURL: zipFileURL)
+                            try await self.viewModel.loadCanvas(
+                                device: self.sharedDevice,
+                                zipFileURL: zipFileURL
+                            )
+                            try await self.initializeCanvas(self.viewModel.textureSize)
+                            self.updateDrawingComponents()
                             self.presentedViewController?.dismiss(animated: true)
+                            self.showToast(.success)
                         } catch {
                             self.showAlert(error)
                         }
@@ -35,7 +44,10 @@ extension HandDrawingViewController {
                 },
                 onTapDelete: { [weak self] index in
                     guard let self else { return }
+                    self.viewModel.showActivityIndicator(true)
                     Task { @MainActor in
+                        defer { self.viewModel.showActivityIndicator(false) }
+
                         do {
                             let didInitializeCanvas = try await self.viewModel.onTapDeleteFile(
                                 index: index,

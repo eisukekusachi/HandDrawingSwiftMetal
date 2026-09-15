@@ -258,13 +258,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.toast
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] model in
-                self?.showToast(model)
-            }
-            .store(in: &cancellables)
-
         viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, let newColor = viewModel.brushPalette.color(at: index) else { return }
@@ -603,29 +596,39 @@ extension HandDrawingViewController {
 extension HandDrawingViewController {
 
     func loadCanvas(zipFileURL: URL) {
-        self.viewModel.loadCanvas(
-            device: sharedDevice,
-            zipFileURL: zipFileURL,
-            completion: { [weak self] in
-                guard let `self` else { return }
-                Task {
-                    do {
-                        try await self.initializeCanvas(self.viewModel.textureSize)
-                        self.updateDrawingComponents()
-                    } catch {
-                        self.showAlert(error)
-                    }
-                }
+        viewModel.showActivityIndicator(true)
+        Task { @MainActor in
+            defer { viewModel.showActivityIndicator(false) }
+
+            do {
+                try await viewModel.loadCanvas(
+                    device: sharedDevice,
+                    zipFileURL: zipFileURL
+                )
+                try await initializeCanvas(viewModel.textureSize)
+                updateDrawingComponents()
+                showToast(.success)
+            } catch {
+                showAlert(error)
             }
-        )
+        }
     }
 
     func saveCanvas() {
-        viewModel.saveCanvas(
-            thumbnail: canvasView.thumbnail,
-            completion: nil,
-            zipFileURL: viewModel.zipFileURL
-        )
+        viewModel.showActivityIndicator(true)
+        Task { @MainActor in
+            defer { viewModel.showActivityIndicator(false) }
+
+            do {
+                try await viewModel.saveCanvas(
+                    thumbnail: canvasView.thumbnail,
+                    zipFileURL: viewModel.zipFileURL
+                )
+                showToast(.success)
+            } catch {
+                showAlert(error)
+            }
+        }
     }
 
     func saveImage() {
@@ -638,12 +641,7 @@ extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            showToast(
-                .init(
-                    title: "Success",
-                    icon: UIImage(systemName: "hand.thumbsup.fill")
-                )
-            )
+            showToast(.success)
         }
     }
 }
