@@ -61,25 +61,6 @@ extension HandDrawingViewModel {
         return targetURL
     }
 
-    /// Clears the canvas texture and resets drawing tool / palettes.
-    private func initializeBlankCanvasContent(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
-
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: newTextureLayersState,
-            device: device,
-            commandQueue: commandQueue
-        )
-        textureLayersState.update(newTextureLayersState)
-
-        drawingToolStorage.initializeData()
-        brushPalette.initializeData()
-        eraserPalette.initializeData()
-    }
-
     /// Loads a saved canvas zip into the editor.
     func loadCanvas(
         device: MTLDevice?,
@@ -382,5 +363,24 @@ private extension HandDrawingViewModel {
         }
 
         textureLayersState.update(newTextureLayers)
+    }
+
+    /// Clears the canvas texture and resets drawing tool / palettes.
+    func initializeBlankCanvasContent(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
+
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+            textureLayers: newTextureLayersState,
+            device: device,
+            commandQueue: commandQueue
+        )
+        textureLayersState.update(newTextureLayersState)
+
+        drawingToolStorage.initializeData()
+        brushPalette.initializeData()
+        eraserPalette.initializeData()
     }
 }
