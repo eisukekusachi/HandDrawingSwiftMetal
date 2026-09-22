@@ -157,24 +157,34 @@ private extension FileView {
         HStack(spacing: configuration.toolbarButtonSpacing) {
             Button(
                 action: { viewModel.onTapCreate() },
-                label: { icons.create }
+                label: { toolbarIcon(icons.create) }
             )
 
             Button(
                 action: { viewModel.onTapRename() },
-                label: { icons.rename }
+                label: { toolbarIcon(icons.rename) }
             )
             .grayedOutWhenDisabled(viewModel.renameDisabled)
 
             Button(
                 action: { viewModel.onTapDelete() },
-                label: { icons.delete }
+                label: { toolbarIcon(icons.delete) }
             )
             .grayedOutWhenDisabled(
                 viewModel.deleteDisabled,
                 enabledColor: configuration.deleteButtonEnabledColor
             )
         }
+    }
+
+    func toolbarIcon(_ image: Image) -> some View {
+        image
+            .resizable()
+            .scaledToFit()
+            .frame(
+                width: configuration.toolbarButtonSize,
+                height: configuration.toolbarButtonSize
+            )
     }
 
     func trailingToolbarContent() -> some View {

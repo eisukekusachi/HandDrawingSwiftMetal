@@ -22,6 +22,8 @@ public struct FileViewConfiguration {
     public var columnSpacing: CGFloat
     /// Spacing between leading toolbar buttons
     public var toolbarButtonSpacing: CGFloat
+    /// Side length of the add, rename, and delete toolbar icons
+    public var toolbarButtonSize: CGFloat
     /// Preferred thumbnail width used only to decide column count; actual cell width is flexible
     public var preferredThumbnailWidth: CGFloat
     /// Corner radius of each thumbnail
@@ -89,6 +91,7 @@ public struct FileViewConfiguration {
         verticalPadding: CGFloat = 24,
         columnSpacing: CGFloat = 12,
         toolbarButtonSpacing: CGFloat = 20,
+        toolbarButtonSize: CGFloat = 20,
         preferredThumbnailWidth: CGFloat = 200,
         cornerRadius: CGFloat = 24,
         thumbnailImagePadding: CGFloat = 16,
@@ -121,6 +124,7 @@ public struct FileViewConfiguration {
         self.verticalPadding = verticalPadding
         self.columnSpacing = columnSpacing
         self.toolbarButtonSpacing = toolbarButtonSpacing
+        self.toolbarButtonSize = toolbarButtonSize
         self.preferredThumbnailWidth = preferredThumbnailWidth
         self.cornerRadius = cornerRadius
         self.thumbnailImagePadding = thumbnailImagePadding
