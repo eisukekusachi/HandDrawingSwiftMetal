@@ -149,7 +149,7 @@ extension HandDrawingViewModel {
         let oldFileURL = item.fileURL
         let oldTitle = item.title
         let normalizedName = URL.normalizedName(
-            oldName: oldTitle,
+            fallbackName: oldTitle,
             newName: newName
         )
 
