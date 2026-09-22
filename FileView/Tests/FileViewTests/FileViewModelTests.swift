@@ -177,6 +177,24 @@ struct FileViewModelTests {
     @MainActor
     struct SelectedIndex {
         @Test
+        func `Verify that init keeps the current open file selected`() {
+            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
+            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
+
+            let subject: Subject = .init(
+                fileList: .init(
+                    fileSuffix: "zip",
+                    items: [fileItemA, fileItemB]
+                ),
+                currentOpenFileURL: fileItemB.fileURL
+            )
+
+            #expect(subject.selectedIndex == 1)
+            #expect(subject.renameDisabled == false)
+            #expect(subject.deleteDisabled == false)
+        }
+
+        @Test
         func `Verify that selectedIndex is cleared when the selected file is removed`() {
             let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
             let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))

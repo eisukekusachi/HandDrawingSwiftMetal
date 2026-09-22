@@ -105,7 +105,12 @@ final class FileViewModel: ObservableObject {
         self.strings = strings
         self.eventHandler = eventHandler
         self.currentOpenFileURL = currentOpenFileURL
-        self.selectedIndex = fileList.index(fileURL: currentOpenFileURL)
+
+        let initialIndex = fileList.index(fileURL: currentOpenFileURL)
+        // `didSet` does not run for property initialization, so set `selectedItem` explicitly
+        // before subscribing to `$items` (which would otherwise clear the selection).
+        self.selectedIndex = initialIndex
+        self.selectedItem = initialIndex.flatMap { fileList.item($0) }
 
         fileList.$items
             .sink { [weak self] items in
