@@ -240,7 +240,7 @@ private extension FileView {
         let placeholderTint = configuration.unsavedPlaceholderTintColor
 
         return VStack(
-            alignment:. center,
+            alignment: .center,
             spacing: configuration.unsavedPlaceholderSpacing
         ) {
             Spacer()
