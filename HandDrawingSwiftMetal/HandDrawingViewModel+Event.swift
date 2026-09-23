@@ -73,7 +73,7 @@ extension HandDrawingViewModel {
             return false
         }
 
-        if item.fileURL == zipFileURL {
+        if item.fileURL == currentZipFileURL {
             try await clearCanvas(
                 device: device,
                 commandQueue: commandQueue

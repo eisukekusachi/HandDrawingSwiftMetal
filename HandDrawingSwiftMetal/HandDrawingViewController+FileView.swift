@@ -18,7 +18,7 @@ extension HandDrawingViewController {
                 onTapDelete: { [weak self] index in self?.deleteFile(index) },
                 onSelectItem: { [weak self] zipFileURL in self?.selectFile(zipFileURL) }
             ),
-            currentOpenFileURL: viewModel.zipFileURL
+            currentOpenFileURL: viewModel.currentZipFileURL
         )
 
         let vc = UIHostingController(rootView: fileView)

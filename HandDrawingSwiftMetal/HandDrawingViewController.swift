@@ -622,7 +622,7 @@ extension HandDrawingViewController {
             do {
                 try await viewModel.saveCanvas(
                     thumbnail: canvasView.thumbnail,
-                    zipFileURL: viewModel.zipFileURL
+                    zipFileURL: viewModel.currentZipFileURL
                 )
                 showToast(.success)
             } catch {

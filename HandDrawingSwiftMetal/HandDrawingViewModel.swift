@@ -35,7 +35,7 @@ final class HandDrawingViewModel: ObservableObject {
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            fileURL: zipFileURL
+            fileURL: currentZipFileURL
         )
     }
 

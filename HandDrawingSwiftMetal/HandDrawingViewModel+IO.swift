@@ -12,7 +12,7 @@ import UIKit
 
 extension HandDrawingViewModel {
 
-    var zipFileURL: URL {
+    var currentZipFileURL: URL {
         FileManager.zipFileURL(
             projectName: project.currentProjectName,
             suffix: fileList.fileSuffix
@@ -128,7 +128,7 @@ extension HandDrawingViewModel {
                 brushPalette: brushPalette,
                 eraserPalette: eraserPalette
             ),
-            to: zipFileURL
+            to: currentZipFileURL
         )
 
         fileList.setItem(currentFileItem(thumbnail: nil))
@@ -174,7 +174,7 @@ extension HandDrawingViewModel {
         try dependencies.localFileRepository.moveItem(at: oldFileURL, to: newFileURL)
         fileList.renameItem(title: oldTitle, newTitle: uniqueName)
 
-        if oldFileURL == zipFileURL {
+        if oldFileURL == currentZipFileURL {
             project.update(
                 projectName: uniqueName,
                 updatedAt: Date()
