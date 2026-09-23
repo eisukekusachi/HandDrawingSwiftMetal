@@ -41,7 +41,7 @@ private extension HandDrawingViewController {
             defer { viewModel.showActivityIndicator(false) }
 
             do {
-                let zipFileURL = try await viewModel.onTapNewCanvas(
+                let zipFileURL = try await viewModel.onTapCreate(
                     fileName: Calendar.currentDate,
                     device: sharedDevice,
                     commandQueue: canvasView.sharedCommandQueue
@@ -62,7 +62,7 @@ private extension HandDrawingViewController {
 
     func renameFile(_ index: Int, _ newName: String) -> String? {
         do {
-            return try viewModel.onTapRenameFile(index, newName)
+            return try viewModel.onTapRename(index: index, newName: newName)
         } catch {
             showAlert(error)
             return nil
@@ -75,7 +75,7 @@ private extension HandDrawingViewController {
             defer { viewModel.showActivityIndicator(false) }
 
             do {
-                let didInitializeCanvas = try await viewModel.onTapDeleteFile(
+                let didInitializeCanvas = try await viewModel.onTapDelete(
                     index: index,
                     device: sharedDevice,
                     commandQueue: canvasView.sharedCommandQueue

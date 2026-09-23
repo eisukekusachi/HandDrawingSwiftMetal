@@ -52,13 +52,16 @@ extension HandDrawingViewModel {
         }
     }
 
-    func onTapRenameFile(_ index: Int, _ newName: String) throws -> String {
+    func onTapRename(
+        index: Int,
+        newName: String
+    ) throws -> String {
         try renameCanvas(index: index, newName: newName)
     }
 
     /// Deletes a saved file, or clears the open canvas when that file is selected.
     /// - Returns: `true` when the open canvas was cleared and the UI should reinitialize.
-    func onTapDeleteFile(
+    func onTapDelete(
         index: Int,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
@@ -85,7 +88,7 @@ extension HandDrawingViewModel {
         return false
     }
 
-    func onTapNewCanvas(
+    func onTapCreate(
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
