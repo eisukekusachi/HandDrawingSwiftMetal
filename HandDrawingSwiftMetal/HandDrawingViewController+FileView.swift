@@ -13,39 +13,10 @@ extension HandDrawingViewController {
         let fileView = FileView(
             fileList: viewModel.fileList,
             eventHandler: .init(
-                onTapCreate: { [weak self] in
-                    guard let self else { return }
-                    Task {
-                        await self.viewModel.createFile(
-                            fileName: Calendar.currentDate,
-                            device: self.sharedDevice,
-                            commandQueue: self.canvasView.sharedCommandQueue
-                        )
-                    }
-                },
-                onTapRename: { [weak self] index, newName in
-                    self?.viewModel.renameFile(index: index, newName: newName)
-                },
-                onTapDelete: { [weak self] index in
-                    guard let self else { return }
-                    Task {
-                        await self.viewModel.deleteFile(
-                            index: index,
-                            device: self.sharedDevice,
-                            commandQueue: self.canvasView.sharedCommandQueue
-                        )
-                    }
-                },
-                onSelectItem: { [weak self] zipFileURL in
-                    guard let self else { return }
-                    self.presentedViewController?.dismiss(animated: true)
-                    Task {
-                        await self.viewModel.loadFile(
-                            device: self.sharedDevice,
-                            zipFileURL: zipFileURL
-                        )
-                    }
-                }
+                onTapCreate: { [weak self] in self?.onTapCreate() },
+                onTapRename: { [weak self] index, newName in self?.onTapRename(index, newName) },
+                onTapDelete: { [weak self] index in self?.onTapDelete(index) },
+                onSelectItem: { [weak self] zipFileURL in self?.onSelectItem(zipFileURL) }
             ),
             currentOpenFileURL: viewModel.currentZipFileURL
         )
@@ -60,5 +31,41 @@ extension HandDrawingViewController {
         }
 
         present(vc, animated: true)
+    }
+}
+
+private extension HandDrawingViewController {
+    func onTapCreate() {
+        Task {
+            await viewModel.createFile(
+                fileName: Calendar.currentDate,
+                device: sharedDevice,
+                commandQueue: canvasView.sharedCommandQueue
+            )
+        }
+    }
+
+    func onTapRename(_ index: Int, _ newName: String) -> String? {
+        viewModel.renameFile(index: index, newName: newName)
+    }
+
+    func onTapDelete(_ index: Int) {
+        Task {
+            await viewModel.deleteFile(
+                index: index,
+                device: sharedDevice,
+                commandQueue: canvasView.sharedCommandQueue
+            )
+        }
+    }
+
+    func onSelectItem(_ zipFileURL: URL) {
+        presentedViewController?.dismiss(animated: true)
+        Task {
+            await viewModel.loadFile(
+                device: sharedDevice,
+                zipFileURL: zipFileURL
+            )
+        }
     }
 }
