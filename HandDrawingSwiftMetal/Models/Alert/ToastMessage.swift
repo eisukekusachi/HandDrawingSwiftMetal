@@ -26,3 +26,12 @@ struct ToastMessage: Identifiable {
         self.duration = duration
     }
 }
+
+extension ToastMessage {
+    static var success: ToastMessage {
+        .init(
+            title: String(localized: "Success"),
+            icon: UIImage(systemName: "hand.thumbsup.fill")
+        )
+    }
+}

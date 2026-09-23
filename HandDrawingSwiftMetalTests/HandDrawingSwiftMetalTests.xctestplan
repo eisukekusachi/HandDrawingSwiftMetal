@@ -53,6 +53,13 @@
         "identifier" : "PaletteEditViewTests",
         "name" : "PaletteEditViewTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:FileView",
+        "identifier" : "FileViewTests",
+        "name" : "FileViewTests"
+      }
     }
   ],
   "version" : 1

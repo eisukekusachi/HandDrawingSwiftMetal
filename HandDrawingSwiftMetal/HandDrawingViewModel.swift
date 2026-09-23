@@ -7,8 +7,25 @@
 
 import Combine
 import CanvasView
+import FileView
 import UIKit
 import TextureLayerView
+
+/// Asks the view to reinitialize the canvas after a file action.
+struct InitializeCanvasRequest: Equatable {
+    /// Whether the layer list UI should reload from `textureLayersState`
+    let updateLayerList: Bool
+    /// Whether the presented file list should be dismissed after initialization
+    let dismissFileView: Bool
+
+    init(
+        updateLayerList: Bool = false,
+        dismissFileView: Bool = false
+    ) {
+        self.updateLayerList = updateLayerList
+        self.dismissFileView = dismissFileView
+    }
+}
 
 @MainActor
 final class HandDrawingViewModel: ObservableObject {
@@ -24,31 +41,25 @@ final class HandDrawingViewModel: ObservableObject {
 
     let textureLayersState: TextureLayersState = TextureLayersState()
 
-    var zipFileURL: URL {
-        FileManager.zipFileURL(
-            projectName: project.currentProjectName,
-            suffix: fileCoordinator.fileSuffix
-        )
-    }
+    let fileList = FileList(fileSuffix: "zip")
+
+    let thumbnailFileName = "thumbnail.png"
 
     /// Current file for displaying in the file list
-    func currentFileItem(thumbnail: UIImage?) -> LocalFileItem {
+    func currentFileItem(thumbnail: UIImage?) -> FileItem {
         .init(
-            title: project.currentProjectName,
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            suffix: fileCoordinator.fileSuffix
+            fileURL: currentZipFileURL
         )
     }
 
-    let fileCoordinator: FileCoordinator
-
     private let textureLayerStorage: CoreDataTextureLayerStorage
-    private let projectStorage: CoreDataProjectStorage
-    private let drawingToolStorage: CoreDataDrawingToolStorage
-    private let brushPaletteStorage: CoreDataBrushPaletteStorage
-    private let eraserPaletteStorage: CoreDataEraserPaletteStorage
+    let projectStorage: CoreDataProjectStorage
+    let drawingToolStorage: CoreDataDrawingToolStorage
+    let brushPaletteStorage: CoreDataBrushPaletteStorage
+    let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     private let textureLayersStorageController: PersistenceController = PersistenceController(
         xcdatamodeldName: "TextureLayerStorage"
@@ -60,21 +71,26 @@ final class HandDrawingViewModel: ObservableObject {
     var activityIndicator: AnyPublisher<Bool, Never> {
         activityIndicatorSubject.eraseToAnyPublisher()
     }
-    private let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
+    let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
 
     var alert: AnyPublisher<any Error, Never> {
         alertSubject.eraseToAnyPublisher()
     }
-    private let alertSubject = PassthroughSubject<any Error, Never>()
+    let alertSubject = PassthroughSubject<any Error, Never>()
 
     var toast: AnyPublisher<ToastMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
-    private let toastSubject = PassthroughSubject<ToastMessage, Never>()
+    let toastSubject = PassthroughSubject<ToastMessage, Never>()
+
+    var initializeCanvasRequest: AnyPublisher<InitializeCanvasRequest, Never> {
+        initializeCanvasRequestSubject.eraseToAnyPublisher()
+    }
+    let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
-    private let dependencies: HandDrawingViewDependencies
+    let dependencies: HandDrawingViewDependencies
 
     init(
         dependencies: HandDrawingViewDependencies? = nil
@@ -108,15 +124,14 @@ final class HandDrawingViewModel: ObservableObject {
             context: drawingToolStorageController.viewContext
         )
         self.dependencies = dependencies ?? .init()
-        self.fileCoordinator = FileCoordinator(dependencies: self.dependencies)
-        self.fileCoordinator.objectWillChange
-            .sink { [weak self] in
+        self.fileList.objectWillChange
+            .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
     }
 
-    func loadLocalDrawingComponentsData(configuration: ProjectConfiguration) {
+    func loadLocalDrawingComponentsData(configuration _: ProjectConfiguration) {
         // Fetch data from Core Data
         do {
             try fetchDataFromCoreDataIfAvailable()
@@ -124,9 +139,7 @@ final class HandDrawingViewModel: ObservableObject {
             Logger.error(error)
         }
         Task {
-            await fileCoordinator.setupFileList(
-                configuration: configuration
-            )
+            await setupFileList()
         }
     }
 
@@ -162,7 +175,7 @@ final class HandDrawingViewModel: ObservableObject {
 
         if let restoredTextureLayerDataFromCoreData {
             do {
-                try fileCoordinator.initializeStorageByRestoring(
+                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
                     textureLayers: restoredTextureLayerDataFromCoreData,
                     device: device
                 )
@@ -174,7 +187,7 @@ final class HandDrawingViewModel: ObservableObject {
                     let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
 
                     // Initialize using the configuration values when an error occurs
-                    try await fileCoordinator.initializeStorage(
+                    try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                         textureLayers: newTextureLayers,
                         device: device,
                         commandQueue: commandQueue
@@ -192,7 +205,7 @@ final class HandDrawingViewModel: ObservableObject {
             do {
                 let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
 
-                try await fileCoordinator.initializeStorage(
+                try await dependencies.textureLayersDocumentsRepository.initializeStorage(
                     textureLayers: newTextureLayers,
                     device: device,
                     commandQueue: commandQueue
@@ -212,267 +225,16 @@ final class HandDrawingViewModel: ObservableObject {
     func toggleDrawingTool() {
         drawingTool.swapTool(drawingTool.type)
     }
-}
 
-extension HandDrawingViewModel {
-
-    func loadCanvas(
-        device: MTLDevice?,
-        zipFileURL: URL,
-        completion: (() -> Void)?
-    ) {
-        Task { [weak self] in
-            guard
-                let `self`,
-                let device
-            else { return }
-
-            defer { self.activityIndicatorSubject.send(false) }
-            self.activityIndicatorSubject.send(true)
-
-            do {
-                try await self.fileCoordinator.loadProject(
-                    device: device,
-                    textureLayersState: textureLayersState,
-                    from: zipFileURL
-                ) { [weak self] workingDirectoryURL in
-                    guard let `self` else { return }
-                    try self.projectStorage.update(
-                        directoryURL: workingDirectoryURL,
-                        projectName: zipFileURL.baseName
-                    )
-                    try? self.drawingToolStorage.update(directoryURL: workingDirectoryURL)
-                    try? self.brushPaletteStorage.update(directoryURL: workingDirectoryURL)
-                    try? self.eraserPaletteStorage.update(directoryURL: workingDirectoryURL)
-                }
-
-                let textures = try? await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
-                    self.textureLayersState.layers.map { $0.id },
-                    textureSize: textureLayersState.textureSize,
-                    device: device
-                )
-                textures?.forEach { texture in
-                    self.textureLayersState.updateThumbnail(texture.0, texture: texture.1)
-                }
-
-                completion?()
-
-                self.toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                self.alertSubject.send(error)
-            }
-        }
+    func showActivityIndicator(_ isShown: Bool) {
+        activityIndicatorSubject.send(isShown)
     }
 
-    func saveCanvas(
-        thumbnail: UIImage?,
-        completion: (() -> Void)?,
-        zipFileURL: URL
-    ) {
-        Task(priority: .userInitiated) { [weak self] in
-            guard let `self` else { return }
-
-            defer { self.activityIndicatorSubject.send(false) }
-            self.activityIndicatorSubject.send(true)
-
-            do {
-                try await self.fileCoordinator.saveProject(
-                    content: .init(
-                        thumbnail: thumbnail,
-                        textureLayersState: self.textureLayersState,
-                        project: self.project,
-                        drawingTool: self.drawingTool,
-                        brushPalette: self.brushPalette,
-                        eraserPalette: self.eraserPalette
-                    ),
-                    to: zipFileURL
-                )
-
-                completion?()
-
-                self.toastSubject.send(
-                    .init(
-                        title: "Success",
-                        icon: UIImage(systemName: "hand.thumbsup.fill")
-                    )
-                )
-            } catch {
-                self.alertSubject.send(error)
-            }
-        }
+    func showError(_ error: Error) {
+        alertSubject.send(error)
     }
 
-    func createNewCanvas(
-        fileName: String,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> URL {
-        activityIndicatorSubject.send(true)
-        defer { activityIndicatorSubject.send(false) }
-
-        let targetURL = try URL.uniqueProjectURLInDocuments(
-            fileName: fileName,
-            fileSuffix: fileCoordinator.fileSuffix
-        )
-
-        try await initializeBlankCanvasContent(
-            device: device,
-            commandQueue: commandQueue
-        )
-        project.update(
-            projectName: targetURL.baseName,
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-
-        try await fileCoordinator.saveProject(
-            content: .init(
-                thumbnail: nil,
-                textureLayersState: textureLayersState,
-                project: project,
-                drawingTool: drawingTool,
-                brushPalette: brushPalette,
-                eraserPalette: eraserPalette
-            ),
-            to: targetURL
-        )
-
-        upsertFileList(
-            currentFileItem(thumbnail: nil)
-        )
-
-        sortFileList()
-
-        return targetURL
-    }
-
-    @discardableResult
-    func renameCanvas(
-        index: Int,
-        newName: String,
-        currentOpenFileURL: URL
-    ) throws -> URL {
-        guard
-            let item = fileCoordinator.item(index),
-            let index = fileCoordinator.index(url: item.fileURL)
-        else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
-            )
-            throw error
-        }
-
-        let oldFileURL = item.fileURL
-
-        let normalizedName = URL.normalizedName(
-            oldName: oldFileURL.baseName,
-            newName: newName
-        )
-
-        let newFileURL = URL.uniqueURL(
-            baseName: normalizedName,
-            fileSuffix: fileCoordinator.fileSuffix,
-            excludeURL: oldFileURL
-        )
-
-        try fileCoordinator.renameFile(
-            index: index,
-            oldFileURL: oldFileURL,
-            newFileURL: newFileURL
-        )
-
-        if oldFileURL == currentOpenFileURL {
-            project.update(
-                projectName: newFileURL.baseName,
-                updatedAt: Date()
-            )
-        }
-
-        return newFileURL
-    }
-
-    @discardableResult
-    func deleteCanvas(
-        index: Int,
-        currentOpenFileURL: URL,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> Bool {
-        guard
-            let item = fileCoordinator.item(index)
-        else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
-            )
-            throw error
-        }
-
-        let shouldResetCanvas = item.fileURL == currentOpenFileURL
-
-        if shouldResetCanvas {
-            activityIndicatorSubject.send(true)
-            defer { activityIndicatorSubject.send(false) }
-
-            try await initializeBlankCanvasContent(
-                device: device,
-                commandQueue: commandQueue
-            )
-            project.update(updatedAt: Date())
-
-            try await fileCoordinator.saveProject(
-                content: .init(
-                    thumbnail: nil,
-                    textureLayersState: textureLayersState,
-                    project: project,
-                    drawingTool: drawingTool,
-                    brushPalette: brushPalette,
-                    eraserPalette: eraserPalette
-                ),
-                to: currentOpenFileURL
-            )
-            upsertFileList(
-                currentFileItem(thumbnail: nil)
-            )
-            sortFileList()
-        } else {
-            try fileCoordinator.deleteFile(
-                fileURL: item.fileURL
-            )
-        }
-
-        return shouldResetCanvas
-    }
-
-    func upsertFileList(_ file: LocalFileItem) {
-        fileCoordinator.upsertFileList(file)
-    }
-
-    func sortFileList() {
-        fileCoordinator.sortFileList()
-    }
-
-    private func initializeBlankCanvasContent(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
-
-        try await fileCoordinator.initializeStorage(
-            textureLayers: newTextureLayersState,
-            device: device,
-            commandQueue: commandQueue
-        )
-        textureLayersState.update(newTextureLayersState)
-
-        drawingToolStorage.initializeData()
-        brushPalette.initializeData()
-        eraserPalette.initializeData()
+    func showToast(_ model: ToastMessage) {
+        toastSubject.send(model)
     }
 }

@@ -54,27 +54,6 @@ extension URL {
 
 extension URL {
 
-    static func normalizedName(
-        oldName: String,
-        newName: String
-    ) -> String {
-        let sanitizedName = URL.sanitizedName(
-            URL.trimmedName(oldName: oldName, newName: newName)
-        )
-        return URL.trimmedName(
-            oldName: oldName,
-            newName: sanitizedName
-        )
-    }
-
-    static func trimmedName(
-        oldName: String,
-        newName: String
-    ) -> String {
-        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedName.isEmpty ? oldName : trimmedName
-    }
-
     static func sanitizedName(_ raw: String) -> String {
         var string = raw
         for char in ["/", "\\", ":", "?", "%", "*", "|", "\"", "<", ">"] {
