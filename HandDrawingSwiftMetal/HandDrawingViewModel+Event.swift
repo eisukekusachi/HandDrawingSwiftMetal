@@ -6,7 +6,6 @@
 
 import FileView
 import Foundation
-import Metal
 import UIKit
 
 extension HandDrawingViewModel {
@@ -50,53 +49,5 @@ extension HandDrawingViewModel {
                 return nil
             }
         }
-    }
-
-    func onTapRename(
-        index: Int,
-        newName: String
-    ) throws -> String {
-        try renameCanvas(index: index, newName: newName)
-    }
-
-    /// Deletes a saved file, or clears the open canvas when that file is selected.
-    /// - Returns: `true` when the open canvas was cleared and the UI should reinitialize.
-    func onTapDelete(
-        index: Int,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> Bool {
-        guard let item = fileList.item(index) else {
-            showError(
-                NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Invalid Value")
-                )
-            )
-            return false
-        }
-
-        if item.fileURL == currentZipFileURL {
-            try await clearCanvas(
-                device: device,
-                commandQueue: commandQueue
-            )
-            return true
-        }
-
-        try deleteCanvas(index: index)
-        return false
-    }
-
-    func onTapCreate(
-        fileName: String,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> URL {
-        try await newCanvas(
-            fileName: fileName,
-            device: device,
-            commandQueue: commandQueue
-        )
     }
 }
