@@ -52,23 +52,8 @@ extension HandDrawingViewModel {
         }
     }
 
-    func onTapRenameFile(_ index: Int, _ newName: String) -> String? {
-        guard fileList.item(index) != nil else {
-            showError(
-                NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Invalid Value")
-                )
-            )
-            return nil
-        }
-
-        do {
-            return try renameCanvas(index: index, newName: newName)
-        } catch {
-            showError(error)
-            return nil
-        }
+    func onTapRenameFile(_ index: Int, _ newName: String) throws -> String {
+        try renameCanvas(index: index, newName: newName)
     }
 
     /// Deletes a saved file, or clears the open canvas when that file is selected.
