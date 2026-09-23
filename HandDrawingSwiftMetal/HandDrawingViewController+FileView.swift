@@ -38,8 +38,9 @@ extension HandDrawingViewController {
                 },
                 onSelectItem: { [weak self] zipFileURL in
                     guard let self else { return }
+                    self.presentedViewController?.dismiss(animated: true)
                     Task {
-                        await self.viewModel.selectFile(
+                        await self.viewModel.loadFile(
                             device: self.sharedDevice,
                             zipFileURL: zipFileURL
                         )

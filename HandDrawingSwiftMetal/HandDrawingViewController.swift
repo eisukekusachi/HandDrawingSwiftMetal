@@ -265,13 +265,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.dismissFileView
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.presentedViewController?.dismiss(animated: true)
-            }
-            .store(in: &cancellables)
-
         viewModel.initializeCanvasRequest
             .receive(on: DispatchQueue.main)
             .sink { [weak self] request in
@@ -350,7 +343,13 @@ extension HandDrawingViewController {
             }
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.saveCanvas()
+            guard let self else { return }
+            Task {
+                await self.viewModel.saveFile(
+                    thumbnail: self.canvasView.thumbnail,
+                    zipFileURL: self.viewModel.currentZipFileURL
+                )
+            }
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -631,24 +630,6 @@ extension HandDrawingViewController {
 }
 
 extension HandDrawingViewController {
-
-    func loadCanvas(zipFileURL: URL) {
-        Task {
-            await viewModel.loadFile(
-                device: sharedDevice,
-                zipFileURL: zipFileURL
-            )
-        }
-    }
-
-    func saveCanvas() {
-        Task {
-            await viewModel.saveFile(
-                thumbnail: canvasView.thumbnail,
-                zipFileURL: viewModel.currentZipFileURL
-            )
-        }
-    }
 
     func saveImage() {
         if let image = canvasView.canvasTexture?.uiImage {

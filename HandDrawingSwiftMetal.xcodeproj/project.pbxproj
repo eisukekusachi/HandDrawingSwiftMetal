@@ -317,16 +317,8 @@
 			isa = PBXGroup;
 			children = (
 				D426FC622E5C4B3000CC116D /* Drawingtools */,
-				D4732C7B2FA0EE5700119C55 /* FileIO */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		D4732C7B2FA0EE5700119C55 /* FileIO */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = FileIO;
 			sourceTree = "<group>";
 		};
 		D4732C7E2FA0EE8D00119C55 /* Extensions */ = {

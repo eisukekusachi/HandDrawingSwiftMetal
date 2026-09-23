@@ -88,11 +88,6 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
 
-    var dismissFileView: AnyPublisher<Void, Never> {
-        dismissFileViewSubject.eraseToAnyPublisher()
-    }
-    let dismissFileViewSubject = PassthroughSubject<Void, Never>()
-
     private var cancellables = Set<AnyCancellable>()
 
     let dependencies: HandDrawingViewDependencies

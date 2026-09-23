@@ -126,18 +126,6 @@ extension HandDrawingViewModel {
         }
     }
 
-    /// Dismisses the file list and loads the selected zip.
-    func selectFile(
-        device: MTLDevice,
-        zipFileURL: URL
-    ) async {
-        dismissFileViewSubject.send()
-        await loadFile(
-            device: device,
-            zipFileURL: zipFileURL
-        )
-    }
-
     /// Loads a zip into the editor and asks the view to refresh.
     func loadFile(
         device: MTLDevice,
