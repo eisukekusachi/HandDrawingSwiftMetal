@@ -13,10 +13,38 @@ extension HandDrawingViewController {
         let fileView = FileView(
             fileList: viewModel.fileList,
             eventHandler: .init(
-                onTapCreate: { [weak self] in self?.createFile() },
-                onTapRename: { [weak self] index, newName in self?.renameFile(index, newName) },
-                onTapDelete: { [weak self] index in self?.deleteFile(index) },
-                onSelectItem: { [weak self] zipFileURL in self?.selectFile(zipFileURL) }
+                onTapCreate: { [weak self] in
+                    guard let self else { return }
+                    Task {
+                        await self.viewModel.createFile(
+                            fileName: Calendar.currentDate,
+                            device: self.sharedDevice,
+                            commandQueue: self.canvasView.sharedCommandQueue
+                        )
+                    }
+                },
+                onTapRename: { [weak self] index, newName in
+                    self?.viewModel.renameFile(index: index, newName: newName)
+                },
+                onTapDelete: { [weak self] index in
+                    guard let self else { return }
+                    Task {
+                        await self.viewModel.deleteFile(
+                            index: index,
+                            device: self.sharedDevice,
+                            commandQueue: self.canvasView.sharedCommandQueue
+                        )
+                    }
+                },
+                onSelectItem: { [weak self] zipFileURL in
+                    guard let self else { return }
+                    Task {
+                        await self.viewModel.selectFile(
+                            device: self.sharedDevice,
+                            zipFileURL: zipFileURL
+                        )
+                    }
+                }
             ),
             currentOpenFileURL: viewModel.currentZipFileURL
         )
@@ -31,71 +59,5 @@ extension HandDrawingViewController {
         }
 
         present(vc, animated: true)
-    }
-}
-
-private extension HandDrawingViewController {
-    func createFile() {
-        viewModel.showActivityIndicator(true)
-        Task { @MainActor in
-            defer { viewModel.showActivityIndicator(false) }
-
-            do {
-                let zipFileURL = try await viewModel.newCanvas(
-                    fileName: Calendar.currentDate,
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
-                try await viewModel.loadCanvas(
-                    device: sharedDevice,
-                    zipFileURL: zipFileURL
-                )
-                try await initializeCanvas(viewModel.textureSize)
-                updateDrawingComponents()
-                presentedViewController?.dismiss(animated: true)
-                showToast(.success)
-            } catch {
-                showAlert(error)
-            }
-        }
-    }
-
-    func renameFile(_ index: Int, _ newName: String) -> String? {
-        do {
-            return try viewModel.renameCanvas(index: index, newName: newName)
-        } catch {
-            showAlert(error)
-            return nil
-        }
-    }
-
-    func deleteFile(_ index: Int) {
-        viewModel.showActivityIndicator(true)
-        Task { @MainActor in
-            defer { viewModel.showActivityIndicator(false) }
-
-            do {
-                let didInitializeCanvas = try await viewModel.deleteFile(
-                    index: index,
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
-                guard didInitializeCanvas else { return }
-
-                try await initializeCanvas(viewModel.textureSize)
-                textureLayerView.update(
-                    viewModel.textureLayersState
-                )
-                updateDrawingComponents()
-                presentedViewController?.dismiss(animated: true)
-            } catch {
-                showAlert(error)
-            }
-        }
-    }
-
-    func selectFile(_ zipFileURL: URL) {
-        loadCanvas(zipFileURL: zipFileURL)
-        presentedViewController?.dismiss(animated: true)
     }
 }

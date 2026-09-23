@@ -11,6 +11,22 @@ import FileView
 import UIKit
 import TextureLayerView
 
+/// Asks the view to reinitialize the canvas after a file action.
+struct InitializeCanvasRequest: Equatable {
+    /// Whether the layer list UI should reload from `textureLayersState`
+    let updateLayerList: Bool
+    /// Whether the presented file list should be dismissed after initialization
+    let dismissFileView: Bool
+
+    init(
+        updateLayerList: Bool = false,
+        dismissFileView: Bool = false
+    ) {
+        self.updateLayerList = updateLayerList
+        self.dismissFileView = dismissFileView
+    }
+}
+
 @MainActor
 final class HandDrawingViewModel: ObservableObject {
 
@@ -61,6 +77,21 @@ final class HandDrawingViewModel: ObservableObject {
         alertSubject.eraseToAnyPublisher()
     }
     let alertSubject = PassthroughSubject<any Error, Never>()
+
+    var toast: AnyPublisher<ToastMessage, Never> {
+        toastSubject.eraseToAnyPublisher()
+    }
+    let toastSubject = PassthroughSubject<ToastMessage, Never>()
+
+    var initializeCanvasRequest: AnyPublisher<InitializeCanvasRequest, Never> {
+        initializeCanvasRequestSubject.eraseToAnyPublisher()
+    }
+    let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
+
+    var dismissFileView: AnyPublisher<Void, Never> {
+        dismissFileViewSubject.eraseToAnyPublisher()
+    }
+    let dismissFileViewSubject = PassthroughSubject<Void, Never>()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -206,5 +237,9 @@ final class HandDrawingViewModel: ObservableObject {
 
     func showError(_ error: Error) {
         alertSubject.send(error)
+    }
+
+    func showToast(_ model: ToastMessage) {
+        toastSubject.send(model)
     }
 }

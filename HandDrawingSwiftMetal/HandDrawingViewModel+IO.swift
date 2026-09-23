@@ -5,8 +5,8 @@
 //
 
 import CanvasView
-import Combine
 import FileView
+import Metal
 import TextureLayerView
 import UIKit
 
@@ -172,6 +172,7 @@ extension HandDrawingViewModel {
         )
 
         try dependencies.localFileRepository.moveItem(at: oldFileURL, to: newFileURL)
+
         fileList.renameItem(title: oldTitle, newTitle: uniqueName)
 
         if oldFileURL == currentZipFileURL {
@@ -184,33 +185,7 @@ extension HandDrawingViewModel {
         return uniqueName
     }
 
-    /// Deletes a saved file, or clears the open canvas when that file is selected.
-    /// - Returns: `true` when the open canvas was cleared and the UI should reinitialize.
-    func deleteFile(
-        index: Int,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> Bool {
-        guard let item = fileList.item(index) else {
-            throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
-            )
-        }
-
-        if item.fileURL == currentZipFileURL {
-            try await clearCanvas(
-                device: device,
-                commandQueue: commandQueue
-            )
-            return true
-        }
-
-        try deleteCanvas(index: index)
-        return false
-    }
-
-    /// Removes a saved file from disk and the file list.
+    /// Deletes a saved file from disk and the file list.
     func deleteCanvas(index: Int) throws {
         guard let item = fileList.item(index) else {
             throw NSError(
@@ -220,6 +195,7 @@ extension HandDrawingViewModel {
         }
 
         try dependencies.localFileRepository.removeItem(at: item.fileURL)
+
         fileList.deleteItem(title: item.title)
     }
 }

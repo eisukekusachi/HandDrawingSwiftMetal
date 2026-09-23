@@ -31,14 +31,10 @@
 		D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */; };
 		D442BD072F937F4D00C55A4C /* UndoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */; };
 		D44624652F9C546B00BE4E8A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D44624642F9C546B00BE4E8A /* Localizable.xcstrings */; };
-		D4F1A0072FBE010300C55A4D /* ProjectSaveContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0062FBE010300C55A4D /* ProjectSaveContent.swift */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
 		D44B52B62DB3928000EE213C /* HandDrawingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */; };
 		D44B52BB2DB3928000EE213C /* HandDrawingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */; };
 		D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */; };
-		D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */; };
-		D4F1A0032FBE010100C55A4D /* HandDrawingViewModel+Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0022FBE010100C55A4D /* HandDrawingViewModel+Event.swift */; };
-		D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+IO.swift */; };
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46EDF962F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDF952F7BA945008A2A89 /* LocalFileRepositoryProtocol.swift */; };
@@ -79,11 +75,10 @@
 		D49D7DD22F4A9FC000B178EF /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */; };
 		D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */; };
 		D4B8E1012FBC010100C55A4D /* PaletteView in Frameworks */ = {isa = PBXBuildFile; productRef = D4B8E1032FBC010100C55A4D /* PaletteView */; };
-		D4C8A2012FCC010100C55A4D /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = D4C8A2032FCC010100C55A4D /* PopupView */; };
-		D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4E2A1032FCD010100C55A4D /* PaletteEditView */; };
 		D4BBCC022FA211EE00C55A4C /* FileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */; };
 		D4BBCC042FA211EF00C55A4C /* MockFileManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */; };
 		D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */; };
+		D4C8A2012FCC010100C55A4D /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = D4C8A2032FCC010100C55A4D /* PopupView */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */; };
 		D4DF37742E914492009B8F2A /* Throttle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DF37732E914492009B8F2A /* Throttle.swift */; };
@@ -94,12 +89,17 @@
 		D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */; };
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
+		D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4E2A1032FCD010100C55A4D /* PaletteEditView */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
-		D4F8B2052FD2010500C55A4E /* FileView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F8B2062FD2010600C55A4E /* FileView */; };
+		D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */; };
+		D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */; };
+		D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */; };
+		D4F1A0092FBE010400C55A4D /* ProjectSaveContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0082FBE010400C55A4D /* ProjectSaveContent.swift */; };
 		D4F5256D2EAC611F00439FFF /* LocalFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */; };
 		D4F5256F2EAC614B00439FFF /* FileInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5256E2EAC614B00439FFF /* FileInput.swift */; };
 		D4F525712EAC616600439FFF /* FileOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525702EAC616600439FFF /* FileOutput.swift */; };
 		D4F525732EAC96BE00439FFF /* ToastMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525722EAC96BE00439FFF /* ToastMessage.swift */; };
+		D4F8B2052FD2010500C55A4E /* FileView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F8B2062FD2010600C55A4E /* FileView */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -143,13 +143,9 @@
 		D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSErrorExtensions.swift; sourceTree = "<group>"; };
 		D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoCoordinator.swift; sourceTree = "<group>"; };
 		D44624642F9C546B00BE4E8A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		D4F1A0062FBE010300C55A4D /* ProjectSaveContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSaveContent.swift; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
 		D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingContentView.xib; sourceTree = "<group>"; };
 		D44B52B02DB3928000EE213C /* HandDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewController.swift; sourceTree = "<group>"; };
-		D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewController+FileView.swift"; sourceTree = "<group>"; };
-		D4F1A0022FBE010100C55A4D /* HandDrawingViewModel+Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+Event.swift"; sourceTree = "<group>"; };
-		D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+IO.swift"; sourceTree = "<group>"; };
 		D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HandDrawingViewController.xib; sourceTree = "<group>"; };
 		D46A2CE32E424E7000D638AE /* TextureLayerView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerView; sourceTree = "<group>"; };
 		D46AD0A72F49CC880051C0D7 /* CanvasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasError.swift; sourceTree = "<group>"; };
@@ -191,11 +187,10 @@
 		D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
 		D4ACE9A32BA8587A0077C888 /* DialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPresenter.swift; sourceTree = "<group>"; };
 		D4B8E1022FBC010100C55A4D /* PaletteView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteView; sourceTree = "<group>"; };
-		D4C8A2022FCC010100C55A4D /* PopupView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PopupView; sourceTree = "<group>"; };
-		D4E2A1022FCD010100C55A4D /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
 		D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BBCC032FA211EF00C55A4C /* MockFileManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFileManagerWrapper.swift; sourceTree = "<group>"; };
 		D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModel.swift; sourceTree = "<group>"; };
+		D4C8A2022FCC010100C55A4D /* PopupView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PopupView; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
 		D4DF37732E914492009B8F2A /* Throttle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttle.swift; sourceTree = "<group>"; };
@@ -210,13 +205,18 @@
 		D4E1ECF92752388E00D4A23D /* HandDrawingSwiftMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandDrawingSwiftMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D4E2A1022FCD010100C55A4D /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
-		D4F8B2042FD2010400C55A4E /* FileView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FileView; sourceTree = "<group>"; };
+		D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewController+FileView.swift"; sourceTree = "<group>"; };
+		D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+File.swift"; sourceTree = "<group>"; };
+		D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+IO.swift"; sourceTree = "<group>"; };
+		D4F1A0082FBE010400C55A4D /* ProjectSaveContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSaveContent.swift; sourceTree = "<group>"; };
 		D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = "<group>"; };
 		D4F5256C2EAC611F00439FFF /* LocalFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileRepository.swift; sourceTree = "<group>"; };
 		D4F5256E2EAC614B00439FFF /* FileInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInput.swift; sourceTree = "<group>"; };
 		D4F525702EAC616600439FFF /* FileOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOutput.swift; sourceTree = "<group>"; };
 		D4F525722EAC96BE00439FFF /* ToastMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastMessage.swift; sourceTree = "<group>"; };
+		D4F8B2042FD2010400C55A4E /* FileView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FileView; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -295,7 +295,7 @@
 			isa = PBXGroup;
 			children = (
 				D4BBCC012FA211EE00C55A4C /* FileManagerWrapper.swift */,
-				D4F1A0062FBE010300C55A4D /* ProjectSaveContent.swift */,
+				D4F1A0082FBE010400C55A4D /* ProjectSaveContent.swift */,
 				D49C69352F23CD7700B66608 /* FileManager.swift */,
 				D49C693D2F249C9600B66608 /* LocalFileConvertible.swift */,
 			);
@@ -494,8 +494,8 @@
 				D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */,
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
-				D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+IO.swift */,
-				D4F1A0022FBE010100C55A4D /* HandDrawingViewModel+Event.swift */,
+				D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */,
+				D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */,
 				D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
 				D4E1ECEA2752388E00D4A23D /* Info.plist */,
@@ -736,11 +736,11 @@
 				D48CA07C2F3C18D3008C6E9E /* UndoDrawing.swift in Sources */,
 				D48CA07D2F3C18D3008C6E9E /* UndoAlphaObject.swift in Sources */,
 				D48CA07E2F3C18D3008C6E9E /* UndoAdditionObject.swift in Sources */,
-				D4F1A0072FBE010300C55A4D /* ProjectSaveContent.swift in Sources */,
+				D4F1A0092FBE010400C55A4D /* ProjectSaveContent.swift in Sources */,
 				D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */,
 				D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */,
-				D4F1A0032FBE010100C55A4D /* HandDrawingViewModel+Event.swift in Sources */,
-				D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+IO.swift in Sources */,
+				D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */,
+				D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */,
 				D48CA09C2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift in Sources */,
 				D4F525712EAC616600439FFF /* FileOutput.swift in Sources */,
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
