@@ -1,8 +1,5 @@
 //
-//  LocalFileConvertible.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/01/24.
+//  Created by Eisuke Kusachi on 2026/09/26.
 //
 
 import Foundation
@@ -10,10 +7,7 @@ import Foundation
 public protocol LocalFileConvertible: Sendable, Codable {
     static var fileName: String { get }
 
-    /// Read from a **directory** URL (fileName is appended)
     init(in directory: URL) throws
-
-    /// Write to a **directory** URL (fileName is appended)
     func write(in directory: URL) throws
 }
 

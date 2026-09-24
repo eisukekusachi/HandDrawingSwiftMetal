@@ -13,16 +13,21 @@ public struct ProjectConfiguration {
     /// File extension used when saving a file
     public let fileSuffix: String
 
+    /// Thumbnail file name stored inside a project zip
+    public let thumbnailFileName: String
+
     public let undoCount: Int
 
     public let canvasConfiguration: CanvasConfiguration
 
     public init(
         fileSuffix: String = "",
+        thumbnailFileName: String = "thumbnail.png",
         undoCount: Int = 12,
         canvasConfiguration: CanvasConfiguration
     ) {
         self.fileSuffix = Self.sanitizedFileExtension(fileSuffix)
+        self.thumbnailFileName = thumbnailFileName
         self.undoCount = undoCount
         self.canvasConfiguration = canvasConfiguration
     }

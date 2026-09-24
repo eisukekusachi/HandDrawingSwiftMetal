@@ -5,6 +5,7 @@
 //
 
 import Combine
+import Core
 import Foundation
 
 /// Presentation state for the saved-file list shown in FileView.

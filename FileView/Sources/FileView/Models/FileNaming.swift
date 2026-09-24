@@ -4,6 +4,7 @@
 //  Created by Eisuke Kusachi on 2026/09/13.
 //
 
+import Core
 import Foundation
 
 /// Domain rules for saved-file names and supported extensions.

@@ -1,13 +1,10 @@
 //
-//  CalendarExtensions.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/01/23.
+//  Created by Eisuke Kusachi on 2026/09/26.
 //
 
 import Foundation
 
-extension Calendar {
+public extension Calendar {
 
     static var currentDate: String {
         let dateFormatter = DateFormatter()

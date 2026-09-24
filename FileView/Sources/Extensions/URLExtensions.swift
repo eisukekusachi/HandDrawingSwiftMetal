@@ -4,13 +4,10 @@
 //  Created by Eisuke Kusachi on 2026/09/01.
 //
 
+import Core
 import Foundation
 
 extension URL {
-
-    public var baseName: String {
-        deletingPathExtension().lastPathComponent
-    }
 
     public static func normalizedName(
         fallbackName: String,
@@ -35,28 +32,13 @@ extension URL {
         return trimmedName.isEmpty ? fallbackName : trimmedName
     }
 
-    public static func sanitizedName(_ raw: String) -> String {
-        var string = raw
-        for char in ["/", "\\", ":", "?", "%", "*", "|", "\"", "<", ">"] {
-            string = string.replacingOccurrences(of: char, with: "")
-        }
-        return string
-    }
-
-    public static func projectName(name: String, fileSuffix: String = "") -> String {
-        if fileSuffix.isEmpty {
-            return name
-        }
-        return name + "." + fileSuffix
-    }
-
     public static func fileURL(
         in directory: URL,
         name: String,
         fileSuffix: String = ""
     ) -> URL {
         directory.appendingPathComponent(
-            projectName(name: name, fileSuffix: fileSuffix)
+            URL.projectName(name: name, fileSuffix: fileSuffix)
         )
     }
 }

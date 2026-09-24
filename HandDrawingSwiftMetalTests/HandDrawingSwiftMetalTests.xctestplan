@@ -14,6 +14,13 @@
   "testTargets" : [
     {
       "target" : {
+        "containerPath" : "container:Core",
+        "identifier" : "CoreTests",
+        "name" : "CoreTests"
+      }
+    },
+    {
+      "target" : {
         "containerPath" : "container:TextureLayerView",
         "identifier" : "TextureLayerViewTests",
         "name" : "TextureLayerViewTests"

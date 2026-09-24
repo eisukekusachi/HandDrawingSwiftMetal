@@ -7,6 +7,7 @@
 
 import Combine
 import CanvasView
+import Core
 import FileView
 import UIKit
 import TextureLayerView
@@ -41,9 +42,8 @@ final class HandDrawingViewModel: ObservableObject {
 
     let textureLayersState: TextureLayersState = TextureLayersState()
 
-    let fileList = FileList(fileSuffix: "zip")
-
-    let thumbnailFileName = "thumbnail.png"
+    let fileList: FileList
+    let thumbnailFileName: String
 
     /// Current file for displaying in the file list
     func currentFileItem(thumbnail: UIImage?) -> FileItem {
@@ -51,7 +51,14 @@ final class HandDrawingViewModel: ObservableObject {
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            fileURL: currentZipFileURL
+            fileURL: zipFileURL(projectName: project.currentProjectName)
+        )
+    }
+
+    func zipFileURL(projectName: String) -> URL {
+        documentsDataStore.zipFileURL(
+            projectName: projectName,
+            suffix: fileList.fileSuffix
         )
     }
 
@@ -88,13 +95,25 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
 
-    private var cancellables = Set<AnyCancellable>()
+    let documentsDataStore: DocumentsDataStore
 
     let dependencies: HandDrawingViewDependencies
 
+    private var cancellables = Set<AnyCancellable>()
+
     init(
-        dependencies: HandDrawingViewDependencies? = nil
+        dependencies: HandDrawingViewDependencies? = nil,
+        fileSuffix: String = "zip",
+        thumbnailFileName: String = "thumbnail.png"
     ) {
+        self.dependencies = dependencies ?? .init()
+        self.fileList = FileList(fileSuffix: fileSuffix)
+        self.thumbnailFileName = thumbnailFileName
+
+        self.documentsDataStore = DocumentsDataStore(
+            localFileRepository: self.dependencies.localFileRepository
+        )
+
         self.brushPalette = .init()
         self.eraserPalette = .init()
         self.textureLayerStorage = .init(
@@ -123,7 +142,7 @@ final class HandDrawingViewModel: ObservableObject {
             palette: eraserPalette,
             context: drawingToolStorageController.viewContext
         )
-        self.dependencies = dependencies ?? .init()
+
         self.fileList.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
@@ -131,7 +150,7 @@ final class HandDrawingViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func loadLocalDrawingComponentsData(configuration _: ProjectConfiguration) {
+    func onViewDidLoad() {
         // Fetch data from Core Data
         do {
             try fetchDataFromCoreDataIfAvailable()
@@ -143,29 +162,7 @@ final class HandDrawingViewModel: ObservableObject {
         }
     }
 
-    private func fetchDataFromCoreDataIfAvailable() throws {
-        if let projectEntity = try projectStorage.fetch() {
-            projectStorage.update(projectEntity)
-        }
-        if let drawingToolEntity = try drawingToolStorage.fetch() {
-            drawingToolStorage.update(drawingToolEntity)
-        }
-        if let brushEntity = try brushPaletteStorage.fetch() {
-            brushPaletteStorage.update(brushEntity)
-        }
-        if let eraserEntity = try eraserPaletteStorage.fetch() {
-            eraserPaletteStorage.update(eraserEntity)
-        }
-    }
-
-    private var restoredTextureLayerDataFromCoreData: TextureLayersModel? {
-        guard
-            let entity = textureLayerStorage.fetch()
-        else { return nil }
-        return textureLayerStorage.textureLayersModel(from: entity)
-    }
-
-    func restoreOrInitializeTextureLayers(
+    func prepareTextureLayers(
         device: MTLDevice,
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
@@ -236,5 +233,30 @@ final class HandDrawingViewModel: ObservableObject {
 
     func showToast(_ model: ToastMessage) {
         toastSubject.send(model)
+    }
+}
+
+private extension HandDrawingViewModel {
+
+    var restoredTextureLayerDataFromCoreData: TextureLayersModel? {
+        guard
+            let entity = textureLayerStorage.fetch()
+        else { return nil }
+        return textureLayerStorage.textureLayersModel(from: entity)
+    }
+
+    func fetchDataFromCoreDataIfAvailable() throws {
+        if let projectEntity = try projectStorage.fetch() {
+            projectStorage.update(projectEntity)
+        }
+        if let drawingToolEntity = try drawingToolStorage.fetch() {
+            drawingToolStorage.update(drawingToolEntity)
+        }
+        if let brushEntity = try brushPaletteStorage.fetch() {
+            brushPaletteStorage.update(brushEntity)
+        }
+        if let eraserEntity = try eraserPaletteStorage.fetch() {
+            eraserPaletteStorage.update(eraserEntity)
+        }
     }
 }

@@ -1,8 +1,5 @@
 //
-//  FileManager.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/01/24.
+//  Created by Eisuke Kusachi on 2026/09/26.
 //
 
 import Foundation

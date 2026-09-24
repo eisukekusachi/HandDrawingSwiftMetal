@@ -4,6 +4,7 @@
 //  Created by Eisuke Kusachi on 2026/09/01.
 //
 
+import Core
 import UIKit
 
 public class FileItem: Identifiable {

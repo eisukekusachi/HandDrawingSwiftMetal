@@ -13,15 +13,19 @@ let package = Package(
             targets: ["FileView"]
         ),
     ],
+    dependencies: [
+        .package(path: "../Core"),
+    ],
     targets: [
         .target(
             name: "FileView",
+            dependencies: ["Core"],
             path: "Sources",
             resources: [
                 .process("FileView/Resources")
             ]
         ),
-        .testTarget(
+		.testTarget(
             name: "FileViewTests",
             dependencies: ["FileView"],
             path: "Tests"

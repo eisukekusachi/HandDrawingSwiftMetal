@@ -1,13 +1,10 @@
 //
-//  URLExtensions.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2023/11/04.
+//  Created by Eisuke Kusachi on 2026/09/26.
 //
 
 import Foundation
 
-extension URL {
+public extension URL {
 
     static var documents: URL {
         guard
@@ -32,7 +29,7 @@ extension URL {
     }
 
     var baseName: String {
-        self.deletingPathExtension().lastPathComponent
+        deletingPathExtension().lastPathComponent
     }
 
     func allFileURLs(suffix: String = "") -> [URL] {
@@ -46,13 +43,12 @@ extension URL {
                 suffix.isEmpty || $0.lastPathComponent.hasSuffix(suffix)
             }
         } catch {
-            Logger.error(error)
             return []
         }
     }
 }
 
-extension URL {
+public extension URL {
 
     static func sanitizedName(_ raw: String) -> String {
         var string = raw
@@ -82,7 +78,7 @@ extension URL {
     }
 }
 
-extension URL {
+public extension URL {
     /// Returns a unique file URL in Documents by appending `_2`, `_3`, ... when needed.
     /// This function is pure except for the injected `exists` predicate.
     static func uniqueProjectURLInDocuments(
@@ -93,16 +89,16 @@ extension URL {
         let trimmedFileName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedFileName.isEmpty else {
             throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Please enter a file name")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Please enter a file name", bundle: .module)
             )
         }
 
         let newFileName = URL.sanitizedName(trimmedFileName)
         guard !newFileName.isEmpty else {
             throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid Value", bundle: .module)
             )
         }
 

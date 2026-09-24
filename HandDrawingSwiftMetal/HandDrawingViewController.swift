@@ -100,7 +100,10 @@ class HandDrawingViewController: UIViewController {
         }
     )
 
-    let viewModel = HandDrawingViewModel()
+    private(set) lazy var viewModel = HandDrawingViewModel(
+        fileSuffix: configuration.fileSuffix,
+        thumbnailFileName: configuration.thumbnailFileName
+    )
 
     override func viewDidLoad() {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -120,9 +123,8 @@ class HandDrawingViewController: UIViewController {
             )
         }
 
-        viewModel.loadLocalDrawingComponentsData(
-            configuration: configuration
-        )
+        viewModel.onViewDidLoad()
+
         updateDrawingComponents()
 
         showActivityIndicator(true)
@@ -130,7 +132,7 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                let textureSize = await viewModel.restoreOrInitializeTextureLayers(
+                let textureSize = await viewModel.prepareTextureLayers(
                     device: sharedDevice,
                     fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
@@ -347,7 +349,9 @@ extension HandDrawingViewController {
             Task {
                 await self.viewModel.saveFile(
                     thumbnail: self.canvasView.thumbnail,
-                    zipFileURL: self.viewModel.currentZipFileURL
+                    zipFileURL: self.viewModel.zipFileURL(
+                        projectName: self.viewModel.project.currentProjectName
+                    )
                 )
             }
         }

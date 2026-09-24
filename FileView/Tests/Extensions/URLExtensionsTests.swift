@@ -11,28 +11,6 @@ import Testing
 struct URLExtensionsTests {
 
     @Test
-    func `sanitizedName replaces invalid characters`() {
-        let sanitized = URL.sanitizedName("File/\\:?%*|\"<>_Name")
-        #expect(!sanitized.contains("/"))
-        #expect(!sanitized.contains("\\"))
-        #expect(!sanitized.contains(":"))
-        #expect(!sanitized.contains("?"))
-        #expect(!sanitized.contains("%"))
-        #expect(!sanitized.contains("*"))
-        #expect(!sanitized.contains("|"))
-        #expect(!sanitized.contains("\""))
-        #expect(!sanitized.contains("<"))
-        #expect(!sanitized.contains(">"))
-        #expect(sanitized.contains("File_Name"))
-    }
-
-    @Test
-    func `projectName appends fileSuffix when non-empty`() {
-        #expect(URL.projectName(name: "fileName", fileSuffix: "") == "fileName")
-        #expect(URL.projectName(name: "fileName", fileSuffix: "zip") == "fileName.zip")
-    }
-
-    @Test
     func `fileURL appends projectName under the directory`() {
         let directory = URL(fileURLWithPath: "/tmp", isDirectory: true)
         let fileURL = URL.fileURL(

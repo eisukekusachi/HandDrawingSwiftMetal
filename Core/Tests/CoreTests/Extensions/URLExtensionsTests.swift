@@ -1,16 +1,11 @@
 //
-//  URLExtensionsTests.swift
-//  HandDrawingSwiftMetalTests
-//
-//  Created by Eisuke Kusachi on 2026/04/25.
+//  Created by Eisuke Kusachi on 2026/09/26.
 //
 
+import Foundation
 import Testing
-import UIKit
+@testable import Core
 
-@testable import HandDrawingSwiftMetal
-
-@MainActor
 struct URLExtensionsTests {
 
     @Test
@@ -39,13 +34,12 @@ struct URLExtensionsTests {
     struct UniqueProjectURLInDocuments {
         @Test
         func `uniqueProjectURLInDocuments appends suffix using injected exists`() throws {
-            
             let fileName = "fileName"
             let fileSuffix = "zip"
-            
+
             let url1 = FileManager.zipFileURL(projectName: fileName, suffix: fileSuffix)
             let url2 = FileManager.zipFileURL(projectName: "\(fileName)_2", suffix: fileSuffix)
-            
+
             let uniqueURL = try URL.uniqueProjectURLInDocuments(
                 fileName: fileName,
                 fileSuffix: fileSuffix,
@@ -53,11 +47,11 @@ struct URLExtensionsTests {
                     url == url1 || url == url2
                 }
             )
-            
+
             #expect(uniqueURL.deletingPathExtension().lastPathComponent == "\(fileName)_3")
             #expect(uniqueURL.pathExtension == fileSuffix)
         }
-        
+
         @Test(
             arguments: [
                 "   ",

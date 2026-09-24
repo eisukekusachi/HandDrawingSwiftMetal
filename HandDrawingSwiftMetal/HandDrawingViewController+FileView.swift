@@ -4,6 +4,7 @@
 //  Created by Eisuke Kusachi on 2026/09/13.
 //
 
+import Core
 import FileView
 import SwiftUI
 import UIKit
@@ -18,7 +19,9 @@ extension HandDrawingViewController {
                 onTapDelete: { [weak self] index in self?.onTapDelete(index) },
                 onSelectItem: { [weak self] zipFileURL in self?.onSelectItem(zipFileURL) }
             ),
-            currentOpenFileURL: viewModel.currentZipFileURL
+            currentOpenFileURL: viewModel.zipFileURL(
+                projectName: viewModel.project.currentProjectName
+            )
         )
 
         let vc = UIHostingController(rootView: fileView)

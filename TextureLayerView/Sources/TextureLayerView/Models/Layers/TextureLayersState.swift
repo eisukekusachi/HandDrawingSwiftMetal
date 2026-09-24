@@ -49,6 +49,15 @@ public class TextureLayersState: ObservableObject {
         self.selectedLayerId = textureLayers.selectedLayerId
         self.textureSize = textureLayers.textureSize
     }
+
+    /// Snapshot of the current layers for persistence or handoff.
+    public var model: TextureLayersModel {
+        .init(
+            layers: layers.map { .init(item: $0) },
+            layerIndex: selectedIndex ?? 0,
+            textureSize: textureSize
+        )
+    }
 }
 
 public extension TextureLayersState {

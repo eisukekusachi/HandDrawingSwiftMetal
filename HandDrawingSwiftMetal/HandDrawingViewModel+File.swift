@@ -4,12 +4,13 @@
 //  Created by Eisuke Kusachi on 2026/09/13.
 //
 
+import CanvasView
+import Core
 import FileView
 import Metal
 import UIKit
 
 extension HandDrawingViewModel {
-
     /// Scans Documents for zip files and refreshes the file list.
     func setupFileList() async {
         let fileURLs = URL.documents.allFileURLs(suffix: fileList.fileSuffix)
@@ -29,22 +30,19 @@ extension HandDrawingViewModel {
         await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
             do {
-                defer { try? dependencies.localFileRepository.removeWorkingDirectory() }
-                let workingDirectoryURL = try dependencies.localFileRepository.createWorkingDirectory()
-                try await dependencies.localFileRepository.unzipToWorkingDirectory(
-                    from: zipFileURL
-                )
-
-                let projectMetaData = try ProjectArchiveModel(in: workingDirectoryURL)
-                let thumbnailURL = workingDirectoryURL.appendingPathComponent(thumbnailFileName)
-                let thumbnailData = try? Data(contentsOf: thumbnailURL)
-
-                return FileItem(
-                    createdAt: projectMetaData.createdAt,
-                    updatedAt: projectMetaData.updatedAt,
-                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                    fileURL: zipFileURL
-                )
+                return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                    let projectMetaData = try ProjectArchiveModel(in: workingDirectoryURL)
+                    let thumbnailURL = workingDirectoryURL.appendingPathComponent(
+                        self.thumbnailFileName
+                    )
+                    let thumbnailData = try? Data(contentsOf: thumbnailURL)
+                    return FileItem(
+                        createdAt: projectMetaData.createdAt,
+                        updatedAt: projectMetaData.updatedAt,
+                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                        fileURL: zipFileURL
+                    )
+                }
             } catch {
                 Logger.error(error)
                 return nil
@@ -67,11 +65,17 @@ extension HandDrawingViewModel {
                 device: device,
                 commandQueue: commandQueue
             )
-            try await loadCanvas(
+            let loaded = try await readProject(
                 device: device,
-                zipFileURL: zipFileURL
+                from: zipFileURL
             )
+
+            apply(loaded, projectName: zipFileURL.baseName)
+
+            await updateThumbnails(device: device)
+
             showToast(.success)
+
             initializeCanvasRequestSubject.send(
                 .init(dismissFileView: true)
             )
@@ -107,7 +111,7 @@ extension HandDrawingViewModel {
                 )
             }
 
-            if item.fileURL == currentZipFileURL {
+            if item.fileURL == zipFileURL(projectName: project.currentProjectName) {
                 try await clearCanvas(
                     device: device,
                     commandQueue: commandQueue
@@ -135,10 +139,12 @@ extension HandDrawingViewModel {
         defer { showActivityIndicator(false) }
 
         do {
-            try await loadCanvas(
+            let loaded = try await readProject(
                 device: device,
-                zipFileURL: zipFileURL
+                from: zipFileURL
             )
+            apply(loaded, projectName: zipFileURL.baseName)
+            await updateThumbnails(device: device)
             showToast(.success)
             initializeCanvasRequestSubject.send(.init())
         } catch {
@@ -155,13 +161,67 @@ extension HandDrawingViewModel {
         defer { showActivityIndicator(false) }
 
         do {
-            try await saveCanvas(
-                thumbnail: thumbnail,
-                zipFileURL: zipFileURL
+            try await writeProject(
+                content: .init(
+                    thumbnail: thumbnail,
+                    textureLayers: textureLayersState.model,
+                    project: .init(project),
+                    drawingTool: .init(drawingTool),
+                    brushPalette: .init(brushPalette),
+                    eraserPalette: .init(eraserPalette)
+                ),
+                to: zipFileURL
             )
+            fileList.setItem(currentFileItem(thumbnail: thumbnail))
+            fileList.sortItems()
             showToast(.success)
         } catch {
             showError(error)
+        }
+    }
+}
+
+private extension HandDrawingViewModel {
+    func apply(_ loaded: ProjectContent, projectName: String) {
+        if let layers = loaded.textureLayers {
+            textureLayersState.update(layers)
+        }
+
+        project.update(
+            projectName: projectName,
+            createdAt: loaded.project.createdAt,
+            updatedAt: loaded.project.updatedAt
+        )
+
+        if let tool = loaded.drawingTool {
+            drawingToolStorage.update(
+                type: .init(rawValue: tool.type),
+                brushDiameter: tool.brushDiameter,
+                eraserDiameter: tool.eraserDiameter
+            )
+        }
+        if let brush = loaded.brushPalette {
+            brushPalette.update(
+                colors: brush.hexColors.map { UIColor(hex: $0) },
+                selectedIndex: brush.index
+            )
+        }
+        if let eraser = loaded.eraserPalette {
+            eraserPalette.update(
+                alphas: eraser.alphas,
+                selectedIndex: eraser.index
+            )
+        }
+    }
+
+    func updateThumbnails(device: MTLDevice) async {
+        let textures = try? await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+            textureLayersState.layers.map { $0.id },
+            textureSize: textureLayersState.textureSize,
+            device: device
+        )
+        textures?.forEach { texture in
+            textureLayersState.updateThumbnail(texture.0, texture: texture.1)
         }
     }
 }
