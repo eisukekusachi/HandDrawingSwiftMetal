@@ -25,6 +25,7 @@ DerivedData/
 ## library
 Pods/*
 Carthage/Build/
+**/Package.resolved
 ## Other
 *.moved-aside
 *.xccheckout

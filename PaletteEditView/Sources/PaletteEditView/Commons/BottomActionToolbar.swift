@@ -45,6 +45,13 @@ struct BottomActionToolbar: View {
 
             HStack(alignment: .center, spacing: buttonSpacing) {
                 Button(
+                    action: onDuplicate
+                ) {
+                    Image(systemName: "plus.circle")
+                        .toolbarIcon(size: buttonSize)
+                }
+
+                Button(
                     action: onRemove
                 ) {
                     Image(systemName: "trash")
@@ -54,13 +61,6 @@ struct BottomActionToolbar: View {
                         )
                 }
                 .disabled(!isRemoveEnabled)
-
-                Button(
-                    action: onDuplicate
-                ) {
-                    Image(systemName: "plus.rectangle.on.rectangle")
-                        .toolbarIcon(size: buttonSize)
-                }
 
                 Spacer()
             }

@@ -57,7 +57,7 @@ struct TextureLayerToolbar: View {
                     }
                 },
                 label: {
-                    Image(systemName: "minus.circle")
+                    Image(systemName: "trash")
                         .buttonModifier(diameter: buttonSize)
                 }
             )

@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/01/23.
 //
 
+import Core
 import Foundation
 
 final class ProjectData {

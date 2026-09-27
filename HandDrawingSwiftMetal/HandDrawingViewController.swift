@@ -38,7 +38,7 @@ class HandDrawingViewController: UIViewController {
     private let paletteHeight: CGFloat = 44
 
     /// The `MTLDevice` used throughout the app
-    private lazy var sharedDevice: MTLDevice = {
+    private(set) lazy var sharedDevice: MTLDevice = {
         guard let device = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
@@ -52,7 +52,7 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private lazy var canvasView: TextureLayerCanvasView = {
+    private(set) lazy var canvasView: TextureLayerCanvasView = {
         TextureLayerCanvasView(
             textureLayersState: viewModel.textureLayersState,
             device: sharedDevice,
@@ -60,7 +60,7 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private lazy var textureLayerView: TextureLayerView = {
+    private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
             viewModel: UndoTextureLayerViewModel(
                 textureLayers: viewModel.textureLayersState,
@@ -100,7 +100,11 @@ class HandDrawingViewController: UIViewController {
         }
     )
 
-    private let viewModel = HandDrawingViewModel()
+    private(set) lazy var viewModel = HandDrawingViewModel(
+        dependencies: .init(),
+        fileSuffix: configuration.fileSuffix,
+        thumbnailFileName: configuration.thumbnailFileName
+    )
 
     override func viewDidLoad() {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -120,9 +124,8 @@ class HandDrawingViewController: UIViewController {
             )
         }
 
-        viewModel.loadLocalDrawingComponentsData(
-            configuration: configuration
-        )
+        viewModel.onViewDidLoad()
+
         updateDrawingComponents()
 
         showActivityIndicator(true)
@@ -130,7 +133,7 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                let textureSize = await viewModel.restoreOrInitializeTextureLayers(
+                let textureSize = await viewModel.prepareTextureLayers(
                     device: sharedDevice,
                     fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
@@ -173,7 +176,7 @@ class HandDrawingViewController: UIViewController {
     }
 }
 
-private extension HandDrawingViewController {
+extension HandDrawingViewController {
     /// Handler that responds to texture layer events and updates the canvas view accordingly.
     var onTextureLayersChanged: (TextureLayerEvent) -> Void {
         { [weak self] event in
@@ -265,6 +268,29 @@ private extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        viewModel.initializeCanvasRequest
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] request in
+                guard let self else { return }
+                Task { @MainActor in
+                    do {
+                        try await self.initializeCanvas(self.viewModel.textureSize)
+                        if request.updateLayerList {
+                            self.textureLayerView.update(
+                                self.viewModel.textureLayersState
+                            )
+                        }
+                        self.updateDrawingComponents()
+                        if request.dismissFileView {
+                            self.presentedViewController?.dismiss(animated: true)
+                        }
+                    } catch {
+                        self.showAlert(error)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, let newColor = viewModel.brushPalette.color(at: index) else { return }
@@ -320,7 +346,15 @@ private extension HandDrawingViewController {
             }
         }
         contentView.tapSaveButton = { [weak self] in
-            self?.saveCanvas()
+            guard let self else { return }
+            Task {
+                await self.viewModel.saveFile(
+                    thumbnail: self.canvasView.thumbnail,
+                    zipFileURL: self.viewModel.zipFileURL(
+                        projectName: self.viewModel.project.currentProjectName
+                    )
+                )
+            }
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -543,7 +577,7 @@ private extension HandDrawingViewController {
     }
 }
 
-private extension HandDrawingViewController {
+extension HandDrawingViewController {
 
     func embedHostingController<Content: View>(
         _ hostingController: UIHostingController<Content>,
@@ -562,70 +596,6 @@ private extension HandDrawingViewController {
         ])
 
         hostingController.didMove(toParent: self)
-    }
-
-    func showFileView() {
-        let fileView = FileView(
-            fileCoordinator: viewModel.fileCoordinator,
-            currentOpenFileURL: viewModel.zipFileURL,
-            selectedFileURL: viewModel.zipFileURL,
-            createAction: { [weak self] name in
-                guard let `self` else { return }
-                let zipFileURL = try await self.viewModel.createNewCanvas(
-                    fileName: name,
-                    device: self.sharedDevice,
-                    commandQueue: self.canvasView.sharedCommandQueue
-                )
-                self.loadCanvas(zipFileURL: zipFileURL)
-                self.presentedViewController?.dismiss(animated: true)
-            },
-            renameAction: { [weak self] index, newName in
-                guard let `self` else {
-                    throw NSError(
-                        title: String(localized: "Error"),
-                        message: String(localized: "Invalid Value")
-                    )
-                }
-                return try self.viewModel.renameCanvas(
-                    index: index,
-                    newName: newName,
-                    currentOpenFileURL: self.viewModel.zipFileURL
-                )
-            },
-            deleteAction: { [weak self] index in
-                guard let `self` else { return }
-                let didInitializeCanvas = try await self.viewModel.deleteCanvas(
-                    index: index,
-                    currentOpenFileURL: self.viewModel.zipFileURL,
-                    device: self.sharedDevice,
-                    commandQueue: self.canvasView.sharedCommandQueue
-                )
-                guard didInitializeCanvas else { return }
-
-                try await self.initializeCanvas(self.viewModel.textureSize)
-                self.textureLayerView.update(
-                    self.viewModel.textureLayersState
-                )
-                self.updateDrawingComponents()
-                self.presentedViewController?.dismiss(animated: true)
-            },
-            selectAction: { [weak self] zipFileURL in
-                guard let `self` else { return }
-                self.loadCanvas(zipFileURL: zipFileURL)
-                self.presentedViewController?.dismiss(animated: true)
-            }
-        )
-
-        let vc = UIHostingController(rootView: fileView)
-        vc.modalPresentationStyle = .pageSheet
-        if let sheet = vc.sheetPresentationController {
-            sheet.detents = [.large()]
-            sheet.selectedDetentIdentifier = .large
-            sheet.prefersGrabberVisible = true
-            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
-        }
-
-        present(vc, animated: true)
     }
 
     func showAlert(_ error: CanvasError) {
@@ -664,45 +634,7 @@ private extension HandDrawingViewController {
     }
 }
 
-private extension HandDrawingViewController {
-
-    func loadCanvas(zipFileURL: URL) {
-        self.viewModel.loadCanvas(
-            device: sharedDevice,
-            zipFileURL: zipFileURL,
-            completion: { [weak self] in
-                guard let `self` else { return }
-                Task {
-                    do {
-                        try await self.initializeCanvas(self.viewModel.textureSize)
-                        self.updateDrawingComponents()
-                    } catch {
-                        self.showAlert(error)
-                    }
-                }
-            }
-        )
-    }
-
-    func saveCanvas() {
-        viewModel.saveCanvas(
-            thumbnail: canvasView.thumbnail,
-            completion: { [weak self] in
-                guard
-                    let `self`,
-                    let thumbnail = self.canvasView.thumbnail
-                else { return }
-
-                self.viewModel.upsertFileList(
-                    self.viewModel.currentFileItem(
-                        thumbnail: thumbnail
-                    )
-                )
-                self.viewModel.sortFileList()
-            },
-            zipFileURL: viewModel.zipFileURL
-        )
-    }
+extension HandDrawingViewController {
 
     func saveImage() {
         if let image = canvasView.canvasTexture?.uiImage {
@@ -714,12 +646,7 @@ private extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            showToast(
-                .init(
-                    title: "Success",
-                    icon: UIImage(systemName: "hand.thumbsup.fill")
-                )
-            )
+            showToast(.success)
         }
     }
 }

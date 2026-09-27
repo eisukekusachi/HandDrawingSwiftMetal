@@ -5,6 +5,8 @@
 //  Created by Eisuke Kusachi on 2025/08/25.
 //
 
+import CanvasView
+import Core
 import Foundation
 
 struct BrushPaletteArchiveModel: Codable, Sendable {
@@ -15,9 +17,7 @@ struct BrushPaletteArchiveModel: Codable, Sendable {
         self.index = index
         self.hexColors = hexColors
     }
-}
 
-extension BrushPaletteArchiveModel {
     @MainActor
     init(_ palette: BrushPalette) {
         self.index = palette.selectedIndex

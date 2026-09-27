@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/01/24.
 //
 
+import Core
 import Foundation
 
 struct ProjectArchiveModel: Codable, Sendable {
@@ -19,10 +20,9 @@ struct ProjectArchiveModel: Codable, Sendable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-}
 
-extension ProjectArchiveModel {
-    @MainActor init(_ model: ProjectData) throws {
+    @MainActor
+    init(_ model: ProjectData) {
         self.createdAt = model.createdAt
         self.updatedAt = model.updatedAt
     }

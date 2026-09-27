@@ -5,23 +5,29 @@
 //  Created by Eisuke Kusachi on 2026/04/04.
 //
 
+import Core
 import Foundation
 import TextureLayerView
 
+@MainActor
 final class HandDrawingViewDependencies {
 
+    let fileManager: FileManaging
     let localFileRepository: LocalFileRepositoryProtocol
-
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
-    @MainActor
     init(
-        localFileRepository: LocalFileRepositoryProtocol = LocalFileRepository(
-            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
-        ),
+        fileManager: FileManaging? = nil,
+        localFileRepository: LocalFileRepositoryProtocol? = nil,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
-        self.localFileRepository = localFileRepository
-        self.textureLayersDocumentsRepository = textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
+        let fileManager = fileManager ?? FileManagerWrapper()
+        self.fileManager = fileManager
+        self.localFileRepository = localFileRepository ?? LocalFileRepository(
+            workingDirectoryURL: fileManager.temporaryDirectory.appendingPathComponent("TmpFolder"),
+            fileManager: fileManager
+        )
+        self.textureLayersDocumentsRepository =
+            textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
     }
 }

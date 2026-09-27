@@ -1,0 +1,15 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Error" : {
+      "extractionState" : "manual"
+    },
+    "Invalid Value" : {
+      "extractionState" : "manual"
+    },
+    "Please enter a file name" : {
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.1"
+}
