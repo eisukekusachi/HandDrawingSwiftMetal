@@ -58,7 +58,11 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
     }
 
     public func renameFile(at sourceURL: URL, to destinationURL: URL) throws {
-        if fileManager.fileExists(atPath: destinationURL.path) {
+        if fileManager.fileExists(atPath: destinationURL.path),
+            // fileExists does not distinguish letter case, so skip remove when
+            // only the case differs; otherwise the source file would be deleted.
+            sourceURL.path.lowercased() != destinationURL.path.lowercased()
+        {
             try fileManager.removeItem(at: destinationURL)
         }
         try fileManager.moveItem(at: sourceURL, to: destinationURL)
