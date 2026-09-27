@@ -17,7 +17,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
 
     public init(
         workingDirectoryURL: URL,
-        fileManager: FileManaging = FileManagerWrapper(),
+        fileManager: FileManaging,
         zipHandler: ZipHandling? = nil
     ) {
         self.workingDirectoryURL = workingDirectoryURL

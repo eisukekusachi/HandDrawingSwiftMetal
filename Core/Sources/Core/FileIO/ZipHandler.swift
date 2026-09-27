@@ -15,7 +15,7 @@ public protocol ZipHandling: Sendable {
 public struct ZipHandler: ZipHandling {
     private let fileManager: FileManaging
 
-    public init(fileManager: FileManaging = FileManagerWrapper()) {
+    public init(fileManager: FileManaging) {
         self.fileManager = fileManager
     }
 

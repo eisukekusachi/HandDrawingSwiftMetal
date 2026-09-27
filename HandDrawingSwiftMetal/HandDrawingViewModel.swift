@@ -102,16 +102,17 @@ final class HandDrawingViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        dependencies: HandDrawingViewDependencies? = nil,
+        dependencies: HandDrawingViewDependencies,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
-        self.dependencies = dependencies ?? .init()
+        self.dependencies = dependencies
         self.fileList = FileList(fileSuffix: fileSuffix)
         self.thumbnailFileName = thumbnailFileName
 
         self.documentsDataStore = DocumentsDataStore(
-            localFileRepository: self.dependencies.localFileRepository
+            fileManager: dependencies.fileManager,
+            localFileRepository: dependencies.localFileRepository
         )
 
         self.brushPalette = .init()

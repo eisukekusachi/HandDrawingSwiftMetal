@@ -101,6 +101,7 @@ class HandDrawingViewController: UIViewController {
     )
 
     private(set) lazy var viewModel = HandDrawingViewModel(
+        dependencies: .init(),
         fileSuffix: configuration.fileSuffix,
         thumbnailFileName: configuration.thumbnailFileName
     )

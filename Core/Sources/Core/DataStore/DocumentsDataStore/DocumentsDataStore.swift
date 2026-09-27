@@ -12,7 +12,7 @@ public final class DocumentsDataStore {
     let localFileRepository: LocalFileRepositoryProtocol
 
     public init(
-        fileManager: FileManaging = FileManagerWrapper(),
+        fileManager: FileManaging,
         localFileRepository: LocalFileRepositoryProtocol? = nil
     ) {
         self.fileManager = fileManager
