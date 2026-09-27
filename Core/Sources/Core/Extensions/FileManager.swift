@@ -18,14 +18,6 @@ public extension FileManager {
         try FileManager.createDirectory(url)
     }
 
-    /// URL of the project file in Documents
-    static func zipFileURL(projectName: String, suffix: String) -> URL {
-        guard !suffix.isEmpty else {
-            return URL.documents.appendingPathComponent(projectName)
-        }
-        return URL.documents.appendingPathComponent(projectName + "." + suffix)
-    }
-
     static func contentsOfDirectory(_ url: URL) -> [URL] {
         (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
     }

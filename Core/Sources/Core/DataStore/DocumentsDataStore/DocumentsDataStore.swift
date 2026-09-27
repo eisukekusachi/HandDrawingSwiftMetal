@@ -30,6 +30,40 @@ public final class DocumentsDataStore {
         return fileManager.documentsDirectory.appendingPathComponent(projectName + "." + suffix)
     }
 
+    /// Returns a unique zip URL in Documents by appending `_2`, `_3`, ... when needed.
+    public func uniqueZipFileURL(
+        fileName: String,
+        suffix: String,
+        excludeURL: URL? = nil,
+        exists: ((URL) -> Bool)? = nil
+    ) throws -> URL {
+        let exists = exists ?? { self.fileManager.fileExists(atPath: $0.path) }
+
+        let trimmedFileName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedFileName.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Please enter a file name", bundle: .module)
+            )
+        }
+
+        let baseName = URL.sanitizedName(trimmedFileName)
+        guard !baseName.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid Value", bundle: .module)
+            )
+        }
+
+        var candidateURL = zipFileURL(projectName: baseName, suffix: suffix)
+        var suffixIndex = 2
+        while exists(candidateURL) && candidateURL != excludeURL {
+            candidateURL = zipFileURL(projectName: "\(baseName)_\(suffixIndex)", suffix: suffix)
+            suffixIndex += 1
+        }
+        return candidateURL
+    }
+
     /// Creates a working directory, runs `operation` to write files, zips them to `zipFileURL`, then cleans up.
     public func withZippedContents(
         to zipFileURL: URL,
