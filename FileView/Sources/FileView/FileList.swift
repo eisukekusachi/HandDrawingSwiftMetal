@@ -138,7 +138,7 @@ extension FileList {
             fileSuffix: naming.fileSuffix
         )
 
-        var items = self.items
+        let items = self.items
         items[index].update(
             fileURL: newFileURL
         )

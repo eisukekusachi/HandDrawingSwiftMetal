@@ -9,7 +9,7 @@ import Foundation
 public final class DocumentsDataStore {
 
     private let fileManager: FileManaging
-    private let localFileRepository: LocalFileRepositoryProtocol
+    let localFileRepository: LocalFileRepositoryProtocol
 
     public init(
         fileManager: FileManaging = FileManagerWrapper(),
