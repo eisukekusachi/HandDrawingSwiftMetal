@@ -51,7 +51,7 @@ extension HandDrawingViewModel {
             )
         }
 
-        try documentsDataStore.removeItem(at: item.fileURL)
+        try documentsDataStore.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
     }
 
@@ -134,7 +134,7 @@ extension HandDrawingViewModel {
             fileSuffix: fileList.fileSuffix
         )
 
-        try documentsDataStore.moveItem(at: oldFileURL, to: newFileURL)
+        try documentsDataStore.moveFile(at: oldFileURL, to: newFileURL)
 
         if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
             project.update(
@@ -174,7 +174,7 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsDataStore.withWorkingDirectory { [self] workingDirectoryURL in
+        try await documentsDataStore.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
                     to: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
@@ -227,8 +227,6 @@ extension HandDrawingViewModel {
                 createdAt: projectCreatedAt ?? content.project.createdAt,
                 updatedAt: projectUpdatedAt ?? content.project.updatedAt
             ).write(in: workingDirectoryURL)
-
-            try documentsDataStore.zipWorkingDirectory(to: zipFileURL)
         }
     }
 

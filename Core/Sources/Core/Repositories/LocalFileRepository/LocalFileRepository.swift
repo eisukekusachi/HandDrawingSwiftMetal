@@ -5,6 +5,9 @@
 import Foundation
 
 /// Manages temporary working-directory file operations for Documents zip I/O.
+///
+/// Each session uses a unique subdirectory under `workingDirectoryURL`,
+/// so sessions can run in parallel without sharing one folder.
 public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked Sendable {
 
     public let workingDirectoryURL: URL
@@ -22,45 +25,39 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)
     }
 
-    public func createWorkingDirectory() throws -> URL {
-        if fileManager.fileExists(atPath: workingDirectoryURL.path) {
-            try fileManager.removeItem(at: workingDirectoryURL)
-        }
+    public func createSessionDirectory() throws -> URL {
+        let sessionURL = workingDirectoryURL.appendingPathComponent(UUID().uuidString)
         try fileManager.createDirectory(
-            at: workingDirectoryURL,
+            at: sessionURL,
             withIntermediateDirectories: true
         )
-        return workingDirectoryURL
+        return sessionURL
     }
 
-    public func removeWorkingDirectory() throws {
-        try fileManager.removeItem(at: workingDirectoryURL)
-    }
-
-    public func zipWorkingDirectory(to zipFileURL: URL) throws {
+    public func zipFile(from directoryURL: URL, to zipFileURL: URL) throws {
         let fileURLs = try fileManager.contentsOfDirectory(
-            at: workingDirectoryURL,
+            at: directoryURL,
             includingPropertiesForKeys: nil
         )
         let fileName = zipFileURL.lastPathComponent
-        let tempZipURL = workingDirectoryURL.appendingPathComponent(fileName)
+        let tempZipURL = directoryURL.appendingPathComponent(fileName)
         try zipHandler.zip(sourceURLs: fileURLs, to: tempZipURL)
-        try moveItem(at: tempZipURL, to: zipFileURL)
+        try moveFile(at: tempZipURL, to: zipFileURL)
     }
 
-    public func unzipToWorkingDirectory(from zipFileURL: URL) async throws {
+    public func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws {
         try await zipHandler.unzip(
             sourceURL: zipFileURL,
-            to: workingDirectoryURL,
+            to: directoryURL,
             priority: .high
         )
     }
 
-    public func removeItem(at url: URL) throws {
+    public func removeFile(at url: URL) throws {
         try fileManager.removeItem(at: url)
     }
 
-    public func moveItem(at sourceURL: URL, to destinationURL: URL) throws {
+    public func moveFile(at sourceURL: URL, to destinationURL: URL) throws {
         if fileManager.fileExists(atPath: destinationURL.path) {
             try fileManager.removeItem(at: destinationURL)
         }

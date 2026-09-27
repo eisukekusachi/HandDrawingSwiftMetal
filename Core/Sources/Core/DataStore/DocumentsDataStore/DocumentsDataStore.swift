@@ -23,39 +23,44 @@ public final class DocumentsDataStore {
         FileManager.zipFileURL(projectName: projectName, suffix: suffix)
     }
 
-    /// Creates a fresh working directory, runs `operation`, then removes the working directory.
-    public func withWorkingDirectory<T>(
-        _ operation: (_ workingDirectoryURL: URL) async throws -> T
-    ) async throws -> T {
-        defer {
-            try? localFileRepository.removeWorkingDirectory()
+    /// Creates a working directory, runs `operation` to write files, zips them to `zipFileURL`, then cleans up.
+    public func withZippedContents(
+        to zipFileURL: URL,
+        _ operation: (_ workingDirectoryURL: URL) async throws -> Void
+    ) async throws {
+        try await withWorkingDirectory { workingDirectoryURL in
+            try await operation(workingDirectoryURL)
+            try localFileRepository.zipFile(from: workingDirectoryURL, to: zipFileURL)
         }
-        let workingDirectoryURL = try localFileRepository.createWorkingDirectory()
-        return try await operation(workingDirectoryURL)
     }
 
-    /// Unzips `zipFileURL` into a fresh working directory, runs `operation`, then cleans up.
+    /// Unzips `zipFileURL` into a working directory, runs `operation`, then cleans up.
     public func withUnzippedContents<T>(
         from zipFileURL: URL,
         _ operation: (_ workingDirectoryURL: URL) async throws -> T
     ) async throws -> T {
         try await withWorkingDirectory { workingDirectoryURL in
-            try await localFileRepository.unzipToWorkingDirectory(from: zipFileURL)
+            try await localFileRepository.unzipFile(from: zipFileURL, to: workingDirectoryURL)
             return try await operation(workingDirectoryURL)
         }
     }
 
-    /// Zips the current working directory to `zipFileURL`.
-    /// Call only inside `withWorkingDirectory` / `withUnzippedContents`.
-    public func zipWorkingDirectory(to zipFileURL: URL) throws {
-        try localFileRepository.zipWorkingDirectory(to: zipFileURL)
+    public func removeFile(at url: URL) throws {
+        try localFileRepository.removeFile(at: url)
     }
 
-    public func removeItem(at url: URL) throws {
-        try localFileRepository.removeItem(at: url)
+    public func moveFile(at srcURL: URL, to dstURL: URL) throws {
+        try localFileRepository.moveFile(at: srcURL, to: dstURL)
     }
+}
 
-    public func moveItem(at srcURL: URL, to dstURL: URL) throws {
-        try localFileRepository.moveItem(at: srcURL, to: dstURL)
+private extension DocumentsDataStore {
+    private func withWorkingDirectory<T>(
+        _ operation: (_ workingDirectoryURL: URL) async throws -> T
+    ) async throws -> T {
+        let workingDirectoryURL = try localFileRepository.createSessionDirectory()
+        defer { try? localFileRepository.removeFile(at: workingDirectoryURL) }
+
+        return try await operation(workingDirectoryURL)
     }
 }

@@ -6,18 +6,17 @@ import Foundation
 
 public protocol LocalFileRepositoryProtocol: Sendable {
 
+    /// Root under which session directories are created (e.g. `TmpFolder`).
     var workingDirectoryURL: URL { get }
 
-    @discardableResult
-    func createWorkingDirectory() throws -> URL
+    /// Creates a unique session directory under `workingDirectoryURL`.
+    func createSessionDirectory() throws -> URL
 
-    func removeWorkingDirectory() throws
+    func zipFile(from directoryURL: URL, to zipFileURL: URL) throws
 
-    func zipWorkingDirectory(to zipFileURL: URL) throws
+    func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws
 
-    func unzipToWorkingDirectory(from zipFileURL: URL) async throws
+    func removeFile(at url: URL) throws
 
-    func removeItem(at url: URL) throws
-
-    func moveItem(at sourceURL: URL, to destinationURL: URL) throws
+    func moveFile(at sourceURL: URL, to destinationURL: URL) throws
 }

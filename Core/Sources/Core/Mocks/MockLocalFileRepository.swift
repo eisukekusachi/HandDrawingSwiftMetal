@@ -14,29 +14,23 @@ public struct MockLocalFileRepository: LocalFileRepositoryProtocol, @unchecked S
         self.workingDirectoryURL = workingDirectoryURL
     }
 
-    @discardableResult
-    public func createWorkingDirectory() throws -> URL {
-        // No-op: return a stable temporary URL (do not touch disk).
+    public func createSessionDirectory() throws -> URL {
         workingDirectoryURL
     }
 
-    public func removeWorkingDirectory() throws {
+    public func zipFile(from directoryURL: URL, to zipFileURL: URL) throws {
         // No-op
     }
 
-    public func zipWorkingDirectory(to zipFileURL: URL) throws {
+    public func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws {
         // No-op
     }
 
-    public func unzipToWorkingDirectory(from zipFileURL: URL) async throws {
+    public func removeFile(at url: URL) throws {
         // No-op
     }
 
-    public func removeItem(at url: URL) throws {
-        // No-op
-    }
-
-    public func moveItem(at sourceURL: URL, to destinationURL: URL) throws {
+    public func moveFile(at sourceURL: URL, to destinationURL: URL) throws {
         // No-op
     }
 }
