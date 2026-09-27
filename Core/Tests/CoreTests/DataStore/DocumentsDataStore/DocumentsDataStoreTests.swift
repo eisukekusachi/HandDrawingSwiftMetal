@@ -64,19 +64,61 @@ struct DocumentsDataStoreTests {
                 fileManager: fileManager,
                 localFileRepository: MockLocalFileRepository()
             )
-            let url1 = subject.zipFileURL(projectName: "fileName", suffix: "zip")
-            let url2 = subject.zipFileURL(projectName: "fileName_2", suffix: "zip")
+            fileManager.setFileExists(
+                true,
+                atPath: subject.zipFileURL(projectName: "fileName", suffix: "zip").path
+            )
+            fileManager.setFileExists(
+                true,
+                atPath: subject.zipFileURL(projectName: "fileName_2", suffix: "zip").path
+            )
 
             let uniqueURL = try subject.uniqueZipFileURL(
                 fileName: "fileName",
-                suffix: "zip",
-                exists: { url in
-                    url == url1 || url == url2
-                }
+                suffix: "zip"
             )
 
             #expect(uniqueURL.deletingPathExtension().lastPathComponent == "fileName_3")
             #expect(uniqueURL.pathExtension == "zip")
+        }
+
+        @Test
+        func `uniqueZipFileURL keeps excludeURL even when it already exists`() throws {
+            let fileManager = MockFileManager()
+            let subject = Subject(
+                fileManager: fileManager,
+                localFileRepository: MockLocalFileRepository()
+            )
+            let excludeURL = subject.zipFileURL(projectName: "fileName", suffix: "zip")
+            fileManager.setFileExists(true, atPath: excludeURL.path)
+
+            let uniqueURL = try subject.uniqueZipFileURL(
+                fileName: "fileName",
+                suffix: "zip",
+                excludeURL: excludeURL
+            )
+
+            #expect(uniqueURL == excludeURL)
+        }
+
+        @Test
+        func `uniqueZipFileURL treats excludeURL as same when only letter case differs`() throws {
+            let fileManager = MockFileManager()
+            let subject = Subject(
+                fileManager: fileManager,
+                localFileRepository: MockLocalFileRepository()
+            )
+            let excludeURL = subject.zipFileURL(projectName: "fileName", suffix: "zip")
+            let differentlyCasedURL = subject.zipFileURL(projectName: "FileName", suffix: "zip")
+            fileManager.setFileExists(true, atPath: excludeURL.path)
+
+            let uniqueURL = try subject.uniqueZipFileURL(
+                fileName: "FileName",
+                suffix: "zip",
+                excludeURL: excludeURL
+            )
+
+            #expect(uniqueURL == differentlyCasedURL)
         }
 
         @Test(
@@ -96,8 +138,7 @@ struct DocumentsDataStoreTests {
             #expect(throws: Error.self) {
                 _ = try subject.uniqueZipFileURL(
                     fileName: name,
-                    suffix: "zip",
-                    exists: { _ in false }
+                    suffix: "zip"
                 )
             }
         }

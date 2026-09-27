@@ -67,7 +67,8 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
     public func fileExists(atPath path: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        return _existingPaths.contains(path)
+        // Match FileManager on case-insensitive volumes (e.g. iOS Documents).
+        return _existingPaths.contains { $0.lowercased() == path.lowercased() }
     }
 
     public func createDirectory(at url: URL, withIntermediateDirectories createIntermediates: Bool) throws {

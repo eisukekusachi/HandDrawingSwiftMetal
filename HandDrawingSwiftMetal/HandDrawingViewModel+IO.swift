@@ -120,19 +120,15 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        let uniqueName = fileList.naming.uniqueTitle(
-            from: normalizedName,
-            existingTitles: fileList.items.map(\.title)
+        let newFileURL = try documentsDataStore.uniqueZipFileURL(
+            fileName: normalizedName,
+            suffix: fileList.fileSuffix,
+            excludeURL: oldFileURL
         )
+        let uniqueName = newFileURL.baseName
         guard uniqueName != oldTitle else {
             return oldTitle
         }
-
-        let newFileURL = URL.fileURL(
-            in: oldFileURL.deletingLastPathComponent(),
-            name: uniqueName,
-            fileSuffix: fileList.fileSuffix
-        )
 
         try documentsDataStore.renameFile(at: oldFileURL, to: newFileURL)
 

@@ -34,11 +34,8 @@ public final class DocumentsDataStore {
     public func uniqueZipFileURL(
         fileName: String,
         suffix: String,
-        excludeURL: URL? = nil,
-        exists: ((URL) -> Bool)? = nil
+        excludeURL: URL? = nil
     ) throws -> URL {
-        let exists = exists ?? { self.fileManager.fileExists(atPath: $0.path) }
-
         let trimmedFileName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedFileName.isEmpty else {
             throw NSError(
@@ -57,7 +54,9 @@ public final class DocumentsDataStore {
 
         var candidateURL = zipFileURL(projectName: baseName, suffix: suffix)
         var suffixIndex = 2
-        while exists(candidateURL) && candidateURL != excludeURL {
+        while fileManager.fileExists(atPath: candidateURL.path),
+              excludeURL.map({ $0.path.lowercased() != candidateURL.path.lowercased() }) ?? true
+        {
             candidateURL = zipFileURL(projectName: "\(baseName)_\(suffixIndex)", suffix: suffix)
             suffixIndex += 1
         }
