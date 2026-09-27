@@ -8,19 +8,26 @@ import Foundation
 @MainActor
 public final class DocumentsDataStore {
 
+    private let fileManager: FileManaging
     private let localFileRepository: LocalFileRepositoryProtocol
 
     public init(
-        localFileRepository: LocalFileRepositoryProtocol = LocalFileRepository(
-            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
-        )
+        fileManager: FileManaging = FileManagerWrapper(),
+        localFileRepository: LocalFileRepositoryProtocol? = nil
     ) {
-        self.localFileRepository = localFileRepository
+        self.fileManager = fileManager
+        self.localFileRepository = localFileRepository ?? LocalFileRepository(
+            workingDirectoryURL: fileManager.temporaryDirectory.appendingPathComponent("TmpFolder"),
+            fileManager: fileManager
+        )
     }
 
     /// URL of a project zip in Documents for the given project name and file suffix.
     public func zipFileURL(projectName: String, suffix: String) -> URL {
-        FileManager.zipFileURL(projectName: projectName, suffix: suffix)
+        guard !suffix.isEmpty else {
+            return fileManager.documentsDirectory.appendingPathComponent(projectName)
+        }
+        return fileManager.documentsDirectory.appendingPathComponent(projectName + "." + suffix)
     }
 
     /// Creates a working directory, runs `operation` to write files, zips them to `zipFileURL`, then cleans up.
@@ -49,8 +56,8 @@ public final class DocumentsDataStore {
         try localFileRepository.removeFile(at: url)
     }
 
-    public func moveFile(at srcURL: URL, to dstURL: URL) throws {
-        try localFileRepository.moveFile(at: srcURL, to: dstURL)
+    public func renameFile(at srcURL: URL, to dstURL: URL) throws {
+        try localFileRepository.renameFile(at: srcURL, to: dstURL)
     }
 }
 

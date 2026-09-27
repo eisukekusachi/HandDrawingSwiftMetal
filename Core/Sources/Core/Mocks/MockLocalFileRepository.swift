@@ -30,7 +30,7 @@ public struct MockLocalFileRepository: LocalFileRepositoryProtocol, @unchecked S
         // No-op
     }
 
-    public func moveFile(at sourceURL: URL, to destinationURL: URL) throws {
+    public func renameFile(at sourceURL: URL, to destinationURL: URL) throws {
         // No-op
     }
 }

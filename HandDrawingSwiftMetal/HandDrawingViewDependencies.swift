@@ -16,12 +16,14 @@ final class HandDrawingViewDependencies {
     let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
 
     init(
-        localFileRepository: LocalFileRepositoryProtocol = LocalFileRepository(
-            workingDirectoryURL: FileManager.default.temporaryDirectory.appendingPathComponent("TmpFolder")
-        ),
+        fileManager: FileManaging = FileManagerWrapper(),
+        localFileRepository: LocalFileRepositoryProtocol? = nil,
         textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
-        self.localFileRepository = localFileRepository
+        self.localFileRepository = localFileRepository ?? LocalFileRepository(
+            workingDirectoryURL: fileManager.temporaryDirectory.appendingPathComponent("TmpFolder"),
+            fileManager: fileManager
+        )
         self.textureLayersDocumentsRepository =
             textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
     }

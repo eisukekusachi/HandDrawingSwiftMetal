@@ -7,6 +7,9 @@ import ZIPFoundation
 
 /// File-system operations used by LocalFileRepository.
 public protocol FileManaging: Sendable {
+    var temporaryDirectory: URL { get }
+    var documentsDirectory: URL { get }
+
     func fileExists(atPath path: String) -> Bool
     func createDirectory(at url: URL, withIntermediateDirectories createIntermediates: Bool) throws
     func contentsOfDirectory(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?) throws -> [URL]
@@ -18,6 +21,22 @@ public protocol FileManaging: Sendable {
 /// Thin wrapper around `FileManager.default`.
 public struct FileManagerWrapper: FileManaging {
     public init() {}
+
+    public var temporaryDirectory: URL {
+        FileManager.default.temporaryDirectory
+    }
+
+    public var documentsDirectory: URL {
+        guard
+            let url = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first
+        else {
+            fatalError("Failed to resolve Documents directory URL")
+        }
+        return url
+    }
 
     public func fileExists(atPath path: String) -> Bool {
         FileManager.default.fileExists(atPath: path)

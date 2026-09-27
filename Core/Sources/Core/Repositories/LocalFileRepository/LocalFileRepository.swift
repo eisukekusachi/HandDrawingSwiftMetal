@@ -42,7 +42,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         let fileName = zipFileURL.lastPathComponent
         let tempZipURL = directoryURL.appendingPathComponent(fileName)
         try zipHandler.zip(sourceURLs: fileURLs, to: tempZipURL)
-        try moveFile(at: tempZipURL, to: zipFileURL)
+        try renameFile(at: tempZipURL, to: zipFileURL)
     }
 
     public func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws {
@@ -57,7 +57,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         try fileManager.removeItem(at: url)
     }
 
-    public func moveFile(at sourceURL: URL, to destinationURL: URL) throws {
+    public func renameFile(at sourceURL: URL, to destinationURL: URL) throws {
         if fileManager.fileExists(atPath: destinationURL.path) {
             try fileManager.removeItem(at: destinationURL)
         }

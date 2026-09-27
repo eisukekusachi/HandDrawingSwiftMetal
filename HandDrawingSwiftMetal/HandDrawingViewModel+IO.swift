@@ -134,7 +134,7 @@ extension HandDrawingViewModel {
             fileSuffix: fileList.fileSuffix
         )
 
-        try documentsDataStore.moveFile(at: oldFileURL, to: newFileURL)
+        try documentsDataStore.renameFile(at: oldFileURL, to: newFileURL)
 
         if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
             project.update(

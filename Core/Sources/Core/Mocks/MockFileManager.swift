@@ -40,6 +40,14 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
 
     public init() {}
 
+    public var temporaryDirectory: URL {
+        FileManager.default.temporaryDirectory
+    }
+
+    public var documentsDirectory: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("MockDocuments")
+    }
+
     public func setFileExists(_ exists: Bool, atPath path: String) {
         lock.lock()
         defer { lock.unlock() }

@@ -18,5 +18,5 @@ public protocol LocalFileRepositoryProtocol: Sendable {
 
     func removeFile(at url: URL) throws
 
-    func moveFile(at sourceURL: URL, to destinationURL: URL) throws
+    func renameFile(at sourceURL: URL, to destinationURL: URL) throws
 }
