@@ -123,7 +123,7 @@ final class HandDrawingViewModel: ObservableObject {
             repository: dependencies.textureLayersDocumentsRepository
         )
         self.textureLayerStorage = .init(
-            textureLayersState: self.textureLayersState,
+            textureLayers: self.textureLayersState,
             context: textureLayersStorageController.viewContext
         )
         self.projectStorageController = .init(

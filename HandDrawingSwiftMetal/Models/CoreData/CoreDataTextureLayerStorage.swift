@@ -18,24 +18,24 @@ import TextureLayerView
 @MainActor
 public final class CoreDataTextureLayerStorage: ObservableObject {
 
-    private var textureLayersState: TextureLayersState
+    private var textureLayers: TextureLayersState
 
     private var storage: CoreDataStorage<TextureLayerArrayEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayersState: TextureLayersState,
+        textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
-        self.textureLayersState = textureLayersState
+        self.textureLayers = textureLayers
 
         // Save to Core Data when any of the properties are updated
         Publishers.Merge3(
-            textureLayersState.$layerModels.map { _ in () }.eraseToAnyPublisher(),
-            textureLayersState.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
-            textureLayersState.$textureSize.map { _ in () }.eraseToAnyPublisher()
+            textureLayers.$layerModels.map { _ in () }.eraseToAnyPublisher(),
+            textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
+            textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] _ in
@@ -88,13 +88,13 @@ private extension CoreDataTextureLayerStorage {
         else { return }
 
         guard
-            textureLayersState.layers.count != 0,
-            textureLayersState.textureSize != .zero,
-            let selectedLayerId = textureLayersState.selectedLayer?.id
+            textureLayers.layers.count != 0,
+            textureLayers.textureSize != .zero,
+            let selectedLayerId = textureLayers.selectedLayer?.id
         else { return }
 
-        let textureSize = self.textureLayersState.textureSize
-        let layers = textureLayersState.layerModels
+        let textureSize = self.textureLayers.textureSize
+        let layers = textureLayers.layerModels
 
         request.fetchLimit = 1
 
