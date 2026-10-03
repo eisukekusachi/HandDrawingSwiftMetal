@@ -6,7 +6,6 @@ import Core
 import Foundation
 
 /// Snapshot of `EraserPalette` used when saving and restoring.
-/// Each eraser is stored as its alpha value.
 struct EraserPaletteSnapshot: Codable, Sendable {
     public let index: Int
     public let alphas: [Int]

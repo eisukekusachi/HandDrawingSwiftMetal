@@ -6,7 +6,6 @@ import Core
 import Foundation
 
 /// Snapshot of `ProjectData` used when saving and restoring.
-/// `currentProjectName` stays outside this file.
 struct ProjectSnapshot: Codable, Sendable {
 
     public let createdAt: Date

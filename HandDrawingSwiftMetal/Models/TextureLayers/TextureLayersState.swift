@@ -47,7 +47,7 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
         )
     }
 
-    /// Snapshot of the current layers for persistence or handoff.
+    /// Snapshot of the current layers for persistence
     var snapshot: TextureLayersSnapshot {
         .init(
             layers: layerModels,

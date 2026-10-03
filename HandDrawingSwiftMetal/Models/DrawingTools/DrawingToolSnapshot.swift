@@ -6,7 +6,6 @@ import Core
 import Foundation
 
 /// Snapshot of `DrawingTool` used when saving and restoring.
-/// The tool type is stored as its raw `Int`.
 struct DrawingToolSnapshot: Codable, Sendable {
     let type: Int
     let brushDiameter: Int

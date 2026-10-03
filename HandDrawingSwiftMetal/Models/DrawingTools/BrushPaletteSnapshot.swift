@@ -7,7 +7,6 @@ import Core
 import Foundation
 
 /// Snapshot of `BrushPalette` used when saving and restoring.
-/// Colors are stored as hex strings.
 struct BrushPaletteSnapshot: Codable, Sendable {
     let index: Int
     let hexColors: [String]
