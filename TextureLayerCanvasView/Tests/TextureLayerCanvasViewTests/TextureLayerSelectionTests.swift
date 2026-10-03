@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/04/22.
 //
 
+import Foundation
 import Testing
 
 @testable import TextureLayerCanvasView
@@ -13,7 +14,7 @@ import Testing
 struct TextureLayerSelectionTests {
 
     private func layers(_ count: Int) -> [CanvasLayerSnapshot] {
-        (0..<count).map {
+        (0..<count).map { _ in
             .init(id: UUID(), alpha: 255, isVisible: true)
         }
     }
