@@ -1,6 +1,6 @@
 //
 //  RemoveLayerIndexTests.swift
-//  TextureLayerViewTests
+//  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/07/05.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import Testing
 
-@testable import TextureLayerView
+@testable import HandDrawingSwiftMetal
 
 /*
  In this app, layers are arranged in descending order by their indices

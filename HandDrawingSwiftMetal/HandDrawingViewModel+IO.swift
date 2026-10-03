@@ -25,7 +25,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.model,
+                textureLayers: textureLayersState.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -76,7 +76,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.model,
+                textureLayers: textureLayersState.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -150,14 +150,11 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
-
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: newTextureLayersState,
+        try await installBlankLayer(
+            textureSize: textureLayersState.textureSize,
             device: device,
             commandQueue: commandQueue
         )
-        textureLayersState.update(newTextureLayersState)
 
         drawingToolStorage.initializeData()
         brushPalette.initializeData()
@@ -234,12 +231,13 @@ extension HandDrawingViewModel {
             let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
                 in: workingDirectoryURL
             )
-            let newTextureLayers: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+            let newTextureLayers = try textureLayersArchiveModel.makeTextureLayersSnapshot()
 
-            let restoredLayers: TextureLayersModel?
+            let restoredLayers: TextureLayersSnapshot?
             if try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-                url: workingDirectoryURL,
-                textureLayers: newTextureLayers,
+                from: workingDirectoryURL,
+                ids: newTextureLayers.layers.map(\.id),
+                textureSize: newTextureLayers.textureSize,
                 device: device
             ) {
                 restoredLayers = newTextureLayers

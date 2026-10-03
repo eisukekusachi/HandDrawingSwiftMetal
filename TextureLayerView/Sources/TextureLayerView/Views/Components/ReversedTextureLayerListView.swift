@@ -16,7 +16,7 @@ struct ReversedTextureLayerListView: View {
             ForEach(
                 // In drawing apps, textures stack from bottom to top,
                 // so the layer order is reversed compared to the default.
-                viewModel.textureLayers.layers.reversed(),
+                viewModel.layers.reversed(),
                 id: \.id
             ) { layer in
                 let isSelected = viewModel.isSelected(layer.id)
@@ -44,7 +44,7 @@ struct ReversedTextureLayerListView: View {
                 .listRowInsets(EdgeInsets())
             }
             .onMove(perform: { source, destination in
-                viewModel.onMoveLayer(
+                try? viewModel.onMoveLayer(
                     source: source,
                     destination: destination
                 )
@@ -68,48 +68,21 @@ private struct PlainListBackground: ViewModifier {
 }
 
 private struct PreviewView: View {
-    let viewModel = TextureLayerViewModel(
-        textureLayers: TextureLayersState(
-            textureLayers: .init(
-                layers: [
-                    .init(
-                        id: LayerId(),
-                        title: "Layer0",
-                        alpha: 255,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer1",
-                        alpha: 200,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer2",
-                        alpha: 150,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer3",
-                        alpha: 100,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer4",
-                        alpha: 50,
-                        isVisible: true
-                    )
-                ],
-                layerIndex: 3,
-                textureSize: .zero
+    let viewModel: TextureLayerViewModel = {
+        let layers: [TextureLayerItem] = [
+            .init(id: LayerId(), title: "Layer0", alpha: 255, isVisible: true),
+            .init(id: LayerId(), title: "Layer1", alpha: 200, isVisible: true),
+            .init(id: LayerId(), title: "Layer2", alpha: 150, isVisible: true),
+            .init(id: LayerId(), title: "Layer3", alpha: 100, isVisible: true),
+            .init(id: LayerId(), title: "Layer4", alpha: 50, isVisible: true)
+        ]
+        return TextureLayerViewModel(
+            textureLayers: PreviewTextureLayers(
+                layers: layers,
+                selectedLayerId: layers[3].id
             )
-        ),
-        device: nil,
-        commandQueue: nil
-    )
+        )
+    }()
     var body: some View {
         ReversedTextureLayerListView(
             viewModel: viewModel

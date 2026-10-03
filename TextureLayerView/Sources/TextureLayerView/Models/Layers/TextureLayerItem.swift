@@ -60,29 +60,6 @@ public struct TextureLayerItem: Identifiable {
 }
 
 public extension TextureLayerItem {
-    init(
-        model: TextureLayerModel,
-        thumbnail: UIImage? = nil,
-        defaultBackgroundColor: UIColor = .systemBackground,
-        selectedBackgroundColor: UIColor = .label,
-        iconSize: CGSize = .init(width: 32, height: 32),
-        padding: CGFloat = 4,
-        cornerRadius: CGFloat = 4
-    ) {
-        self.init(
-            id: model.id,
-            title: model.title,
-            alpha: model.alpha,
-            isVisible: model.isVisible,
-            thumbnail: thumbnail,
-            defaultBackgroundColor: defaultBackgroundColor,
-            selectedBackgroundColor: selectedBackgroundColor,
-            iconSize: iconSize,
-            padding: padding,
-            cornerRadius: cornerRadius
-        )
-    }
-
     func updated(
         title: String? = nil,
         alpha: Int? = nil,

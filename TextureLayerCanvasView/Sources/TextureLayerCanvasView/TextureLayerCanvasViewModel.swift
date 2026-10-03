@@ -7,7 +7,7 @@
 
 import CanvasView
 import Combine
-import TextureLayerView
+import Core
 
 @preconcurrency import MetalKit
 
@@ -15,10 +15,10 @@ import TextureLayerView
 final class TextureLayerCanvasViewModel: ObservableObject {
 
     var textureSize: CGSize {
-        textureLayersState.textureSize
+        textureLayer.textureSize
     }
 
-    let textureLayersState: TextureLayersState
+    let textureLayer: TextureLayerCanvasProtocol
 
     let dependencies: TextureLayerCanvasViewDependencies
 
@@ -37,11 +37,11 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }()
 
     init(
-        textureLayersState: TextureLayersState,
+        textureLayer: TextureLayerCanvasProtocol,
         renderer: MTLRendering,
         dependencies: TextureLayerCanvasViewDependencies? = nil
     ) {
-        self.textureLayersState = textureLayersState
+        self.textureLayer = textureLayer
         self.dependencies = dependencies ?? .init()
         self.renderer = renderer
     }
@@ -105,6 +105,10 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         )
     }
 
+    func updateLayerThumbnail(_ id: UUID, thumbnail: UIImage?) {
+        textureLayer.updateLayerThumbnail(id, thumbnail: thumbnail)
+    }
+
     func updateCanvasTexture(
         _ texture: MTLTexture?,
         on destinationTexture: MTLTexture?,
@@ -113,7 +117,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         guard
             let destinationTexture,
             let commandBuffer,
-            let selectedLayer = textureLayersState.selectedLayer
+            let selectedLayer = textureLayer.selectedLayerSnapshot
         else { return }
 
         canvasRenderer.renderCanvas(
@@ -133,7 +137,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 extension TextureLayerCanvasViewModel {
 
     func duplicateTextureFromDocumentsDirectory(
-        _ id: LayerId
+        _ id: UUID
     ) async throws -> MTLTexture? {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
             id,
@@ -143,8 +147,8 @@ extension TextureLayerCanvasViewModel {
     }
 
     func duplicateTexturesFromDocumentsDirectory(
-        _ ids: [LayerId]
-    ) async throws -> [(LayerId, MTLTexture)] {
+        _ ids: [UUID]
+    ) async throws -> [(UUID, MTLTexture)] {
         try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             ids,
             textureSize: textureSize,

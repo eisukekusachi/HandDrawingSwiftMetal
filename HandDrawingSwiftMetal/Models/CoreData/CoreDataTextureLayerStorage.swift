@@ -18,24 +18,24 @@ import TextureLayerView
 @MainActor
 public final class CoreDataTextureLayerStorage: ObservableObject {
 
-    private var textureLayers: TextureLayersState
+    private var textureLayersState: TextureLayersState
 
     private var storage: CoreDataStorage<TextureLayerArrayEntity>?
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayersState,
+        textureLayersState: TextureLayersState,
         context: NSManagedObjectContext
     ) {
         self.storage = .init(context: context)
-        self.textureLayers = textureLayers
+        self.textureLayersState = textureLayersState
 
         // Save to Core Data when any of the properties are updated
         Publishers.Merge3(
-            textureLayers.$layers.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
+            textureLayersState.$layerModels.map { _ in () }.eraseToAnyPublisher(),
+            textureLayersState.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
+            textureLayersState.$textureSize.map { _ in () }.eraseToAnyPublisher()
         )
         .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
         .sink { [weak self] _ in
@@ -58,7 +58,7 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
         }
     }
 
-    public func textureLayersModel(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
+    public func textureLayersSnapshot(from entity: TextureLayerArrayEntity) -> TextureLayersSnapshot {
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }
             .map { layer -> TextureLayerModel in
@@ -88,13 +88,13 @@ private extension CoreDataTextureLayerStorage {
         else { return }
 
         guard
-            textureLayers.layers.count != 0,
-            textureLayers.textureSize != .zero,
-            let selectedLayerId = textureLayers.selectedLayer?.id
+            textureLayersState.layers.count != 0,
+            textureLayersState.textureSize != .zero,
+            let selectedLayerId = textureLayersState.selectedLayer?.id
         else { return }
 
-        let textureSize = self.textureLayers.textureSize
-        let layers = textureLayers.layers.map { TextureLayerModel(item: $0) }
+        let textureSize = self.textureLayersState.textureSize
+        let layers = textureLayersState.layerModels
 
         request.fetchLimit = 1
 

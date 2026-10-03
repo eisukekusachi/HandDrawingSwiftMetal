@@ -12,7 +12,7 @@ import UIKit
 struct ProjectContent {
     let thumbnail: UIImage?
     /// `nil` when texture restore fails on load.
-    let textureLayers: TextureLayersModel?
+    let textureLayers: TextureLayersSnapshot?
     let project: ProjectArchiveModel
     let drawingTool: DrawingToolArchiveModel?
     let brushPalette: BrushPaletteArchiveModel?

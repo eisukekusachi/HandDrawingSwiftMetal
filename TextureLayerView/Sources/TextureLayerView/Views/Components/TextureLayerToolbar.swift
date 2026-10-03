@@ -11,8 +11,6 @@ struct TextureLayerToolbar: View {
 
     @ObservedObject private var viewModel: TextureLayerViewModel
 
-    private let onClose: (() -> Void)?
-
     private let buttonThrottle = ButtonThrottle()
 
     private let buttonSize: CGFloat = 20
@@ -21,11 +19,9 @@ struct TextureLayerToolbar: View {
     @State private var textFieldTitle: String = ""
 
     init(
-        viewModel: TextureLayerViewModel,
-        onClose: (() -> Void)? = nil
+        viewModel: TextureLayerViewModel
     ) {
         self.viewModel = viewModel
-        self.onClose = onClose
     }
 
     var body: some View {
@@ -34,11 +30,7 @@ struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
                         Task { @MainActor in
-                            do {
-                                try await viewModel.onTapInsertButton()
-                            } catch {
-                                Logger.error(error)
-                            }
+                            try? await viewModel.onTapInsertButton()
                         }
                     }
                 },
@@ -52,7 +44,7 @@ struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
-                            await viewModel.onTapDeleteButton()
+                            try? await viewModel.onTapDeleteButton()
                         }
                     }
                 },
@@ -76,7 +68,7 @@ struct TextureLayerToolbar: View {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = viewModel.selectedLayer else { return }
-                    viewModel.onTapTitleButton(
+                    try? viewModel.onTapTitleButton(
                         selectedLayer.id,
                         title: textFieldTitle
                     )
@@ -85,7 +77,7 @@ struct TextureLayerToolbar: View {
             }
             Spacer()
 
-            if let onClose {
+            if let onClose = viewModel.onClose {
                 Button(action: onClose) {
                     Image(systemName: "xmark.circle.fill")
                         .resizable()
@@ -111,24 +103,15 @@ private extension Image {
 }
 
 private struct PreviewView: View {
-    private let viewModel = TextureLayerViewModel(
-        textureLayers: TextureLayersState(
-            textureLayers: .init(
-                layers: [
-                    .init(
-                        id: LayerId(),
-                        title: "Layer0",
-                        alpha: 255,
-                        isVisible: true
-                    )
-                ],
-                layerIndex: 0,
-                textureSize: .zero
+    private let viewModel: TextureLayerViewModel = {
+        let layer = TextureLayerItem(id: LayerId(), title: "Layer0", alpha: 255, isVisible: true)
+        return TextureLayerViewModel(
+            textureLayers: PreviewTextureLayers(
+                layers: [layer],
+                selectedLayerId: layer.id
             )
-        ),
-        device: nil,
-        commandQueue: nil
-    )
+        )
+    }()
     var body: some View {
         TextureLayerToolbar(
             viewModel: viewModel

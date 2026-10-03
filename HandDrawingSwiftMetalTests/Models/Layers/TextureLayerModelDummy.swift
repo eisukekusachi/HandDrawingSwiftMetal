@@ -1,11 +1,12 @@
 //
 //  TextureLayerModelDummy.swift
-//  TextureLayerViewTests
+//  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/04/06.
 //
 
 import Foundation
+import HandDrawingSwiftMetal
 import TextureLayerView
 
 public extension TextureLayerModel {

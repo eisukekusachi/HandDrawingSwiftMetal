@@ -164,7 +164,7 @@ extension HandDrawingViewModel {
             try await writeProject(
                 content: .init(
                     thumbnail: thumbnail,
-                    textureLayers: textureLayersState.model,
+                    textureLayers: textureLayersState.snapshot,
                     project: .init(project),
                     drawingTool: .init(drawingTool),
                     brushPalette: .init(brushPalette),
@@ -213,7 +213,9 @@ private extension HandDrawingViewModel {
             )
         }
     }
+}
 
+extension HandDrawingViewModel {
     func updateThumbnails(device: MTLDevice) async {
         let textures = try? await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
             textureLayersState.layers.map { $0.id },
@@ -221,7 +223,7 @@ private extension HandDrawingViewModel {
             device: device
         )
         textures?.forEach { texture in
-            textureLayersState.updateThumbnail(texture.0, texture: texture.1)
+            textureLayersState.updateThumbnail(texture.0, thumbnail: texture.1.makeThumbnail())
         }
     }
 }

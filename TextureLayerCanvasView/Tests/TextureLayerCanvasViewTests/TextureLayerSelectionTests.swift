@@ -7,17 +7,14 @@
 
 import Testing
 
-import CanvasView
-import TextureLayerView
-
 @testable import TextureLayerCanvasView
 
 @MainActor
 struct TextureLayerSelectionTests {
 
-    private func layers(_ count: Int) -> [TextureLayerModel] {
+    private func layers(_ count: Int) -> [CanvasLayerSnapshot] {
         (0..<count).map {
-            .init(id: LayerId(), title: "\($0)", alpha: 255, isVisible: true)
+            .init(id: UUID(), alpha: 255, isVisible: true)
         }
     }
 
@@ -72,11 +69,11 @@ struct TextureLayerSelectionTests {
     @Test
     func `Verify that layers with isVisible set to false are not included in the array`() {
         let layers = [
-            TextureLayerModel(id: LayerId(), title: "0", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "1", alpha: 255, isVisible: false),
-            TextureLayerModel(id: LayerId(), title: "2", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "3", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "4", alpha: 255, isVisible: false)
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false)
         ]
 
         let subject = TextureLayerSelection(

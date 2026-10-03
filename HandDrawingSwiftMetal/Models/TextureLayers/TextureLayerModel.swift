@@ -1,10 +1,11 @@
 //
 //  TextureLayerModel.swift
-//  TextureLayerView
+//  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/02.
 //
 
+import TextureLayerView
 import UIKit
 
 public struct TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
@@ -47,15 +48,6 @@ extension TextureLayerModel {
         case isVisible
         // legacy
         case textureName
-    }
-
-    public init(item: TextureLayerItem) {
-        self.init(
-            id: item.id,
-            title: item.title,
-            alpha: item.alpha,
-            isVisible: item.isVisible
-        )
     }
 
     public init(from decoder: Decoder) throws {

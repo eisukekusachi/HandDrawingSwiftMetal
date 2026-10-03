@@ -8,6 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
+		D4C3A0543069000100009F91 /* TextureLayersSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0533069000100009F91 /* TextureLayersSnapshot.swift */; };
+		D4C3A0563069000100009F91 /* TextureLayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0553069000100009F91 /* TextureLayerModel.swift */; };
+		D4C3A0583069000100009F91 /* AddLayerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0573069000100009F91 /* AddLayerIndex.swift */; };
+		D4C3A05A3069000100009F91 /* RemoveLayerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0593069000100009F91 /* RemoveLayerIndex.swift */; };
+		D4C3A05C3069000100009F91 /* MoveLayerIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A05B3069000100009F91 /* MoveLayerIndices.swift */; };
+		D4C3A0633069000100009F91 /* TextureLayersState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0623069000100009F91 /* TextureLayersState.swift */; };
+		D4C3A0673069000100009F91 /* TextureLayersArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */; };
+		D4C3A06B3069000100009F91 /* TimeStampFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A06A3069000100009F91 /* TimeStampFormatter.swift */; };
+		D4C3A0713069000100009F91 /* TextureLayersStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */; };
+		D4C3A0733069000100009F91 /* TextureLayersSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */; };
+		D4C3A0753069000100009F91 /* AddLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0743069000100009F91 /* AddLayerIndexTests.swift */; };
+		D4C3A0773069000100009F91 /* RemoveLayerIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0763069000100009F91 /* RemoveLayerIndexTests.swift */; };
+		D4C3A0793069000100009F91 /* MoveLayerIndicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0783069000100009F91 /* MoveLayerIndicesTests.swift */; };
+		D4C3A07B3069000100009F91 /* TextureLayerModelDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */; };
 		D41240CA2F77BE9800B757F8 /* UndoTitleObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */; };
 		D41240D02F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */; };
 		D41240D22F77D4B700B757F8 /* UndoTextureLayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */; };
@@ -110,6 +124,20 @@
 
 /* Begin PBXFileReference section */
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
+		D4C3A0533069000100009F91 /* TextureLayersSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersSnapshot.swift; sourceTree = "<group>"; };
+		D4C3A0553069000100009F91 /* TextureLayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModel.swift; sourceTree = "<group>"; };
+		D4C3A0573069000100009F91 /* AddLayerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndex.swift; sourceTree = "<group>"; };
+		D4C3A0593069000100009F91 /* RemoveLayerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndex.swift; sourceTree = "<group>"; };
+		D4C3A05B3069000100009F91 /* MoveLayerIndices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndices.swift; sourceTree = "<group>"; };
+		D4C3A0623069000100009F91 /* TextureLayersState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersState.swift; sourceTree = "<group>"; };
+		D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersArchiveModel.swift; sourceTree = "<group>"; };
+		D4C3A06A3069000100009F91 /* TimeStampFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStampFormatter.swift; sourceTree = "<group>"; };
+		D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersStateTests.swift; sourceTree = "<group>"; };
+		D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersSnapshotTests.swift; sourceTree = "<group>"; };
+		D4C3A0743069000100009F91 /* AddLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLayerIndexTests.swift; sourceTree = "<group>"; };
+		D4C3A0763069000100009F91 /* RemoveLayerIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndexTests.swift; sourceTree = "<group>"; };
+		D4C3A0783069000100009F91 /* MoveLayerIndicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndicesTests.swift; sourceTree = "<group>"; };
+		D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModelDummy.swift; sourceTree = "<group>"; };
 		D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTitleObject.swift; sourceTree = "<group>"; };
 		D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureInMemoryRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureLayerViewModel.swift; sourceTree = "<group>"; };
@@ -285,6 +313,7 @@
 			isa = PBXGroup;
 			children = (
 				D426FC622E5C4B3000CC116D /* Drawingtools */,
+				D4C3A07C3069000100009F91 /* Layers */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -355,6 +384,7 @@
 			isa = PBXGroup;
 			children = (
 				D49C692B2F23A76400B66608 /* Logger.swift */,
+				D4C3A06A3069000100009F91 /* TimeStampFormatter.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -366,6 +396,7 @@
 				D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */,
 				D49C69242F23A69100B66608 /* ProjectData.swift */,
 				D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */,
+				D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */,
 			);
 			path = Project;
 			sourceTree = "<group>";
@@ -479,8 +510,35 @@
 				D49C693F2F24A10100B66608 /* Project */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
 				D48CA0722F3C18D3008C6E9E /* Undo */,
+				D4C3A0503069000100009F91 /* TextureLayers */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D4C3A0503069000100009F91 /* TextureLayers */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A0573069000100009F91 /* AddLayerIndex.swift */,
+				D4C3A05B3069000100009F91 /* MoveLayerIndices.swift */,
+				D4C3A0593069000100009F91 /* RemoveLayerIndex.swift */,
+				D4C3A0553069000100009F91 /* TextureLayerModel.swift */,
+				D4C3A0623069000100009F91 /* TextureLayersState.swift */,
+				D4C3A0533069000100009F91 /* TextureLayersSnapshot.swift */,
+			);
+			path = TextureLayers;
+			sourceTree = "<group>";
+		};
+		D4C3A07C3069000100009F91 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A0743069000100009F91 /* AddLayerIndexTests.swift */,
+				D4C3A0783069000100009F91 /* MoveLayerIndicesTests.swift */,
+				D4C3A0763069000100009F91 /* RemoveLayerIndexTests.swift */,
+				D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */,
+				D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */,
+				D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */,
+			);
+			path = Layers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -714,6 +772,14 @@
 				D49C69482F2EE29C00B66608 /* TextureLayerStorage.xcdatamodeld in Sources */,
 				D49C691F2F23A3F400B66608 /* ProjectStorage.xcdatamodeld in Sources */,
 				D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */,
+				D4C3A0543069000100009F91 /* TextureLayersSnapshot.swift in Sources */,
+				D4C3A0563069000100009F91 /* TextureLayerModel.swift in Sources */,
+				D4C3A0583069000100009F91 /* AddLayerIndex.swift in Sources */,
+				D4C3A05A3069000100009F91 /* RemoveLayerIndex.swift in Sources */,
+				D4C3A05C3069000100009F91 /* MoveLayerIndices.swift in Sources */,
+				D4C3A0633069000100009F91 /* TextureLayersState.swift in Sources */,
+				D4C3A0673069000100009F91 /* TextureLayersArchiveModel.swift in Sources */,
+				D4C3A06B3069000100009F91 /* TimeStampFormatter.swift in Sources */,
 				D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -723,6 +789,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */,
+				D4C3A0713069000100009F91 /* TextureLayersStateTests.swift in Sources */,
+				D4C3A0733069000100009F91 /* TextureLayersSnapshotTests.swift in Sources */,
+				D4C3A0753069000100009F91 /* AddLayerIndexTests.swift in Sources */,
+				D4C3A0773069000100009F91 /* RemoveLayerIndexTests.swift in Sources */,
+				D4C3A0793069000100009F91 /* MoveLayerIndicesTests.swift in Sources */,
+				D4C3A07B3069000100009F91 /* TextureLayerModelDummy.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
 				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,

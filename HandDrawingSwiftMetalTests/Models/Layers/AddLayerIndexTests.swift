@@ -1,13 +1,13 @@
 //
 //  AddLayerIndexTests.swift
-//  TextureLayerViewTests
+//  HandDrawingSwiftMetalTests
 //
 //  Created by Eisuke Kusachi on 2025/07/05.
 //
 
 import Testing
 
-@testable import TextureLayerView
+@testable import HandDrawingSwiftMetal
 
 /*
  In this app, layers with smaller indices are positioned further back. For example, moving a layer from index 0 to 1 brings it to the front.

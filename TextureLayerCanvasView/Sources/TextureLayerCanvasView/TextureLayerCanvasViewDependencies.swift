@@ -5,7 +5,7 @@
 //  Created by Eisuke Kusachi on 2026/04/18.
 //
 
-import TextureLayerView
+import Core
 
 final class TextureLayerCanvasViewDependencies {
 

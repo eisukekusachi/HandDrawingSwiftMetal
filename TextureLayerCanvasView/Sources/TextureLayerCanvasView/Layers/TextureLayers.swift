@@ -5,22 +5,20 @@
 //  Created by Eisuke Kusachi on 2026/02/15.
 //
 
-import TextureLayerView
-
 @MainActor
 struct TextureLayers {
 
     let selectedIndex: Int
-    let layers: [TextureLayerModel]
+    let layers: [CanvasLayerSnapshot]
 }
 
 extension TextureLayers {
 
-    init?(state: TextureLayersState) {
+    init?(source: TextureLayerCanvasProtocol) {
         guard
-            let selectedIndex = state.selectedIndex
+            let selectedIndex = source.selectedLayerIndex
         else { return nil }
         self.selectedIndex = selectedIndex
-        self.layers = state.layers.map { .init(item: $0) }
+        self.layers = source.layerSnapshots
     }
 }

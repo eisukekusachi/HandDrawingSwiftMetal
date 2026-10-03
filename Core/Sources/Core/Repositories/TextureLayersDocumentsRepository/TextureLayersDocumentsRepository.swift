@@ -1,23 +1,20 @@
 //
-//  TextureLayersDocumentsRepository.swift
-//  TextureLayerView
-//
 //  Created by Eisuke Kusachi on 2025/05/17.
 //
 
-import UIKit
+import CoreGraphics
+import Foundation
 
 @preconcurrency import MetalKit
 
 private struct TextureSource: Sendable {
-    let id: LayerId
-    let url: URL
+    let id: UUID
     let width: Int
     let height: Int
     let hexadecimalData: [UInt8]
 }
 
-/// Manages and persists `TextureLayers` textures on disk
+/// Manages and persists texture bytes on disk, keyed by id.
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     @MainActor
     public static let shared: any TextureLayersDocumentsRepositoryProtocol = {
@@ -50,30 +47,14 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     }
 
     public func initializeStorage(
-        textureLayers: TextureLayersModel,
+        id: UUID,
+        textureSize: CGSize,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        let textureSize = textureLayers.textureSize
-
-        // There is no recovery path. so missing layerId is treated as an error.
         guard
-            let layerId: LayerId = textureLayers.layers.first?.id
-        else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(
-                    localized: "Unable to find layer ID"
-                )
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        // There is no recovery path. so invalid texture size is treated as an error.
-        guard
-            Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
-            let newTexture = MTLTextureCreator.makeTexture(
+            Int(textureSize.width) >= TextureBytes.minimumLength && Int(textureSize.height) >= TextureBytes.minimumLength,
+            let newTexture = TextureBytes.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
                 with: device
@@ -89,7 +70,6 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             throw error
         }
 
-        // Delete all textures in the repository
         removeAll()
 
         let textureData = try await newTexture.data(
@@ -98,43 +78,42 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         )
         try await addTextureData(
             data: textureData,
-            id: layerId
+            id: id
         )
     }
 
-    /// Restore the storage
-    /// Verify that the textures already present in `workingDirectory` match the data in `TextureLayersModel`
     public func restoreStorageFromWorkingDirectory(
-        textureLayers: TextureLayersModel,
+        ids: [UUID],
+        textureSize: CGSize,
         device: MTLDevice
     ) throws {
-        return try loadTexturesIfValid(
+        try loadTexturesIfValid(
             from: workingDirectoryURL,
-            textureLayers: textureLayers,
+            ids: ids,
+            textureSize: textureSize,
             device: device
         )
     }
 
-    /// Restore the storage
-    /// Verify that the textures in `sourceFolderURL` match `TextureLayersModel`,
-    /// and if they do, move them to `workingDirectory`
     public func restoreStorage(
-        url sourceFolderURL: URL,
-        textureLayers: TextureLayersModel,
+        from sourceFolderURL: URL,
+        ids: [UUID],
+        textureSize: CGSize,
         device: MTLDevice
     ) async throws -> Bool {
         try loadTexturesIfValid(
             from: sourceFolderURL,
-            textureLayers: textureLayers,
+            ids: ids,
+            textureSize: textureSize,
             device: device
         )
 
-        self.removeAll()
+        removeAll()
 
-        try textureLayers.layers.forEach { layer in
+        try ids.forEach { id in
             try FileManager.default.moveItem(
-                at: sourceFolderURL.appendingPathComponent(layer.id.uuidString),
-                to: self.workingDirectoryURL.appendingPathComponent(layer.id.uuidString)
+                at: sourceFolderURL.appendingPathComponent(id.uuidString),
+                to: workingDirectoryURL.appendingPathComponent(id.uuidString)
             )
         }
 
@@ -144,13 +123,11 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
 
 public extension TextureLayersDocumentsRepository {
 
-    /// Adds texture data
     @discardableResult
     func addTextureData(
         data: Data,
-        id: LayerId
+        id: UUID
     ) async throws -> Bool {
-        // If it doesn’t exist, add it
         guard
             !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
@@ -166,15 +143,14 @@ public extension TextureLayersDocumentsRepository {
         return true
     }
 
-    /// Copies a texture for the given `LayerId`
     func duplicatedTexture(
-        _ id: LayerId,
+        _ id: UUID,
         textureSize: CGSize,
         device: MTLDevice
     ) async throws -> MTLTexture {
         guard
-            Int(textureSize.width) >= textureMinimumLength &&
-            Int(textureSize.height) >= textureMinimumLength
+            Int(textureSize.width) >= TextureBytes.minimumLength &&
+            Int(textureSize.height) >= TextureBytes.minimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -186,10 +162,10 @@ public extension TextureLayersDocumentsRepository {
             throw error
         }
 
-        let destinationUrl = self.workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let destinationUrl = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            let newTexture: MTLTexture = try MTLTextureCreator.makeTexture(
+            let newTexture: MTLTexture = try TextureBytes.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
                 with: device
@@ -208,15 +184,14 @@ public extension TextureLayersDocumentsRepository {
         return newTexture
     }
 
-    /// Copies multiple textures for the given `LayerId`s
     func duplicatedTextures(
-        _ ids: [LayerId],
+        _ ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
-    ) async throws -> [(LayerId, MTLTexture)] {
+    ) async throws -> [(UUID, MTLTexture)] {
         guard
-            Int(textureSize.width) >= textureMinimumLength,
-            Int(textureSize.height) >= textureMinimumLength
+            Int(textureSize.width) >= TextureBytes.minimumLength,
+            Int(textureSize.height) >= TextureBytes.minimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -235,7 +210,7 @@ public extension TextureLayersDocumentsRepository {
                 let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
                 group.addTask {
-                    guard let hexadecimalData = try MTLTextureCreator.loadHexadecimalData(from: url) else {
+                    guard let hexadecimalData = try TextureBytes.loadHexadecimalData(from: url) else {
                         let error = NSError(
                             title: String(localized: "Error"),
                             message: String(localized: "File not found: \(url.path)")
@@ -245,7 +220,6 @@ public extension TextureLayersDocumentsRepository {
                     }
                     return TextureSource(
                         id: id,
-                        url: url,
                         width: width,
                         height: height,
                         hexadecimalData: hexadecimalData
@@ -263,11 +237,11 @@ public extension TextureLayersDocumentsRepository {
             return results
         }
 
-        var textures: [(LayerId, MTLTexture)] = []
+        var textures: [(UUID, MTLTexture)] = []
         textures.reserveCapacity(sources.count)
 
         for source in sources {
-            let texture = try MTLTextureCreator.makeTexture(
+            let texture = try TextureBytes.makeTexture(
                 width: source.width,
                 height: source.height,
                 from: source.hexadecimalData,
@@ -279,27 +253,21 @@ public extension TextureLayersDocumentsRepository {
         return textures
     }
 
-    /// Recreate the directory
     func removeAll() {
         do {
-            // Create a new folder
             try FileManager.createNewDirectory(workingDirectoryURL)
         } catch {
-            // Do nothing on error
             Logger.error(error)
         }
     }
 
-    /// Removes the texture for the specified `LayerId` from the Documents directory
     @discardableResult
-    func removeTexture(_ id: LayerId) throws -> Bool {
+    func removeTexture(_ id: UUID) throws -> Bool {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
-        // If the file exists, delete it
         guard
             FileManager.default.fileExists(atPath: fileURL.path)
         else {
-            // Log the error only, as nothing can be done
             Logger.info("Unable to find \(id.uuidString)")
             return false
         }
@@ -310,13 +278,12 @@ public extension TextureLayersDocumentsRepository {
 
     @discardableResult
     func copyTexture(
-        id: LayerId,
+        id: UUID,
         to destinationURL: URL
     ) async throws -> Bool {
         let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
-        let destinationURL = destinationURL.appendingPathComponent(id.uuidString)
+        let destinationFileURL = destinationURL.appendingPathComponent(id.uuidString)
 
-        // If the file exists, copy it
         guard
             FileManager.default.fileExists(atPath: sourceURL.path)
         else {
@@ -324,13 +291,13 @@ public extension TextureLayersDocumentsRepository {
             return false
         }
 
-        try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+        try FileManager.default.copyItem(at: sourceURL, to: destinationFileURL)
 
         return true
     }
 
     func writeDataToDisk(
-        id: LayerId,
+        id: UUID,
         data: Data
     ) async throws {
         let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
@@ -345,11 +312,12 @@ private extension TextureLayersDocumentsRepository {
 
     func loadTexturesIfValid(
         from directoryURL: URL,
-        textureLayers: TextureLayersModel,
+        ids: [UUID],
+        textureSize: CGSize,
         device: MTLDevice
     ) throws {
         guard FileManager.containsAllFileNames(
-            fileNames: textureLayers.layers.map { $0.fileName },
+            fileNames: ids.map(\.uuidString),
             in: FileManager.contentsOfDirectory(directoryURL)
         ) else {
             let error = NSError(
@@ -360,11 +328,9 @@ private extension TextureLayersDocumentsRepository {
             throw error
         }
 
-        let textureSize = textureLayers.textureSize
-
-        try textureLayers.layers.forEach { layer in
+        try ids.forEach { id in
             let textureData = try Data(
-                contentsOf: directoryURL.appendingPathComponent(layer.id.uuidString)
+                contentsOf: directoryURL.appendingPathComponent(id.uuidString)
             )
 
             guard !textureData.isEmpty else {
@@ -376,14 +342,109 @@ private extension TextureLayersDocumentsRepository {
                 throw error
             }
 
-            let hexadecimalData = [UInt8](textureData)
-
-            let _ = try MTLTextureCreator.makeTexture(
-               width: Int(textureSize.width),
-               height: Int(textureSize.height),
-               from: hexadecimalData,
-               with: device
-           )
+            let _ = try TextureBytes.makeTexture(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                from: [UInt8](textureData),
+                with: device
+            )
         }
+    }
+}
+
+private enum TextureBytes {
+    static let minimumLength = 16
+
+    static func loadHexadecimalData(
+        from url: URL
+    ) throws -> [UInt8]? {
+        let data = try Data(contentsOf: url)
+        guard !data.isEmpty else { return nil }
+        return [UInt8](data)
+    }
+
+    static func makeTexture(
+        url: URL,
+        size: CGSize,
+        with device: MTLDevice
+    ) throws -> MTLTexture? {
+        guard
+            let hexadecimalData = try loadHexadecimalData(from: url)
+        else { return nil }
+        return try makeTexture(
+            width: Int(size.width),
+            height: Int(size.height),
+            from: hexadecimalData,
+            with: device
+        )
+    }
+
+    static func makeTexture(
+        width: Int,
+        height: Int,
+        with device: MTLDevice
+    ) -> MTLTexture? {
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        textureDescriptor.usage = [
+            .renderTarget,
+            .shaderRead,
+            .shaderWrite
+        ]
+        return device.makeTexture(descriptor: textureDescriptor)
+    }
+
+    static func makeTexture(
+        width: Int,
+        height: Int,
+        from colorArray: [UInt8],
+        with device: MTLDevice
+    ) throws -> MTLTexture {
+        let bytesPerPixel = 4
+
+        guard colorArray.count == width * height * bytesPerPixel else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid value")
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        let bytesPerRow = bytesPerPixel * width
+
+        guard let texture = makeTexture(
+            width: width,
+            height: height,
+            with: device
+        ) else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to create texture")
+            )
+            Logger.error(error)
+            throw error
+        }
+
+        colorArray.withUnsafeBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress else {
+                return
+            }
+
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, width, height),
+                mipmapLevel: 0,
+                slice: 0,
+                withBytes: baseAddress,
+                bytesPerRow: bytesPerRow,
+                bytesPerImage: bytesPerRow * height
+            )
+        }
+
+        return texture
     }
 }
