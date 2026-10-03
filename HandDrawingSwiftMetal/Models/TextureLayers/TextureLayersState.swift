@@ -188,8 +188,8 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
         guard let repository, let undo, let canvasView else { return false }
         do {
             let removed = try await undo.removeLayer(in: self) {
+                guard layerCount > 1, let index = index(for: id) else { return false }
                 guard try repository.removeTexture(id) else { return false }
-                guard let index = index(for: id) else { return false }
                 return removeLayer(layerIndexToDelete: index)
             }
             if removed {
