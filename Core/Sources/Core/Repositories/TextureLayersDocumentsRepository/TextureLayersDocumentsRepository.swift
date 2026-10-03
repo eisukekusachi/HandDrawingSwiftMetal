@@ -7,14 +7,6 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-private struct TextureSource: Sendable {
-    let id: UUID
-    let width: Int
-    let height: Int
-    let hexadecimalData: [UInt8]
-}
-
-/// Manages and persists texture bytes on disk, keyed by id.
 public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
     @MainActor
     public static let shared: any TextureLayersDocumentsRepositoryProtocol = {
@@ -70,7 +62,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             throw error
         }
 
-        removeAll()
+        try removeAll()
 
         let textureData = try await newTexture.data(
             device: device,
@@ -108,7 +100,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
             device: device
         )
 
-        removeAll()
+        try removeAll()
 
         try ids.forEach { id in
             try FileManager.default.moveItem(
@@ -253,12 +245,8 @@ public extension TextureLayersDocumentsRepository {
         return textures
     }
 
-    func removeAll() {
-        do {
-            try FileManager.createNewDirectory(workingDirectoryURL)
-        } catch {
-            Logger.error(error)
-        }
+    func removeAll() throws {
+        try FileManager.createNewDirectory(workingDirectoryURL)
     }
 
     @discardableResult
@@ -447,4 +435,11 @@ private enum TextureBytes {
 
         return texture
     }
+}
+
+private struct TextureSource: Sendable {
+    let id: UUID
+    let width: Int
+    let height: Int
+    let hexadecimalData: [UInt8]
 }

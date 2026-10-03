@@ -7,8 +7,7 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// Stores texture bytes in a directory, keyed by id.
-/// Layer titles, order, and visibility stay with the caller.
+/// Stores texture bytes in a directory, keyed by id
 public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
 
     var workingDirectoryURL: URL { get }
@@ -56,7 +55,7 @@ public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
         _ id: UUID
     ) throws -> Bool
 
-    func removeAll()
+    func removeAll() throws
 
     @discardableResult
     func copyTexture(
