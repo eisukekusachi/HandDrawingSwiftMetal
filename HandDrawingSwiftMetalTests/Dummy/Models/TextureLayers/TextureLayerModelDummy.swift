@@ -7,7 +7,6 @@ import HandDrawingSwiftMetal
 import TextureLayerView
 
 public extension TextureLayerModel {
-
     static func generate(
         id: LayerId = LayerId(),
         title: String = "",

@@ -85,6 +85,7 @@
 		D4C3A07B3069000100009F91 /* TextureLayerModelDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */; };
 		D4C3A07F3069000100009F91 /* TextureLayersStateProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A07E3069000100009F91 /* TextureLayersStateProtocol.swift */; };
 		D4C3A0813069000100009F91 /* UndoableTextureLayersState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0803069000100009F91 /* UndoableTextureLayersState.swift */; };
+		D4C3A0833069000100009F91 /* UndoableTextureLayersStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0823069000100009F91 /* UndoableTextureLayersStateTests.swift */; };
 		D4C8A2012FCC010100C55A4D /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = D4C8A2032FCC010100C55A4D /* PopupView */; };
 		D4CF05002B9D4CAF00849A2C /* UIButtonExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */; };
 		D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */; };
@@ -201,6 +202,7 @@
 		D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerModelDummy.swift; sourceTree = "<group>"; };
 		D4C3A07E3069000100009F91 /* TextureLayersStateProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersStateProtocol.swift; sourceTree = "<group>"; };
 		D4C3A0803069000100009F91 /* UndoableTextureLayersState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoableTextureLayersState.swift; sourceTree = "<group>"; };
+		D4C3A0823069000100009F91 /* UndoableTextureLayersStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoableTextureLayersStateTests.swift; sourceTree = "<group>"; };
 		D4C8A2022FCC010100C55A4D /* PopupView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PopupView; sourceTree = "<group>"; };
 		D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonExtensions.swift; sourceTree = "<group>"; };
 		D4D02E402E5AA47B0064ECC3 /* DrawingToolType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolType.swift; sourceTree = "<group>"; };
@@ -261,6 +263,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D402815830716E8400F25241 /* Dummy */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A0853069000100009F91 /* Models */,
+			);
+			path = Dummy;
+			sourceTree = "<group>";
+		};
+		D4C3A0853069000100009F91 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A0863069000100009F91 /* TextureLayers */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D4C3A0863069000100009F91 /* TextureLayers */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */,
+			);
+			path = TextureLayers;
+			sourceTree = "<group>";
+		};
 		D41C72172E6C479500D524DE /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
@@ -276,14 +302,14 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
-		D426FC622E5C4B3000CC116D /* Drawingtools */ = {
+		D426FC622E5C4B3000CC116D /* DrawingTools */ = {
 			isa = PBXGroup;
 			children = (
 				D426FC962E5C4B7100CC116D /* BrushPaletteTests.swift */,
 				D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */,
 				D426FC982E5C852E00CC116D /* EraserPaletteTests.swift */,
 			);
-			path = Drawingtools;
+			path = DrawingTools;
 			sourceTree = "<group>";
 		};
 		D426FC9D2E5DD8CD00CC116D /* DrawingTools */ = {
@@ -314,8 +340,9 @@
 		D4732C7A2FA0EE4E00119C55 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D426FC622E5C4B3000CC116D /* Drawingtools */,
-				D4C3A07C3069000100009F91 /* Layers */,
+				D426FC622E5C4B3000CC116D /* DrawingTools */,
+				D4C3A0843069000100009F91 /* Undo */,
+				D4C3A07C3069000100009F91 /* TextureLayers */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -434,17 +461,24 @@
 			path = TextureLayers;
 			sourceTree = "<group>";
 		};
-		D4C3A07C3069000100009F91 /* Layers */ = {
+		D4C3A07C3069000100009F91 /* TextureLayers */ = {
 			isa = PBXGroup;
 			children = (
 				D4C3A0743069000100009F91 /* AddLayerIndexTests.swift */,
 				D4C3A0783069000100009F91 /* MoveLayerIndicesTests.swift */,
 				D4C3A0763069000100009F91 /* RemoveLayerIndexTests.swift */,
-				D4C3A07A3069000100009F91 /* TextureLayerModelDummy.swift */,
 				D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */,
 				D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */,
 			);
-			path = Layers;
+			path = TextureLayers;
+			sourceTree = "<group>";
+		};
+		D4C3A0843069000100009F91 /* Undo */ = {
+			isa = PBXGroup;
+			children = (
+				D4C3A0823069000100009F91 /* UndoableTextureLayersStateTests.swift */,
+			);
+			path = Undo;
 			sourceTree = "<group>";
 		};
 		D4E1ECD02752388C00D4A23D = {
@@ -506,6 +540,7 @@
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
+				D402815830716E8400F25241 /* Dummy */,
 				D4732C7A2FA0EE4E00119C55 /* Models */,
 				D4E1ECF32752388E00D4A23D /* HandDrawingSwiftMetalTests.swift */,
 				D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */,
@@ -794,6 +829,7 @@
 			files = (
 				D426FC972E5C4B7100CC116D /* BrushPaletteTests.swift in Sources */,
 				D4C3A0713069000100009F91 /* TextureLayersStateTests.swift in Sources */,
+				D4C3A0833069000100009F91 /* UndoableTextureLayersStateTests.swift in Sources */,
 				D4C3A0733069000100009F91 /* TextureLayersSnapshotTests.swift in Sources */,
 				D4C3A0753069000100009F91 /* AddLayerIndexTests.swift in Sources */,
 				D4C3A0773069000100009F91 /* RemoveLayerIndexTests.swift in Sources */,

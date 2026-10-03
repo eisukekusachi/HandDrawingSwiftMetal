@@ -2,27 +2,26 @@
 //  Created by Eisuke Kusachi
 //
 
-import Foundation
 import Testing
-
 @testable import HandDrawingSwiftMetal
 
-/*
- In this app, layers are arranged in descending order by their indices
-*/
 struct RemoveLayerIndexTests {
 
-    @Test("Confirms that deleting a non-zero indexed layer selects the layer at index - 1.")
-    func testSelectedIndexAfterDeletion_decrementsWhenGreaterThanZero() {
+    @Test
+    func `Confirms deleting a layer above index 0 selects the previous layer`() async throws {
         let selectedIndex = 3
+
         let result = RemoveLayerIndex.nextLayerIndexAfterDeletion(index: selectedIndex)
+
         #expect(result == 2)
     }
 
-    @Test("Confirms that deleting a zero indexed layer selects the layer at index + 1.")
-    func testSelectedIndexAfterDeletion_doesNotGoBelowZero() {
+    @Test
+    func `Confirms deleting the layer at index 0 selects the next layer`() async throws {
         let selectedIndex = 0
+
         let result = RemoveLayerIndex.nextLayerIndexAfterDeletion(index: selectedIndex)
+
         #expect(result == 1)
     }
 }
