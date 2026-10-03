@@ -84,7 +84,7 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
 
     private var showError: (Error) -> Void = { _ in }
 
-    private var canvasView: TextureLayerCanvasView?
+    private weak var canvasView: TextureLayerCanvasView?
 
     public init(
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
