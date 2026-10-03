@@ -1,8 +1,5 @@
 //
-//  TextureLayerSelection.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2026/04/22.
+//  Created by Eisuke Kusachi
 //
 
 @MainActor

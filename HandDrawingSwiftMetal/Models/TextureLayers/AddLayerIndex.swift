@@ -1,8 +1,5 @@
 //
-//  AddLayerIndex.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/07/03.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

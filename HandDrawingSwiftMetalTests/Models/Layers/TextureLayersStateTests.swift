@@ -1,8 +1,5 @@
 //
-//  TextureLayersStateTests.swift
-//  HandDrawingSwiftMetalTests
-//
-//  Created by Eisuke Kusachi on 2025/12/30.
+//  Created by Eisuke Kusachi
 //
 
 import CoreGraphics

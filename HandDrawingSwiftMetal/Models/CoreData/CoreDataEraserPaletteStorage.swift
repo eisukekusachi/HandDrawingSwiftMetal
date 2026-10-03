@@ -1,8 +1,5 @@
 //
-//  CoreDataEraserPaletteStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/09/06.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView

@@ -1,8 +1,5 @@
 //
-//  ProjectContent.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/04/25.
+//  Created by Eisuke Kusachi
 //
 
 import TextureLayerView

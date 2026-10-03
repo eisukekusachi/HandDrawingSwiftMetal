@@ -1,8 +1,5 @@
 //
-//  CoreDataProjectStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/01/23.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView

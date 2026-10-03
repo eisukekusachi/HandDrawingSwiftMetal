@@ -1,7 +1,5 @@
 //
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/09/13.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView

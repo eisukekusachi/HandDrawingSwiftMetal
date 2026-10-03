@@ -1,8 +1,5 @@
 //
-//  MoveLayerIndicesTests.swift
-//  HandDrawingSwiftMetalTests
-//
-//  Created by Eisuke Kusachi on 2025/07/05.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

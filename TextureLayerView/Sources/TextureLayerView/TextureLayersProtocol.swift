@@ -1,7 +1,5 @@
 //
-//  TextureLayerView
-//
-//  Created by Eisuke Kusachi on 2026/10/01.
+//  Created by Eisuke Kusachi
 //
 
 import Combine

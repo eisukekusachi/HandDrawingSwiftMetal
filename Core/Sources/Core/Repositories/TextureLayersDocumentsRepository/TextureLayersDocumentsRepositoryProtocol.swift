@@ -1,5 +1,5 @@
 //
-//  Created by Eisuke Kusachi on 2025/12/29.
+//  Created by Eisuke Kusachi
 //
 
 import CoreGraphics

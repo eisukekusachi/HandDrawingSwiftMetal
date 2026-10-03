@@ -1,7 +1,5 @@
 //
-//  TextureLayerView
-//
-//  Created by Eisuke Kusachi on 2025/08/05.
+//  Created by Eisuke Kusachi
 //
 
 import SwiftUI

@@ -1,8 +1,5 @@
 //
-//  TimeStampFormatter.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2023/12/31.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

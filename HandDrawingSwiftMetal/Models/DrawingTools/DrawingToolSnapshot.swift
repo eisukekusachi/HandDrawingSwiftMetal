@@ -1,8 +1,5 @@
 //
-//  DrawingToolSnapshot.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/08/25.
+//  Created by Eisuke Kusachi
 //
 
 import Core

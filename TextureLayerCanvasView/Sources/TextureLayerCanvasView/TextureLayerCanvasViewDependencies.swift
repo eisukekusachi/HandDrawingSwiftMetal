@@ -1,8 +1,5 @@
 //
-//  TextureLayerCanvasViewDependencies.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2026/04/18.
+//  Created by Eisuke Kusachi
 //
 
 import Core
