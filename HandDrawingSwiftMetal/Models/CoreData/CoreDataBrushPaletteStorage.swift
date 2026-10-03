@@ -63,7 +63,7 @@ extension CoreDataBrushPaletteStorage {
     func update(directoryURL: URL) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
-            let result = try? BrushPaletteArchiveModel(in: directoryURL)
+            let result = try? BrushPaletteSnapshot(in: directoryURL)
         else {
             let nsError = NSError(
                 domain: String(describing: Self.self),

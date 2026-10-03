@@ -31,7 +31,7 @@ extension HandDrawingViewModel {
             guard let self else { return nil }
             do {
                 return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                    let projectMetaData = try ProjectArchiveModel(in: workingDirectoryURL)
+                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
                     let thumbnailURL = workingDirectoryURL.appendingPathComponent(
                         self.thumbnailFileName
                     )

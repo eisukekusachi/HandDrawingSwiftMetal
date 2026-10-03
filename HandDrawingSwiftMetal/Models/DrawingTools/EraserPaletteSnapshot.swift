@@ -1,5 +1,5 @@
 //
-//  EraserPaletteArchiveModel.swift
+//  EraserPaletteSnapshot.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,7 +8,9 @@
 import Core
 import Foundation
 
-struct EraserPaletteArchiveModel: Codable, Sendable {
+/// Snapshot of `EraserPalette` used when saving and restoring.
+/// Each eraser is stored as its alpha value.
+struct EraserPaletteSnapshot: Codable, Sendable {
     public let index: Int
     public let alphas: [Int]
 
@@ -26,6 +28,6 @@ struct EraserPaletteArchiveModel: Codable, Sendable {
     }
 }
 
-extension EraserPaletteArchiveModel: LocalFileConvertible {
+extension EraserPaletteSnapshot: LocalFileConvertible {
     static var fileName: String { "eraser_palette" }
 }

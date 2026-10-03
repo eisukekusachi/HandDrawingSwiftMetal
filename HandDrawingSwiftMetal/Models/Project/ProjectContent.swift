@@ -13,8 +13,8 @@ struct ProjectContent {
     let thumbnail: UIImage?
     /// `nil` when texture restore fails on load.
     let textureLayers: TextureLayersSnapshot?
-    let project: ProjectArchiveModel
-    let drawingTool: DrawingToolArchiveModel?
-    let brushPalette: BrushPaletteArchiveModel?
-    let eraserPalette: EraserPaletteArchiveModel?
+    let project: ProjectSnapshot
+    let drawingTool: DrawingToolSnapshot?
+    let brushPalette: BrushPaletteSnapshot?
+    let eraserPalette: EraserPaletteSnapshot?
 }

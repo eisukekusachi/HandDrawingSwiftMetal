@@ -1,5 +1,5 @@
 //
-//  DrawingToolArchiveModel.swift
+//  DrawingToolSnapshot.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -8,7 +8,9 @@
 import Core
 import Foundation
 
-struct DrawingToolArchiveModel: Codable, Sendable {
+/// Snapshot of `DrawingTool` used when saving and restoring.
+/// The tool type is stored as its raw `Int`.
+struct DrawingToolSnapshot: Codable, Sendable {
     let type: Int
     let brushDiameter: Int
     let eraserDiameter: Int
@@ -29,6 +31,6 @@ struct DrawingToolArchiveModel: Codable, Sendable {
     }
 }
 
-extension DrawingToolArchiveModel: LocalFileConvertible {
+extension DrawingToolSnapshot: LocalFileConvertible {
     static var fileName: String { "drawing_tool" }
 }

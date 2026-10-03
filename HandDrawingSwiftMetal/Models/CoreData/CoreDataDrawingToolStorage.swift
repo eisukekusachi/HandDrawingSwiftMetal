@@ -77,7 +77,7 @@ extension CoreDataDrawingToolStorage {
     func update(directoryURL: URL) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
-            let result = try? DrawingToolArchiveModel(in: directoryURL)
+            let result = try? DrawingToolSnapshot(in: directoryURL)
         else {
             let nsError = NSError(
                 domain: String(describing: Self.self),

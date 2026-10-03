@@ -1,5 +1,5 @@
 //
-//  ProjectArchiveModel.swift
+//  ProjectSnapshot.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2026/01/24.
@@ -8,7 +8,9 @@
 import Core
 import Foundation
 
-struct ProjectArchiveModel: Codable, Sendable {
+/// Snapshot of `ProjectData` used when saving and restoring.
+/// `currentProjectName` stays outside this file.
+struct ProjectSnapshot: Codable, Sendable {
 
     public let createdAt: Date
     public let updatedAt: Date
@@ -28,6 +30,6 @@ struct ProjectArchiveModel: Codable, Sendable {
     }
 }
 
-extension ProjectArchiveModel: LocalFileConvertible {
+extension ProjectSnapshot: LocalFileConvertible {
     public static var fileName: String { "project" }
 }

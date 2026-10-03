@@ -1,5 +1,5 @@
 //
-//  BrushPaletteArchiveModel.swift
+//  BrushPaletteSnapshot.swift
 //  HandDrawingSwiftMetal
 //
 //  Created by Eisuke Kusachi on 2025/08/25.
@@ -9,7 +9,9 @@ import CanvasView
 import Core
 import Foundation
 
-struct BrushPaletteArchiveModel: Codable, Sendable {
+/// Snapshot of `BrushPalette` used when saving and restoring.
+/// Colors are stored as hex strings.
+struct BrushPaletteSnapshot: Codable, Sendable {
     let index: Int
     let hexColors: [String]
 
@@ -25,6 +27,6 @@ struct BrushPaletteArchiveModel: Codable, Sendable {
     }
 }
 
-extension BrushPaletteArchiveModel: LocalFileConvertible {
+extension BrushPaletteSnapshot: LocalFileConvertible {
     static var fileName: String { "brush_palette" }
 }

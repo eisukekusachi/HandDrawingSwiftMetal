@@ -62,7 +62,7 @@ extension CoreDataProjectStorage {
     func update(directoryURL: URL, projectName: String) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
-            let result = try? ProjectArchiveModel(in: directoryURL)
+            let result = try? ProjectSnapshot(in: directoryURL)
         else {
             let error = NSError(
                 title: String(localized: "Error"),

@@ -212,7 +212,7 @@ extension HandDrawingViewModel {
             try content.drawingTool?.write(in: workingDirectoryURL)
             try content.brushPalette?.write(in: workingDirectoryURL)
             try content.eraserPalette?.write(in: workingDirectoryURL)
-            try ProjectArchiveModel(
+            try ProjectSnapshot(
                 createdAt: projectCreatedAt ?? content.project.createdAt,
                 updatedAt: projectUpdatedAt ?? content.project.updatedAt
             ).write(in: workingDirectoryURL)
