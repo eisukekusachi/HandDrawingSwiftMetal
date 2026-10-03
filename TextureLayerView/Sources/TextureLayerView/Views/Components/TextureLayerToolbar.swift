@@ -27,7 +27,7 @@ struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "insertLayer") {
                         Task { @MainActor in
-                            try? await viewModel.onTapInsertButton()
+                            await viewModel.onTapInsertButton()
                         }
                     }
                 },
@@ -41,7 +41,7 @@ struct TextureLayerToolbar: View {
                 action: {
                     buttonThrottle.throttle(id: "removeLayer") {
                         Task { @MainActor in
-                            try? await viewModel.onTapDeleteButton()
+                            await viewModel.onTapDeleteButton()
                         }
                     }
                 },
@@ -65,7 +65,7 @@ struct TextureLayerToolbar: View {
                 TextField("Enter a title", text: $textFieldTitle)
                 Button("OK", action: {
                     guard let selectedLayer = viewModel.selectedLayer else { return }
-                    try? viewModel.onTapTitleButton(
+                    viewModel.onTapTitleButton(
                         selectedLayer.id,
                         title: textFieldTitle
                     )

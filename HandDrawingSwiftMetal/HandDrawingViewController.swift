@@ -73,6 +73,9 @@ class HandDrawingViewController: UIViewController {
             textureLayers: viewModel.textureLayersState,
             onClose: { [weak self] in
                 self?.textureLayerViewModel.hide()
+            },
+            onError: { [weak self] error in
+                self?.viewModel.showError(error)
             }
         )
     }()

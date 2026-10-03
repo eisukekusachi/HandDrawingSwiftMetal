@@ -163,10 +163,7 @@ final class HandDrawingViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue,
             undo: undo,
-            canvasView: canvasView,
-            showError: { [weak self] error in
-                self?.showError(error)
-            }
+            canvasView: canvasView
         )
 
         do {

@@ -79,8 +79,6 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
 
     private var undo: UndoTextureLayerRegistrar?
 
-    private var showError: (Error) -> Void = { _ in }
-
     private weak var canvasView: TextureLayerCanvasView?
 
     public init(
@@ -94,14 +92,12 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
         undo: UndoTextureLayerRegistrar,
-        canvasView: TextureLayerCanvasView,
-        showError: @escaping (Error) -> Void
+        canvasView: TextureLayerCanvasView
     ) {
         self.device = device
         self.commandQueue = commandQueue
         self.undo = undo
         self.canvasView = canvasView
-        self.showError = showError
     }
 
     /// Restores the layer list from a saved snapshot.
@@ -147,60 +143,50 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
         guard let anchorId = selectedLayerId else { return }
 
         let id = LayerId()
-        do {
-            guard let texture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            ) else {
-                throw NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Unable to load required data")
-                )
-            }
-            let data = try await texture.data(
-                device: device,
-                commandQueue: commandQueue
+        guard let texture = MTLTextureCreator.makeTexture(
+            width: Int(textureSize.width),
+            height: Int(textureSize.height),
+            with: device
+        ) else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to load required data")
             )
-            try await repository.addTextureData(data: data, id: id)
-            guard let anchorIndex = index(for: anchorId) else {
-                try repository.removeTexture(id)
-                return
-            }
-            addLayer(
-                layer: .init(
-                    id: id,
-                    title: TimeStampFormatter.currentDate,
-                    alpha: 255,
-                    isVisible: true
-                ),
-                thumbnail: texture.makeThumbnail(),
-                at: AddLayerIndex.insertIndex(selectedIndex: anchorIndex)
-            )
-            await undo.didAddLayer(in: self)
-            updateFullCanvas(canvasView)
-        } catch {
-            showError(error)
-            throw error
         }
+        let data = try await texture.data(
+            device: device,
+            commandQueue: commandQueue
+        )
+        try await repository.addTextureData(data: data, id: id)
+        guard let anchorIndex = index(for: anchorId) else {
+            try repository.removeTexture(id)
+            return
+        }
+        addLayer(
+            layer: .init(
+                id: id,
+                title: TimeStampFormatter.currentDate,
+                alpha: 255,
+                isVisible: true
+            ),
+            thumbnail: texture.makeThumbnail(),
+            at: AddLayerIndex.insertIndex(selectedIndex: anchorIndex)
+        )
+        await undo.didAddLayer(in: self)
+        updateFullCanvas(canvasView)
     }
 
     public func removeLayer(id: LayerId) async throws -> Bool {
         guard let repository, let undo, let canvasView else { return false }
-        do {
-            let removed = try await undo.removeLayer(in: self) {
-                guard layerCount > 1, let index = index(for: id) else { return false }
-                guard try repository.removeTexture(id) else { return false }
-                return removeLayer(layerIndexToDelete: index)
-            }
-            if removed {
-                updateFullCanvas(canvasView)
-            }
-            return removed
-        } catch {
-            showError(error)
-            throw error
+        let removed = try await undo.removeLayer(in: self) {
+            guard layerCount > 1, let index = index(for: id) else { return false }
+            guard try repository.removeTexture(id) else { return false }
+            return removeLayer(layerIndexToDelete: index)
         }
+        if removed {
+            updateFullCanvas(canvasView)
+        }
+        return removed
     }
 
     public func renameLayer(id: LayerId, title: String) throws {

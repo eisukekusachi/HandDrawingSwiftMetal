@@ -24,6 +24,8 @@ open class TextureLayerViewModel: ObservableObject {
 
     var onClose: (() -> Void)?
 
+    var onError: ((Error) -> Void)?
+
     var selectedLayer: TextureLayerItem? {
         guard let selectedLayerId else { return nil }
         return layers.first { $0.id == selectedLayerId }
@@ -33,10 +35,12 @@ open class TextureLayerViewModel: ObservableObject {
 
     public init(
         textureLayers: any TextureLayersProtocol,
-        onClose: (() -> Void)? = nil
+        onClose: (() -> Void)? = nil,
+        onError: ((Error) -> Void)? = nil
     ) {
         self.textureLayers = textureLayers
         self.onClose = onClose
+        self.onError = onError
         textureLayers.objectWillChange
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -48,25 +52,38 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     @discardableResult
-    open func onTapInsertButton() async throws -> Bool {
+    open func onTapInsertButton() async -> Bool {
         guard selectedLayerId != nil else { return false }
-        try await textureLayers.addLayer()
-        return true
+        do {
+            try await textureLayers.addLayer()
+            return true
+        } catch {
+            onError?(error)
+            return false
+        }
     }
 
     @discardableResult
-    open func onTapDeleteButton() async throws -> Bool {
+    open func onTapDeleteButton() async -> Bool {
         guard
             let selectedId = selectedLayer?.id,
-            layers.count > 1,
-            try await textureLayers.removeLayer(id: selectedId)
+            layers.count > 1
         else { return false }
-
-        return true
+        do {
+            guard try await textureLayers.removeLayer(id: selectedId) else { return false }
+            return true
+        } catch {
+            onError?(error)
+            return false
+        }
     }
 
-    open func onTapTitleButton(_ id: UUID, title: String) throws {
-        try textureLayers.renameLayer(id: id, title: title)
+    open func onTapTitleButton(_ id: UUID, title: String) {
+        do {
+            try textureLayers.renameLayer(id: id, title: title)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
@@ -77,8 +94,12 @@ open class TextureLayerViewModel: ObservableObject {
         textureLayers.selectLayer(id: id)
     }
 
-    open func onMoveLayer(source: IndexSet, destination: Int) throws {
-        try textureLayers.moveLayers(from: source, to: destination)
+    open func onMoveLayer(source: IndexSet, destination: Int) {
+        do {
+            try textureLayers.moveLayers(from: source, to: destination)
+        } catch {
+            onError?(error)
+        }
     }
 
     func onAlphaSliderDragging(_ isDragging: Bool) {

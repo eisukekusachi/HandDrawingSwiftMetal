@@ -10,12 +10,14 @@ public struct TextureLayerView: View {
 
     public init(
         textureLayers: any TextureLayersProtocol,
-        onClose: (() -> Void)? = nil
+        onClose: (() -> Void)? = nil,
+        onError: ((Error) -> Void)? = nil
     ) {
         self._viewModel = .init(
             wrappedValue: TextureLayerViewModel(
                 textureLayers: textureLayers,
-                onClose: onClose
+                onClose: onClose,
+                onError: onError
             )
         )
     }
@@ -27,7 +29,10 @@ public struct TextureLayerView: View {
             )
 
             ReversedTextureLayerListView(
-                viewModel: viewModel
+                viewModel: viewModel,
+                onMove: { source, destination in
+                    viewModel.onMoveLayer(source: source, destination: destination)
+                }
             )
 
             SliderWithStepper(

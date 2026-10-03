@@ -8,6 +8,8 @@ struct ReversedTextureLayerListView: View {
 
     @ObservedObject var viewModel: TextureLayerViewModel
 
+    let onMove: (IndexSet, Int) -> Void
+
     var body: some View {
         List {
             ForEach(
@@ -40,12 +42,7 @@ struct ReversedTextureLayerListView: View {
                 )
                 .listRowInsets(EdgeInsets())
             }
-            .onMove(perform: { source, destination in
-                try? viewModel.onMoveLayer(
-                    source: source,
-                    destination: destination
-                )
-            })
+            .onMove(perform: onMove)
             .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
@@ -82,7 +79,8 @@ private struct PreviewView: View {
     }()
     var body: some View {
         ReversedTextureLayerListView(
-            viewModel: viewModel
+            viewModel: viewModel,
+            onMove: { _, _ in }
         )
         .frame(width: 256, height: 300)
     }
