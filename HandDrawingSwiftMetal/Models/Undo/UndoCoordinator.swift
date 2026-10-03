@@ -168,7 +168,7 @@ private extension UndoCoordinator {
                 layerId: textureLayerId,
                 textureData: textureData
             )
-            textureLayersState.updateThumbnail(textureLayerId, thumbnail: newTexture.makeThumbnail())
+            textureLayersState.updateLayerThumbnail(textureLayerId, thumbnail: newTexture.makeThumbnail())
 
             try? canvasView.setCurrentTexture(newTexture)
             canvasView.updateCanvasTextureUsingCurrentTexture()
@@ -199,7 +199,7 @@ private extension UndoCoordinator {
                 textureData: textureData
             )
 
-            textureLayersState.addLayer(
+            textureLayersState.insertLayer(
                 layer: undoObject.textureLayer,
                 thumbnail: newTexture.makeThumbnail(),
                 at: undoObject.insertIndex

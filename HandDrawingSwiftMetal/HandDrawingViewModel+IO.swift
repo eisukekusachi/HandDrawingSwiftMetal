@@ -23,7 +23,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.snapshot,
+                textureLayers: textureLayers.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -74,7 +74,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.snapshot,
+                textureLayers: textureLayers.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -149,7 +149,7 @@ extension HandDrawingViewModel {
         commandQueue: MTLCommandQueue
     ) async throws {
         try await installBlankLayer(
-            textureSize: textureLayersState.textureSize,
+            textureSize: textureLayers.textureSize,
             device: device,
             commandQueue: commandQueue
         )

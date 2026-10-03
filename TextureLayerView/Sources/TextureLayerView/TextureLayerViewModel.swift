@@ -87,11 +87,19 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
-        textureLayers.setVisibility(id: id, isVisible: isVisible)
+        do {
+            try textureLayers.setVisibility(id: id, isVisible: isVisible)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onTapCell(_ id: UUID) {
-        textureLayers.selectLayer(id: id)
+        do {
+            try textureLayers.selectLayer(id: id)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onMoveLayer(source: IndexSet, destination: Int) {

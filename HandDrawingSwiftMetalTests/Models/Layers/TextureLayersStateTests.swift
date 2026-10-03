@@ -31,7 +31,7 @@ struct TextureLayersStateTests {
             )
 
             #expect(subject.layers.count == 3)
-            #expect(subject.selectedIndex == 1)
+            #expect(subject.selectedLayerIndex == 1)
             #expect(subject.textureSize.width == textureSize.width)
             #expect(subject.textureSize.height == textureSize.height)
         }
@@ -46,7 +46,7 @@ struct TextureLayersStateTests {
             )
 
             #expect(subject.layers.count == 2)
-            #expect(subject.selectedIndex == 1)
+            #expect(subject.selectedLayerIndex == 1)
         }
 
         @Test
@@ -59,7 +59,7 @@ struct TextureLayersStateTests {
             )
 
             #expect(subject.layers.count == 3)
-            #expect(subject.selectedIndex == 0)
+            #expect(subject.selectedLayerIndex == 0)
         }
     }
 
@@ -82,7 +82,7 @@ struct TextureLayersStateTests {
 
             #expect(result == false)
             #expect(subject.layers.count == 2)
-            #expect(subject.selectedIndex == 0)
+            #expect(subject.selectedLayerIndex == 0)
         }
 
         @Test
@@ -97,7 +97,7 @@ struct TextureLayersStateTests {
 
             #expect(result == false)
             #expect(subject.layers.count == 1)
-            #expect(subject.selectedIndex == 0)
+            #expect(subject.selectedLayerIndex == 0)
         }
     }
 }

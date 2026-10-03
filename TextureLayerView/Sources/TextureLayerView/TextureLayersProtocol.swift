@@ -14,8 +14,8 @@ public protocol TextureLayersProtocol: ObservableObject where ObjectWillChangePu
     func removeLayer(id: LayerId) async throws -> Bool
     func renameLayer(id: LayerId, title: String) throws
     func moveLayers(from source: IndexSet, to destination: Int) throws
-    func selectLayer(id: LayerId)
-    func setVisibility(id: LayerId, isVisible: Bool)
+    func selectLayer(id: LayerId) throws
+    func setVisibility(id: LayerId, isVisible: Bool) throws
     func setAlpha(id: LayerId, alpha: Int)
     func setAlphaSliderDragging(_ isDragging: Bool)
 }

@@ -110,11 +110,11 @@ final class PreviewTextureLayers: TextureLayersProtocol {
 
     func moveLayers(from source: IndexSet, to destination: Int) throws {}
 
-    func selectLayer(id: LayerId) {
+    func selectLayer(id: LayerId) throws {
         selectedLayerId = id
     }
 
-    func setVisibility(id: LayerId, isVisible: Bool) {
+    func setVisibility(id: LayerId, isVisible: Bool) throws {
         guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
         layers[index] = layers[index].updated(isVisible: isVisible)
     }

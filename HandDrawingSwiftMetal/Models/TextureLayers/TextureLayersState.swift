@@ -12,33 +12,25 @@ import UIKit
 @preconcurrency import MetalKit
 
 @MainActor
-public final class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayerCanvasProtocol {
+class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
 
     var selectedLayer: TextureLayerModel? {
         guard let selectedLayerId else { return nil }
         return layerModels.first(where: { $0.id == selectedLayerId })
     }
 
-    var selectedIndex: Int? {
+    var selectedLayerIndex: Int? {
         guard let selectedLayerId else { return nil }
         return layerModels.firstIndex(where: { $0.id == selectedLayerId })
     }
 
-    public var selectedLayerIndex: Int? {
-        selectedIndex
-    }
-
-    var layerCount: Int {
-        layerModels.count
-    }
-
-    public var layerSnapshots: [CanvasLayerSnapshot] {
+    var layerSnapshots: [CanvasLayerSnapshot] {
         layerModels.map {
             .init(id: $0.id, alpha: $0.alpha, isVisible: $0.isVisible)
         }
     }
 
-    public var selectedLayerSnapshot: CanvasLayerSnapshot? {
+    var selectedLayerSnapshot: CanvasLayerSnapshot? {
         guard let selectedLayer else { return nil }
         return .init(
             id: selectedLayer.id,
@@ -51,15 +43,15 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
     var snapshot: TextureLayersSnapshot {
         .init(
             layers: layerModels,
-            layerIndex: selectedIndex ?? 0,
+            layerIndex: selectedLayerIndex ?? 0,
             textureSize: textureSize
         )
     }
 
     /// Presentation models for `TextureLayerView`.
-    public var layers: [TextureLayerItem] {
+    var layers: [TextureLayerItem] {
         layerModels.map { model in
-            .init(model: model, thumbnail: thumbnails[model.id])
+                .init(model: model, thumbnail: thumbnails[model.id])
         }
     }
 
@@ -67,9 +59,9 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
 
     @Published private var thumbnails: [LayerId: UIImage] = [:]
 
-    @Published public private(set) var selectedLayerId: LayerId?
+    @Published private(set) var selectedLayerId: LayerId?
 
-    @Published public private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
+    @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
     private let repository: TextureLayersDocumentsRepositoryProtocol?
 
@@ -77,31 +69,31 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
 
     private var commandQueue: MTLCommandQueue?
 
-    private var undo: UndoTextureLayerRegistrar?
+    private(set) weak var canvasView: TextureLayerCanvasView?
 
-    private weak var canvasView: TextureLayerCanvasView?
-
-    public init(
+    init(
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
     ) {
         self.repository = repository
     }
 
-    /// Canvas and undo are created from this object, so they are set up once both exist.
+    /// The canvas is created from this object, so it is set up once the canvas exists.
     func setup(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        undo: UndoTextureLayerRegistrar,
         canvasView: TextureLayerCanvasView
     ) {
         self.device = device
         self.commandQueue = commandQueue
-        self.undo = undo
         self.canvasView = canvasView
     }
 
+    func layer(_ id: LayerId) -> TextureLayerModel? {
+        layerModels.first(where: { $0.id == id })
+    }
+
     /// Restores the layer list from a saved snapshot.
-    func update(
+    func setLayers(
         _ textureLayers: TextureLayersSnapshot
     ) {
         setLayers(
@@ -127,12 +119,11 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
         self.textureSize = textureSize
     }
 
-    public func addLayer() async throws {
+    func addLayer() async throws {
         guard
             let repository,
             let device,
             let commandQueue,
-            let undo,
             let canvasView
         else {
             throw NSError(
@@ -158,11 +149,11 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
             commandQueue: commandQueue
         )
         try await repository.addTextureData(data: data, id: id)
-        guard let anchorIndex = index(for: anchorId) else {
+        guard let anchorIndex = layerModels.firstIndex(where: { $0.id == anchorId }) else {
             try repository.removeTexture(id)
             return
         }
-        addLayer(
+        insertLayer(
             layer: .init(
                 id: id,
                 title: TimeStampFormatter.currentDate,
@@ -172,105 +163,10 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
             thumbnail: texture.makeThumbnail(),
             at: AddLayerIndex.insertIndex(selectedIndex: anchorIndex)
         )
-        await undo.didAddLayer(in: self)
         updateFullCanvas(canvasView)
     }
 
-    public func removeLayer(id: LayerId) async throws -> Bool {
-        guard let repository, let undo, let canvasView else { return false }
-        let removed = try await undo.removeLayer(in: self) {
-            guard layerCount > 1, let index = index(for: id) else { return false }
-            guard try repository.removeTexture(id) else { return false }
-            return removeLayer(layerIndexToDelete: index)
-        }
-        if removed {
-            updateFullCanvas(canvasView)
-        }
-        return removed
-    }
-
-    public func renameLayer(id: LayerId, title: String) throws {
-        if let undo {
-            try undo.renameLayer(in: self, id: id, title: title) {
-                update(id, title: title)
-            }
-        } else {
-            update(id, title: title)
-        }
-    }
-
-    public func moveLayers(from source: IndexSet, to destination: Int) throws {
-        if let undo {
-            try undo.moveLayer(in: self, source: source, destination: destination) {
-                moveLayer(
-                    indices: .init(
-                        sourceIndexSet: source,
-                        destinationIndex: destination
-                    )
-                )
-            }
-        } else {
-            moveLayer(
-                indices: .init(
-                    sourceIndexSet: source,
-                    destinationIndex: destination
-                )
-            )
-        }
-        if let canvasView {
-            updateFullCanvas(canvasView)
-        }
-    }
-
-    public func selectLayer(id: LayerId) {
-        if let undo {
-            undo.selectLayer(in: self, id: id) {
-                selectLayer(id)
-            }
-        } else {
-            selectLayer(id)
-        }
-        if let canvasView {
-            updateFullCanvas(canvasView)
-        }
-    }
-
-    public func setVisibility(id: LayerId, isVisible: Bool) {
-        if let undo {
-            undo.changeVisibility(in: self, id: id, isVisible: isVisible) {
-                update(id, isVisible: isVisible)
-            }
-        } else {
-            update(id, isVisible: isVisible)
-        }
-        if let canvasView {
-            updateFullCanvas(canvasView)
-        }
-    }
-
-    public func setAlpha(id: LayerId, alpha: Int) {
-        updateAlpha(id, alpha: alpha)
-        canvasView?.updateCanvasTextureUsingCurrentTexture()
-    }
-
-    public func setAlphaSliderDragging(_ isDragging: Bool) {
-        undo?.alphaSliderDraggingChanged(in: self, isDragging)
-    }
-
-    public func updateLayerThumbnail(_ id: UUID, thumbnail: UIImage?) {
-        updateThumbnail(id, thumbnail: thumbnail)
-    }
-
-    private func updateFullCanvas(_ canvasView: TextureLayerCanvasView) {
-        Task {
-            try? await canvasView.updateFullCanvasTexture()
-        }
-    }
-}
-
-extension TextureLayersState {
-
-    func addLayer(
+    func insertLayer(
         layer: TextureLayerModel,
         thumbnail: UIImage?,
         at index: Int
@@ -282,9 +178,28 @@ extension TextureLayersState {
         selectedLayerId = layer.id
     }
 
+    func removeLayer(id: LayerId) async throws -> Bool {
+        guard
+            canvasView != nil,
+            let repository,
+            layerModels.count > 1,
+            let index = layerModels.firstIndex(where: { $0.id == id }),
+            try repository.removeTexture(id)
+        else { return false }
+
+        let removed = removeLayer(layerIndexToDelete: index)
+        if removed {
+            refreshCanvas()
+        }
+        return removed
+    }
+
     @discardableResult
     func removeLayer(layerIndexToDelete index: Int) -> Bool {
-        guard layerCount > 1, layerModels.indices.contains(index) else { return false }
+        guard
+            layerModels.count > 1,
+            layerModels.indices.contains(index)
+        else { return false }
 
         let newLayerId = layerModels[
             RemoveLayerIndex.nextLayerIndexAfterDeletion(index: index)
@@ -296,10 +211,41 @@ extension TextureLayersState {
         return true
     }
 
+    func renameLayer(id: LayerId, title: String) throws {
+        update(id, title: title)
+    }
+
+    func moveLayers(from source: IndexSet, to destination: Int) throws {
+        moveLayer(
+            indices: .init(
+                sourceIndexSet: source,
+                destinationIndex: destination
+            )
+        )
+        refreshCanvas()
+    }
+
+    func selectLayer(id: LayerId) throws {
+        selectLayer(id)
+        refreshCanvas()
+    }
+
+    func setVisibility(id: LayerId, isVisible: Bool) throws {
+        update(id, isVisible: isVisible)
+        refreshCanvas()
+    }
+
+    func setAlpha(id: LayerId, alpha: Int) {
+        update(id, alpha: alpha)
+        canvasView?.updateCanvasTextureUsingCurrentTexture()
+    }
+
+    func setAlphaSliderDragging(_ isDragging: Bool) {}
+
     func moveLayer(indices: MoveLayerIndices) {
         let reversedIndices = MoveLayerIndices.reversedIndices(
             indices: indices,
-            layerCount: layerCount
+            layerCount: layerModels.count
         )
         layerModels.move(
             fromOffsets: reversedIndices.sourceIndexSet,
@@ -318,7 +264,9 @@ extension TextureLayersState {
         isVisible: Bool? = nil,
         thumbnail: UIImage? = nil
     ) {
-        guard let index = index(for: id) else { return }
+        guard
+            let index = layerModels.firstIndex(where: { $0.id == id })
+        else { return }
 
         if title != nil || alpha != nil || isVisible != nil {
             let layer = layerModels[index]
@@ -334,20 +282,24 @@ extension TextureLayersState {
         }
     }
 
-    func updateAlpha(_ id: LayerId, alpha: Int) {
-        update(id, alpha: alpha)
-    }
-
-    func updateThumbnail(_ id: LayerId, thumbnail: UIImage?) {
-        guard let thumbnail, index(for: id) != nil else { return }
+    func updateLayerThumbnail(_ id: UUID, thumbnail: UIImage?) {
+        guard
+            let thumbnail,
+            layerModels.firstIndex(where: { $0.id == id }) != nil
+        else { return }
         thumbnails[id] = thumbnail
     }
 
-    func index(for id: LayerId) -> Int? {
-        layerModels.firstIndex(where: { $0.id == id })
+    func refreshCanvas() {
+        guard let canvasView else { return }
+        updateFullCanvas(canvasView)
     }
+}
 
-    func layer(_ id: LayerId) -> TextureLayerModel? {
-        layerModels.first(where: { $0.id == id })
+private extension TextureLayersState {
+    func updateFullCanvas(_ canvasView: TextureLayerCanvasView) {
+        Task {
+            try? await canvasView.updateFullCanvasTexture()
+        }
     }
 }

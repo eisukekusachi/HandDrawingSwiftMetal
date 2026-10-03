@@ -21,7 +21,7 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {

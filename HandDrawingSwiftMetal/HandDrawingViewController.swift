@@ -45,13 +45,13 @@ class HandDrawingViewController: UIViewController {
     private lazy var undoCoordinator: UndoCoordinator = {
         .init(
             canvasView: canvasView,
-            textureLayersState: viewModel.textureLayersState
+            textureLayersState: viewModel.undoableTextureLayers
         )
     }()
 
     private(set) lazy var canvasView: TextureLayerCanvasView = {
         TextureLayerCanvasView(
-            textureLayer: viewModel.textureLayersState,
+            textureLayer: viewModel.textureLayers,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration
         )
@@ -70,7 +70,7 @@ class HandDrawingViewController: UIViewController {
 
     private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
-            textureLayers: viewModel.textureLayersState,
+            textureLayers: viewModel.textureLayers,
             onClose: { [weak self] in
                 self?.textureLayerViewModel.hide()
             },
@@ -307,7 +307,7 @@ extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(
                     .init(undoManager)
                 )
-                if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                if let alpha = self?.viewModel.textureLayers.selectedLayer?.alpha {
                     self?.textureLayerView.updateAlpha(alpha)
                 }
             }

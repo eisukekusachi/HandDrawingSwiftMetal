@@ -39,7 +39,7 @@ final class UndoTextureLayerRegistrar {
     func didAddLayer(in state: TextureLayersState) async {
         guard
             let layerId = state.selectedLayerId,
-            let layerIndex = state.selectedIndex,
+            let layerIndex = state.selectedLayerIndex,
             let layer = state.selectedLayer
         else { return }
 
@@ -71,11 +71,11 @@ final class UndoTextureLayerRegistrar {
 
     func removeLayer(
         in state: TextureLayersState,
-        _ perform: () throws -> Bool
+        _ perform: () async throws -> Bool
     ) async throws -> Bool {
         guard
             let layerId = state.selectedLayerId,
-            let layerIndex = state.selectedIndex,
+            let layerIndex = state.selectedLayerIndex,
             let layer = state.selectedLayer
         else { return false }
 
@@ -91,7 +91,7 @@ final class UndoTextureLayerRegistrar {
             return false
         }
 
-        guard try perform() else { return false }
+        guard try await perform() else { return false }
 
         try await registerDeletionUndo(
             restorationTexture: texture,
@@ -136,11 +136,11 @@ final class UndoTextureLayerRegistrar {
         in state: TextureLayersState,
         id: LayerId,
         isVisible: Bool,
-        perform: () -> Void
-    ) {
+        perform: () throws -> Void
+    ) rethrows {
         guard let undoLayer = state.layer(id) else { return }
 
-        perform()
+        try perform()
 
         guard let redoLayer = state.layer(id) else { return }
 
@@ -159,11 +159,11 @@ final class UndoTextureLayerRegistrar {
     func selectLayer(
         in state: TextureLayersState,
         id: LayerId,
-        perform: () -> Void
-    ) {
+        perform: () throws -> Void
+    ) rethrows {
         guard let undoLayer = state.selectedLayer else { return }
 
-        perform()
+        try perform()
 
         guard let redoLayer = state.selectedLayer else { return }
 

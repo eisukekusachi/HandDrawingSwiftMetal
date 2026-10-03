@@ -12,7 +12,7 @@ import UIKit
 
 /// Asks the view to reinitialize the canvas after a file action.
 struct InitializeCanvasRequest: Equatable {
-    /// Whether the layer list UI should reload from `textureLayersState`
+    /// Whether the layer list UI should reload from `textureLayers`
     let updateLayerList: Bool
     /// Whether the presented file list should be dismissed after initialization
     let dismissFileView: Bool
@@ -30,7 +30,7 @@ struct InitializeCanvasRequest: Equatable {
 final class HandDrawingViewModel: ObservableObject {
 
     var textureSize: CGSize {
-        textureLayersState.textureSize
+        textureLayers.textureSize
     }
 
     let project: ProjectData = .init()
@@ -38,7 +38,9 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPalette: BrushPalette
     let eraserPalette: EraserPalette
 
-    let textureLayersState: TextureLayersState
+    let undoableTextureLayers: UndoableTextureLayersState
+
+    let textureLayers: any TextureLayersStateProtocol
 
     let fileList: FileList
     let thumbnailFileName: String
@@ -116,11 +118,13 @@ final class HandDrawingViewModel: ObservableObject {
         self.brushPalette = .init()
         self.eraserPalette = .init()
 
-        self.textureLayersState = TextureLayersState(
+        let undoableTextureLayers = UndoableTextureLayersState(
             repository: dependencies.textureLayersDocumentsRepository
         )
+        self.undoableTextureLayers = undoableTextureLayers
+        self.textureLayers = undoableTextureLayers
         self.textureLayerStorage = .init(
-            textureLayers: self.textureLayersState,
+            textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
         )
         self.projectStorageController = .init(
@@ -159,12 +163,12 @@ final class HandDrawingViewModel: ObservableObject {
         undo: UndoTextureLayerRegistrar,
         canvasView: TextureLayerCanvasView
     ) {
-        textureLayersState.setup(
+        textureLayers.setup(
             device: device,
             commandQueue: commandQueue,
-            undo: undo,
             canvasView: canvasView
         )
+        undoableTextureLayers.setUndo(undo: undo)
 
         do {
             try fetchDataFromCoreDataIfAvailable()
@@ -188,7 +192,7 @@ final class HandDrawingViewModel: ObservableObject {
                     textureSize: restoredTextureLayerDataFromCoreData.textureSize,
                     device: device
                 )
-                textureLayersState.update(restoredTextureLayerDataFromCoreData)
+                textureLayers.setLayers(restoredTextureLayerDataFromCoreData)
                 return restoredTextureLayerDataFromCoreData.textureSize
             } catch {
                 let textureSize = await installBlankLayerOrAbort(
@@ -225,7 +229,7 @@ final class HandDrawingViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue
         )
-        textureLayersState.setLayers(
+        textureLayers.setLayers(
             [layer],
             textureSize: textureSize
         )
