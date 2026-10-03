@@ -14,7 +14,6 @@
 		D4C3A05A3069000100009F91 /* RemoveLayerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0593069000100009F91 /* RemoveLayerIndex.swift */; };
 		D4C3A05C3069000100009F91 /* MoveLayerIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A05B3069000100009F91 /* MoveLayerIndices.swift */; };
 		D4C3A0633069000100009F91 /* TextureLayersState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0623069000100009F91 /* TextureLayersState.swift */; };
-		D4C3A0673069000100009F91 /* TextureLayersArchiveModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */; };
 		D4C3A06B3069000100009F91 /* TimeStampFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A06A3069000100009F91 /* TimeStampFormatter.swift */; };
 		D4C3A0713069000100009F91 /* TextureLayersStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */; };
 		D4C3A0733069000100009F91 /* TextureLayersSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */; };
@@ -130,7 +129,6 @@
 		D4C3A0593069000100009F91 /* RemoveLayerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveLayerIndex.swift; sourceTree = "<group>"; };
 		D4C3A05B3069000100009F91 /* MoveLayerIndices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLayerIndices.swift; sourceTree = "<group>"; };
 		D4C3A0623069000100009F91 /* TextureLayersState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersState.swift; sourceTree = "<group>"; };
-		D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersArchiveModel.swift; sourceTree = "<group>"; };
 		D4C3A06A3069000100009F91 /* TimeStampFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStampFormatter.swift; sourceTree = "<group>"; };
 		D4C3A0703069000100009F91 /* TextureLayersStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersStateTests.swift; sourceTree = "<group>"; };
 		D4C3A0723069000100009F91 /* TextureLayersSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersSnapshotTests.swift; sourceTree = "<group>"; };
@@ -396,7 +394,6 @@
 				D49D7DD12F4A9FBE00B178EF /* ProjectConfiguration.swift */,
 				D49C69242F23A69100B66608 /* ProjectData.swift */,
 				D49C693B2F249C6B00B66608 /* ProjectArchiveModel.swift */,
-				D4C3A0663069000100009F91 /* TextureLayersArchiveModel.swift */,
 			);
 			path = Project;
 			sourceTree = "<group>";
@@ -778,7 +775,6 @@
 				D4C3A05A3069000100009F91 /* RemoveLayerIndex.swift in Sources */,
 				D4C3A05C3069000100009F91 /* MoveLayerIndices.swift in Sources */,
 				D4C3A0633069000100009F91 /* TextureLayersState.swift in Sources */,
-				D4C3A0673069000100009F91 /* TextureLayersArchiveModel.swift in Sources */,
 				D4C3A06B3069000100009F91 /* TimeStampFormatter.swift in Sources */,
 				D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */,
 			);

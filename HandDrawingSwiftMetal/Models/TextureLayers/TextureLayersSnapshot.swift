@@ -5,12 +5,13 @@
 //  Created by Eisuke Kusachi on 2025/08/11.
 //
 
+import Core
 import TextureLayerView
 import UIKit
 
 /// A struct that represents the snapshot of `TextureLayersState`.
 /// Used when saving and restoring layer data.
-public struct TextureLayersSnapshot: Sendable {
+public struct TextureLayersSnapshot: Codable, Equatable, Sendable {
 
     public let layers: [TextureLayerModel]
 
@@ -19,26 +20,22 @@ public struct TextureLayersSnapshot: Sendable {
     public let textureSize: CGSize
 
     public init(
-        layers: [TextureLayerModel] = [],
-        layerIndex: Int = 0,
-        textureSize: CGSize,
-        title: String = ""
+        layers: [TextureLayerModel],
+        layerIndex: Int,
+        textureSize: CGSize
     ) {
+        self.layers = layers
         if layers.isEmpty {
-            self.layers = [
-                .init(
-                    id: LayerId(),
-                    title: title,
-                    alpha: 255,
-                    isVisible: true
-                )
-            ]
+            self.layerIndex = 0
         } else {
-            self.layers = layers
+            self.layerIndex = max(0, min(layerIndex, layers.count - 1))
         }
-        self.layerIndex = max(0, min(layerIndex, self.layers.count - 1))
         self.textureSize = textureSize
     }
+}
+
+extension TextureLayersSnapshot: LocalFileConvertible {
+    public static var fileName: String { "data" }
 }
 
 public extension TextureLayersSnapshot {

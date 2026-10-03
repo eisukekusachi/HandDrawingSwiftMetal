@@ -201,11 +201,7 @@ extension HandDrawingViewModel {
             }
 
             do {
-                try TextureLayersArchiveModel(
-                    layers: textureLayers.layers,
-                    layerIndex: textureLayers.layerIndex,
-                    textureSize: textureLayers.textureSize
-                ).write(in: workingDirectoryURL)
+                try textureLayers.write(in: workingDirectoryURL)
             } catch {
                 throw NSError(
                     title: String(localized: "Error"),
@@ -228,10 +224,15 @@ extension HandDrawingViewModel {
         from zipFileURL: URL
     ) async throws -> ProjectContent {
         try await documentsDataStore.withUnzippedContents(from: zipFileURL) { workingDirectoryURL in
-            let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-                in: workingDirectoryURL
-            )
-            let newTextureLayers = try textureLayersArchiveModel.makeTextureLayersSnapshot()
+            let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
+            if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
+                let error = NSError(
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to find texture layer files")
+                )
+                Logger.error(error)
+                throw error
+            }
 
             let restoredLayers: TextureLayersSnapshot?
             if try await dependencies.textureLayersDocumentsRepository.restoreStorage(

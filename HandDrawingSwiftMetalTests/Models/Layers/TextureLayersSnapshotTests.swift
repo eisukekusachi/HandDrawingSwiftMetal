@@ -15,15 +15,15 @@ struct TextureLayersSnapshotTests {
     private let textureSize: CGSize = .init(width: 123, height: 456)
 
     @Test
-    func `When layers is empty, one layer is created`() {
+    func `When layers is empty, the snapshot stays empty`() {
         let subject = TextureLayersSnapshot(
-            textureSize: textureSize,
-            title: "blank"
+            layers: [],
+            layerIndex: 0,
+            textureSize: textureSize
         )
 
-        #expect(subject.layers.count == 1)
-        #expect(subject.layers[0].title == "blank")
-        #expect(subject.layerIndex == 0)
+        #expect(subject.layers.isEmpty)
+        #expect(subject.selectedLayerId == nil)
     }
 
     @Test
