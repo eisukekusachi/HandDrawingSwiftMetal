@@ -147,6 +147,7 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
                 message: String(localized: "Unable to load required data")
             )
         }
+        guard let anchorId = selectedLayerId else { return }
 
         let id = LayerId()
         do {
@@ -165,7 +166,10 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
                 commandQueue: commandQueue
             )
             try await repository.addTextureData(data: data, id: id)
-            guard let selectedIndex else { return }
+            guard let anchorIndex = index(for: anchorId) else {
+                try repository.removeTexture(id)
+                return
+            }
             addLayer(
                 layer: .init(
                     id: id,
@@ -174,7 +178,7 @@ public final class TextureLayersState: ObservableObject, TextureLayersProtocol, 
                     isVisible: true
                 ),
                 thumbnail: texture.makeThumbnail(),
-                at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
+                at: AddLayerIndex.insertIndex(selectedIndex: anchorIndex)
             )
             await undo.didAddLayer(in: self)
             updateFullCanvas(canvasView)
