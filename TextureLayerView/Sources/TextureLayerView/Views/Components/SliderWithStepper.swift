@@ -1,5 +1,4 @@
 //
-//  SliderWithStepper.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2026/08/23.

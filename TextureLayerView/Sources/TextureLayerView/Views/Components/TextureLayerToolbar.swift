@@ -1,5 +1,4 @@
 //
-//  TextureLayerToolbar.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2025/08/09.

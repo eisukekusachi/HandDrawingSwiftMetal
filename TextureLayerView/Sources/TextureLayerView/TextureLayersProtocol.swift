@@ -1,5 +1,4 @@
 //
-//  TextureLayersProtocol.swift
 //  TextureLayerView
 //
 //  Created by Eisuke Kusachi on 2026/10/01.
