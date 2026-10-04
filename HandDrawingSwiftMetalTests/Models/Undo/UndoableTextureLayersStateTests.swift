@@ -21,6 +21,19 @@ struct UndoableTextureLayersStateTests {
     let layer2: TextureLayerModel = .generate(title: "layer2", isVisible: true)
 
     @Test
+    func `Confirms addLayer throws when undo is not set`() async throws {
+        let subject: Subject = .init()
+        subject.setLayers([layer0], textureSize: textureSize)
+
+        do {
+            try await subject.addLayer()
+        } catch {
+            #expect((error as NSError).localizedFailureReason == "Undo is not set")
+        }
+        #expect(subject.layers.map(\.id) == [layer0.id])
+    }
+
+    @Test
     func `Confirms renameLayer throws when undo is not set`() async throws {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)

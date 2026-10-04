@@ -16,10 +16,16 @@ final class UndoableTextureLayersState: TextureLayersState {
     }
 
     override func addLayer() async throws {
+        guard let undo else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Undo is not set")
+            )
+        }
         let count = layerModels.count
         try await super.addLayer()
         guard layerModels.count > count else { return }
-        await undo?.didAddLayer(in: self)
+        await undo.addLayer(in: self)
     }
 
     override func removeLayer(id: LayerId) async throws -> Bool {

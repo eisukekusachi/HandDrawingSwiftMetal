@@ -36,7 +36,7 @@ final class UndoTextureLayerRegistrar {
         self.showError = showError
     }
 
-    func didAddLayer(in state: TextureLayersState) async {
+    func addLayer(in state: TextureLayersState) async {
         guard
             let layerId = state.selectedLayerId,
             let layerIndex = state.selectedLayerIndex,
