@@ -111,7 +111,7 @@ extension DrawingCurve {
         return curve
     }
 
-    /// Makes an array of intermediate curve points from an iterator, setting the range to 4
+    /// Makes an array of intermediate curve points from overlapping windows of 4 points
     func makeIntermediateCurvePoints(
         duration: Int? = nil
     ) -> [GrayscaleDotPoint] {
@@ -230,19 +230,14 @@ private extension Iterator<GrayscaleDotPoint> {
     func getBezierCurveIntermediatePointsWithFixedRange4() -> [BezierCurveIntermediatePoints]? {
         guard array.count >= 4 else { return nil }
 
-        var array: [BezierCurveIntermediatePoints] = []
-
-        while let subsequence = next(range: 4) {
-            array.append(
-                .init(
-                    previousPoint: subsequence[0],
-                    startPoint: subsequence[1],
-                    endPoint: subsequence[2],
-                    nextPoint: subsequence[3]
-                )
+        return windows(ofCount: 4).map { window in
+            .init(
+                previousPoint: window[0],
+                startPoint: window[1],
+                endPoint: window[2],
+                nextPoint: window[3]
             )
         }
-        return array
     }
 
     func getBezierCurveLastPoints() -> BezierCurveLastPoints? {

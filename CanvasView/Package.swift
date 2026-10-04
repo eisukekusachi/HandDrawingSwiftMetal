@@ -15,11 +15,17 @@ let package = Package(
             targets: ["CanvasView"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-algorithms", from: "1.2.0")
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "CanvasView",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms")
+            ],
             resources: [
                 .process("Resources")
             ]
