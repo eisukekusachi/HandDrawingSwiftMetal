@@ -29,7 +29,7 @@ final class UndoableTextureLayersState: TextureLayersState {
                 message: String(localized: "Undo is not set")
             )
         }
-        return try await undo.removeLayer(in: self) {
+        return try await undo.removeLayer(in: self, id: id) {
             try await super.removeLayer(id: id)
         }
     }

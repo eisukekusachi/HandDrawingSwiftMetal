@@ -5,6 +5,7 @@
 import CoreGraphics
 import MetalKit
 import Testing
+import TextureLayerCanvasView
 import TextureLayerView
 @testable import HandDrawingSwiftMetal
 
@@ -146,6 +147,35 @@ struct UndoableTextureLayersStateTests {
         #expect(repository.removedIds.isEmpty)
     }
 
+    @Test
+    func `Confirms removeLayer registers the requested layer for undo`() async throws {
+        let repository = TextureRepositoryStub()
+        let registered = UndoRegistration()
+        let subject = try subject(
+            layers: [layer0, layer1],
+            repository: repository,
+            registered: registered
+        )
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        let canvas = CanvasUpdatingStub()
+        subject.setup(
+            device: device,
+            commandQueue: commandQueue,
+            canvasView: canvas
+        )
+
+        let removed = try await subject.removeLayer(id: layer1.id)
+
+        let undoObject = try #require(registered.pairs.first?.undoObject as? UndoAdditionObject)
+        #expect(removed)
+        #expect(subject.layers.map(\.id) == [layer0.id])
+        #expect(undoObject.textureLayer.id == layer1.id)
+        #expect(undoObject.insertIndex == 1)
+        #expect(registered.pairs.first?.redoObject.textureLayer.id == layer1.id)
+        #expect(repository.removedIds == [layer1.id])
+    }
+
     private func subject(
         layers: [TextureLayerModel],
         repository: TextureRepositoryStub = TextureRepositoryStub(),
@@ -167,4 +197,9 @@ struct UndoableTextureLayersStateTests {
 
 private final class UndoRegistration {
     var pairs: [UndoRedoObjectPair] = []
+}
+
+private final class CanvasUpdatingStub: TextureLayerCanvasUpdating {
+    func updateFullCanvas() async throws {}
+    func updateCanvasDisplay() {}
 }

@@ -71,18 +71,18 @@ final class UndoTextureLayerRegistrar {
 
     func removeLayer(
         in state: TextureLayersState,
+        id: LayerId,
         _ perform: () async throws -> Bool
     ) async throws -> Bool {
         guard
-            let layerId = state.selectedLayerId,
-            let layerIndex = state.selectedLayerIndex,
-            let layer = state.selectedLayer
+            let layer = state.layer(id),
+            let layerIndex = state.layerModels.firstIndex(where: { $0.id == id })
         else { return false }
 
         let texture: MTLTexture
         do {
             texture = try await textureRepository.duplicatedTexture(
-                layerId,
+                layer.id,
                 textureSize: state.textureSize,
                 device: device
             )
