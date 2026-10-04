@@ -5,7 +5,6 @@
 import CoreGraphics
 import MetalKit
 import Testing
-import TextureLayerCanvasView
 import TextureLayerView
 @testable import HandDrawingSwiftMetal
 

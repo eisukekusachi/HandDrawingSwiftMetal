@@ -4,7 +4,6 @@
 
 import CoreGraphics
 import MetalKit
-import TextureLayerCanvasView
 import TextureLayerView
 
 /// The layer list shown in `TextureLayerView` and the layer data read by the canvas.

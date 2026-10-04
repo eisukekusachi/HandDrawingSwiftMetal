@@ -6,7 +6,6 @@ import Combine
 import CanvasView
 import Core
 import FileView
-import TextureLayerCanvasView
 import TextureLayerView
 import UIKit
 
