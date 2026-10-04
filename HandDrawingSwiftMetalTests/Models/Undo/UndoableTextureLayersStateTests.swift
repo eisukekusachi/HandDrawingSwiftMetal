@@ -25,11 +25,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0], textureSize: textureSize)
 
-        do {
+        let error = await #expect(throws: NSError.self) {
             try await subject.addLayer()
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.layers.map(\.id) == [layer0.id])
     }
 
@@ -38,11 +38,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        do {
+        let error = #expect(throws: NSError.self) {
             try subject.renameLayer(id: layer0.id, title: "renamed")
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.layer(layer0.id)?.title == "layer0")
     }
 
@@ -51,11 +51,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        do {
+        let error = #expect(throws: NSError.self) {
             try subject.moveLayers(from: IndexSet(integer: 0), to: 2)
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
     }
 
@@ -64,11 +64,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        do {
+        let error = #expect(throws: NSError.self) {
             try subject.selectLayer(id: layer1.id)
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.selectedLayer?.id == layer0.id)
     }
 
@@ -77,11 +77,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        do {
+        let error = #expect(throws: NSError.self) {
             try subject.setVisibility(id: layer0.id, isVisible: false)
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.layer(layer0.id)?.isVisible == true)
     }
 
@@ -90,11 +90,11 @@ struct UndoableTextureLayersStateTests {
         let subject: Subject = .init()
         subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        do {
-            _ = try await subject.removeLayer(id: layer0.id)
-        } catch {
-            #expect((error as NSError).localizedFailureReason == "Undo is not set")
+        let error = await #expect(throws: NSError.self) {
+            try await subject.removeLayer(id: layer0.id)
         }
+
+        #expect(error?.localizedFailureReason == "Undo is not set")
         #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
     }
 
