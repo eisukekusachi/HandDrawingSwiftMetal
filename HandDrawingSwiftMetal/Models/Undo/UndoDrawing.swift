@@ -1,12 +1,10 @@
 //
-//  UndoDrawing.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/09/23.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
 import Combine
+import Core
 import UIKit
 import TextureLayerView
 
@@ -50,7 +48,7 @@ final class UndoDrawing: ObservableObject {
     }
 
     func pushUndoDrawingObject(
-        selectedLayer: TextureLayerItem,
+        selectedLayer: TextureLayerModel,
         texture: MTLTexture?
     ) async throws -> UndoRedoObjectPair? {
         guard let inMemoryRepository else { return nil }
@@ -76,10 +74,10 @@ final class UndoDrawing: ObservableObject {
         }
 
         let undoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer)
+            layer: selectedLayer
         )
         let redoObject = UndoDrawingObject(
-            layer: .init(item: selectedLayer)
+            layer: selectedLayer
         )
 
         guard

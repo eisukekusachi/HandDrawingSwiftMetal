@@ -1,0 +1,18 @@
+//
+//  Created by Eisuke Kusachi
+//
+
+import Foundation
+
+enum TimeStampFormatter {
+
+    static var currentDate: String {
+        TimeStampFormatter.current(template: "MMM dd HH mm ss")
+    }
+
+    static func current(template: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: template, options: 0, locale: .current)
+        return dateFormatter.string(from: Date())
+    }
+}

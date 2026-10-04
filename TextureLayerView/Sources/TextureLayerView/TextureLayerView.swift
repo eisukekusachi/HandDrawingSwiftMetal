@@ -1,35 +1,38 @@
 //
-//  TextureLayerView.swift
-//  TextureLayerView
-//
-//  Created by Eisuke Kusachi on 2023/12/31.
+//  Created by Eisuke Kusachi
 //
 
 import SwiftUI
 
 public struct TextureLayerView: View {
 
-    @ObservedObject private var viewModel: TextureLayerViewModel
-
-    private let onClose: (() -> Void)?
+    @StateObject private var viewModel: TextureLayerViewModel
 
     public init(
-        viewModel: TextureLayerViewModel,
-        onClose: (() -> Void)? = nil
+        textureLayers: any TextureLayersProtocol,
+        onClose: (() -> Void)? = nil,
+        onError: ((Error) -> Void)? = nil
     ) {
-        self._viewModel = .init(wrappedValue: viewModel)
-        self.onClose = onClose
+        self._viewModel = StateObject(
+            wrappedValue: TextureLayerViewModel(
+                textureLayers: textureLayers,
+                onClose: onClose,
+                onError: onError
+            )
+        )
     }
 
     public var body: some View {
         VStack {
             TextureLayerToolbar(
-                viewModel: viewModel,
-                onClose: onClose
+                viewModel: viewModel
             )
 
             ReversedTextureLayerListView(
-                viewModel: viewModel
+                viewModel: viewModel,
+                onMove: { source, destination in
+                    viewModel.onMoveLayer(source: source, destination: destination)
+                }
             )
 
             SliderWithStepper(
@@ -39,16 +42,12 @@ public struct TextureLayerView: View {
                     set: { viewModel.onChangeCurrentAlpha($0) }
                 ),
                 onEditingChanged: { dragging in
-                    viewModel.isAlphaSliderDragging = dragging
+                    viewModel.onAlphaSliderDragging(dragging)
                 }
             )
             .padding(.top, 4)
             .padding([.leading, .trailing, .bottom], 8)
         }
-    }
-
-    public func update(_ state: TextureLayersState) {
-        viewModel.update(state)
     }
 
     /// Updates the alpha slider without changing the selected layer.
@@ -59,51 +58,22 @@ public struct TextureLayerView: View {
 
 @MainActor
 private struct PreviewView: View {
-    var viewModel = TextureLayerViewModel(
-        textureLayers: TextureLayersState(
-            textureLayers: .init(
-                layers: [
-                    .init(
-                        id: LayerId(),
-                        title: "Layer0",
-                        alpha: 255,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer1",
-                        alpha: 200,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer2",
-                        alpha: 150,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer3",
-                        alpha: 100,
-                        isVisible: true
-                    ),
-                    .init(
-                        id: LayerId(),
-                        title: "Layer4",
-                        alpha: 50,
-                        isVisible: true
-                    )
-                ],
-                layerIndex: 3,
-                textureSize: .zero
-            )
-        ),
-        device: nil,
-        commandQueue: nil
-    )
+    private let textureLayers: PreviewTextureLayers = {
+        let layers: [TextureLayerItem] = [
+            .init(id: LayerId(), title: "Layer0", alpha: 255, isVisible: true),
+            .init(id: LayerId(), title: "Layer1", alpha: 200, isVisible: true),
+            .init(id: LayerId(), title: "Layer2", alpha: 150, isVisible: true),
+            .init(id: LayerId(), title: "Layer3", alpha: 100, isVisible: true),
+            .init(id: LayerId(), title: "Layer4", alpha: 50, isVisible: true)
+        ]
+        return PreviewTextureLayers(
+            layers: layers,
+            selectedLayerId: layers[3].id
+        )
+    }()
     var body: some View {
         TextureLayerView(
-            viewModel: viewModel
+            textureLayers: textureLayers
         )
         .frame(width: 320, height: 315)
     }
@@ -117,4 +87,42 @@ private struct PreviewView: View {
 #Preview("Dark") {
     PreviewView()
         .preferredColorScheme(.dark)
+}
+
+@MainActor
+final class PreviewTextureLayers: TextureLayersProtocol {
+    @Published var layers: [TextureLayerItem]
+    @Published var selectedLayerId: LayerId?
+
+    init(
+        layers: [TextureLayerItem],
+        selectedLayerId: LayerId? = nil
+    ) {
+        self.layers = layers
+        self.selectedLayerId = selectedLayerId
+    }
+
+    func addLayer() async throws {}
+
+    func removeLayer(id: LayerId) async throws -> Bool { false }
+
+    func renameLayer(id: LayerId, title: String) throws {}
+
+    func moveLayers(from source: IndexSet, to destination: Int) throws {}
+
+    func selectLayer(id: LayerId) throws {
+        selectedLayerId = id
+    }
+
+    func setVisibility(id: LayerId, isVisible: Bool) throws {
+        guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
+        layers[index] = layers[index].updated(isVisible: isVisible)
+    }
+
+    func setAlpha(id: LayerId, alpha: Int) {
+        guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
+        layers[index] = layers[index].updated(alpha: alpha)
+    }
+
+    func setAlphaSliderDragging(_ isDragging: Bool) {}
 }

@@ -1,8 +1,5 @@
 //
-//  LayerId.swift
-//  TextureLayerView
-//
-//  Created by Eisuke Kusachi on 2025/10/12.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

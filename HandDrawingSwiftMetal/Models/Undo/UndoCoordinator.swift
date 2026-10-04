@@ -1,12 +1,10 @@
 //
-//  UndoCoordinator.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/04/18.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
 import Combine
+import Core
 import Foundation
 import TextureLayerCanvasView
 import TextureLayerView
@@ -171,10 +169,10 @@ private extension UndoCoordinator {
                 layerId: textureLayerId,
                 textureData: textureData
             )
-            textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
+            textureLayersState.updateLayerThumbnail(textureLayerId, thumbnail: newTexture.makeThumbnail())
 
             try? canvasView.setCurrentTexture(newTexture)
-            canvasView.updateCanvasTextureUsingCurrentTexture()
+            canvasView.updateCanvasDisplay()
 
         } catch {
             Logger.error(error)
@@ -202,13 +200,13 @@ private extension UndoCoordinator {
                 textureData: textureData
             )
 
-            textureLayersState.addLayer(
+            textureLayersState.insertLayer(
                 layer: undoObject.textureLayer,
                 thumbnail: newTexture.makeThumbnail(),
                 at: undoObject.insertIndex
             )
 
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
 
         } catch {
             Logger.error(error)
@@ -231,7 +229,7 @@ private extension UndoCoordinator {
         )
 
         Task {
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
         }
     }
 
@@ -243,7 +241,7 @@ private extension UndoCoordinator {
         )
 
         Task {
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
         }
     }
 
@@ -254,7 +252,7 @@ private extension UndoCoordinator {
             undoObject.textureLayer.id
         )
 
-        try? await canvasView.updateFullCanvasTexture()
+        try? await canvasView.updateFullCanvas()
     }
 
     func performAlphaUndo(
@@ -265,7 +263,7 @@ private extension UndoCoordinator {
             alpha: undoObject.textureLayer.alpha
         )
 
-        canvasView.updateCanvasTextureUsingCurrentTexture()
+        canvasView.updateCanvasDisplay()
     }
 
     func performVisibilityUndo(
@@ -276,7 +274,7 @@ private extension UndoCoordinator {
             isVisible: undoObject.textureLayer.isVisible
         )
 
-        try? await canvasView.updateFullCanvasTexture()
+        try? await canvasView.updateFullCanvas()
     }
 
     func performTitleUndo(

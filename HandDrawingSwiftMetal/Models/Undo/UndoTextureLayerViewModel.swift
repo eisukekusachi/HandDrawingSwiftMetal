@@ -1,23 +1,20 @@
 //
-//  UndoTextureLayerViewModel.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/03/22.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
-import Combine
+import Core
 import MetalKit
 import TextureLayerView
 
-final class UndoTextureLayerViewModel: TextureLayerViewModel {
-
-    /// Is the undo feature enabled
-    var isUndoEnabled: Bool {
-        inMemoryRepository != nil
-    }
+@MainActor
+final class UndoTextureLayerRegistrar {
 
     private let onRegisterUndo: ((UndoRedoObjectPair) -> Void)?
+
+    private let showError: (Error) -> Void
+
+    private let textureRepository: TextureLayersDocumentsRepositoryProtocol
 
     private let inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
 
@@ -25,182 +22,177 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
 
     private var previousAlpha: Int?
 
-    private var cancellables = Set<AnyCancellable>()
-
     init(
-        textureLayers: TextureLayersState,
         device: MTLDevice,
-        commandQueue: MTLCommandQueue,
+        textureRepository: TextureLayersDocumentsRepositoryProtocol,
         inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil,
-        onLayersChanged: ((TextureLayerEvent) -> Void)? = nil,
-        onRegisterUndo: ((UndoRedoObjectPair) -> Void)? = nil
+        onRegisterUndo: ((UndoRedoObjectPair) -> Void)? = nil,
+        showError: @escaping (Error) -> Void = { _ in }
     ) {
         self.device = device
+        self.textureRepository = textureRepository
         self.inMemoryRepository = inMemoryRepository ?? UndoTextureInMemoryRepository.shared
         self.onRegisterUndo = onRegisterUndo
-        super.init(
-            textureLayers: textureLayers,
-            device: device,
-            commandQueue: commandQueue,
-            onLayersChanged: onLayersChanged
-        )
-        self.$isAlphaSliderDragging
-            .sink { [weak self] isDragging in
-                guard let `self` else { return }
-                if isDragging {
-                    self.previousAlpha = self.currentAlpha
-                } else {
-                    guard
-                        let item = self.textureLayers.selectedLayer,
-                        let previousAlpha = self.previousAlpha
-                    else { return }
-                    self.onRegisterUndo?(
-                        .init(
-                            undoObject: UndoAlphaObject(
-                                layer: .init(item: item),
-                                alpha: previousAlpha
-                            ),
-                            redoObject: UndoAlphaObject(
-                                layer: .init(item: item),
-                                alpha: item.alpha
-                            )
-                        )
-                    )
-                }
-            }.store(in: &cancellables)
+        self.showError = showError
     }
 
-    @discardableResult
-    override func onTapInsertButton() async throws -> Bool {
+    func addLayer(in state: TextureLayersState) async {
         guard
-            try await super.onTapInsertButton(),
-            let layerId = textureLayers.selectedLayerId,
-            let layerIndex = textureLayers.selectedIndex,
-            let layer = textureLayers.selectedLayer
-        else { return false }
+            let layerId = state.selectedLayerId,
+            let layerIndex = state.selectedLayerIndex,
+            let layer = state.selectedLayer
+        else { return }
 
-        let newTexture = try await textureFromDocumentsRepository(
-            layerId,
-            device: device
-        )
+        let newTexture: MTLTexture
+        do {
+            newTexture = try await textureRepository.duplicatedTexture(
+                layerId,
+                textureSize: state.textureSize,
+                device: device
+            )
+        } catch {
+            showError(error)
+            return
+        }
 
         await registerAdditionUndo(
             newTexture: newTexture,
-            // Create a deletion undo object to cancel the addition
             undoRedoObject: .init(
                 undoObject: UndoDeletionObject(
-                    layerToBeDeleted: .init(item: layer)
+                    layerToBeDeleted: layer
                 ),
                 redoObject: UndoAdditionObject(
-                    layerToBeAdded: .init(item: layer),
+                    layerToBeAdded: layer,
                     at: layerIndex
                 )
             )
         )
+    }
 
+    func removeLayer(
+        in state: TextureLayersState,
+        id: LayerId,
+        _ perform: () async throws -> Bool
+    ) async throws -> Bool {
+        guard
+            let layer = state.layer(id),
+            let layerIndex = state.layerModels.firstIndex(where: { $0.id == id })
+        else { return false }
+
+        let texture: MTLTexture
+        do {
+            texture = try await textureRepository.duplicatedTexture(
+                layer.id,
+                textureSize: state.textureSize,
+                device: device
+            )
+        } catch {
+            showError(error)
+            return false
+        }
+
+        guard try await perform() else { return false }
+
+        try await registerDeletionUndo(
+            restorationTexture: texture,
+            undoRedoObject: .init(
+                undoObject: UndoAdditionObject(
+                    layerToBeAdded: layer,
+                    at: layerIndex
+                ),
+                redoObject: UndoDeletionObject(
+                    layerToBeDeleted: layer
+                )
+            )
+        )
         return true
     }
 
-    @discardableResult
-    override func onTapDeleteButton() async -> Bool {
-        do {
-            guard
-                let layerId = textureLayers.selectedLayerId,
-                let layerIndex = textureLayers.selectedIndex,
-                let layer = textureLayers.selectedLayer
-            else { return false }
+    func renameLayer(
+        in state: TextureLayersState,
+        id: LayerId,
+        title: String,
+        perform: () throws -> Void
+    ) rethrows {
+        guard let undoLayer = state.layer(id) else { return }
 
-            let texture = try await textureFromDocumentsRepository(layerId, device: device)
+        try perform()
 
-            await super.onTapDeleteButton()
-
-            try await registerDeletionUndo(
-                restorationTexture: texture,
-                undoRedoObject: .init(
-                    undoObject: UndoAdditionObject(
-                        layerToBeAdded: .init(item: layer),
-                        at: layerIndex
-                    ),
-                    // Create a deletion undo object to cancel the addition
-                    redoObject: UndoDeletionObject(
-                        layerToBeDeleted: .init(item: layer)
-                    )
-                )
-            )
-            return true
-
-        } catch {
-            Logger.error(error)
-            return false
-        }
-    }
-
-    override func onTapTitleButton(_ id: LayerId, title: String) {
-        guard let undoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
-
-        super.onTapTitleButton(id, title: title)
-
-        guard let redoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
+        guard let redoLayer = state.layer(id) else { return }
 
         onRegisterUndo?(
             .init(
                 undoObject: UndoTitleObject(
-                    layer: .init(item: undoLayer)
+                    layer: undoLayer
                 ),
                 redoObject: UndoTitleObject(
-                    layer: .init(item: redoLayer)
+                    layer: redoLayer
                 )
             )
         )
     }
 
-    override func onTapVisibleButton(_ id: LayerId, isVisible: Bool) {
-        guard let undoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
+    func changeVisibility(
+        in state: TextureLayersState,
+        id: LayerId,
+        isVisible: Bool,
+        perform: () throws -> Void
+    ) rethrows {
+        guard let undoLayer = state.layer(id) else { return }
 
-        super.onTapVisibleButton(id, isVisible: isVisible)
+        try perform()
 
-        guard let redoLayer = textureLayers.layers.first(where: { $0.id == id }) else { return }
+        guard let redoLayer = state.layer(id) else { return }
 
         onRegisterUndo?(
             .init(
                 undoObject: UndoVisibilityObject(
-                    layer: .init(item: undoLayer)
+                    layer: undoLayer
                 ),
                 redoObject: UndoVisibilityObject(
-                    layer: .init(item: redoLayer)
+                    layer: redoLayer
                 )
             )
         )
     }
 
-    override func onTapCell(_ id: UUID) {
-        guard let undoLayer = textureLayers.selectedLayer else { return }
+    func selectLayer(
+        in state: TextureLayersState,
+        id: LayerId,
+        perform: () throws -> Void
+    ) rethrows {
+        guard let undoLayer = state.selectedLayer else { return }
 
-        super.onTapCell(id)
+        try perform()
 
-        guard let redoLayer = textureLayers.selectedLayer else { return }
+        guard let redoLayer = state.selectedLayer else { return }
 
         onRegisterUndo?(
             .init(
                 undoObject: UndoSelectionObject(
-                    layer: .init(item: undoLayer)
+                    layer: undoLayer
                 ),
                 redoObject: UndoSelectionObject(
-                    layer: .init(item: redoLayer)
+                    layer: redoLayer
                 )
             )
         )
     }
 
-    override func onMoveLayer(source: IndexSet, destination: Int) {
-        guard let layer = textureLayers.selectedLayer else { return }
+    func moveLayer(
+        in state: TextureLayersState,
+        source: IndexSet,
+        destination: Int,
+        perform: () throws -> Void
+    ) rethrows {
+        guard let layer = state.selectedLayer else { return }
 
-        super.onMoveLayer(source: source, destination: destination)
+        try perform()
 
         let redoObject = UndoMoveObject(
             indices: .init(sourceIndexSet: source, destinationIndex: destination),
             selectedLayerId: layer.id,
-            layer: .init(item: layer)
+            layer: layer
         )
 
         onRegisterUndo?(
@@ -210,9 +202,35 @@ final class UndoTextureLayerViewModel: TextureLayerViewModel {
             )
         )
     }
+
+    func alphaSliderDraggingChanged(
+        in state: TextureLayersState,
+        _ isDragging: Bool
+    ) {
+        if isDragging {
+            previousAlpha = state.selectedLayer?.alpha
+        } else {
+            guard
+                let item = state.selectedLayer,
+                let previousAlpha
+            else { return }
+            onRegisterUndo?(
+                .init(
+                    undoObject: UndoAlphaObject(
+                        layer: item,
+                        alpha: previousAlpha
+                    ),
+                    redoObject: UndoAlphaObject(
+                        layer: item,
+                        alpha: item.alpha
+                    )
+                )
+            )
+        }
+    }
 }
 
-private extension UndoTextureLayerViewModel {
+private extension UndoTextureLayerRegistrar {
 
     func registerAdditionUndo(
         newTexture: MTLTexture?,
@@ -227,7 +245,6 @@ private extension UndoTextureLayerViewModel {
         }
 
         do {
-            // Add a texture to the UndoTextureRepository for restoration
             try await inMemoryRepository
                 .addTexture(
                     newTexture: newTexture,
@@ -239,7 +256,6 @@ private extension UndoTextureLayerViewModel {
             )
 
         } catch {
-            // No action on error
             Logger.error(error)
         }
     }
@@ -256,7 +272,6 @@ private extension UndoTextureLayerViewModel {
         }
 
         do {
-            // Add a texture to the UndoTextureRepository for restoration
             try await inMemoryRepository
                 .addTexture(
                     newTexture: restorationTexture,
@@ -267,7 +282,6 @@ private extension UndoTextureLayerViewModel {
                 undoRedoObject
             )
         } catch {
-            // No action on error
             Logger.error(error)
         }
     }

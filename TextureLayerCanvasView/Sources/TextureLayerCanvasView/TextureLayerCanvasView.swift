@@ -1,26 +1,22 @@
 //
-//  TextureLayerCanvasView.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2026/04/18.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
 import Combine
-import TextureLayerView
 
 @preconcurrency import MetalKit
 
-@objc public final class TextureLayerCanvasView: CanvasView {
+@objc public final class TextureLayerCanvasView: CanvasView, TextureLayerCanvasUpdating {
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private let textureLayersState: TextureLayersState
+    private let textureLayer: TextureLayerCanvasProtocol
 
     private lazy var viewModel: TextureLayerCanvasViewModel = {
         .init(
-            textureLayersState: textureLayersState,
+            textureLayer: textureLayer,
             renderer: renderer
         )
     }()
@@ -30,11 +26,11 @@ import TextureLayerView
     private let configuration: CanvasConfiguration
 
     public init(
-        textureLayersState: TextureLayersState,
+        textureLayer: TextureLayerCanvasProtocol,
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration
     ) {
-        self.textureLayersState = textureLayersState
+        self.textureLayer = textureLayer
         self.configuration = configuration
         super.init(
             device: device,
@@ -60,13 +56,13 @@ import TextureLayerView
 
         try viewModel.initializeTextures(textureSize)
 
-        try await updateFullCanvasTexture()
+        try await updateFullCanvas()
     }
 
     private func completeDrawing() {
         guard
             let texture = currentTexture,
-            let layerId = textureLayersState.selectedLayer?.id
+            let layerId = textureLayer.selectedLayerSnapshot?.id
         else { return }
 
         let device = renderer.device
@@ -83,9 +79,9 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
-                await self.viewModel.textureLayersState.updateThumbnail(
+                await self.viewModel.updateLayerThumbnail(
                     layerId,
-                    texture: texture
+                    thumbnail: texture.makeThumbnail()
                 )
             } catch {
                 Logger.error(error)
@@ -93,9 +89,9 @@ import TextureLayerView
         }
     }
 
-    public func updateFullCanvasTexture() async throws {
+    public func updateFullCanvas() async throws {
         guard
-            let selectedLayer = textureLayersState.selectedLayer,
+            let selectedLayer = textureLayer.selectedLayerSnapshot,
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             ),
@@ -105,7 +101,7 @@ import TextureLayerView
         }
 
         try await viewModel.updateUnselectedTextures(
-            textureLayers: .init(state: textureLayersState),
+            textureLayers: .init(source: textureLayer),
             with: newCommandBuffer
         )
 
@@ -113,10 +109,10 @@ import TextureLayerView
 
         try setCurrentTexture(currentTexture)
 
-        updateCanvasTextureUsingCurrentTexture()
+        updateCanvasDisplay()
     }
 
-    override public func updateCanvasTextureUsingRealtimeDrawingTexture() {
+    override public func updateCanvasInRealtime() {
         viewModel.updateCanvasTexture(
             realtimeDrawingTexture,
             on: canvasTexture,
@@ -125,7 +121,7 @@ import TextureLayerView
         present()
     }
 
-    override public func updateCanvasTextureUsingCurrentTexture() {
+    override public func updateCanvasDisplay() {
         viewModel.updateCanvasTexture(
             currentTexture,
             on: canvasTexture,

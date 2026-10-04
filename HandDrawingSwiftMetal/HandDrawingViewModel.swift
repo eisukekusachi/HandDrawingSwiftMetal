@@ -1,20 +1,18 @@
 //
-//  HandDrawingViewModel.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/08/10.
+//  Created by Eisuke Kusachi
 //
 
 import Combine
 import CanvasView
 import Core
 import FileView
-import UIKit
+import TextureLayerCanvasView
 import TextureLayerView
+import UIKit
 
 /// Asks the view to reinitialize the canvas after a file action.
 struct InitializeCanvasRequest: Equatable {
-    /// Whether the layer list UI should reload from `textureLayersState`
+    /// Whether the layer list UI should reload from `textureLayers`
     let updateLayerList: Bool
     /// Whether the presented file list should be dismissed after initialization
     let dismissFileView: Bool
@@ -32,7 +30,7 @@ struct InitializeCanvasRequest: Equatable {
 final class HandDrawingViewModel: ObservableObject {
 
     var textureSize: CGSize {
-        textureLayersState.textureSize
+        textureLayers.textureSize
     }
 
     let project: ProjectData = .init()
@@ -40,7 +38,9 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPalette: BrushPalette
     let eraserPalette: EraserPalette
 
-    let textureLayersState: TextureLayersState = TextureLayersState()
+    let undoableTextureLayers: UndoableTextureLayersState
+
+    let textureLayers: any TextureLayersStateProtocol
 
     let fileList: FileList
     let thumbnailFileName: String
@@ -117,8 +117,14 @@ final class HandDrawingViewModel: ObservableObject {
 
         self.brushPalette = .init()
         self.eraserPalette = .init()
+
+        let undoableTextureLayers = UndoableTextureLayersState(
+            repository: dependencies.textureLayersDocumentsRepository
+        )
+        self.undoableTextureLayers = undoableTextureLayers
+        self.textureLayers = undoableTextureLayers
         self.textureLayerStorage = .init(
-            textureLayers: textureLayersState,
+            textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
         )
         self.projectStorageController = .init(
@@ -151,8 +157,19 @@ final class HandDrawingViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func onViewDidLoad() {
-        // Fetch data from Core Data
+    func onViewDidLoad(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue,
+        undo: UndoTextureLayerRegistrar,
+        canvasView: TextureLayerCanvasView
+    ) {
+        textureLayers.setup(
+            device: device,
+            commandQueue: commandQueue,
+            canvasView: canvasView
+        )
+        undoableTextureLayers.setUndo(undo: undo)
+
         do {
             try fetchDataFromCoreDataIfAvailable()
         } catch {
@@ -168,56 +185,71 @@ final class HandDrawingViewModel: ObservableObject {
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async -> CGSize {
-        let textureLayersData: TextureLayersModel
-        let resolvedTextureSize: CGSize
-
         if let restoredTextureLayerDataFromCoreData {
             do {
                 try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
-                    textureLayers: restoredTextureLayerDataFromCoreData,
+                    ids: restoredTextureLayerDataFromCoreData.layers.map(\.id),
+                    textureSize: restoredTextureLayerDataFromCoreData.textureSize,
                     device: device
                 )
-                textureLayersData = restoredTextureLayerDataFromCoreData
-                resolvedTextureSize = restoredTextureLayerDataFromCoreData.textureSize
-
+                textureLayers.setLayers(restoredTextureLayerDataFromCoreData)
+                return restoredTextureLayerDataFromCoreData.textureSize
             } catch {
-                do {
-                    let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
-
-                    // Initialize using the configuration values when an error occurs
-                    try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                        textureLayers: newTextureLayers,
-                        device: device,
-                        commandQueue: commandQueue
-                    )
-                    textureLayersData = newTextureLayers
-                    resolvedTextureSize = fallbackTextureSize
-
-                    // Initialize the Core Data storage if fetching fails
-                    textureLayerStorage.clearAll()
-                } catch {
-                    fatalError("Failed to initialize storage")
-                }
-            }
-        } else {
-            do {
-                let newTextureLayers = TextureLayersModel(textureSize: fallbackTextureSize)
-
-                try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-                    textureLayers: newTextureLayers,
+                let textureSize = await installBlankLayerOrAbort(
+                    textureSize: fallbackTextureSize,
                     device: device,
                     commandQueue: commandQueue
                 )
-                textureLayersData = newTextureLayers
-                resolvedTextureSize = fallbackTextureSize
-            } catch {
-                fatalError("Failed to initialize storage")
+                textureLayerStorage.clearAll()
+                return textureSize
             }
         }
 
-        textureLayersState.update(textureLayersData)
+        return await installBlankLayerOrAbort(
+            textureSize: fallbackTextureSize,
+            device: device,
+            commandQueue: commandQueue
+        )
+    }
 
-        return resolvedTextureSize
+    func installBlankLayer(
+        textureSize: CGSize,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        let layer = TextureLayerModel(
+            id: LayerId(),
+            title: TimeStampFormatter.currentDate,
+            alpha: 255,
+            isVisible: true
+        )
+        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+            id: layer.id,
+            textureSize: textureSize,
+            device: device,
+            commandQueue: commandQueue
+        )
+        textureLayers.setLayers(
+            [layer],
+            textureSize: textureSize
+        )
+    }
+
+    private func installBlankLayerOrAbort(
+        textureSize: CGSize,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async -> CGSize {
+        do {
+            try await installBlankLayer(
+                textureSize: textureSize,
+                device: device,
+                commandQueue: commandQueue
+            )
+            return textureSize
+        } catch {
+            fatalError("Failed to initialize storage")
+        }
     }
 
     func toggleDrawingTool() {
@@ -239,11 +271,11 @@ final class HandDrawingViewModel: ObservableObject {
 
 private extension HandDrawingViewModel {
 
-    var restoredTextureLayerDataFromCoreData: TextureLayersModel? {
+    var restoredTextureLayerDataFromCoreData: TextureLayersSnapshot? {
         guard
             let entity = textureLayerStorage.fetch()
         else { return nil }
-        return textureLayerStorage.textureLayersModel(from: entity)
+        return textureLayerStorage.textureLayersSnapshot(from: entity)
     }
 
     func fetchDataFromCoreDataIfAvailable() throws {

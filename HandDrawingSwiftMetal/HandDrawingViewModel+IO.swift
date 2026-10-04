@@ -1,7 +1,5 @@
 //
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/09/13.
+//  Created by Eisuke Kusachi
 //
 
 import Core
@@ -25,7 +23,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.model,
+                textureLayers: textureLayers.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -76,7 +74,7 @@ extension HandDrawingViewModel {
         try await writeProject(
             content: .init(
                 thumbnail: nil,
-                textureLayers: textureLayersState.model,
+                textureLayers: textureLayers.snapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -150,14 +148,11 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        let newTextureLayersState: TextureLayersModel = .init(textureSize: textureLayersState.textureSize)
-
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
-            textureLayers: newTextureLayersState,
+        try await installBlankLayer(
+            textureSize: textureLayers.textureSize,
             device: device,
             commandQueue: commandQueue
         )
-        textureLayersState.update(newTextureLayersState)
 
         drawingToolStorage.initializeData()
         brushPalette.initializeData()
@@ -204,11 +199,7 @@ extension HandDrawingViewModel {
             }
 
             do {
-                try TextureLayersArchiveModel(
-                    layers: textureLayers.layers,
-                    layerIndex: textureLayers.layerIndex,
-                    textureSize: textureLayers.textureSize
-                ).write(in: workingDirectoryURL)
+                try textureLayers.write(in: workingDirectoryURL)
             } catch {
                 throw NSError(
                     title: String(localized: "Error"),
@@ -219,7 +210,7 @@ extension HandDrawingViewModel {
             try content.drawingTool?.write(in: workingDirectoryURL)
             try content.brushPalette?.write(in: workingDirectoryURL)
             try content.eraserPalette?.write(in: workingDirectoryURL)
-            try ProjectArchiveModel(
+            try ProjectSnapshot(
                 createdAt: projectCreatedAt ?? content.project.createdAt,
                 updatedAt: projectUpdatedAt ?? content.project.updatedAt
             ).write(in: workingDirectoryURL)
@@ -231,15 +222,21 @@ extension HandDrawingViewModel {
         from zipFileURL: URL
     ) async throws -> ProjectContent {
         try await documentsDataStore.withUnzippedContents(from: zipFileURL) { workingDirectoryURL in
-            let textureLayersArchiveModel: TextureLayersArchiveModel = try .init(
-                in: workingDirectoryURL
-            )
-            let newTextureLayers: TextureLayersModel = try .init(model: textureLayersArchiveModel)
+            let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
+            if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
+                let error = NSError(
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to find texture layer files")
+                )
+                Logger.error(error)
+                throw error
+            }
 
-            let restoredLayers: TextureLayersModel?
+            let restoredLayers: TextureLayersSnapshot?
             if try await dependencies.textureLayersDocumentsRepository.restoreStorage(
-                url: workingDirectoryURL,
-                textureLayers: newTextureLayers,
+                from: workingDirectoryURL,
+                ids: newTextureLayers.layers.map(\.id),
+                textureSize: newTextureLayers.textureSize,
                 device: device
             ) {
                 restoredLayers = newTextureLayers
