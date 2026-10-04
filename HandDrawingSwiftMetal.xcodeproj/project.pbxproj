@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		D40CDF072B4128670059527E /* ColorAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40CDF062B4128670059527E /* ColorAssets.xcassets */; };
 		D41240CA2F77BE9800B757F8 /* UndoTitleObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */; };
-		D41240D02F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */; };
 		D41240D22F77D4B700B757F8 /* UndoTextureLayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */; };
 		D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D4168DA72E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld */; };
 		D4168DAB2E594E84007F7904 /* BrushPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4168DAA2E594E84007F7904 /* BrushPalette.swift */; };
@@ -53,7 +52,6 @@
 		D48CA07C2F3C18D3008C6E9E /* UndoDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */; };
 		D48CA07D2F3C18D3008C6E9E /* UndoAlphaObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0662F3C18D3008C6E9E /* UndoAlphaObject.swift */; };
 		D48CA07E2F3C18D3008C6E9E /* UndoAdditionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */; };
-		D48CA09C2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */; };
 		D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */; };
 		D49C691F2F23A3F400B66608 /* ProjectStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D49C691D2F23A3F400B66608 /* ProjectStorage.xcdatamodeld */; };
 		D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69202F23A5A400B66608 /* PersistenceController.swift */; };
@@ -127,7 +125,6 @@
 /* Begin PBXFileReference section */
 		D40CDF062B4128670059527E /* ColorAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ColorAssets.xcassets; sourceTree = "<group>"; };
 		D41240C92F77BE9800B757F8 /* UndoTitleObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTitleObject.swift; sourceTree = "<group>"; };
-		D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureInMemoryRepositoryProtocol.swift; sourceTree = "<group>"; };
 		D41240D12F77D4B700B757F8 /* UndoTextureLayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureLayerViewModel.swift; sourceTree = "<group>"; };
 		D4168DA82E594E4D007F7904 /* DrawingToolStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DrawingToolStorage.xcdatamodel; sourceTree = "<group>"; };
 		D4168DAA2E594E84007F7904 /* BrushPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushPalette.swift; sourceTree = "<group>"; };
@@ -169,7 +166,6 @@
 		D48CA06F2F3C18D3008C6E9E /* UndoRedoObjectPair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoRedoObjectPair.swift; sourceTree = "<group>"; };
 		D48CA0702F3C18D3008C6E9E /* UndoTextureId.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureId.swift; sourceTree = "<group>"; };
 		D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDrawing.swift; sourceTree = "<group>"; };
-		D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoTextureInMemoryRepository.swift; sourceTree = "<group>"; };
 		D49432EC2F9319F0003A25BA /* TextureLayerCanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = TextureLayerCanvasView; sourceTree = "<group>"; };
 		D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackViewExtensions.swift; sourceTree = "<group>"; };
 		D49C691E2F23A3F400B66608 /* ProjectStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ProjectStorage.xcdatamodel; sourceTree = "<group>"; };
@@ -515,7 +511,6 @@
 			children = (
 				D47FD3E52E2B20C600F3F514 /* Extensions */,
 				D4F525742EAC96C600439FFF /* Models */,
-				D4F5256B2EAC60F200439FFF /* Repositories */,
 				D47FD3E62E2B20E800F3F514 /* Resources */,
 				D49C69292F23A75000B66608 /* Utils */,
 				D49D7DCA2F49FAB200B178EF /* Views */,
@@ -555,15 +550,6 @@
 				D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */,
 			);
 			path = HandDrawingSwiftMetalUITests;
-			sourceTree = "<group>";
-		};
-		D4F5256B2EAC60F200439FFF /* Repositories */ = {
-			isa = PBXGroup;
-			children = (
-				D48CA09B2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift */,
-				D41240CF2F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift */,
-			);
-			path = Repositories;
 			sourceTree = "<group>";
 		};
 		D4F525742EAC96C600439FFF /* Models */ = {
@@ -770,7 +756,6 @@
 				D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */,
 				D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */,
 				D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */,
-				D48CA09C2F3C40D0008C6E9E /* UndoTextureInMemoryRepository.swift in Sources */,
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */,
 				D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */,
@@ -784,7 +769,6 @@
 				D4ACE9A42BA8587B0077C888 /* DialogPresenter.swift in Sources */,
 				D442BD072F937F4D00C55A4C /* UndoCoordinator.swift in Sources */,
 				D41CACE52B9C023900B8C7C5 /* UIViewExtensions.swift in Sources */,
-				D41240D02F77D49100B757F8 /* UndoTextureInMemoryRepositoryProtocol.swift in Sources */,
 				D41C721B2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift in Sources */,
 				D49C692C2F23A76400B66608 /* Logger.swift in Sources */,
 				D4168DA92E594E4D007F7904 /* DrawingToolStorage.xcdatamodeld in Sources */,

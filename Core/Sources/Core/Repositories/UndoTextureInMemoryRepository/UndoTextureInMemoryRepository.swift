@@ -1,39 +1,35 @@
 //
-//  UndoTextureInMemoryRepository.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/04/06.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation
-import TextureLayerView
 
 @preconcurrency import MetalKit
 
 /// A repository that manages textures for undo operations.
 /// The textures are stored in memory to avoid blocking the main thread.
-final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
+public final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
 
-    static let shared: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository(
+    public static let shared: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository(
         textures: [:]
     )
 
-    /// A dictionary with `LayerId` as the key and MTLTexture as the value
-    private(set) var textures: [LayerId: MTLTexture] = [:]
+    /// A dictionary with id as the key and MTLTexture as the value
+    private(set) var textures: [UUID: MTLTexture] = [:]
 
     init(
-        textures: [LayerId: MTLTexture] = [:]
+        textures: [UUID: MTLTexture] = [:]
     ) {
         self.textures = textures
     }
 
-    /// Returns the texture associated with the specified `LayerId`
-    func texture(_ id: UndoTextureId) -> MTLTexture? {
+    /// Returns the texture associated with the specified id
+    public func texture(_ id: UUID) -> MTLTexture? {
         textures[id]
     }
 
-    /// Adds a texture.Since `MTLTexture` is a reference type, this texture must be a new instance
-    func addTexture(newTexture: MTLTexture, id: LayerId) throws {
+    /// Adds a texture. Since `MTLTexture` is a reference type, this texture must be a new instance
+    public func addTexture(newTexture: MTLTexture, id: UUID) throws {
         // If it doesn’t exist, add it
         guard textures[id] == nil else {
             let error = NSError(
@@ -47,7 +43,7 @@ final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol
     }
 
     /// Updates the texture. Since `MTLTexture` is a reference type, this texture must be a new instance
-    func updateTexture(newTexture: MTLTexture, for id: LayerId) async throws {
+    public func updateTexture(newTexture: MTLTexture, for id: UUID) async throws {
         guard self.textures[id] != nil else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -60,12 +56,12 @@ final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol
     }
 
     /// Removes all textures
-    func removeAll() {
+    public func removeAll() {
         textures = [:]
     }
 
-    /// Removes the texture for the specified `LayerId`
-    func removeTexture(_ id: LayerId) throws {
+    /// Removes the texture for the specified id
+    public func removeTexture(_ id: UUID) throws {
         // If the file exists, delete it
         guard textures.keys.contains(id) else {
             let error = NSError(
