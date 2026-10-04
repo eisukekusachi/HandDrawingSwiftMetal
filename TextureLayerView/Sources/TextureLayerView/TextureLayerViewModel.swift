@@ -6,34 +6,34 @@ import Combine
 import Foundation
 
 @MainActor
-open class TextureLayerViewModel: ObservableObject {
+final class TextureLayerViewModel: ObservableObject {
 
-    private static var alphaRange: ClosedRange<Int> { 0...255 }
-
-    @Published public var currentAlpha: Int = 0
+    @Published private(set) var currentAlpha: Int = 0
 
     var layers: [TextureLayerItem] {
         textureLayers.layers
     }
 
-    var selectedLayerId: LayerId? {
+    private var selectedLayerId: LayerId? {
         textureLayers.selectedLayerId
     }
 
-    let textureLayers: any TextureLayersProtocol
+    private let textureLayers: any TextureLayersProtocol
 
-    var onClose: (() -> Void)?
+    let onClose: (() -> Void)?
 
-    var onError: ((Error) -> Void)?
+    private let onError: ((Error) -> Void)?
 
     var selectedLayer: TextureLayerItem? {
         guard let selectedLayerId else { return nil }
         return layers.first { $0.id == selectedLayerId }
     }
 
+    private static var alphaRange: ClosedRange<Int> { 0...255 }
+
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         textureLayers: any TextureLayersProtocol,
         onClose: (() -> Void)? = nil,
         onError: ((Error) -> Void)? = nil
@@ -52,7 +52,7 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     @discardableResult
-    open func onTapInsertButton() async -> Bool {
+    func onTapInsertButton() async -> Bool {
         guard selectedLayerId != nil else { return false }
         do {
             try await textureLayers.addLayer()
@@ -64,7 +64,7 @@ open class TextureLayerViewModel: ObservableObject {
     }
 
     @discardableResult
-    open func onTapDeleteButton() async -> Bool {
+    func onTapDeleteButton() async -> Bool {
         guard
             let selectedId = selectedLayer?.id,
             layers.count > 1
@@ -78,7 +78,7 @@ open class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    open func onTapTitleButton(_ id: UUID, title: String) {
+    func onTapTitleButton(_ id: UUID, title: String) {
         do {
             try textureLayers.renameLayer(id: id, title: title)
         } catch {
@@ -86,7 +86,7 @@ open class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
+    func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
         do {
             try textureLayers.setVisibility(id: id, isVisible: isVisible)
         } catch {
@@ -94,7 +94,7 @@ open class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    open func onTapCell(_ id: UUID) {
+    func onTapCell(_ id: UUID) {
         do {
             try textureLayers.selectLayer(id: id)
         } catch {
@@ -102,7 +102,7 @@ open class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    open func onMoveLayer(source: IndexSet, destination: Int) {
+    func onMoveLayer(source: IndexSet, destination: Int) {
         do {
             try textureLayers.moveLayers(from: source, to: destination)
         } catch {
@@ -114,7 +114,7 @@ open class TextureLayerViewModel: ObservableObject {
         textureLayers.setAlphaSliderDragging(isDragging)
     }
 
-    open func onChangeCurrentAlpha(_ alpha: Int) {
+    func onChangeCurrentAlpha(_ alpha: Int) {
         guard let selectedLayerId = selectedLayer?.id else { return }
         let clamped = Self.clampedAlpha(alpha)
         textureLayers.setAlpha(id: selectedLayerId, alpha: clamped)
@@ -126,21 +126,19 @@ open class TextureLayerViewModel: ObservableObject {
         guard currentAlpha != clamped else { return }
         currentAlpha = clamped
     }
-}
 
-public extension TextureLayerViewModel {
     func isSelected(_ id: UUID) -> Bool {
         selectedLayerId == id
     }
 }
 
-extension TextureLayerViewModel {
+private extension TextureLayerViewModel {
 
     static func clampedAlpha(_ alpha: Int) -> Int {
         min(max(alphaRange.lowerBound, alpha), alphaRange.upperBound)
     }
 
-    private func updateCurrentAlpha() {
+    func updateCurrentAlpha() {
         guard let layer = selectedLayer else { return }
         setCurrentAlpha(layer.alpha)
     }

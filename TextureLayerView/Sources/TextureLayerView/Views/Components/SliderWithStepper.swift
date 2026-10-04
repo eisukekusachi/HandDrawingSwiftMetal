@@ -5,6 +5,7 @@
 import SwiftUI
 
 struct SliderWithStepper: View {
+
     @Binding var value: Int
 
     private let title: String
