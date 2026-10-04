@@ -307,9 +307,6 @@ extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(
                     .init(undoManager)
                 )
-                if let alpha = self?.viewModel.textureLayers.selectedLayer?.alpha {
-                    self?.textureLayerView.updateAlpha(alpha)
-                }
             }
             .store(in: &cancellables)
     }

@@ -49,11 +49,6 @@ public struct TextureLayerView: View {
             .padding([.leading, .trailing, .bottom], 8)
         }
     }
-
-    /// Updates the alpha slider without changing the selected layer.
-    public func updateAlpha(_ alpha: Int) {
-        viewModel.setCurrentAlpha(alpha)
-    }
 }
 
 @MainActor
