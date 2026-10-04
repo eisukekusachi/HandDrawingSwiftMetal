@@ -6,14 +6,14 @@ import SwiftUI
 
 public struct TextureLayerView: View {
 
-    @ObservedObject private var viewModel: TextureLayerViewModel
+    @StateObject private var viewModel: TextureLayerViewModel
 
     public init(
         textureLayers: any TextureLayersProtocol,
         onClose: (() -> Void)? = nil,
         onError: ((Error) -> Void)? = nil
     ) {
-        self._viewModel = .init(
+        self._viewModel = StateObject(
             wrappedValue: TextureLayerViewModel(
                 textureLayers: textureLayers,
                 onClose: onClose,
