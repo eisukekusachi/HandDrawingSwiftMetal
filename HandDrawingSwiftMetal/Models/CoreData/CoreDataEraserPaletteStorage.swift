@@ -1,8 +1,5 @@
 //
-//  CoreDataEraserPaletteStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/09/06.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
@@ -64,7 +61,7 @@ extension CoreDataEraserPaletteStorage {
     func update(directoryURL: URL) throws {
         // Do nothing if an error occurs, since nothing can be done
         guard
-            let result = try? EraserPaletteArchiveModel(in: directoryURL)
+            let result = try? EraserPaletteSnapshot(in: directoryURL)
         else {
             let nsError = NSError(
                 domain: String(describing: Self.self),

@@ -1,8 +1,5 @@
 //
-//  HandDrawingViewController.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2021/11/27.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
@@ -48,31 +45,37 @@ class HandDrawingViewController: UIViewController {
     private lazy var undoCoordinator: UndoCoordinator = {
         .init(
             canvasView: canvasView,
-            textureLayersState: viewModel.textureLayersState
+            textureLayersState: viewModel.undoableTextureLayers
         )
     }()
 
     private(set) lazy var canvasView: TextureLayerCanvasView = {
         TextureLayerCanvasView(
-            textureLayersState: viewModel.textureLayersState,
+            textureLayer: viewModel.textureLayers,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration
         )
     }()
 
+    private lazy var textureLayerUndo = UndoTextureLayerRegistrar(
+        device: sharedDevice,
+        textureRepository: viewModel.dependencies.textureLayersDocumentsRepository,
+        onRegisterUndo: { [weak self] undoObjectPair in
+            self?.undoCoordinator.registerUndo(undoObjectPair)
+        },
+        showError: { [weak self] error in
+            self?.viewModel.showError(error)
+        }
+    )
+
     private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
-            viewModel: UndoTextureLayerViewModel(
-                textureLayers: viewModel.textureLayersState,
-                device: canvasView.sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue,
-                onLayersChanged: onTextureLayersChanged,
-                onRegisterUndo: { [weak self] undoObjectPair in
-                    self?.undoCoordinator.registerUndo(undoObjectPair)
-                }
-            ),
+            textureLayers: viewModel.textureLayers,
             onClose: { [weak self] in
                 self?.textureLayerViewModel.hide()
+            },
+            onError: { [weak self] error in
+                self?.viewModel.showError(error)
             }
         )
     }()
@@ -116,6 +119,12 @@ class HandDrawingViewController: UIViewController {
         sharedDevice = defaultDevice
         addEvents()
         bindData()
+        viewModel.onViewDidLoad(
+            device: sharedDevice,
+            commandQueue: canvasView.sharedCommandQueue,
+            undo: textureLayerUndo,
+            canvasView: canvasView
+        )
         layoutViews()
 
         drawingRenderers.forEach {
@@ -123,8 +132,6 @@ class HandDrawingViewController: UIViewController {
                 renderer: canvasView.renderer
             )
         }
-
-        viewModel.onViewDidLoad()
 
         updateDrawingComponents()
 
@@ -141,9 +148,7 @@ class HandDrawingViewController: UIViewController {
 
                 try await initializeCanvas(textureSize)
 
-                textureLayerView.update(
-                    viewModel.textureLayersState
-                )
+                await viewModel.updateThumbnails(device: sharedDevice)
 
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
@@ -177,27 +182,6 @@ class HandDrawingViewController: UIViewController {
 }
 
 extension HandDrawingViewController {
-    /// Handler that responds to texture layer events and updates the canvas view accordingly.
-    var onTextureLayersChanged: (TextureLayerEvent) -> Void {
-        { [weak self] event in
-            switch event {
-            case .addLayer, .removeLayer, .selectLayer, .changeVisibility, .moveLayer:
-                Task { [weak self] in
-                    try? await self?.canvasView.updateFullCanvasTexture()
-                }
-                // Update the alpha UI to match the currently selected layer.
-                // changeLayerAlpha is excluded because the slider already reflects that change.
-                if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
-                    self?.textureLayerView.updateAlpha(alpha)
-                }
-            case .changeLayerAlpha:
-                Task { [weak self] in
-                    self?.canvasView.updateCanvasTextureUsingCurrentTexture()
-                }
-            }
-        }
-    }
-
     func initializeCanvas(_ textureSize: CGSize) async throws {
         try await canvasView.initializeCanvas(textureSize)
 
@@ -276,9 +260,7 @@ extension HandDrawingViewController {
                     do {
                         try await self.initializeCanvas(self.viewModel.textureSize)
                         if request.updateLayerList {
-                            self.textureLayerView.update(
-                                self.viewModel.textureLayersState
-                            )
+                            await self.viewModel.updateThumbnails(device: self.sharedDevice)
                         }
                         self.updateDrawingComponents()
                         if request.dismissFileView {
@@ -325,7 +307,7 @@ extension HandDrawingViewController {
                 self?.contentView.setUndoRedoButtonState(
                     .init(undoManager)
                 )
-                if let alpha = self?.viewModel.textureLayersState.selectedLayer?.alpha {
+                if let alpha = self?.viewModel.textureLayers.selectedLayer?.alpha {
                     self?.textureLayerView.updateAlpha(alpha)
                 }
             }

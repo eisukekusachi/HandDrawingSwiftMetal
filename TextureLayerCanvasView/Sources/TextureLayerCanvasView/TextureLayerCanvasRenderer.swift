@@ -1,12 +1,9 @@
 //
-//  TextureLayerCanvasRenderer.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2026/02/05.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
-import TextureLayerView
+import Core
 
 @preconcurrency import MetalKit
 
@@ -24,7 +21,7 @@ final class TextureLayerCanvasRenderer {
     }
 
     func renderLayersIntoTextures(
-        layers: [TextureLayerModel],
+        layers: [CanvasLayerSnapshot],
         textureRepository: TextureLayersDocumentsRepositoryProtocol,
         on destinationTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer

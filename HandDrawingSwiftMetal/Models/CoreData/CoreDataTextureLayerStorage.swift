@@ -1,10 +1,7 @@
 // TODO: Move to Core Package
 
 //
-//  CoreDataTextureLayerStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/02/01.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
@@ -24,7 +21,7 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {
@@ -33,7 +30,7 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 
         // Save to Core Data when any of the properties are updated
         Publishers.Merge3(
-            textureLayers.$layers.map { _ in () }.eraseToAnyPublisher(),
+            textureLayers.$layerModels.map { _ in () }.eraseToAnyPublisher(),
             textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
             textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
         )
@@ -58,7 +55,7 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
         }
     }
 
-    public func textureLayersModel(from entity: TextureLayerArrayEntity) -> TextureLayersModel {
+    public func textureLayersSnapshot(from entity: TextureLayerArrayEntity) -> TextureLayersSnapshot {
         let layers: [TextureLayerModel] = entity.textureLayerItems?
             .compactMap { $0 as? TextureLayerEntity }
             .map { layer -> TextureLayerModel in
@@ -94,7 +91,7 @@ private extension CoreDataTextureLayerStorage {
         else { return }
 
         let textureSize = self.textureLayers.textureSize
-        let layers = textureLayers.layers.map { TextureLayerModel(item: $0) }
+        let layers = textureLayers.layerModels
 
         request.fetchLimit = 1
 

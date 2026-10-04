@@ -1,8 +1,5 @@
 //
-//  ProjectContent.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/04/25.
+//  Created by Eisuke Kusachi
 //
 
 import TextureLayerView
@@ -12,9 +9,9 @@ import UIKit
 struct ProjectContent {
     let thumbnail: UIImage?
     /// `nil` when texture restore fails on load.
-    let textureLayers: TextureLayersModel?
-    let project: ProjectArchiveModel
-    let drawingTool: DrawingToolArchiveModel?
-    let brushPalette: BrushPaletteArchiveModel?
-    let eraserPalette: EraserPaletteArchiveModel?
+    let textureLayers: TextureLayersSnapshot?
+    let project: ProjectSnapshot
+    let drawingTool: DrawingToolSnapshot?
+    let brushPalette: BrushPaletteSnapshot?
+    let eraserPalette: EraserPaletteSnapshot?
 }

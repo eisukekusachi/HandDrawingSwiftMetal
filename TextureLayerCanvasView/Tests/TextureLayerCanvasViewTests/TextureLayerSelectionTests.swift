@@ -1,23 +1,18 @@
 //
-//  TextureLayerSelectionTests.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2026/04/22.
+//  Created by Eisuke Kusachi
 //
 
+import Foundation
 import Testing
-
-import CanvasView
-import TextureLayerView
 
 @testable import TextureLayerCanvasView
 
 @MainActor
 struct TextureLayerSelectionTests {
 
-    private func layers(_ count: Int) -> [TextureLayerModel] {
-        (0..<count).map {
-            .init(id: LayerId(), title: "\($0)", alpha: 255, isVisible: true)
+    private func layers(_ count: Int) -> [CanvasLayerSnapshot] {
+        (0..<count).map { _ in
+            .init(id: UUID(), alpha: 255, isVisible: true)
         }
     }
 
@@ -72,11 +67,11 @@ struct TextureLayerSelectionTests {
     @Test
     func `Verify that layers with isVisible set to false are not included in the array`() {
         let layers = [
-            TextureLayerModel(id: LayerId(), title: "0", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "1", alpha: 255, isVisible: false),
-            TextureLayerModel(id: LayerId(), title: "2", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "3", alpha: 255, isVisible: true),
-            TextureLayerModel(id: LayerId(), title: "4", alpha: 255, isVisible: false)
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
+            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false)
         ]
 
         let subject = TextureLayerSelection(

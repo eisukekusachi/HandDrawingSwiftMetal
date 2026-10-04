@@ -1,12 +1,10 @@
 //
-//  UndoCoordinator.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/04/18.
+//  Created by Eisuke Kusachi
 //
 
 import CanvasView
 import Combine
+import Core
 import Foundation
 import TextureLayerCanvasView
 import TextureLayerView
@@ -171,7 +169,7 @@ private extension UndoCoordinator {
                 layerId: textureLayerId,
                 textureData: textureData
             )
-            textureLayersState.updateThumbnail(textureLayerId, texture: newTexture)
+            textureLayersState.updateLayerThumbnail(textureLayerId, thumbnail: newTexture.makeThumbnail())
 
             try? canvasView.setCurrentTexture(newTexture)
             canvasView.updateCanvasTextureUsingCurrentTexture()
@@ -202,7 +200,7 @@ private extension UndoCoordinator {
                 textureData: textureData
             )
 
-            textureLayersState.addLayer(
+            textureLayersState.insertLayer(
                 layer: undoObject.textureLayer,
                 thumbnail: newTexture.makeThumbnail(),
                 at: undoObject.insertIndex

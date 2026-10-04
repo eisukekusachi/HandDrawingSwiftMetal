@@ -1,154 +1,124 @@
 //
-//  TextureLayerViewModel.swift
-//  TextureLayerView
-//
-//  Created by Eisuke Kusachi on 2023/12/16.
+//  Created by Eisuke Kusachi
 //
 
 import Combine
-import UIKit
-
-@preconcurrency import MetalKit
+import Foundation
 
 @MainActor
 open class TextureLayerViewModel: ObservableObject {
 
-    static let alphaRange: ClosedRange<Int> = 0...255
+    private static var alphaRange: ClosedRange<Int> { 0...255 }
 
     @Published public var currentAlpha: Int = 0
 
-    @Published public var isAlphaSliderDragging: Bool = false
+    var layers: [TextureLayerItem] {
+        textureLayers.layers
+    }
 
-    @Published public var textureLayers: TextureLayersState
+    var selectedLayerId: LayerId? {
+        textureLayers.selectedLayerId
+    }
 
-    let onLayersChanged: ((TextureLayerEvent) -> Void)?
+    let textureLayers: any TextureLayersProtocol
+
+    var onClose: (() -> Void)?
+
+    var onError: ((Error) -> Void)?
 
     var selectedLayer: TextureLayerItem? {
-        textureLayers.selectedLayer
+        guard let selectedLayerId else { return nil }
+        return layers.first { $0.id == selectedLayerId }
     }
-
-    public var textureSize: CGSize {
-        textureLayers.textureSize
-    }
-
-    private let device: MTLDevice?
-
-    private let commandQueue: MTLCommandQueue?
-
-    private let dependencies: TextureLayerViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        textureLayers: TextureLayersState,
-        device: MTLDevice? = nil,
-        commandQueue: MTLCommandQueue? = nil,
-        dependencies: TextureLayerViewDependencies? = nil,
-        onLayersChanged: ((TextureLayerEvent) -> Void)? = nil
+        textureLayers: any TextureLayersProtocol,
+        onClose: (() -> Void)? = nil,
+        onError: ((Error) -> Void)? = nil
     ) {
         self.textureLayers = textureLayers
-        self.device = device
-        self.commandQueue = commandQueue
-        self.dependencies = dependencies ?? .init()
-        self.onLayersChanged = onLayersChanged
+        self.onClose = onClose
+        self.onError = onError
+        textureLayers.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+                self?.updateCurrentAlpha()
+            }
+            .store(in: &cancellables)
+        updateCurrentAlpha()
     }
 
     @discardableResult
-    open func onTapInsertButton() async throws -> Bool {
-        guard
-            let device,
-            let commandQueue,
-            let selectedIndex = textureLayers.selectedIndex,
-            let newTexture = MTLTextureCreator.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                with: device
-            )
-        else { return false }
-
-        let layer: TextureLayerModel = .init(
-            id: LayerId(),
-            title: TimeStampFormatter.currentDate,
-            alpha: 255,
-            isVisible: true
-        )
-
-        let textureData = try await newTexture.data(
-            device: device,
-            commandQueue: commandQueue
-        )
-        try await dependencies.textureLayersDocumentsRepository
-            .addTextureData(
-                data: textureData,
-                id: layer.id
-            )
-        textureLayers.addLayer(
-            layer: layer,
-            thumbnail: newTexture.makeThumbnail(),
-            at: AddLayerIndex.insertIndex(selectedIndex: selectedIndex)
-        )
-
-        onLayersChanged?(.addLayer)
-
-        return true
+    open func onTapInsertButton() async -> Bool {
+        guard selectedLayerId != nil else { return false }
+        do {
+            try await textureLayers.addLayer()
+            return true
+        } catch {
+            onError?(error)
+            return false
+        }
     }
 
     @discardableResult
     open func onTapDeleteButton() async -> Bool {
+        guard
+            let selectedId = selectedLayer?.id,
+            layers.count > 1
+        else { return false }
         do {
-            guard
-                let selectedIndex = textureLayers.selectedIndex,
-                let selectedId = textureLayers.selectedLayer?.id,
-                textureLayers.layerCount > 1,
-                try dependencies.textureLayersDocumentsRepository
-                    .removeTexture(
-                        selectedId
-                    )
-            else { return false }
-
-            textureLayers.removeLayer(
-                layerIndexToDelete: selectedIndex
-            )
-            onLayersChanged?(.removeLayer)
-
+            guard try await textureLayers.removeLayer(id: selectedId) else { return false }
             return true
         } catch {
-            Logger.error(error)
+            onError?(error)
             return false
         }
     }
 
     open func onTapTitleButton(_ id: UUID, title: String) {
-        textureLayers.update(id, title: title)
+        do {
+            try textureLayers.renameLayer(id: id, title: title)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
-        textureLayers.update(id, isVisible: isVisible)
-        onLayersChanged?(.changeVisibility)
+        do {
+            try textureLayers.setVisibility(id: id, isVisible: isVisible)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onTapCell(_ id: UUID) {
-        textureLayers.selectLayer(id)
-        updateCurrentAlpha()
-        onLayersChanged?(.selectLayer)
+        do {
+            try textureLayers.selectLayer(id: id)
+        } catch {
+            onError?(error)
+        }
     }
 
     open func onMoveLayer(source: IndexSet, destination: Int) {
-        textureLayers.moveLayer(
-            indices: .init(
-                sourceIndexSet: source,
-                destinationIndex: destination
-            )
-        )
-        onLayersChanged?(.moveLayer)
+        do {
+            try textureLayers.moveLayers(from: source, to: destination)
+        } catch {
+            onError?(error)
+        }
+    }
+
+    func onAlphaSliderDragging(_ isDragging: Bool) {
+        textureLayers.setAlphaSliderDragging(isDragging)
     }
 
     open func onChangeCurrentAlpha(_ alpha: Int) {
         guard let selectedLayerId = selectedLayer?.id else { return }
         let clamped = Self.clampedAlpha(alpha)
-        textureLayers.updateAlpha(selectedLayerId, alpha: clamped)
+        textureLayers.setAlpha(id: selectedLayerId, alpha: clamped)
         setCurrentAlpha(clamped)
-        onLayersChanged?(.changeLayerAlpha)
     }
 
     func setCurrentAlpha(_ alpha: Int) {
@@ -159,50 +129,8 @@ open class TextureLayerViewModel: ObservableObject {
 }
 
 public extension TextureLayerViewModel {
-    func textureFromDocumentsRepository(_ id: LayerId, device: MTLDevice) async throws -> MTLTexture {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
-            id,
-            textureSize: textureSize,
-            device: device
-        )
-    }
-
-    func update(
-        _ textureLayers: TextureLayersState
-    ) {
-        // Avoid multiple subscriptions
-        cancellables.removeAll()
-
-        self.textureLayers = textureLayers
-
-        self.textureLayers.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        // Update the alpha slider handle position
-        updateCurrentAlpha()
-
-        // Update the thumbnails
-        if let device {
-            Task { @MainActor [weak self] in
-                guard let `self` else { return }
-                for layer in self.textureLayers.layers {
-                    let layerId: LayerId = layer.id
-                    let texture = try? await self.dependencies.textureLayersDocumentsRepository.duplicatedTexture(
-                        layerId,
-                        textureSize: textureSize,
-                        device: device
-                    )
-                    self.textureLayers.updateThumbnail(layerId, texture: texture)
-                }
-            }
-        }
-    }
-
     func isSelected(_ id: UUID) -> Bool {
-        textureLayers.selectedLayer?.id == id
+        selectedLayerId == id
     }
 }
 
@@ -213,11 +141,7 @@ extension TextureLayerViewModel {
     }
 
     private func updateCurrentAlpha() {
-        guard
-            let selectedLayerId = selectedLayer?.id,
-            let layer = textureLayers.layer(selectedLayerId)
-        else { return }
-
+        guard let layer = selectedLayer else { return }
         setCurrentAlpha(layer.alpha)
     }
 }
