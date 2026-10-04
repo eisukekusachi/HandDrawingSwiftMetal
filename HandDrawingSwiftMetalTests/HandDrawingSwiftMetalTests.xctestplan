@@ -35,13 +35,6 @@
     },
     {
       "target" : {
-        "containerPath" : "container:TextureLayerCanvasView",
-        "identifier" : "TextureLayerCanvasViewTests",
-        "name" : "TextureLayerCanvasViewTests"
-      }
-    },
-    {
-      "target" : {
         "containerPath" : "container:CanvasView",
         "identifier" : "CanvasViewTests",
         "name" : "CanvasViewTests"
