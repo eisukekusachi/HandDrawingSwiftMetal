@@ -10,7 +10,7 @@ import UIKit
 
 @preconcurrency import MetalKit
 
-open class CanvasView: UIView {
+open class CanvasView: UIView, CanvasUpdating {
 
     public var thumbnail: UIImage? {
         canvasTexture?.uiImage?.resizeWithAspectRatio(
@@ -139,7 +139,7 @@ open class CanvasView: UIView {
         // Mainly used when the device rotates.
         displayView.displayTextureSizeChanged
             .sink { [weak self] _ in
-                self?.updateCanvasTextureUsingCurrentTexture()
+                self?.updateCanvasDisplay()
             }
             .store(in: &cancellables)
 
@@ -148,9 +148,9 @@ open class CanvasView: UIView {
             .sink { [weak self] event in
                 switch event {
                 case .displayCurrentTexture:
-                    self?.updateCanvasTextureUsingCurrentTexture()
+                    self?.updateCanvasDisplay()
                 case .displayRealtimeDrawingTexture:
-                    self?.updateCanvasTextureUsingRealtimeDrawingTexture()
+                    self?.updateCanvasInRealtime()
                 }
             }
             .store(in: &cancellables)
@@ -190,15 +190,15 @@ open class CanvasView: UIView {
 
         // Display the initialized canvas immediately so the view does not remain
         // stale or blank until a later draw or display event occurs
-        updateCanvasTextureUsingCurrentTexture()
+        updateCanvasDisplay()
     }
 
-    open func updateCanvasTextureUsingRealtimeDrawingTexture() {
+    open func updateCanvasInRealtime() {
         viewModel.updateCanvasTexture(realtimeDrawingTexture)
         present()
     }
 
-    open func updateCanvasTextureUsingCurrentTexture() {
+    open func updateCanvasDisplay() {
         viewModel.updateCanvasTexture(currentTexture)
         present()
     }

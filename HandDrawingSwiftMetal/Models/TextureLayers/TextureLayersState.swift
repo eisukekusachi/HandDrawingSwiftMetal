@@ -69,7 +69,7 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
 
     private var commandQueue: MTLCommandQueue?
 
-    private(set) weak var canvasView: TextureLayerCanvasView?
+    private(set) weak var canvasView: (any TextureLayerCanvasUpdating)?
 
     init(
         repository: TextureLayersDocumentsRepositoryProtocol? = nil
@@ -81,7 +81,7 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
     func setup(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        canvasView: TextureLayerCanvasView
+        canvasView: any TextureLayerCanvasUpdating
     ) {
         self.device = device
         self.commandQueue = commandQueue
@@ -237,7 +237,7 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
 
     func setAlpha(id: LayerId, alpha: Int) {
         update(id, alpha: alpha)
-        canvasView?.updateCanvasTextureUsingCurrentTexture()
+        canvasView?.updateCanvasDisplay()
     }
 
     func setAlphaSliderDragging(_ isDragging: Bool) {}
@@ -297,9 +297,9 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
 }
 
 private extension TextureLayersState {
-    func updateFullCanvas(_ canvasView: TextureLayerCanvasView) {
+    func updateFullCanvas(_ canvasView: any TextureLayerCanvasUpdating) {
         Task {
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
         }
     }
 }

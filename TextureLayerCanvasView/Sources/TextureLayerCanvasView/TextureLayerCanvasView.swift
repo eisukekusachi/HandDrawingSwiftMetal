@@ -7,7 +7,7 @@ import Combine
 
 @preconcurrency import MetalKit
 
-@objc public final class TextureLayerCanvasView: CanvasView {
+@objc public final class TextureLayerCanvasView: CanvasView, TextureLayerCanvasUpdating {
 
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
@@ -56,7 +56,7 @@ import Combine
 
         try viewModel.initializeTextures(textureSize)
 
-        try await updateFullCanvasTexture()
+        try await updateFullCanvas()
     }
 
     private func completeDrawing() {
@@ -89,7 +89,7 @@ import Combine
         }
     }
 
-    public func updateFullCanvasTexture() async throws {
+    public func updateFullCanvas() async throws {
         guard
             let selectedLayer = textureLayer.selectedLayerSnapshot,
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
@@ -109,10 +109,10 @@ import Combine
 
         try setCurrentTexture(currentTexture)
 
-        updateCanvasTextureUsingCurrentTexture()
+        updateCanvasDisplay()
     }
 
-    override public func updateCanvasTextureUsingRealtimeDrawingTexture() {
+    override public func updateCanvasInRealtime() {
         viewModel.updateCanvasTexture(
             realtimeDrawingTexture,
             on: canvasTexture,
@@ -121,7 +121,7 @@ import Combine
         present()
     }
 
-    override public func updateCanvasTextureUsingCurrentTexture() {
+    override public func updateCanvasDisplay() {
         viewModel.updateCanvasTexture(
             currentTexture,
             on: canvasTexture,

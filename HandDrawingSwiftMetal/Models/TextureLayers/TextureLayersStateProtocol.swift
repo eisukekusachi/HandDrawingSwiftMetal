@@ -19,7 +19,7 @@ protocol TextureLayersStateProtocol: TextureLayersProtocol, TextureLayerCanvasPr
     func setup(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        canvasView: TextureLayerCanvasView
+        canvasView: any TextureLayerCanvasUpdating
     )
 
     /// Restores the layer list from a saved snapshot.

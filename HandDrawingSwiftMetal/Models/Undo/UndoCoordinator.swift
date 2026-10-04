@@ -172,7 +172,7 @@ private extension UndoCoordinator {
             textureLayersState.updateLayerThumbnail(textureLayerId, thumbnail: newTexture.makeThumbnail())
 
             try? canvasView.setCurrentTexture(newTexture)
-            canvasView.updateCanvasTextureUsingCurrentTexture()
+            canvasView.updateCanvasDisplay()
 
         } catch {
             Logger.error(error)
@@ -206,7 +206,7 @@ private extension UndoCoordinator {
                 at: undoObject.insertIndex
             )
 
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
 
         } catch {
             Logger.error(error)
@@ -229,7 +229,7 @@ private extension UndoCoordinator {
         )
 
         Task {
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
         }
     }
 
@@ -241,7 +241,7 @@ private extension UndoCoordinator {
         )
 
         Task {
-            try? await canvasView.updateFullCanvasTexture()
+            try? await canvasView.updateFullCanvas()
         }
     }
 
@@ -252,7 +252,7 @@ private extension UndoCoordinator {
             undoObject.textureLayer.id
         )
 
-        try? await canvasView.updateFullCanvasTexture()
+        try? await canvasView.updateFullCanvas()
     }
 
     func performAlphaUndo(
@@ -263,7 +263,7 @@ private extension UndoCoordinator {
             alpha: undoObject.textureLayer.alpha
         )
 
-        canvasView.updateCanvasTextureUsingCurrentTexture()
+        canvasView.updateCanvasDisplay()
     }
 
     func performVisibilityUndo(
@@ -274,7 +274,7 @@ private extension UndoCoordinator {
             isVisible: undoObject.textureLayer.isVisible
         )
 
-        try? await canvasView.updateFullCanvasTexture()
+        try? await canvasView.updateFullCanvas()
     }
 
     func performTitleUndo(
