@@ -51,7 +51,9 @@ final class TextureLayerCanvasViewModel: ObservableObject {
             let error = NSError(
                 title: String(localized: "Error"),
                 message: String(
-                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                    format: String(localized: "Texture size is below the minimum: %lf %lf"),
+                    textureSize.width,
+                    textureSize.height
                 )
             )
             Logger.error(error)

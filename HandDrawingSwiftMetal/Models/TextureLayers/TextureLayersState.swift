@@ -5,7 +5,6 @@
 import CanvasView
 import Combine
 import Core
-import TextureLayerCanvasView
 import TextureLayerView
 import UIKit
 

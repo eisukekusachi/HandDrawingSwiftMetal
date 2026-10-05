@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2022/02/05.
 //
 
+import Algorithms
 import Foundation
 
 enum Calculator {
@@ -19,11 +20,9 @@ enum Calculator {
 
     /// Get the total distance by connecting points
     static func getTotalLength(points: [CGPoint]) -> CGFloat {
-        var totalLength: CGFloat = 0.0
-        for i in 0 ..< points.count - 1 {
-            totalLength += getLength(points[i], to: points[i + 1])
+        points.adjacentPairs().reduce(0.0) { total, pair in
+            total + getLength(pair.0, to: pair.1)
         }
-        return totalLength
     }
 
     static func getRadian(_ leftHandSide: CGVector, _ rightHandSide: CGVector) -> CGFloat {

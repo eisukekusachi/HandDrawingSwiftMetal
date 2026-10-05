@@ -8,7 +8,6 @@ import PaletteEditView
 import PaletteView
 import PopupView
 import SwiftUI
-import TextureLayerCanvasView
 import TextureLayerView
 import UIKit
 

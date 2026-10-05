@@ -6,7 +6,6 @@ import CanvasView
 import Combine
 import Core
 import Foundation
-import TextureLayerCanvasView
 import TextureLayerView
 
 @MainActor

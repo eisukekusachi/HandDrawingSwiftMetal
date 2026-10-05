@@ -5,7 +5,7 @@
 import Foundation
 import Testing
 
-@testable import TextureLayerCanvasView
+@testable import HandDrawingSwiftMetal
 
 @MainActor
 struct TextureLayerSelectionTests {

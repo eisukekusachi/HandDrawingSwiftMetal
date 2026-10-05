@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2022/11/03.
 //
 
+import Algorithms
 import Foundation
 
 class Iterator<T: Equatable>: IteratorProtocol {
@@ -34,28 +35,15 @@ class Iterator<T: Equatable>: IteratorProtocol {
         }
     }
 
-    func next(range: Int = 1, _ results: ([Element]) -> Void) {
-        if range <= 0 { return }
+    /// Overlapping windows that begin at `index`, then advances `index` past them.
+    func windows(ofCount count: Int) -> [[Element]] {
+        guard count > 0 else { return [] }
 
-        while (index + range) <= array.count {
-            results(Array(array[index ..< index + range]))
-            index += 1
-        }
+        let windows = array.dropFirst(index).windows(ofCount: count).map { Array($0) }
+        index += windows.count
+        return windows
     }
-    func next(range: Int) -> [Element]? {
-        if range <= 0 { return nil }
 
-        if (index + range) <= array.count {
-
-            let elements = array[index ..< index + range]
-            index += 1
-
-            return Array(elements)
-
-        } else {
-            return nil
-        }
-    }
     func append(_ element: Element) {
         array.append(element)
     }

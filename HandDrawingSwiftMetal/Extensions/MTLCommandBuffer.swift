@@ -1,8 +1,5 @@
 //
-//  MTLCommandBufferExtensions.swift
-//  CanvasView
-//
-//  Created by Eisuke Kusachi on 2025/10/10.
+//  Created by Eisuke Kusachi
 //
 
 @preconcurrency import MetalKit

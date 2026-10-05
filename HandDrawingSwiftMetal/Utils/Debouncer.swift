@@ -1,8 +1,5 @@
 //
-//  Debouncer.swift
-//  TextureLayerCanvasView
-//
-//  Created by Eisuke Kusachi on 2025/10/11.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

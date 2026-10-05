@@ -1,8 +1,5 @@
 //
-//  CollectionExtensions.swift
-//  CanvasView
-//
-//  Created by Eisuke Kusachi on 2025/04/06.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

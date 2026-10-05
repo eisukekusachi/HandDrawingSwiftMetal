@@ -60,12 +60,13 @@ extension SmoothDrawingCurve {
             self.append(firstElement)
         }
 
-        while let subsequence = tmpIterator.next(range: 2) {
-            let dotPoint = GrayscaleDotPoint.average(
-                subsequence[0],
-                subsequence[1]
+        for window in tmpIterator.windows(ofCount: 2) {
+            self.append(
+                GrayscaleDotPoint.average(
+                    window[0],
+                    window[1]
+                )
             )
-            self.append(dotPoint)
         }
 
         if touchPhase == .ended,
