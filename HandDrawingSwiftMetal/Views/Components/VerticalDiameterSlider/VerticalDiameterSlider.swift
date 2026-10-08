@@ -13,16 +13,6 @@ struct VerticalDiameterSlider: View {
 
     private let onEditingChanged: ((Bool) -> Void)?
 
-    private let sliderLength: CGFloat = 256
-
-    private let sliderThickness: CGFloat = 44
-
-    private let stepperLength: CGFloat = 96
-
-    private let stepperThickness: CGFloat = 36
-
-    private let controlSpacing: CGFloat = 8
-
     init(
         value: Binding<Int>,
         in range: ClosedRange<Int> = 1...64,
@@ -34,25 +24,63 @@ struct VerticalDiameterSlider: View {
     }
 
     var body: some View {
-        VStack(
-            alignment: .center,
-            spacing: controlSpacing
-        ) {
-            verticalSlider
-            valueLabel
-            verticalStepper
+        GeometryReader { geometry in
+            let layout = LayoutMetrics(availableHeight: geometry.size.height)
+
+            VStack(
+                alignment: .center,
+                spacing: LayoutMetrics.controlSpacing
+            ) {
+                slider(length: layout.sliderLength)
+                valueLabel
+                stepper
+            }
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .bottomLeading
+            )
         }
-        .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity,
-            alignment: .bottomLeading
-        )
     }
 }
 
 private extension VerticalDiameterSlider {
+    struct LayoutMetrics {
+        /// Vertical track length when there is enough space (e.g. portrait).
+        static let preferredSliderLength: CGFloat = 256
+        /// Shortest slider track; keeps the thumb reachable on compact heights (e.g. landscape).
+        static let minSliderLength: CGFloat = 72
+        /// Fixed vertical size of the rotated system stepper (+/−); not scaled with height.
+        static let stepperLength: CGFloat = 96
+        /// Width of the rotated slider after layout (touch target along the screen horizontal axis).
+        static let sliderThickness: CGFloat = 44
+        /// Width of the rotated stepper after layout.
+        static let stepperThickness: CGFloat = 36
+        /// Gap between slider, value label, and stepper in the column.
+        static let controlSpacing: CGFloat = 8
+        /// Reserved height for the monospaced diameter number between slider and stepper.
+        static let valueLabelHeight: CGFloat = 22
 
-    var verticalSlider: some View {
+        let sliderLength: CGFloat
+
+        init(availableHeight: CGFloat) {
+            guard availableHeight.isFinite, availableHeight > 0 else {
+                sliderLength = Self.minSliderLength
+                return
+            }
+
+            let spacingTotal = Self.controlSpacing * 2
+            let fixedChrome =
+                spacingTotal + Self.valueLabelHeight + Self.stepperLength
+
+            sliderLength = min(
+                Self.preferredSliderLength,
+                max(Self.minSliderLength, availableHeight - fixedChrome)
+            )
+        }
+    }
+
+    func slider(length: CGFloat) -> some View {
         Slider(
             value: Binding(
                 get: { Double(value) },
@@ -65,17 +93,18 @@ private extension VerticalDiameterSlider {
             }
         )
         .rotationEffect(.degrees(-90))
-        .frame(width: sliderLength, height: sliderThickness)
-        .frame(width: sliderThickness, height: sliderLength)
+        .frame(width: length, height: LayoutMetrics.sliderThickness)
+        .frame(width: LayoutMetrics.sliderThickness, height: length)
     }
 
     var valueLabel: some View {
         Text(value, format: .number)
             .monospacedDigit()
             .foregroundStyle(.primary)
+            .frame(height: LayoutMetrics.valueLabelHeight)
     }
 
-    var verticalStepper: some View {
+    var stepper: some View {
         Stepper(value: $value, in: range) {
             Text(verbatim: "")
                 .frame(width: 0, height: 0)
@@ -83,8 +112,8 @@ private extension VerticalDiameterSlider {
         }
         .foregroundStyle(.primary)
         .rotationEffect(.degrees(-90))
-        .frame(width: stepperLength, height: stepperThickness)
-        .frame(width: stepperThickness, height: stepperLength)
+        .frame(width: LayoutMetrics.stepperLength, height: LayoutMetrics.stepperThickness)
+        .frame(width: LayoutMetrics.stepperThickness, height: LayoutMetrics.stepperLength)
     }
 }
 
@@ -100,7 +129,22 @@ private struct VerticalDiameterSliderPreview: View {
     }
 }
 
-#Preview {
+private struct VerticalDiameterSliderCompactPreview: View {
+
+    @State private var value = 32
+
+    var body: some View {
+        VerticalDiameterSlider(value: $value)
+            .frame(width: 44, height: 287)
+            .padding()
+    }
+}
+
+#Preview("Regular height") {
     VerticalDiameterSliderPreview()
+}
+
+#Preview("Landscape height") {
+    VerticalDiameterSliderCompactPreview()
 }
 #endif
