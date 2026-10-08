@@ -1,8 +1,5 @@
 //
-//  DrawingTool.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2025/08/24.
+//  Created by Eisuke Kusachi
 //
 
 import UIKit

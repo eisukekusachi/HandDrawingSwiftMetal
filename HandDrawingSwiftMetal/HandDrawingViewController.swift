@@ -362,12 +362,6 @@ extension HandDrawingViewController {
             self?.undoCoordinator.redo()
         }
 
-        contentView.dragBrushSlider = { [weak self] value in
-            self?.viewModel.drawingTool.brushDiameter = BrushDrawingRenderer.diameterIntValue(value)
-        }
-        contentView.dragEraserSlider = { [weak self] value in
-            self?.viewModel.drawingTool.eraserDiameter = EraserDrawingRenderer.diameterIntValue(value)
-        }
     }
 
     func layoutViews() {
@@ -384,6 +378,8 @@ extension HandDrawingViewController {
 
         addBrushPalette()
         addEraserPalette()
+        addBrushDiameterControl()
+        addEraserDiameterControl()
         addOverlayHostingView()
 
         contentView.layoutIfNeeded()
@@ -421,6 +417,20 @@ extension HandDrawingViewController {
             }
         )
         embedHostingController(hostingController, in: contentView.eraserPaletteView)
+    }
+
+    func addBrushDiameterControl() {
+        let hostingController = UIHostingController(
+            rootView: BrushDiameterSliderHost(drawingTool: viewModel.drawingTool)
+        )
+        embedHostingController(hostingController, in: contentView.brushDiameterView)
+    }
+
+    func addEraserDiameterControl() {
+        let hostingController = UIHostingController(
+            rootView: EraserDiameterSliderHost(drawingTool: viewModel.drawingTool)
+        )
+        embedHostingController(hostingController, in: contentView.eraserDiameterView)
     }
 
     func addOverlayHostingView() {
@@ -544,14 +554,29 @@ extension HandDrawingViewController {
         (drawingRenderers[.brush] as? BrushDrawingRenderer)?.setDiameter(viewModel.drawingTool.brushDiameter)
         (drawingRenderers[.eraser] as? EraserDrawingRenderer)?.setDiameter(viewModel.drawingTool.eraserDiameter)
 
-        contentView.setBrushDiameterSlider(viewModel.drawingTool.brushDiameter)
-        contentView.setEraserDiameterSlider(viewModel.drawingTool.eraserDiameter)
-
         contentView.updateDrawingComponents(viewModel.drawingTool.type)
 
         if let renderer = drawingRenderers[viewModel.drawingTool.type] {
             canvasView.setDrawingRenderer(renderer)
         }
+    }
+}
+
+private struct BrushDiameterSliderHost: View {
+
+    @ObservedObject var drawingTool: DrawingTool
+
+    var body: some View {
+        BrushVerticalDiameterSlider(brushDiameter: $drawingTool.brushDiameter)
+    }
+}
+
+private struct EraserDiameterSliderHost: View {
+
+    @ObservedObject var drawingTool: DrawingTool
+
+    var body: some View {
+        EraserVerticalDiameterSlider(eraserDiameter: $drawingTool.eraserDiameter)
     }
 }
 
