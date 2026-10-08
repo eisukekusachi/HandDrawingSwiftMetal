@@ -17,8 +17,8 @@ final class HandDrawingContentView: UIView {
     @IBOutlet private weak var saveButton: UIButton!
     @IBOutlet private weak var loadButton: UIButton!
 
-    @IBOutlet private weak var brushDiameterSlider: UISlider!
-    @IBOutlet private weak var eraserDiameterSlider: UISlider!
+    @IBOutlet private(set) weak var brushDiameterView: UIView!
+    @IBOutlet private(set) weak var eraserDiameterView: UIView!
 
     @IBOutlet private(set) weak var exportImageButton: UIButton!
     @IBOutlet private(set) weak var layerButton: UIButton!
@@ -40,8 +40,6 @@ final class HandDrawingContentView: UIView {
     var tapDrawingToolButton: (() -> Void)?
     var tapUndoButton: (() -> Void)?
     var tapRedoButton: (() -> Void)?
-    var dragBrushSlider: ((Float) -> Void)?
-    var dragEraserSlider: ((Float) -> Void)?
 
     private let throttle = Throttle(delay: 0.05)
 
@@ -64,9 +62,6 @@ final class HandDrawingContentView: UIView {
         baseView.alpha = 0.0
 
         addEvents()
-
-        brushDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
-        eraserDiameterSlider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2.0))
     }
 
     func showCanvasAfterCompletion() {
@@ -78,30 +73,11 @@ final class HandDrawingContentView: UIView {
     func updateDrawingComponents(_ tool: DrawingToolType) {
         drawingToolButton.setImage(.init(systemName: tool == .brush ? "pencil" : "eraser"), for: .normal)
 
-        brushDiameterSlider.isHidden = tool != .brush
+        brushDiameterView.isHidden = tool != .brush
         brushPaletteView.isHidden = tool != .brush
 
-        eraserDiameterSlider.isHidden = tool != .eraser
+        eraserDiameterView.isHidden = tool != .eraser
         eraserPaletteView.isHidden = tool != .eraser
-    }
-
-    func setBrushDiameterSlider(_ value: Int) {
-        brushDiameterSlider.setValue(
-            BrushDrawingRenderer.diameterFloatValue(value),
-            animated: false
-        )
-    }
-    func setEraserDiameterSlider(_ value: Int) {
-        eraserDiameterSlider.setValue(
-            EraserDrawingRenderer.diameterFloatValue(value),
-            animated: false
-        )
-    }
-    func setBrushDiameterSlider(_ value: Float) {
-        brushDiameterSlider.setValue(value, animated: false)
-    }
-    func setEraserDiameterSlider(_ value: Float) {
-        eraserDiameterSlider.setValue(value, animated: false)
     }
 
     func setUndoRedoButtonState(_ state: UndoRedoButtonState) {
@@ -114,8 +90,8 @@ final class HandDrawingContentView: UIView {
         saveButton.isUserInteractionEnabled = isUserInteractionEnabled
         loadButton.isUserInteractionEnabled = isUserInteractionEnabled
 
-        brushDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
-        eraserDiameterSlider.isUserInteractionEnabled = isUserInteractionEnabled
+        brushDiameterView.isUserInteractionEnabled = isUserInteractionEnabled
+        eraserDiameterView.isUserInteractionEnabled = isUserInteractionEnabled
 
         exportImageButton.isUserInteractionEnabled = isUserInteractionEnabled
         layerButton.isUserInteractionEnabled = isUserInteractionEnabled
@@ -169,15 +145,5 @@ private extension HandDrawingContentView {
                 self.tapRedoButton?()
             }
         }, for: .touchUpInside)
-
-        brushDiameterSlider.addAction(UIAction { [weak self] action in
-            guard let `self`, let slider = action.sender as? UISlider else { return }
-            dragBrushSlider?(slider.value)
-        }, for: .valueChanged)
-
-        eraserDiameterSlider.addAction(UIAction { [weak self] action in
-            guard let `self`,  let slider = action.sender as? UISlider else { return }
-            dragEraserSlider?(slider.value)
-        }, for: .valueChanged)
     }
 }
