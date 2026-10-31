@@ -8,7 +8,7 @@ import MetalKit
 import TextureLayerView
 
 @MainActor
-final class UndoTextureLayerRegistrar {
+final class TextureLayerUndoRegistrar {
 
     private let device: MTLDevice
 
@@ -42,7 +42,7 @@ final class UndoTextureLayerRegistrar {
         guard
             let layerId = state.selectedLayerId,
             let layerIndex = state.selectedLayerIndex,
-            let layer = state.selectedLayer
+            let layer = state.selectedLayerModel
         else { return }
 
         let newTexture: MTLTexture
@@ -163,11 +163,11 @@ final class UndoTextureLayerRegistrar {
         id: LayerId,
         perform: () throws -> Void
     ) rethrows {
-        guard let undoLayer = state.selectedLayer else { return }
+        guard let undoLayer = state.selectedLayerModel else { return }
 
         try perform()
 
-        guard let redoLayer = state.selectedLayer else { return }
+        guard let redoLayer = state.selectedLayerModel else { return }
 
         onRegisterUndo?(
             .init(
@@ -187,7 +187,7 @@ final class UndoTextureLayerRegistrar {
         destination: Int,
         perform: () throws -> Void
     ) rethrows {
-        guard let layer = state.selectedLayer else { return }
+        guard let layer = state.selectedLayerModel else { return }
 
         try perform()
 
@@ -210,10 +210,10 @@ final class UndoTextureLayerRegistrar {
         _ isDragging: Bool
     ) {
         if isDragging {
-            previousAlpha = state.selectedLayer?.alpha
+            previousAlpha = state.selectedLayerModel?.alpha
         } else {
             guard
-                let item = state.selectedLayer,
+                let item = state.selectedLayerModel,
                 let previousAlpha
             else { return }
             onRegisterUndo?(
@@ -232,7 +232,7 @@ final class UndoTextureLayerRegistrar {
     }
 }
 
-private extension UndoTextureLayerRegistrar {
+private extension TextureLayerUndoRegistrar {
 
     func registerAdditionUndo(
         newTexture: MTLTexture?,

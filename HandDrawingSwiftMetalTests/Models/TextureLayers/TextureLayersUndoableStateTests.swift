@@ -9,9 +9,9 @@ import TextureLayerView
 @testable import HandDrawingSwiftMetal
 
 @MainActor
-struct UndoableTextureLayersStateTests {
+struct TextureLayersUndoableStateTests {
 
-    typealias Subject = UndoableTextureLayersState
+    typealias Subject = TextureLayersUndoableState
 
     let textureSize: CGSize = .init(width: 123, height: 456)
 
@@ -68,7 +68,7 @@ struct UndoableTextureLayersStateTests {
         }
 
         #expect(error?.localizedFailureReason == "Undo is not set")
-        #expect(subject.selectedLayer?.id == layer0.id)
+        #expect(subject.selectedLayerModel?.id == layer0.id)
     }
 
     @Test
@@ -115,7 +115,7 @@ struct UndoableTextureLayersStateTests {
 
         try subject.selectLayer(id: layer1.id)
 
-        #expect(subject.selectedLayer?.id == layer1.id)
+        #expect(subject.selectedLayerModel?.id == layer1.id)
         #expect(registered.pairs.count == 1)
     }
 

@@ -7,11 +7,11 @@ import TextureLayerView
 
 /// `TextureLayersState` that records layer edits for undo.
 @MainActor
-final class UndoableTextureLayersState: TextureLayersState {
+final class TextureLayersUndoableState: TextureLayersState {
 
-    private var undo: UndoTextureLayerRegistrar?
+    private var undo: TextureLayerUndoRegistrar?
 
-    func setUndo(undo: UndoTextureLayerRegistrar) {
+    func setUndo(undo: TextureLayerUndoRegistrar) {
         self.undo = undo
     }
 
