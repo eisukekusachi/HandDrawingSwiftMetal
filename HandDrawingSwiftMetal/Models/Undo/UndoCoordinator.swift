@@ -93,7 +93,7 @@ extension UndoCoordinator {
 
     func registerDrawingUndoAfterCommit() async throws {
         guard
-            let selectedLayer = textureLayersState.selectedLayer,
+            let selectedLayer = textureLayersState.selectedLayerModel,
             let undoRedoObjectPair = try await undoDrawing?.pushUndoDrawingObject(
                 selectedLayer: selectedLayer,
                 texture: canvasView.currentTexture
