@@ -13,7 +13,7 @@ import TextureLayerView
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private let textureLayer: TextureLayerCanvasProtocol
+    private let textureLayer: TextureLayersCompositingProtocol
 
     private lazy var viewModel: TextureLayerCanvasViewModel = {
         .init(
@@ -27,7 +27,7 @@ import TextureLayerView
     private let configuration: CanvasConfiguration
 
     public init(
-        textureLayer: TextureLayerCanvasProtocol,
+        textureLayer: TextureLayersCompositingProtocol,
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration
     ) {
@@ -63,7 +63,7 @@ import TextureLayerView
     private func completeDrawing() {
         guard
             let texture = currentTexture,
-            let layerId = textureLayer.selectedLayerItem?.id
+            let layerId = textureLayer.selectedLayer?.id
         else { return }
 
         let device = renderer.device
@@ -80,10 +80,10 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
-                await self.viewModel.updateLayerThumbnail(
-                    layerId,
-                    thumbnail: texture.makeThumbnail()
-                )
+                if let thumbnail = texture.makeThumbnail(),
+                   let layersState = self.textureLayer as? TextureLayersState {
+                    layersState.updateLayerThumbnail(layerId, thumbnail: thumbnail)
+                }
             } catch {
                 Logger.error(error)
             }
@@ -92,7 +92,7 @@ import TextureLayerView
 
     public func updateFullCanvas() async throws {
         guard
-            let selectedLayer = textureLayer.selectedLayerItem,
+            let selectedLayer = textureLayer.selectedLayer,
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             ),
@@ -101,10 +101,7 @@ import TextureLayerView
             return
         }
 
-        try await viewModel.updateUnselectedTextures(
-            textureLayers: .init(source: textureLayer),
-            with: newCommandBuffer
-        )
+        try await viewModel.updateUnselectedTextures(with: newCommandBuffer)
 
         try await newCommandBuffer.commitAndWaitAsync()
 
