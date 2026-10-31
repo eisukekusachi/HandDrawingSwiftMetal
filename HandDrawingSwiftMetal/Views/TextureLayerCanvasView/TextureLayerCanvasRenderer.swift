@@ -61,7 +61,7 @@ final class TextureLayerCanvasRenderer {
     /// Refreshes the entire screen using textures
     func renderCanvas(
         unselectedTopTexture: MTLTexture?,
-        currentTextureLayer: TextureLayer,
+        selectedTextureLayer: SelectedTextureLayer,
         unselectedBottomTexture: MTLTexture?,
         canvasTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer?
@@ -85,11 +85,11 @@ final class TextureLayerCanvasRenderer {
             with: commandBuffer
         )
 
-        if currentTextureLayer.isVisible,
-           let texture = currentTextureLayer.texture {
+        if selectedTextureLayer.isVisible,
+           let texture = selectedTextureLayer.texture {
             renderer.mergeTexture(
                 texture: texture,
-                alpha: currentTextureLayer.alpha,
+                alpha: selectedTextureLayer.alpha,
                 into: canvasTexture,
                 with: commandBuffer
             )
