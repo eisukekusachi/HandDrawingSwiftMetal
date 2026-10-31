@@ -73,7 +73,7 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private lazy var textureLayerUndoRegistrar: TextureLayerUndoRegistrar = {
+    private lazy var textureLayerUndoRegister: TextureLayerUndoRegister = {
         .init(
             device: sharedDevice,
             inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
@@ -141,7 +141,7 @@ class HandDrawingViewController: UIViewController {
         viewModel.onViewDidLoad(
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue,
-            undo: textureLayerUndoRegistrar,
+            undoRegister: textureLayerUndoRegister,
             canvasView: canvasView
         )
         layoutViews()

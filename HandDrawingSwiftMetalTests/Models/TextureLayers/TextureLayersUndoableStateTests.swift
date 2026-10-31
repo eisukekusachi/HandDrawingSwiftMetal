@@ -198,7 +198,7 @@ struct TextureLayersUndoableStateTests {
         let subject: Subject = .init(repository: repository)
         subject.setLayers(layers, textureSize: textureSize)
         subject.setUndo(
-            undo: .init(
+            undoRegister: .init(
                 device: device,
                 inMemoryRepository: inMemoryRepository,
                 textureRepository: repository,

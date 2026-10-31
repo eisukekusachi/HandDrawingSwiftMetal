@@ -15,7 +15,7 @@ import TextureLayerView
 
     private let dependencies: TextureLayerCanvasViewDependencies
 
-    private let onUpdateLayerThumbnail: ((UUID, UIImage?) -> Void)?
+    private let onUpdateLayerThumbnail: (@MainActor @Sendable (UUID, UIImage?) -> Void)?
 
     private lazy var viewModel: TextureLayerCanvasViewModel = {
         .init(dependencies: dependencies)
@@ -29,7 +29,7 @@ import TextureLayerView
         dependencies: TextureLayerCanvasViewDependencies,
         device: MTLDevice? = nil,
         configuration: CanvasConfiguration,
-        onUpdateLayerThumbnail: ((UUID, UIImage?) -> Void)? = nil
+        onUpdateLayerThumbnail: (@MainActor @Sendable (UUID, UIImage?) -> Void)? = nil
     ) {
         self.dependencies = dependencies
         self.onUpdateLayerThumbnail = onUpdateLayerThumbnail
@@ -82,10 +82,10 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
-                await self.onUpdateLayerThumbnail?(
-                    layerId,
-                    texture.makeThumbnail()
-                )
+                let thumbnail = texture.makeThumbnail()
+                await MainActor.run {
+                    self.onUpdateLayerThumbnail?(layerId, thumbnail)
+                }
             } catch {
                 Logger.error(error)
             }

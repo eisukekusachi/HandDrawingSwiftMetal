@@ -155,7 +155,7 @@ final class HandDrawingViewModel: ObservableObject {
     func onViewDidLoad(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        undo: TextureLayerUndoRegistrar,
+        undoRegister: TextureLayerUndoRegister,
         canvasView: TextureLayerCanvasView
     ) {
         undoableTextureLayers.setup(
@@ -163,7 +163,7 @@ final class HandDrawingViewModel: ObservableObject {
             commandQueue: commandQueue,
             canvasView: canvasView
         )
-        undoableTextureLayers.setUndo(undo: undo)
+        undoableTextureLayers.setUndo(undoRegister: undoRegister)
 
         do {
             try fetchDataFromCoreDataIfAvailable()
