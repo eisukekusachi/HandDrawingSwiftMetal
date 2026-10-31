@@ -1,5 +1,5 @@
 //
-//  Created by Eisuke Kusachi on 2026/09/26.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation
