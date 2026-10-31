@@ -87,7 +87,7 @@ private extension CoreDataTextureLayerStorage {
         guard
             textureLayers.layers.count != 0,
             textureLayers.textureSize != .zero,
-            let selectedLayerId = textureLayers.selectedLayer?.id
+            let selectedLayerId = textureLayers.selectedLayerModel?.id
         else { return }
 
         let textureSize = self.textureLayers.textureSize
