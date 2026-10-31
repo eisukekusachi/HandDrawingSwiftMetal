@@ -1,5 +1,5 @@
 //
-//  Created by Eisuke Kusachi on 2026/09/26.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation
@@ -9,14 +9,11 @@ import Foundation
 public final class DocumentsDataStore {
 
     private let fileManager: FileManaging
-    let localFileRepository: LocalFileRepositoryProtocol
+    let localFileIO: LocalFileIO
 
-    public init(
-        fileManager: FileManaging,
-        localFileRepository: LocalFileRepositoryProtocol? = nil
-    ) {
+    public init(fileManager: FileManaging) {
         self.fileManager = fileManager
-        self.localFileRepository = localFileRepository ?? LocalFileRepository(
+        self.localFileIO = LocalFileIO(
             workingDirectoryURL: fileManager.temporaryDirectory.appendingPathComponent("TmpFolder"),
             fileManager: fileManager
         )
@@ -70,7 +67,7 @@ public final class DocumentsDataStore {
     ) async throws {
         try await withWorkingDirectory { workingDirectoryURL in
             try await operation(workingDirectoryURL)
-            try localFileRepository.zipFile(from: workingDirectoryURL, to: zipFileURL)
+            try localFileIO.zipFile(from: workingDirectoryURL, to: zipFileURL)
         }
     }
 
@@ -80,17 +77,17 @@ public final class DocumentsDataStore {
         _ operation: (_ workingDirectoryURL: URL) async throws -> T
     ) async throws -> T {
         try await withWorkingDirectory { workingDirectoryURL in
-            try await localFileRepository.unzipFile(from: zipFileURL, to: workingDirectoryURL)
+            try await localFileIO.unzipFile(from: zipFileURL, to: workingDirectoryURL)
             return try await operation(workingDirectoryURL)
         }
     }
 
     public func removeFile(at url: URL) throws {
-        try localFileRepository.removeFile(at: url)
+        try localFileIO.removeFile(at: url)
     }
 
     public func renameFile(at srcURL: URL, to dstURL: URL) throws {
-        try localFileRepository.renameFile(at: srcURL, to: dstURL)
+        try localFileIO.renameFile(at: srcURL, to: dstURL)
     }
 }
 
@@ -98,8 +95,8 @@ private extension DocumentsDataStore {
     private func withWorkingDirectory<T>(
         _ operation: (_ workingDirectoryURL: URL) async throws -> T
     ) async throws -> T {
-        let workingDirectoryURL = try localFileRepository.createSessionDirectory()
-        defer { try? localFileRepository.removeFile(at: workingDirectoryURL) }
+        let workingDirectoryURL = try localFileIO.createSessionDirectory()
+        defer { try? localFileIO.removeFile(at: workingDirectoryURL) }
 
         return try await operation(workingDirectoryURL)
     }

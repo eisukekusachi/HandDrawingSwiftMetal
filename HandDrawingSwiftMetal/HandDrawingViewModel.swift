@@ -110,15 +110,14 @@ final class HandDrawingViewModel: ObservableObject {
         self.thumbnailFileName = thumbnailFileName
 
         self.documentsDataStore = DocumentsDataStore(
-            fileManager: dependencies.fileManager,
-            localFileRepository: dependencies.localFileRepository
+            fileManager: dependencies.fileManager
         )
 
         self.brushPalette = .init()
         self.eraserPalette = .init()
 
         let undoableTextureLayers = UndoableTextureLayersState(
-            repository: dependencies.textureLayersDocumentsRepository
+            repository: dependencies.documentsTextureDataRepository
         )
         self.undoableTextureLayers = undoableTextureLayers
         self.textureLayers = undoableTextureLayers
@@ -186,7 +185,7 @@ final class HandDrawingViewModel: ObservableObject {
     ) async -> CGSize {
         if let restoredTextureLayerDataFromCoreData {
             do {
-                try dependencies.textureLayersDocumentsRepository.restoreStorageFromWorkingDirectory(
+                try dependencies.documentsTextureDataRepository.restoreTextures(
                     ids: restoredTextureLayerDataFromCoreData.layers.map(\.id),
                     textureSize: restoredTextureLayerDataFromCoreData.textureSize,
                     device: device
@@ -222,7 +221,7 @@ final class HandDrawingViewModel: ObservableObject {
             alpha: 255,
             isVisible: true
         )
-        try await dependencies.textureLayersDocumentsRepository.initializeStorage(
+        try await dependencies.documentsTextureDataRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
             device: device,
@@ -247,7 +246,7 @@ final class HandDrawingViewModel: ObservableObject {
             )
             return textureSize
         } catch {
-            fatalError("Failed to initialize storage")
+            fatalError("Failed to initialize texture")
         }
     }
 

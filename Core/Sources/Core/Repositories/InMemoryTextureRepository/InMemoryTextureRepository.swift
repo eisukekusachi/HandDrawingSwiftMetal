@@ -6,11 +6,11 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// A repository that manages textures for undo operations.
-/// The textures are stored in memory to avoid blocking the main thread.
-public final actor UndoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol {
+/// Stores `MTLTexture` instances in memory, keyed by id.
+/// Keeping them in memory avoids blocking the main thread.
+public final actor InMemoryTextureRepository: MTLTextureRepositoryProtocol {
 
-    public static let shared: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository(
+    public static let shared: MTLTextureRepositoryProtocol = InMemoryTextureRepository(
         textures: [:]
     )
 

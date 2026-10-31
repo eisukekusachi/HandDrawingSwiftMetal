@@ -7,30 +7,21 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// Stores texture bytes in a directory, keyed by id
-public protocol TextureLayersDocumentsRepositoryProtocol: Sendable, AnyObject {
+/// Repository abstraction that stores `MTLTexture` data keyed by id.
+public protocol MTLTextureDataRepositoryProtocol: Sendable, AnyObject {
 
-    var workingDirectoryURL: URL { get }
-
-    func initializeStorage(
+    func initializeTexture(
         id: UUID,
         textureSize: CGSize,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws
 
-    func restoreStorageFromWorkingDirectory(
+    func restoreTextures(
         ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
     ) throws
-
-    func restoreStorage(
-        from sourceFolderURL: URL,
-        ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
-    ) async throws -> Bool
 
     func duplicatedTexture(
         _ id: UUID,

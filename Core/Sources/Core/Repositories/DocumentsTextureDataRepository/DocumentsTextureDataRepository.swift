@@ -7,21 +7,21 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol {
+/// Stores `MTLTexture` data in a `Documents` directory, keyed by id.
+public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProtocol {
     @MainActor
-    public static let shared: any TextureLayersDocumentsRepositoryProtocol = {
+    public static let shared = {
         do {
-            return try TextureLayersDocumentsRepository(
+            return try DocumentsTextureDataRepository(
                 storageDirectoryURL: URL.applicationSupport,
                 directoryName: "TextureStorage"
             )
         } catch {
-            fatalError("Failed to initialize TextureLayersDocumentsRepository: \(error)")
+            fatalError("Failed to initialize DocumentsTextureDataRepository: \(error)")
         }
     }()
 
-    /// URL of the texture storage
-    public let workingDirectoryURL: URL
+    private let workingDirectoryURL: URL
 
     private init(
         storageDirectoryURL: URL,
@@ -38,7 +38,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         try url.setResourceValues(resourceValues)
     }
 
-    public func initializeStorage(
+    public func initializeTexture(
         id: UUID,
         textureSize: CGSize,
         device: MTLDevice,
@@ -74,7 +74,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
         )
     }
 
-    public func restoreStorageFromWorkingDirectory(
+    public func restoreTextures(
         ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
@@ -113,7 +113,7 @@ public final class TextureLayersDocumentsRepository: TextureLayersDocumentsRepos
     }
 }
 
-public extension TextureLayersDocumentsRepository {
+public extension DocumentsTextureDataRepository {
 
     @discardableResult
     func addTextureData(
@@ -296,7 +296,7 @@ public extension TextureLayersDocumentsRepository {
     }
 }
 
-private extension TextureLayersDocumentsRepository {
+private extension DocumentsTextureDataRepository {
 
     func loadTexturesIfValid(
         from directoryURL: URL,

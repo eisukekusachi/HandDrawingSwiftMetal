@@ -22,7 +22,7 @@ final class TextureLayerCanvasRenderer {
 
     func renderLayersIntoTextures(
         layers: [CanvasLayerSnapshot],
-        textureRepository: TextureLayersDocumentsRepositoryProtocol,
+        textureRepository: MTLTextureDataRepositoryProtocol,
         on destinationTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer
     ) async throws {

@@ -22,7 +22,8 @@ final class UndoCoordinator {
 
     private let textureLayersState: TextureLayersState
 
-    private let undoTextureInMemoryRepository: UndoTextureInMemoryRepositoryProtocol = UndoTextureInMemoryRepository.shared
+    /// Repository for undo textures. Kept in memory because undo needs fast access.
+    private let inMemoryTextureRepository: MTLTextureRepositoryProtocol
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -32,13 +33,15 @@ final class UndoCoordinator {
 
     init(
         canvasView: TextureLayerCanvasView,
-        textureLayersState: TextureLayersState
+        textureLayersState: TextureLayersState,
+        inMemoryTextureRepository: MTLTextureRepositoryProtocol
     ) {
         self.canvasView = canvasView
         self.textureLayersState = textureLayersState
+        self.inMemoryTextureRepository = inMemoryTextureRepository
         self.undoDrawing = .init(
             renderer: canvasView.renderer,
-            inMemoryRepository: undoTextureInMemoryRepository
+            inMemoryRepository: inMemoryTextureRepository
         )
     }
 
@@ -73,7 +76,7 @@ final class UndoCoordinator {
     }
     func resetUndo() async {
         guard let undoManager else { return }
-        await undoTextureInMemoryRepository.removeAll()
+        await inMemoryTextureRepository.removeAll()
         undoManager.removeAllActions()
         cancellables.removeAll()
         subscribedUndoObjects.removeAll()
@@ -150,7 +153,7 @@ private extension UndoCoordinator {
         guard
             let undoTextureId = undoObject.undoTextureId,
             let newTexture = try? await MTLTextureCreator.duplicateTexture(
-                texture: undoTextureInMemoryRepository.texture(undoTextureId),
+                texture: inMemoryTextureRepository.texture(undoTextureId),
                 renderer: canvasView.renderer
             )
         else { return }
@@ -184,7 +187,7 @@ private extension UndoCoordinator {
         guard
             let undoTextureId = undoObject.undoTextureId,
             let newTexture = try? await MTLTextureCreator.duplicateTexture(
-                texture: undoTextureInMemoryRepository.texture(undoTextureId),
+                texture: inMemoryTextureRepository.texture(undoTextureId),
                 renderer: canvasView.renderer
             )
         else { return }
@@ -293,7 +296,7 @@ private extension UndoCoordinator {
             .sink { [weak self] result in
                 guard let self, let undoTextureId = result.undoTextureId else { return }
                 Task { @MainActor in
-                    try? await self.undoTextureInMemoryRepository.removeTexture(undoTextureId)
+                    try? await self.inMemoryTextureRepository.removeTexture(undoTextureId)
                 }
             }
             .store(in: &cancellables)

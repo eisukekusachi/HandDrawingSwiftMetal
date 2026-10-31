@@ -6,7 +6,8 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-public protocol UndoTextureInMemoryRepositoryProtocol: Actor {
+/// Repository abstraction that stores `MTLTexture` instances keyed by id.
+public protocol MTLTextureRepositoryProtocol: Actor {
 
     /// Returns the texture associated with the specified id
     func texture(_ id: UUID) -> MTLTexture?

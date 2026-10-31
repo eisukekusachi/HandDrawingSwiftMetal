@@ -191,6 +191,7 @@ struct UndoableTextureLayersStateTests {
     private func subject(
         layers: [TextureLayerModel],
         repository: TextureRepositoryStub = TextureRepositoryStub(),
+        inMemoryRepository: InMemoryTextureRepositoryStub = InMemoryTextureRepositoryStub(),
         registered: UndoRegistration
     ) throws -> Subject {
         let device = try #require(MTLCreateSystemDefaultDevice())
@@ -199,6 +200,7 @@ struct UndoableTextureLayersStateTests {
         subject.setUndo(
             undo: .init(
                 device: device,
+                inMemoryRepository: inMemoryRepository,
                 textureRepository: repository,
                 onRegisterUndo: { registered.pairs.append($0) }
             )

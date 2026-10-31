@@ -1,11 +1,10 @@
 //
-//  Created by Eisuke Kusachi on 2026/09/26.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation
 import ZIPFoundation
 
-/// File-system operations used by LocalFileRepository.
 public protocol FileManaging: Sendable {
     var temporaryDirectory: URL { get }
     var documentsDirectory: URL { get }

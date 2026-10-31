@@ -6,12 +6,12 @@ import Core
 
 final class TextureLayerCanvasViewDependencies {
 
-    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+    let documentsTextureDataRepository: MTLTextureDataRepositoryProtocol
 
     @MainActor
     init(
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
+        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol? = nil
     ) {
-        self.textureLayersDocumentsRepository = textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
+        self.documentsTextureDataRepository = documentsTextureDataRepository ?? DocumentsTextureDataRepository.shared
     }
 }

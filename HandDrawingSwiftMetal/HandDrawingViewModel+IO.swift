@@ -186,7 +186,7 @@ extension HandDrawingViewModel {
 
             do {
                 for layer in textureLayers.layers {
-                    try await dependencies.textureLayersDocumentsRepository.copyTexture(
+                    try await dependencies.documentsTextureDataRepository.copyTexture(
                         id: layer.id,
                         to: workingDirectoryURL
                     )
@@ -233,7 +233,7 @@ extension HandDrawingViewModel {
             }
 
             let restoredLayers: TextureLayersSnapshot?
-            if try await dependencies.textureLayersDocumentsRepository.restoreStorage(
+            if try await DocumentsTextureDataRepository.shared.restoreStorage(
                 from: workingDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
                 textureSize: newTextureLayers.textureSize,
