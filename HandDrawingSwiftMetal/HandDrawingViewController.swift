@@ -41,13 +41,10 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private lazy var undoCoordinator: UndoCoordinator = {
-        .init(
-            canvasView: canvasView,
-            textureLayersState: viewModel.undoableTextureLayers,
-            inMemoryTextureRepository: viewModel.dependencies.inMemoryTextureRepository
-        )
-    }()
+    private let drawingRenderers: [DrawingToolType: any HighPrecisionDrawingRenderer] = [
+        .brush: BrushDrawingRenderer(),
+        .eraser: EraserDrawingRenderer()
+    ]
 
     private lazy var canvasViewDependencies: TextureLayerCanvasViewDependencies = {
         let device = sharedDevice
@@ -73,6 +70,18 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
+    private(set) lazy var textureLayerView: TextureLayerView = {
+        TextureLayerView(
+            textureLayers: viewModel.undoableTextureLayers,
+            onClose: { [weak self] in
+                self?.textureLayerViewModel.hide()
+            },
+            onError: { [weak self] error in
+                self?.viewModel.showError(error)
+            }
+        )
+    }()
+
     private lazy var textureLayerUndoRegister: TextureLayerUndoRegister = {
         .init(
             device: sharedDevice,
@@ -87,22 +96,13 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private(set) lazy var textureLayerView: TextureLayerView = {
-        TextureLayerView(
-            textureLayers: viewModel.undoableTextureLayers,
-            onClose: { [weak self] in
-                self?.textureLayerViewModel.hide()
-            },
-            onError: { [weak self] error in
-                self?.viewModel.showError(error)
-            }
+    private lazy var undoCoordinator: UndoCoordinator = {
+        .init(
+            canvasView: canvasView,
+            textureLayersState: viewModel.undoableTextureLayers,
+            inMemoryTextureRepository: viewModel.dependencies.inMemoryTextureRepository
         )
     }()
-
-    private let drawingRenderers: [DrawingToolType: any HighPrecisionDrawingRenderer] = [
-        .brush: BrushDrawingRenderer(),
-        .eraser: EraserDrawingRenderer()
-    ]
 
     private lazy var colorPaletteEditViewModel = ColorPaletteEditViewModel(
         colorSource: viewModel.brushPalette,
@@ -201,6 +201,7 @@ class HandDrawingViewController: UIViewController {
 }
 
 extension HandDrawingViewController {
+
     func initializeCanvas(_ textureSize: CGSize) async throws {
         try await canvasView.initializeCanvas(textureSize)
 
