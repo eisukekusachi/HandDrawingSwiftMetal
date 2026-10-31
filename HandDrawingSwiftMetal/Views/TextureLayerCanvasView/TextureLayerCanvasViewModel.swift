@@ -86,19 +86,19 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     ) async throws {
         guard let textureLayers else { return }
 
-        let selection: TextureLayerSelection = .init(
+        let unselectedLayers = UnselectedTextureLayers(
             textureLayers: textureLayers
         )
 
         try await canvasRenderer.renderLayersIntoTextures(
-            layers: selection.topLayers,
+            layers: unselectedLayers.topLayers,
             textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedTopTexture,
             commandBuffer: commandBuffer
         )
 
         try await canvasRenderer.renderLayersIntoTextures(
-            layers: selection.bottomLayers,
+            layers: unselectedLayers.bottomLayers,
             textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedBottomTexture,
             commandBuffer: commandBuffer
@@ -122,7 +122,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
         canvasRenderer.renderCanvas(
             unselectedTopTexture: unselectedTopTexture,
-            currentTextureLayer: .init(
+            selectedTextureLayer: .init(
                 isVisible: selectedLayer.isVisible,
                 alpha: selectedLayer.alpha,
                 texture: texture

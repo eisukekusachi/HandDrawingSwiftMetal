@@ -9,7 +9,7 @@ import TextureLayerView
 @testable import HandDrawingSwiftMetal
 
 @MainActor
-struct TextureLayerSelectionTests {
+struct UnselectedTextureLayersTests {
 
     private func layers(_ count: Int) -> [TextureLayerItem] {
         (0..<count).map { _ in
@@ -22,7 +22,7 @@ struct TextureLayerSelectionTests {
 
         let layers = layers(5)
 
-        let subject: TextureLayerSelection = .init(
+        let subject: UnselectedTextureLayers = .init(
             textureLayers: .init(
                 selectedIndex: 0,
                 layers: layers
@@ -38,7 +38,7 @@ struct TextureLayerSelectionTests {
 
         let layers = layers(5)
 
-        let subject: TextureLayerSelection = .init(
+        let subject: UnselectedTextureLayers = .init(
             textureLayers: .init(
                 selectedIndex: 2,
                 layers: layers
@@ -54,7 +54,7 @@ struct TextureLayerSelectionTests {
 
         let layers = layers(5)
 
-        let subject: TextureLayerSelection = .init(
+        let subject: UnselectedTextureLayers = .init(
             textureLayers: .init(
                 selectedIndex: 4,
                 layers: layers
@@ -75,7 +75,7 @@ struct TextureLayerSelectionTests {
             TextureLayerItem(id: UUID(), alpha: 255, isVisible: false)
         ]
 
-        let subject = TextureLayerSelection(
+        let subject = UnselectedTextureLayers(
             textureLayers: .init(
                 selectedIndex: 2,
                 layers: layers
@@ -89,7 +89,7 @@ struct TextureLayerSelectionTests {
     @Test
     func `Verify that the selected layer is excluded from topLayers and bottomLayers`() {
         let layers = layers(3)
-        let subject = TextureLayerSelection(
+        let subject = UnselectedTextureLayers(
             textureLayers: .init(
                 selectedIndex: 1,
                 layers: layers
