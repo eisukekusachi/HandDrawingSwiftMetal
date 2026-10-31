@@ -92,7 +92,7 @@
 		D4C4C0042F94000100C55A4C /* TextureLayerCanvasRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1042F94000100C55A4C /* TextureLayerCanvasRenderer.swift */; };
 		D4C4C0052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift */; };
 		D4C4C0062F94000100C55A4C /* SelectedTextureLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1062F94000100C55A4C /* SelectedTextureLayer.swift */; };
-		D4C4C0072F94000100C55A4C /* TextureLayerCanvasProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1072F94000100C55A4C /* TextureLayerCanvasProtocol.swift */; };
+		D4C4C0072F94000100C55A4C /* TextureLayersCompositingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1072F94000100C55A4C /* TextureLayersCompositingProtocol.swift */; };
 		D4C4C0082F94000100C55A4C /* TextureLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1082F94000100C55A4C /* TextureLayers.swift */; };
 		D4C4C0092F94000100C55A4C /* UnselectedTextureLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1092F94000100C55A4C /* UnselectedTextureLayers.swift */; };
 		D4C4C00A2F94000100C55A4C /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C10A2F94000100C55A4C /* Debouncer.swift */; };
@@ -223,7 +223,7 @@
 		D4C4C1042F94000100C55A4C /* TextureLayerCanvasRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasRenderer.swift; sourceTree = "<group>"; };
 		D4C4C1052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasViewDependencies.swift; sourceTree = "<group>"; };
 		D4C4C1062F94000100C55A4C /* SelectedTextureLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTextureLayer.swift; sourceTree = "<group>"; };
-		D4C4C1072F94000100C55A4C /* TextureLayerCanvasProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasProtocol.swift; sourceTree = "<group>"; };
+		D4C4C1072F94000100C55A4C /* TextureLayersCompositingProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersCompositingProtocol.swift; sourceTree = "<group>"; };
 		D4C4C1082F94000100C55A4C /* TextureLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayers.swift; sourceTree = "<group>"; };
 		D4C4C1092F94000100C55A4C /* UnselectedTextureLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnselectedTextureLayers.swift; sourceTree = "<group>"; };
 		D4C4C10A2F94000100C55A4C /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
@@ -357,6 +357,15 @@
 				D48A7DD029DAB81800D235B1 /* Toast.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		D43E75DF3095F82F00272262 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */,
+				D4C4C1072F94000100C55A4C /* TextureLayersCompositingProtocol.swift */,
+			);
+			path = Protocols;
 			sourceTree = "<group>";
 		};
 		D4732C7A2FA0EE4E00119C55 /* Models */ = {
@@ -527,10 +536,10 @@
 		D4C4C2012F94000100C55A4C /* TextureLayerCanvasView */ = {
 			isa = PBXGroup;
 			children = (
+				D43E75DF3095F82F00272262 /* Protocols */,
 				D4C4C2032F94000100C55A4C /* Layers */,
 				D4C4C1052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift */,
 				D4C4C1042F94000100C55A4C /* TextureLayerCanvasRenderer.swift */,
-				D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */,
 				D4C4C1022F94000100C55A4C /* TextureLayerCanvasView.swift */,
 				D4C4C1032F94000100C55A4C /* TextureLayerCanvasViewModel.swift */,
 			);
@@ -540,7 +549,6 @@
 		D4C4C2032F94000100C55A4C /* Layers */ = {
 			isa = PBXGroup;
 			children = (
-				D4C4C1072F94000100C55A4C /* TextureLayerCanvasProtocol.swift */,
 				D4C4C1062F94000100C55A4C /* SelectedTextureLayer.swift */,
 				D4C4C1092F94000100C55A4C /* UnselectedTextureLayers.swift */,
 				D4C4C1082F94000100C55A4C /* TextureLayers.swift */,
@@ -899,7 +907,7 @@
 				D4C4C0042F94000100C55A4C /* TextureLayerCanvasRenderer.swift in Sources */,
 				D4C4C0052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift in Sources */,
 				D4C4C0062F94000100C55A4C /* SelectedTextureLayer.swift in Sources */,
-				D4C4C0072F94000100C55A4C /* TextureLayerCanvasProtocol.swift in Sources */,
+				D4C4C0072F94000100C55A4C /* TextureLayersCompositingProtocol.swift in Sources */,
 				D4C4C0082F94000100C55A4C /* TextureLayers.swift in Sources */,
 				D4C4C0092F94000100C55A4C /* UnselectedTextureLayers.swift in Sources */,
 				D4C4C00A2F94000100C55A4C /* Debouncer.swift in Sources */,
