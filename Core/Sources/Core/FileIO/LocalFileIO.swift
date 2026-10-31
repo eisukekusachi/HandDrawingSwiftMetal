@@ -1,21 +1,21 @@
 //
-//  Created by Eisuke Kusachi on 2026/09/26.
+//  Created by Eisuke Kusachi on 2026/10/31.
 //
 
 import Foundation
 
-/// Manages temporary working-directory file operations for Documents zip I/O.
+/// Temporary working-directory file operations for zip I/O.
 ///
 /// Each session uses a unique subdirectory under `workingDirectoryURL`,
 /// so sessions can run in parallel without sharing one folder.
-public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked Sendable {
+struct LocalFileIO: Sendable {
 
-    public let workingDirectoryURL: URL
+    let workingDirectoryURL: URL
 
     private let fileManager: FileManaging
     private let zipHandler: ZipHandling
 
-    public init(
+    init(
         workingDirectoryURL: URL,
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil
@@ -25,7 +25,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)
     }
 
-    public func createSessionDirectory() throws -> URL {
+    func createSessionDirectory() throws -> URL {
         let sessionURL = workingDirectoryURL.appendingPathComponent(UUID().uuidString)
         try fileManager.createDirectory(
             at: sessionURL,
@@ -34,7 +34,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         return sessionURL
     }
 
-    public func zipFile(from directoryURL: URL, to zipFileURL: URL) throws {
+    func zipFile(from directoryURL: URL, to zipFileURL: URL) throws {
         let fileURLs = try fileManager.contentsOfDirectory(
             at: directoryURL,
             includingPropertiesForKeys: nil
@@ -45,7 +45,7 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         try renameFile(at: tempZipURL, to: zipFileURL)
     }
 
-    public func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws {
+    func unzipFile(from zipFileURL: URL, to directoryURL: URL) async throws {
         try await zipHandler.unzip(
             sourceURL: zipFileURL,
             to: directoryURL,
@@ -53,11 +53,11 @@ public final class LocalFileRepository: LocalFileRepositoryProtocol, @unchecked 
         )
     }
 
-    public func removeFile(at url: URL) throws {
+    func removeFile(at url: URL) throws {
         try fileManager.removeItem(at: url)
     }
 
-    public func renameFile(at sourceURL: URL, to destinationURL: URL) throws {
+    func renameFile(at sourceURL: URL, to destinationURL: URL) throws {
         if fileManager.fileExists(atPath: destinationURL.path),
             // fileExists does not distinguish letter case, so skip remove when
             // only the case differs; otherwise the source file would be deleted.

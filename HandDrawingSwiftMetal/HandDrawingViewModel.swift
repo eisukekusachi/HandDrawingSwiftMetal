@@ -110,8 +110,7 @@ final class HandDrawingViewModel: ObservableObject {
         self.thumbnailFileName = thumbnailFileName
 
         self.documentsDataStore = DocumentsDataStore(
-            fileManager: dependencies.fileManager,
-            localFileRepository: dependencies.localFileRepository
+            fileManager: dependencies.fileManager
         )
 
         self.brushPalette = .init()

@@ -5,7 +5,6 @@
 import Foundation
 import ZIPFoundation
 
-/// Zip / unzip used by LocalFileRepository. Swap for a mock in tests.
 public protocol ZipHandling: Sendable {
     func zip(sourceURLs: [URL], to zipFileURL: URL) throws
     func unzip(sourceURL: URL, to destinationURL: URL, priority: TaskPriority?) async throws

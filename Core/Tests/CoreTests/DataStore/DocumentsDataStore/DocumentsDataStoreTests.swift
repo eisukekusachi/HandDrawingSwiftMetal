@@ -12,15 +12,12 @@ struct DocumentsDataStoreTests {
     private typealias Subject = DocumentsDataStore
 
     @Test
-    func `init uses TmpFolder when localFileRepository is nil`() {
+    func `init uses TmpFolder under the temporary directory`() {
         let fileManager = MockFileManager()
-        let subject = Subject(
-            fileManager: fileManager,
-            localFileRepository: nil
-        )
+        let subject = Subject(fileManager: fileManager)
 
         #expect(
-            subject.localFileRepository.workingDirectoryURL ==
+            subject.localFileIO.workingDirectoryURL ==
             fileManager.temporaryDirectory.appendingPathComponent("TmpFolder")
         )
     }
@@ -30,10 +27,7 @@ struct DocumentsDataStoreTests {
         @Test
         func `zipFileURL appends suffix when non-empty`() {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
 
             let url = subject.zipFileURL(projectName: "MyProject", suffix: "zip")
 
@@ -43,10 +37,7 @@ struct DocumentsDataStoreTests {
         @Test
         func `zipFileURL omits suffix when empty`() {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
 
             let url = subject.zipFileURL(projectName: "MyProject", suffix: "")
 
@@ -60,10 +51,7 @@ struct DocumentsDataStoreTests {
         @Test
         func `uniqueZipFileURL appends numeric suffix when names exist`() throws {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
             fileManager.setFileExists(
                 true,
                 atPath: subject.zipFileURL(projectName: "fileName", suffix: "zip").path
@@ -85,10 +73,7 @@ struct DocumentsDataStoreTests {
         @Test
         func `uniqueZipFileURL keeps excludeURL even when it already exists`() throws {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
             let excludeURL = subject.zipFileURL(projectName: "fileName", suffix: "zip")
             fileManager.setFileExists(true, atPath: excludeURL.path)
 
@@ -104,10 +89,7 @@ struct DocumentsDataStoreTests {
         @Test
         func `uniqueZipFileURL treats excludeURL as same when only letter case differs`() throws {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
             let excludeURL = subject.zipFileURL(projectName: "fileName", suffix: "zip")
             let differentlyCasedURL = subject.zipFileURL(projectName: "FileName", suffix: "zip")
             fileManager.setFileExists(true, atPath: excludeURL.path)
@@ -130,10 +112,7 @@ struct DocumentsDataStoreTests {
         )
         func `uniqueZipFileURL throws on invalid fileName`(name: String) {
             let fileManager = MockFileManager()
-            let subject = Subject(
-                fileManager: fileManager,
-                localFileRepository: MockLocalFileRepository()
-            )
+            let subject = Subject(fileManager: fileManager)
 
             #expect(throws: Error.self) {
                 _ = try subject.uniqueZipFileURL(
