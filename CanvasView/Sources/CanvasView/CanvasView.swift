@@ -79,26 +79,33 @@ open class CanvasView: UIView, CanvasUpdating {
 
     public init(
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration = .init()
+        configuration: CanvasConfiguration = .init(),
+        renderer: MTLRendering? = nil
     ) {
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal is not supported on this device.")
         }
-        self.sharedDevice = device ?? defaultDevice
-        guard let commandQueue = sharedDevice.makeCommandQueue() else {
-            fatalError("Failed to create command queue.")
+        if let renderer {
+            self.renderer = renderer
+            self.sharedDevice = renderer.device
+            self.sharedCommandQueue = renderer.commandQueue
+        } else {
+            self.sharedDevice = device ?? defaultDevice
+            guard let commandQueue = sharedDevice.makeCommandQueue() else {
+                fatalError("Failed to create command queue.")
+            }
+            self.sharedCommandQueue = commandQueue
+            self.renderer = MTLRenderer(
+                device: sharedDevice,
+                commandQueue: commandQueue
+            )
         }
-        self.sharedCommandQueue = commandQueue
-        self.renderer = MTLRenderer(
-            device: sharedDevice,
-            commandQueue: commandQueue
-        )
         self.displayView = .init(
             device: sharedDevice,
-            commandQueue: commandQueue
+            commandQueue: sharedCommandQueue
         )
         self.canvasRenderer = .init(
-            renderer: renderer,
+            renderer: self.renderer,
             displayView: displayView,
             backgroundColor: configuration.backgroundColor,
             baseBackgroundColor: configuration.baseBackgroundColor
