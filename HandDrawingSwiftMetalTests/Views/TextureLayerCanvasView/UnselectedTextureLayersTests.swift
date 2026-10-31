@@ -23,10 +23,8 @@ struct UnselectedTextureLayersTests {
         let layers = layers(5)
 
         let subject: UnselectedTextureLayers = .init(
-            textureLayers: .init(
-                selectedIndex: 0,
-                layers: layers
-            )
+            layers: layers,
+            selectedIndex: 0
         )
 
         #expect(subject.bottomLayers.map(\.id) == [])
@@ -39,10 +37,8 @@ struct UnselectedTextureLayersTests {
         let layers = layers(5)
 
         let subject: UnselectedTextureLayers = .init(
-            textureLayers: .init(
-                selectedIndex: 2,
-                layers: layers
-            )
+            layers: layers,
+            selectedIndex: 2
         )
 
         #expect(subject.bottomLayers.map(\.id) == [layers[0].id, layers[1].id])
@@ -55,10 +51,8 @@ struct UnselectedTextureLayersTests {
         let layers = layers(5)
 
         let subject: UnselectedTextureLayers = .init(
-            textureLayers: .init(
-                selectedIndex: 4,
-                layers: layers
-            )
+            layers: layers,
+            selectedIndex: 4
         )
 
         #expect(subject.bottomLayers.map(\.id) == [layers[0].id, layers[1].id, layers[2].id, layers[3].id])
@@ -76,10 +70,8 @@ struct UnselectedTextureLayersTests {
         ]
 
         let subject = UnselectedTextureLayers(
-            textureLayers: .init(
-                selectedIndex: 2,
-                layers: layers
-            )
+            layers: layers,
+            selectedIndex: 2
         )
 
         #expect(subject.bottomLayers.map(\.id) == [layers[0].id])
@@ -90,10 +82,8 @@ struct UnselectedTextureLayersTests {
     func `Verify that the selected layer is excluded from topLayers and bottomLayers`() {
         let layers = layers(3)
         let subject = UnselectedTextureLayers(
-            textureLayers: .init(
-                selectedIndex: 1,
-                layers: layers
-            )
+            layers: layers,
+            selectedIndex: 1
         )
 
         let selected = layers[1].id
