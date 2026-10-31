@@ -49,25 +49,43 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private(set) lazy var canvasView: TextureLayerCanvasView = {
-        TextureLayerCanvasView(
-            textureLayer: viewModel.undoableTextureLayers,
-            device: sharedDevice,
-            configuration: configuration.canvasConfiguration
+    private lazy var canvasViewDependencies: TextureLayerCanvasViewDependencies = {
+        let device = sharedDevice
+        guard let commandQueue = device.makeCommandQueue() else {
+            fatalError("Failed to create command queue.")
+        }
+        let renderer = MTLRenderer(device: device, commandQueue: commandQueue)
+        return .init(
+            textureLayers: viewModel.undoableTextureLayers,
+            documentsTextureDataRepository: viewModel.dependencies.documentsTextureDataRepository,
+            renderer: renderer
         )
     }()
 
-    private lazy var textureLayerUndo = TextureLayerUndoRegistrar(
-        device: sharedDevice,
-        inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
-        textureRepository: viewModel.dependencies.documentsTextureDataRepository,
-        onRegisterUndo: { [weak self] undoObjectPair in
-            self?.undoCoordinator.registerUndo(undoObjectPair)
-        },
-        showError: { [weak self] error in
-            self?.viewModel.showError(error)
-        }
-    )
+    private(set) lazy var canvasView: TextureLayerCanvasView = {
+        .init(
+            dependencies: canvasViewDependencies,
+            device: sharedDevice,
+            configuration: configuration.canvasConfiguration,
+            onUpdateLayerThumbnail: { [weak viewModel] id, thumbnail in
+                viewModel?.undoableTextureLayers.updateLayerThumbnail(id, thumbnail: thumbnail)
+            }
+        )
+    }()
+
+    private lazy var textureLayerUndoRegistrar: TextureLayerUndoRegistrar = {
+        .init(
+            device: sharedDevice,
+            inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
+            textureRepository: viewModel.dependencies.documentsTextureDataRepository,
+            onRegisterUndo: { [weak self] undoObjectPair in
+                self?.undoCoordinator.registerUndo(undoObjectPair)
+            },
+            showError: { [weak self] error in
+                self?.viewModel.showError(error)
+            }
+        )
+    }()
 
     private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
@@ -123,7 +141,7 @@ class HandDrawingViewController: UIViewController {
         viewModel.onViewDidLoad(
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue,
-            undo: textureLayerUndo,
+            undo: textureLayerUndoRegistrar,
             canvasView: canvasView
         )
         layoutViews()
