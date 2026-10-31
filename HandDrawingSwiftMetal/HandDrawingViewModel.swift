@@ -29,7 +29,7 @@ struct InitializeCanvasRequest: Equatable {
 final class HandDrawingViewModel: ObservableObject {
 
     var textureSize: CGSize {
-        textureLayers.textureSize
+        undoableTextureLayers.textureSize
     }
 
     let project: ProjectData = .init()
@@ -37,9 +37,7 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPalette: BrushPalette
     let eraserPalette: EraserPalette
 
-    let undoableTextureLayers: UndoableTextureLayersState
-
-    let textureLayers: any TextureLayersStateProtocol
+    let undoableTextureLayers: TextureLayersUndoableState
 
     let fileList: FileList
     let thumbnailFileName: String
@@ -116,11 +114,10 @@ final class HandDrawingViewModel: ObservableObject {
         self.brushPalette = .init()
         self.eraserPalette = .init()
 
-        let undoableTextureLayers = UndoableTextureLayersState(
+        let undoableTextureLayers = TextureLayersUndoableState(
             repository: dependencies.documentsTextureDataRepository
         )
         self.undoableTextureLayers = undoableTextureLayers
-        self.textureLayers = undoableTextureLayers
         self.textureLayerStorage = .init(
             textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
@@ -158,10 +155,10 @@ final class HandDrawingViewModel: ObservableObject {
     func onViewDidLoad(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        undo: UndoTextureLayerRegistrar,
+        undo: TextureLayerUndoRegistrar,
         canvasView: TextureLayerCanvasView
     ) {
-        textureLayers.setup(
+        undoableTextureLayers.setup(
             device: device,
             commandQueue: commandQueue,
             canvasView: canvasView
@@ -190,7 +187,7 @@ final class HandDrawingViewModel: ObservableObject {
                     textureSize: restoredTextureLayerDataFromCoreData.textureSize,
                     device: device
                 )
-                textureLayers.setLayers(restoredTextureLayerDataFromCoreData)
+                undoableTextureLayers.setLayers(restoredTextureLayerDataFromCoreData)
                 return restoredTextureLayerDataFromCoreData.textureSize
             } catch {
                 let textureSize = await installBlankLayerOrAbort(
@@ -227,7 +224,7 @@ final class HandDrawingViewModel: ObservableObject {
             device: device,
             commandQueue: commandQueue
         )
-        textureLayers.setLayers(
+        undoableTextureLayers.setLayers(
             [layer],
             textureSize: textureSize
         )
