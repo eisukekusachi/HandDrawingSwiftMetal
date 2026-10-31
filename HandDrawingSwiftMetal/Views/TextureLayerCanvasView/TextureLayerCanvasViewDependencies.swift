@@ -2,16 +2,29 @@
 //  Created by Eisuke Kusachi
 //
 
+import CanvasView
 import Core
 
-final class TextureLayerCanvasViewDependencies {
+/// Dependencies injected into `TextureLayerCanvasView` for layer compositing and texture access.
+@MainActor
+public final class TextureLayerCanvasViewDependencies {
 
-    let documentsTextureDataRepository: MTLTextureDataRepositoryProtocol
+    /// Layer list and selection used when compositing the canvas.
+    public let textureLayers: TextureLayersCompositingProtocol
 
-    @MainActor
-    init(
-        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol? = nil
+    /// Repository for layer texture data on disk.
+    public let documentsTextureDataRepository: MTLTextureDataRepositoryProtocol
+
+    /// Metal rendering used for compositing and drawing.
+    public let renderer: MTLRendering
+
+    public init(
+        textureLayers: TextureLayersCompositingProtocol,
+        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol,
+        renderer: MTLRendering
     ) {
-        self.documentsTextureDataRepository = documentsTextureDataRepository ?? DocumentsTextureDataRepository.shared
+        self.textureLayers = textureLayers
+        self.documentsTextureDataRepository = documentsTextureDataRepository
+        self.renderer = renderer
     }
 }
