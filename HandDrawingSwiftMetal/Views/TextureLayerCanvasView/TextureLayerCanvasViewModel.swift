@@ -5,6 +5,7 @@
 import CanvasView
 import Combine
 import Core
+import TextureLayerView
 
 @preconcurrency import MetalKit
 
@@ -116,7 +117,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         guard
             let destinationTexture,
             let commandBuffer,
-            let selectedLayer = textureLayer.selectedLayerSnapshot
+            let selectedLayer = textureLayer.selectedLayerItem
         else { return }
 
         canvasRenderer.renderCanvas(

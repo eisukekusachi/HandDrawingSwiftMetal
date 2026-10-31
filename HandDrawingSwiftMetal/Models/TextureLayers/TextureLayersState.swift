@@ -23,19 +23,9 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
         return layerModels.firstIndex(where: { $0.id == selectedLayerId })
     }
 
-    var layerSnapshots: [CanvasLayerSnapshot] {
-        layerModels.map {
-            .init(id: $0.id, alpha: $0.alpha, isVisible: $0.isVisible)
-        }
-    }
-
-    var selectedLayerSnapshot: CanvasLayerSnapshot? {
-        guard let selectedLayer else { return nil }
-        return .init(
-            id: selectedLayer.id,
-            alpha: selectedLayer.alpha,
-            isVisible: selectedLayer.isVisible
-        )
+    var selectedLayerItem: TextureLayerItem? {
+        guard let selectedLayerId else { return nil }
+        return layers.first { $0.id == selectedLayerId }
     }
 
     /// Snapshot of the current layers for persistence

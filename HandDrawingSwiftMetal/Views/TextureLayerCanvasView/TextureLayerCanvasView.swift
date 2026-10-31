@@ -4,6 +4,7 @@
 
 import CanvasView
 import Combine
+import TextureLayerView
 
 @preconcurrency import MetalKit
 
@@ -62,7 +63,7 @@ import Combine
     private func completeDrawing() {
         guard
             let texture = currentTexture,
-            let layerId = textureLayer.selectedLayerSnapshot?.id
+            let layerId = textureLayer.selectedLayerItem?.id
         else { return }
 
         let device = renderer.device
@@ -91,7 +92,7 @@ import Combine
 
     public func updateFullCanvas() async throws {
         guard
-            let selectedLayer = textureLayer.selectedLayerSnapshot,
+            let selectedLayer = textureLayer.selectedLayerItem,
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             ),

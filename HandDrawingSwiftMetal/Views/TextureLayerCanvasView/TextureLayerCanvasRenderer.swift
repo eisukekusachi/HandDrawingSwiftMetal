@@ -4,6 +4,7 @@
 
 import CanvasView
 import Core
+import TextureLayerView
 
 @preconcurrency import MetalKit
 
@@ -21,7 +22,7 @@ final class TextureLayerCanvasRenderer {
     }
 
     func renderLayersIntoTextures(
-        layers: [CanvasLayerSnapshot],
+        layers: [TextureLayerItem],
         textureRepository: MTLTextureDataRepositoryProtocol,
         on destinationTexture: MTLTexture?,
         commandBuffer: MTLCommandBuffer

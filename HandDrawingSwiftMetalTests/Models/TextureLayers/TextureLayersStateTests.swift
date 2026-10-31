@@ -80,7 +80,7 @@ struct TextureLayersStateTests {
 
         #expect(subject.layers.map(\.id) == [layer0.id, layer1.id, layer2.id])
         #expect(subject.selectedLayer?.id == layer2.id)
-        #expect(subject.selectedLayerSnapshot?.id == layer2.id)
+        #expect(subject.selectedLayerItem?.id == layer2.id)
         #expect(subject.snapshot.layerIndex == 2)
         #expect(subject.snapshot.textureSize == textureSize)
     }
@@ -193,8 +193,8 @@ struct TextureLayersStateTests {
         #expect(subject.selectedLayer?.id == layer1.id)
         #expect(subject.layer(layer1.id)?.isVisible == false)
         #expect(subject.layer(layer1.id)?.alpha == 40)
-        #expect(subject.selectedLayerSnapshot?.alpha == 40)
-        #expect(subject.layerSnapshots.map(\.id) == [layer0.id, layer1.id])
+        #expect(subject.selectedLayerItem?.alpha == 40)
+        #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
     }
 
     @Test
