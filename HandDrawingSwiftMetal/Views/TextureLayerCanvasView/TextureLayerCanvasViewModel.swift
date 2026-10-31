@@ -13,10 +13,8 @@ import TextureLayerView
 final class TextureLayerCanvasViewModel: ObservableObject {
 
     var textureSize: CGSize {
-        textureLayer.textureSize
+        dependencies.textureLayers.textureSize
     }
-
-    let textureLayer: TextureLayersCompositingProtocol
 
     let dependencies: TextureLayerCanvasViewDependencies
 
@@ -28,20 +26,14 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var renderer: MTLRendering
-
     private lazy var canvasRenderer: TextureLayerCanvasRenderer = {
-        .init(renderer: renderer)
+        .init(renderer: dependencies.renderer)
     }()
 
     init(
-        textureLayer: TextureLayersCompositingProtocol,
-        renderer: MTLRendering,
-        dependencies: TextureLayerCanvasViewDependencies? = nil
+        dependencies: TextureLayerCanvasViewDependencies
     ) {
-        self.textureLayer = textureLayer
-        self.dependencies = dependencies ?? .init()
-        self.renderer = renderer
+        self.dependencies = dependencies
     }
 
     func initializeTextures(_ textureSize: CGSize) throws {
@@ -62,8 +54,8 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         }
 
         guard
-            let unselectedBottomTexture = renderer.makeTexture(textureSize),
-            let unselectedTopTexture = renderer.makeTexture(textureSize)
+            let unselectedBottomTexture = dependencies.renderer.makeTexture(textureSize),
+            let unselectedTopTexture = dependencies.renderer.makeTexture(textureSize)
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -83,7 +75,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     func updateUnselectedTextures(
         with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let unselectedLayers = UnselectedTextureLayers(source: textureLayer) else {
+        guard let unselectedLayers = UnselectedTextureLayers(source: dependencies.textureLayers) else {
             return
         }
 
@@ -102,10 +94,6 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         )
     }
 
-    func updateLayerThumbnail(_ id: UUID, thumbnail: UIImage?) {
-        textureLayer.updateLayerThumbnail(id, thumbnail: thumbnail)
-    }
-
     func updateCanvasTexture(
         _ texture: MTLTexture?,
         on destinationTexture: MTLTexture?,
@@ -114,7 +102,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         guard
             let destinationTexture,
             let commandBuffer,
-            let selectedLayer = textureLayer.selectedLayer
+            let selectedLayer = dependencies.textureLayers.selectedLayer
         else { return }
 
         canvasRenderer.renderCanvas(
@@ -139,7 +127,7 @@ extension TextureLayerCanvasViewModel {
         try await dependencies.documentsTextureDataRepository.duplicatedTexture(
             id,
             textureSize: textureSize,
-            device: renderer.device
+            device: dependencies.renderer.device
         )
     }
 
@@ -149,7 +137,7 @@ extension TextureLayerCanvasViewModel {
         try await dependencies.documentsTextureDataRepository.duplicatedTextures(
             ids,
             textureSize: textureSize,
-            device: renderer.device
+            device: dependencies.renderer.device
         )
     }
 
