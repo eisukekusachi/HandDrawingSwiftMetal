@@ -528,23 +528,15 @@
 		D4C4C2012F94000100C55A4C /* TextureLayerCanvasView */ = {
 			isa = PBXGroup;
 			children = (
-				D43E75DF3095F82F00272262 /* Protocols */,
 				D4C4C2032F94000100C55A4C /* Layers */,
+				D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */,
 				D4C4C1052F94000100C55A4C /* TextureLayerCanvasViewDependencies.swift */,
 				D4C4C1042F94000100C55A4C /* TextureLayerCanvasRenderer.swift */,
 				D4C4C1022F94000100C55A4C /* TextureLayerCanvasView.swift */,
 				D4C4C1032F94000100C55A4C /* TextureLayerCanvasViewModel.swift */,
-			);
-			path = TextureLayerCanvasView;
-			sourceTree = "<group>";
-		};
-		D43E75DF3095F82F00272262 /* Protocols */ = {
-			isa = PBXGroup;
-			children = (
-				D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */,
 				D4C4C1072F94000100C55A4C /* TextureLayersCompositingProtocol.swift */,
 			);
-			path = Protocols;
+			path = TextureLayerCanvasView;
 			sourceTree = "<group>";
 		};
 		D4C4C2032F94000100C55A4C /* Layers */ = {
