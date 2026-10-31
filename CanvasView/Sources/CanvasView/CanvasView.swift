@@ -86,19 +86,19 @@ open class CanvasView: UIView, CanvasUpdating {
             fatalError("Metal is not supported on this device.")
         }
         if let renderer {
-            self.renderer = renderer
             self.sharedDevice = renderer.device
+            self.renderer = renderer
             self.sharedCommandQueue = renderer.commandQueue
         } else {
             self.sharedDevice = device ?? defaultDevice
             guard let commandQueue = sharedDevice.makeCommandQueue() else {
                 fatalError("Failed to create command queue.")
             }
-            self.sharedCommandQueue = commandQueue
             self.renderer = MTLRenderer(
                 device: sharedDevice,
                 commandQueue: commandQueue
             )
+            self.sharedCommandQueue = commandQueue
         }
         self.displayView = .init(
             device: sharedDevice,
