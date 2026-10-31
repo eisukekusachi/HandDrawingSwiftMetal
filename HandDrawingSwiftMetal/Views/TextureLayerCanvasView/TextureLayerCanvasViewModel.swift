@@ -5,6 +5,7 @@
 import CanvasView
 import Combine
 import Core
+import TextureLayerView
 
 @preconcurrency import MetalKit
 
@@ -15,7 +16,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         textureLayer.textureSize
     }
 
-    let textureLayer: TextureLayerCanvasProtocol
+    let textureLayer: TextureLayersCompositingProtocol
 
     let dependencies: TextureLayerCanvasViewDependencies
 
@@ -34,7 +35,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }()
 
     init(
-        textureLayer: TextureLayerCanvasProtocol,
+        textureLayer: TextureLayersCompositingProtocol,
         renderer: MTLRendering,
         dependencies: TextureLayerCanvasViewDependencies? = nil
     ) {
@@ -80,32 +81,25 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }
 
     func updateUnselectedTextures(
-        textureLayers: TextureLayers?,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let textureLayers else { return }
-
-        let selection: TextureLayerSelection = .init(
-            textureLayers: textureLayers
-        )
+        guard let unselectedLayers = UnselectedTextureLayers(source: textureLayer) else {
+            return
+        }
 
         try await canvasRenderer.renderLayersIntoTextures(
-            layers: selection.topLayers,
+            layers: unselectedLayers.topLayers,
             textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedTopTexture,
             commandBuffer: commandBuffer
         )
 
         try await canvasRenderer.renderLayersIntoTextures(
-            layers: selection.bottomLayers,
+            layers: unselectedLayers.bottomLayers,
             textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedBottomTexture,
             commandBuffer: commandBuffer
         )
-    }
-
-    func updateLayerThumbnail(_ id: UUID, thumbnail: UIImage?) {
-        textureLayer.updateLayerThumbnail(id, thumbnail: thumbnail)
     }
 
     func updateCanvasTexture(
@@ -116,12 +110,12 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         guard
             let destinationTexture,
             let commandBuffer,
-            let selectedLayer = textureLayer.selectedLayerSnapshot
+            let selectedLayer = textureLayer.selectedLayer
         else { return }
 
         canvasRenderer.renderCanvas(
             unselectedTopTexture: unselectedTopTexture,
-            currentTextureLayer: .init(
+            selectedTextureLayer: .init(
                 isVisible: selectedLayer.isVisible,
                 alpha: selectedLayer.alpha,
                 texture: texture

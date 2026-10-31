@@ -2,20 +2,22 @@
 //  Created by Eisuke Kusachi
 //
 
+import TextureLayerView
+
 @MainActor
 struct TextureLayers {
 
     let selectedIndex: Int
-    let layers: [CanvasLayerSnapshot]
+    let layers: [TextureLayerItem]
 }
 
 extension TextureLayers {
 
-    init?(source: TextureLayerCanvasProtocol) {
+    init?(source: TextureLayersCompositingProtocol) {
         guard
             let selectedIndex = source.selectedLayerIndex
         else { return nil }
         self.selectedIndex = selectedIndex
-        self.layers = source.layerSnapshots
+        self.layers = source.layers
     }
 }

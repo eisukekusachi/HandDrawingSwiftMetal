@@ -51,13 +51,13 @@ class HandDrawingViewController: UIViewController {
 
     private(set) lazy var canvasView: TextureLayerCanvasView = {
         TextureLayerCanvasView(
-            textureLayer: viewModel.textureLayers,
+            textureLayer: viewModel.undoableTextureLayers,
             device: sharedDevice,
             configuration: configuration.canvasConfiguration
         )
     }()
 
-    private lazy var textureLayerUndo = UndoTextureLayerRegistrar(
+    private lazy var textureLayerUndo = TextureLayerUndoRegistrar(
         device: sharedDevice,
         inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
         textureRepository: viewModel.dependencies.documentsTextureDataRepository,
@@ -71,7 +71,7 @@ class HandDrawingViewController: UIViewController {
 
     private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
-            textureLayers: viewModel.textureLayers,
+            textureLayers: viewModel.undoableTextureLayers,
             onClose: { [weak self] in
                 self?.textureLayerViewModel.hide()
             },
