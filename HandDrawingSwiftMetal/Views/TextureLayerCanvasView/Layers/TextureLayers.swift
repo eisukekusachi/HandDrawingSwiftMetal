@@ -13,7 +13,7 @@ struct TextureLayers {
 
 extension TextureLayers {
 
-    init?(source: TextureLayerCanvasProtocol) {
+    init?(source: TextureLayersCompositingProtocol) {
         guard
             let selectedIndex = source.selectedLayerIndex
         else { return nil }
