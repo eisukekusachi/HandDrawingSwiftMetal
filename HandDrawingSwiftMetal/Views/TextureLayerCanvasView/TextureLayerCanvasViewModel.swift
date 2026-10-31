@@ -16,7 +16,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         textureLayer.textureSize
     }
 
-    let textureLayer: TextureLayerCanvasProtocol
+    let textureLayer: TextureLayersCompositingProtocol
 
     let dependencies: TextureLayerCanvasViewDependencies
 
@@ -35,7 +35,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }()
 
     init(
-        textureLayer: TextureLayerCanvasProtocol,
+        textureLayer: TextureLayersCompositingProtocol,
         renderer: MTLRendering,
         dependencies: TextureLayerCanvasViewDependencies? = nil
     ) {
@@ -81,14 +81,11 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }
 
     func updateUnselectedTextures(
-        textureLayers: TextureLayers?,
         with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let textureLayers else { return }
-
-        let unselectedLayers = UnselectedTextureLayers(
-            textureLayers: textureLayers
-        )
+        guard let unselectedLayers = UnselectedTextureLayers(source: textureLayer) else {
+            return
+        }
 
         try await canvasRenderer.renderLayersIntoTextures(
             layers: unselectedLayers.topLayers,
@@ -117,7 +114,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
         guard
             let destinationTexture,
             let commandBuffer,
-            let selectedLayer = textureLayer.selectedLayerItem
+            let selectedLayer = textureLayer.selectedLayer
         else { return }
 
         canvasRenderer.renderCanvas(
