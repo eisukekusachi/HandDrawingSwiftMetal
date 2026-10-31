@@ -75,7 +75,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     func updateUnselectedTextures(
         with commandBuffer: MTLCommandBuffer
     ) async throws {
-        guard let unselectedLayers = UnselectedTextureLayers(source: dependencies.textureLayers) else {
+        guard let unselectedLayers = UnselectedTextureLayers(textureLayers: dependencies.textureLayers) else {
             return
         }
 
