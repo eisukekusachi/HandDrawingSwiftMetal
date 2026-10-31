@@ -4,13 +4,14 @@
 
 import Foundation
 import Testing
+import TextureLayerView
 
 @testable import HandDrawingSwiftMetal
 
 @MainActor
 struct TextureLayerSelectionTests {
 
-    private func layers(_ count: Int) -> [CanvasLayerSnapshot] {
+    private func layers(_ count: Int) -> [TextureLayerItem] {
         (0..<count).map { _ in
             .init(id: UUID(), alpha: 255, isVisible: true)
         }
@@ -28,8 +29,8 @@ struct TextureLayerSelectionTests {
             )
         )
 
-        #expect(subject.bottomLayers == [])
-        #expect(subject.topLayers == [layers[1], layers[2], layers[3], layers[4]])
+        #expect(subject.bottomLayers.map(\.id) == [])
+        #expect(subject.topLayers.map(\.id) == [layers[1].id, layers[2].id, layers[3].id, layers[4].id])
     }
 
     @Test
@@ -44,8 +45,8 @@ struct TextureLayerSelectionTests {
             )
         )
 
-        #expect(subject.bottomLayers == [layers[0], layers[1]])
-        #expect(subject.topLayers == [layers[3], layers[4]])
+        #expect(subject.bottomLayers.map(\.id) == [layers[0].id, layers[1].id])
+        #expect(subject.topLayers.map(\.id) == [layers[3].id, layers[4].id])
     }
 
     @Test
@@ -60,18 +61,18 @@ struct TextureLayerSelectionTests {
             )
         )
 
-        #expect(subject.bottomLayers == [layers[0], layers[1], layers[2], layers[3]])
-        #expect(subject.topLayers == [])
+        #expect(subject.bottomLayers.map(\.id) == [layers[0].id, layers[1].id, layers[2].id, layers[3].id])
+        #expect(subject.topLayers.map(\.id) == [])
     }
 
     @Test
     func `Verify that layers with isVisible set to false are not included in the array`() {
         let layers = [
-            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
-            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false),
-            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
-            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: true),
-            CanvasLayerSnapshot(id: UUID(), alpha: 255, isVisible: false)
+            TextureLayerItem(id: UUID(), alpha: 255, isVisible: true),
+            TextureLayerItem(id: UUID(), alpha: 255, isVisible: false),
+            TextureLayerItem(id: UUID(), alpha: 255, isVisible: true),
+            TextureLayerItem(id: UUID(), alpha: 255, isVisible: true),
+            TextureLayerItem(id: UUID(), alpha: 255, isVisible: false)
         ]
 
         let subject = TextureLayerSelection(
@@ -81,8 +82,8 @@ struct TextureLayerSelectionTests {
             )
         )
 
-        #expect(subject.bottomLayers == [layers[0]])
-        #expect(subject.topLayers == [layers[3]])
+        #expect(subject.bottomLayers.map(\.id) == [layers[0].id])
+        #expect(subject.topLayers.map(\.id) == [layers[3].id])
     }
 
     @Test
