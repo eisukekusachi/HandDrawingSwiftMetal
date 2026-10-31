@@ -14,7 +14,7 @@ final class UndoDrawing: ObservableObject {
 
     /// A repository that stores textures for undo operations.
     /// The textures are stored and managed in memory to avoid blocking the main thread.
-    private var inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil
+    private var inMemoryRepository: MTLTextureRepositoryProtocol? = nil
 
     private var renderer: MTLRendering
 
@@ -28,7 +28,7 @@ final class UndoDrawing: ObservableObject {
 
     init(
         renderer: MTLRendering,
-        inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
+        inMemoryRepository: MTLTextureRepositoryProtocol?
     ) {
         self.renderer = renderer
         self.inMemoryRepository = inMemoryRepository

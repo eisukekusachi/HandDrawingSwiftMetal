@@ -245,31 +245,22 @@ struct TextureLayersStateTests {
     }
 }
 
-final class TextureRepositoryStub: TextureLayersDocumentsRepositoryProtocol, @unchecked Sendable {
+final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked Sendable {
 
     var removedIds: [UUID] = []
 
-    let workingDirectoryURL: URL = FileManager.default.temporaryDirectory
-
-    func initializeStorage(
+    func initializeTexture(
         id: UUID,
         textureSize: CGSize,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {}
 
-    func restoreStorageFromWorkingDirectory(
+    func restoreTextures(
         ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
     ) throws {}
-
-    func restoreStorage(
-        from sourceFolderURL: URL,
-        ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
-    ) async throws -> Bool { false }
 
     func duplicatedTexture(
         _ id: UUID,

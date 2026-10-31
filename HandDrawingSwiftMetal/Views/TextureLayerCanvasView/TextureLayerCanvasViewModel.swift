@@ -91,14 +91,14 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
         try await canvasRenderer.renderLayersIntoTextures(
             layers: selection.topLayers,
-            textureRepository: dependencies.textureLayersDocumentsRepository,
+            textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedTopTexture,
             commandBuffer: commandBuffer
         )
 
         try await canvasRenderer.renderLayersIntoTextures(
             layers: selection.bottomLayers,
-            textureRepository: dependencies.textureLayersDocumentsRepository,
+            textureRepository: dependencies.documentsTextureDataRepository,
             on: unselectedBottomTexture,
             commandBuffer: commandBuffer
         )
@@ -138,7 +138,7 @@ extension TextureLayerCanvasViewModel {
     func duplicateTextureFromDocumentsDirectory(
         _ id: UUID
     ) async throws -> MTLTexture? {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTexture(
+        try await dependencies.documentsTextureDataRepository.duplicatedTexture(
             id,
             textureSize: textureSize,
             device: renderer.device
@@ -148,7 +148,7 @@ extension TextureLayerCanvasViewModel {
     func duplicateTexturesFromDocumentsDirectory(
         _ ids: [UUID]
     ) async throws -> [(UUID, MTLTexture)] {
-        try await dependencies.textureLayersDocumentsRepository.duplicatedTextures(
+        try await dependencies.documentsTextureDataRepository.duplicatedTextures(
             ids,
             textureSize: textureSize,
             device: renderer.device
@@ -159,7 +159,7 @@ extension TextureLayerCanvasViewModel {
         layerId: UUID,
         textureData: Data
     ) async throws {
-        try await dependencies.textureLayersDocumentsRepository.writeDataToDisk(
+        try await dependencies.documentsTextureDataRepository.writeDataToDisk(
             id: layerId,
             data: textureData
         )

@@ -62,7 +62,7 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
 
     @Published private(set) var textureSize: CGSize = .init(width: 768, height: 1024)
 
-    private let repository: TextureLayersDocumentsRepositoryProtocol?
+    private let repository: MTLTextureDataRepositoryProtocol?
 
     private var device: MTLDevice?
 
@@ -71,7 +71,7 @@ class TextureLayersState: ObservableObject, TextureLayersStateProtocol {
     private(set) weak var canvasView: (any TextureLayerCanvasUpdating)?
 
     init(
-        repository: TextureLayersDocumentsRepositoryProtocol? = nil
+        repository: MTLTextureDataRepositoryProtocol? = nil
     ) {
         self.repository = repository
     }

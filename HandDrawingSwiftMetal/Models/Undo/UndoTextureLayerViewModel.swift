@@ -10,28 +10,30 @@ import TextureLayerView
 @MainActor
 final class UndoTextureLayerRegistrar {
 
+    private let device: MTLDevice
+
+    /// Holds the `MTLTexture` copied for undo. Kept in memory because undo needs fast access.
+    private let inMemoryRepository: MTLTextureRepositoryProtocol
+
+    /// Texture data for the current layer. Adding or removing a layer copies it into an `MTLTexture` for undo.
+    private let textureRepository: MTLTextureDataRepositoryProtocol
+
     private let onRegisterUndo: ((UndoRedoObjectPair) -> Void)?
 
     private let showError: (Error) -> Void
-
-    private let textureRepository: TextureLayersDocumentsRepositoryProtocol
-
-    private let inMemoryRepository: UndoTextureInMemoryRepositoryProtocol?
-
-    private let device: MTLDevice
 
     private var previousAlpha: Int?
 
     init(
         device: MTLDevice,
-        textureRepository: TextureLayersDocumentsRepositoryProtocol,
-        inMemoryRepository: UndoTextureInMemoryRepositoryProtocol? = nil,
+        inMemoryRepository: MTLTextureRepositoryProtocol,
+        textureRepository: MTLTextureDataRepositoryProtocol,
         onRegisterUndo: ((UndoRedoObjectPair) -> Void)? = nil,
         showError: @escaping (Error) -> Void = { _ in }
     ) {
         self.device = device
+        self.inMemoryRepository = inMemoryRepository
         self.textureRepository = textureRepository
-        self.inMemoryRepository = inMemoryRepository ?? UndoTextureInMemoryRepository.shared
         self.onRegisterUndo = onRegisterUndo
         self.showError = showError
     }
@@ -238,8 +240,7 @@ private extension UndoTextureLayerRegistrar {
     ) async {
         guard
             let newTexture,
-            let undoTextureId = undoRedoObject.redoObject.undoTextureId,
-            let inMemoryRepository
+            let undoTextureId = undoRedoObject.redoObject.undoTextureId
         else {
             return
         }
@@ -264,10 +265,7 @@ private extension UndoTextureLayerRegistrar {
         restorationTexture: MTLTexture,
         undoRedoObject: UndoRedoObjectPair
     ) async throws {
-        guard
-            let undoTextureId = undoRedoObject.undoObject.undoTextureId,
-            let inMemoryRepository
-        else {
+        guard let undoTextureId = undoRedoObject.undoObject.undoTextureId else {
             return
         }
 

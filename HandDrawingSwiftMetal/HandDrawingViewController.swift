@@ -44,7 +44,8 @@ class HandDrawingViewController: UIViewController {
     private lazy var undoCoordinator: UndoCoordinator = {
         .init(
             canvasView: canvasView,
-            textureLayersState: viewModel.undoableTextureLayers
+            textureLayersState: viewModel.undoableTextureLayers,
+            inMemoryTextureRepository: viewModel.dependencies.inMemoryTextureRepository
         )
     }()
 
@@ -58,7 +59,8 @@ class HandDrawingViewController: UIViewController {
 
     private lazy var textureLayerUndo = UndoTextureLayerRegistrar(
         device: sharedDevice,
-        textureRepository: viewModel.dependencies.textureLayersDocumentsRepository,
+        inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
+        textureRepository: viewModel.dependencies.documentsTextureDataRepository,
         onRegisterUndo: { [weak self] undoObjectPair in
             self?.undoCoordinator.registerUndo(undoObjectPair)
         },

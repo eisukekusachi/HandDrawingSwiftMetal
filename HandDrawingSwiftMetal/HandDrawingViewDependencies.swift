@@ -1,8 +1,5 @@
 //
-//  HandDrawingViewDependencies.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/04/04.
+//  Created by Eisuke Kusachi
 //
 
 import Core
@@ -12,15 +9,24 @@ import TextureLayerView
 @MainActor
 final class HandDrawingViewDependencies {
 
+    /// File operations for project zip files in the Documents directory.
     let fileManager: FileManaging
-    let textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol
+
+    /// Repository for texture data. Kept on disk so it remains after the app terminates.
+    let documentsTextureDataRepository: MTLTextureDataRepositoryProtocol
+
+    /// Repository for undo textures. Kept in memory because undo needs fast access.
+    let inMemoryTextureRepository: MTLTextureRepositoryProtocol
 
     init(
         fileManager: FileManaging? = nil,
-        textureLayersDocumentsRepository: TextureLayersDocumentsRepositoryProtocol? = nil
+        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol? = nil,
+        inMemoryTextureRepository: MTLTextureRepositoryProtocol? = nil
     ) {
         self.fileManager = fileManager ?? FileManagerWrapper()
-        self.textureLayersDocumentsRepository =
-            textureLayersDocumentsRepository ?? TextureLayersDocumentsRepository.shared
+        self.documentsTextureDataRepository =
+            documentsTextureDataRepository ?? DocumentsTextureDataRepository.shared
+        self.inMemoryTextureRepository =
+            inMemoryTextureRepository ?? InMemoryTextureRepository.shared
     }
 }
