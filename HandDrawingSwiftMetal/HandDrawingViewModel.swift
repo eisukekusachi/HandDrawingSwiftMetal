@@ -65,11 +65,15 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPaletteStorage: CoreDataBrushPaletteStorage
     let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
-    private let textureLayersStorageController: PersistenceController = PersistenceController(
+    private let textureLayersStorageController = PersistenceController(
         xcdatamodeldName: "TextureLayerStorage"
     )
-    private let projectStorageController: PersistenceController
-    private let drawingToolStorageController: PersistenceController
+    private let projectStorageController = PersistenceController(
+        xcdatamodeldName: "ProjectStorage"
+    )
+    private let drawingToolStorageController = PersistenceController(
+        xcdatamodeldName: "DrawingToolStorage"
+    )
 
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
@@ -121,12 +125,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.textureLayerStorage = .init(
             textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
-        )
-        self.projectStorageController = .init(
-            xcdatamodeldName: "ProjectStorage"
-        )
-        self.drawingToolStorageController = PersistenceController(
-            xcdatamodeldName: "DrawingToolStorage"
         )
         self.projectStorage = .init(
             project: project,

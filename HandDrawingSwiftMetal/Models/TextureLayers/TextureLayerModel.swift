@@ -5,8 +5,9 @@
 import TextureLayerView
 import UIKit
 
+/// Metadata for one texture layer in the layer stack.
+/// Pixel data is stored separately, keyed by `fileName`.
 public struct TextureLayerModel: Identifiable, Codable, Equatable, Sendable {
-
     /// The unique identifier for the layer
     public let id: LayerId
 
