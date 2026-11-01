@@ -3,7 +3,6 @@
 //
 
 import CanvasView
-import Combine
 import UIKit
 
 @preconcurrency import CoreData
@@ -12,37 +11,14 @@ import UIKit
 @MainActor
 final class CoreDataEraserPaletteStorage {
 
-    private var palette: EraserPalette
-
     private let storage: any CoreDataStorageProtocol<EraserPaletteEntity>
 
-    private var cancellables = Set<AnyCancellable>()
-
-    convenience init(palette: EraserPalette, context: NSManagedObjectContext) {
-        self.init(
-            palette: palette,
-            storage: CoreDataStorage(context: context)
-        )
+    convenience init(context: NSManagedObjectContext) {
+        self.init(storage: CoreDataStorage(context: context))
     }
 
-    init(
-        palette: EraserPalette,
-        storage: any CoreDataStorageProtocol<EraserPaletteEntity>
-    ) {
-        self.palette = palette
+    init(storage: any CoreDataStorageProtocol<EraserPaletteEntity>) {
         self.storage = storage
-
-        // Save to Core Data when the properties are updated
-        Publishers.Merge(
-            palette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
-            palette.$items.map { _ in () }.eraseToAnyPublisher()
-        )
-        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] in
-            guard let self else { return }
-            Task { await self.save(self.palette) }
-        }
-        .store(in: &cancellables)
     }
 }
 
@@ -52,11 +28,9 @@ extension CoreDataEraserPaletteStorage {
         try storage.fetch()
     }
 
-    func update(_ entity: EraserPaletteEntity) {
-
+    func update(_ entity: EraserPaletteEntity, palette: EraserPalette) {
         palette.setId(entity.id ?? UUID())
 
-        // Load alphas from Core Data
         let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
             Int($0.alpha)
         } ?? []
@@ -68,8 +42,7 @@ extension CoreDataEraserPaletteStorage {
         )
     }
 
-    func update(directoryURL: URL) throws {
-        // Do nothing if an error occurs, since nothing can be done
+    func update(directoryURL: URL, palette: EraserPalette) throws {
         guard
             let result = try? EraserPaletteSnapshot(in: directoryURL)
         else {
@@ -89,18 +62,16 @@ extension CoreDataEraserPaletteStorage {
             selectedIndex: result.index
         )
     }
-}
 
-private extension CoreDataEraserPaletteStorage {
-    func save(_ target: EraserPalette) async {
+    func save(from palette: EraserPalette) async {
         guard
             let context = storage.context,
             let request = storage.fetchRequest()
         else { return }
 
-        let id = target.id
-        let index = target.selectedIndex
-        let alphas = target.items.map(\.alpha)
+        let id = palette.id
+        let index = palette.selectedIndex
+        let alphas = palette.items.map(\.alpha)
 
         await context.perform { [context] in
             do {
@@ -112,7 +83,6 @@ private extension CoreDataEraserPaletteStorage {
                     Int($0.alpha)
                 } ?? []
 
-                // Return if no changes
                 guard
                     currentId != id ||
                     currentIndex != index ||
@@ -153,7 +123,6 @@ private extension CoreDataEraserPaletteStorage {
                     try context.save()
                 }
             } catch {
-                // Do nothing because nothing can be done
                 Logger.error(error)
             }
         }

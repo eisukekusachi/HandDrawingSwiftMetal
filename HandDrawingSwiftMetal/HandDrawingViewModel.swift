@@ -123,31 +123,20 @@ final class HandDrawingViewModel: ObservableObject {
         )
         self.undoableTextureLayers = undoableTextureLayers
         self.textureLayerStorage = .init(
-            textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
         )
-        self.projectStorage = .init(
-            project: project,
-            context: projectStorageController.viewContext
-        )
-        self.drawingToolStorage = .init(
-            drawingTool: drawingTool,
-            context: drawingToolStorageController.viewContext
-        )
-        self.brushPaletteStorage = .init(
-            palette: brushPalette,
-            context: drawingToolStorageController.viewContext
-        )
-        self.eraserPaletteStorage = .init(
-            palette: eraserPalette,
-            context: drawingToolStorageController.viewContext
-        )
+        self.projectStorage = .init(context: projectStorageController.viewContext)
+        self.drawingToolStorage = .init(context: drawingToolStorageController.viewContext)
+        self.brushPaletteStorage = .init(context: drawingToolStorageController.viewContext)
+        self.eraserPaletteStorage = .init(context: drawingToolStorageController.viewContext)
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        bindCoreDataPersistence()
     }
 
     func onViewDidLoad(
@@ -168,6 +157,7 @@ final class HandDrawingViewModel: ObservableObject {
         } catch {
             Logger.error(error)
         }
+
         Task {
             await setupFileList()
         }
@@ -247,20 +237,91 @@ final class HandDrawingViewModel: ObservableObject {
     }
 }
 
+// MARK: - Core Data
+
 private extension HandDrawingViewModel {
 
+    /// Subscribes to domain model changes and debounces writes to `CoreData*Storage`.
+    func bindCoreDataPersistence() {
+        let debounce = coreDataSaveDebounceMilliseconds
+
+        // Texture layer metadata (`TextureLayerStorage`).
+        Publishers.Merge3(
+            undoableTextureLayers.$layerModels.map { _ in () }.eraseToAnyPublisher(),
+            undoableTextureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
+            undoableTextureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.textureLayerStorage.save(from: self.undoableTextureLayers) }
+        }
+        .store(in: &cancellables)
+
+        // Project metadata (`ProjectStorage`).
+        Publishers.Merge3(
+            project.$currentProjectName.map { _ in () }.eraseToAnyPublisher(),
+            project.$updatedAt.map { _ in () }.eraseToAnyPublisher(),
+            project.$createdAt.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.projectStorage.save(from: self.project) }
+        }
+        .store(in: &cancellables)
+
+        // Drawing tool settings (`DrawingToolStorage`).
+        Publishers.Merge3(
+            drawingTool.$brushDiameter.map { _ in () }.eraseToAnyPublisher(),
+            drawingTool.$eraserDiameter.map { _ in () }.eraseToAnyPublisher(),
+            drawingTool.$type.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.drawingToolStorage.save(from: self.drawingTool) }
+        }
+        .store(in: &cancellables)
+
+        // Brush palette (`DrawingToolStorage` model).
+        Publishers.Merge(
+            brushPalette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
+            brushPalette.$items.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.brushPaletteStorage.save(from: self.brushPalette) }
+        }
+        .store(in: &cancellables)
+
+        // Eraser palette (`DrawingToolStorage` model).
+        Publishers.Merge(
+            eraserPalette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
+            eraserPalette.$items.map { _ in () }.eraseToAnyPublisher()
+        )
+        .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            Task { await self.eraserPaletteStorage.save(from: self.eraserPalette) }
+        }
+        .store(in: &cancellables)
+    }
+
+    /// Restores domain models from Core Data when the canvas loads.
     func fetchDataFromCoreDataIfAvailable() throws {
         if let projectEntity = try projectStorage.fetch() {
-            projectStorage.update(projectEntity)
+            projectStorage.update(projectEntity, project: project)
         }
         if let drawingToolEntity = try drawingToolStorage.fetch() {
-            drawingToolStorage.update(drawingToolEntity)
+            drawingToolStorage.update(drawingToolEntity, drawingTool: drawingTool)
         }
         if let brushEntity = try brushPaletteStorage.fetch() {
-            brushPaletteStorage.update(brushEntity)
+            brushPaletteStorage.update(brushEntity, palette: brushPalette)
         }
         if let eraserEntity = try eraserPaletteStorage.fetch() {
-            eraserPaletteStorage.update(eraserEntity)
+            eraserPaletteStorage.update(eraserEntity, palette: eraserPalette)
         }
     }
 }

@@ -3,7 +3,6 @@
 //
 
 import CanvasView
-import Combine
 import UIKit
 
 @preconcurrency import CoreData
@@ -12,39 +11,14 @@ import UIKit
 @MainActor
 final class CoreDataBrushPaletteStorage {
 
-    private var palette: BrushPalette
-
     private let storage: any CoreDataStorageProtocol<BrushPaletteEntity>
 
-    private var cancellables = Set<AnyCancellable>()
-
-    convenience init(palette: BrushPalette, context: NSManagedObjectContext) {
-        self.init(
-            palette: palette,
-            storage: CoreDataStorage(context: context)
-        )
+    convenience init(context: NSManagedObjectContext) {
+        self.init(storage: CoreDataStorage(context: context))
     }
 
-    init(
-        palette: BrushPalette,
-        storage: any CoreDataStorageProtocol<BrushPaletteEntity>
-    ) {
-        self.palette = palette
+    init(storage: any CoreDataStorageProtocol<BrushPaletteEntity>) {
         self.storage = storage
-
-        // Save to Core Data when the properties are updated
-        Publishers.Merge(
-            palette.$selectedIndex.map { _ in () }.eraseToAnyPublisher(),
-            palette.$items.map { _ in () }.eraseToAnyPublisher()
-        )
-        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] in
-            guard let self else { return }
-            Task {
-                await self.save(palette)
-            }
-        }
-        .store(in: &cancellables)
     }
 }
 
@@ -54,8 +28,7 @@ extension CoreDataBrushPaletteStorage {
         try storage.fetch()
     }
 
-    func update(_ entity: BrushPaletteEntity) {
-
+    func update(_ entity: BrushPaletteEntity, palette: BrushPalette) {
         palette.setId(entity.id ?? UUID())
 
         let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
@@ -67,8 +40,7 @@ extension CoreDataBrushPaletteStorage {
         palette.update(colors: colors, selectedIndex: index)
     }
 
-    func update(directoryURL: URL) throws {
-        // Do nothing if an error occurs, since nothing can be done
+    func update(directoryURL: URL, palette: BrushPalette) throws {
         guard
             let result = try? BrushPaletteSnapshot(in: directoryURL)
         else {
@@ -88,19 +60,16 @@ extension CoreDataBrushPaletteStorage {
             selectedIndex: result.index
         )
     }
-}
 
-private extension CoreDataBrushPaletteStorage {
-
-    func save(_ target: BrushPalette) async {
+    func save(from palette: BrushPalette) async {
         guard
             let context = storage.context,
             let request = storage.fetchRequest()
         else { return }
 
-        let id: UUID = target.id
-        let index = target.selectedIndex
-        let hexes = target.items.map { $0.color.hex() }
+        let id: UUID = palette.id
+        let index = palette.selectedIndex
+        let hexes = palette.items.map { $0.color.hex() }
 
         await context.perform { [context] in
             do {
@@ -112,7 +81,6 @@ private extension CoreDataBrushPaletteStorage {
                     $0.hex
                 } ?? []
 
-                // Return if no changes
                 guard
                     currentId != id ||
                     currentIndex != index ||
@@ -153,7 +121,6 @@ private extension CoreDataBrushPaletteStorage {
                     try context.save()
                 }
             } catch {
-                // Do nothing because nothing can be done
                 Logger.error(error)
             }
         }

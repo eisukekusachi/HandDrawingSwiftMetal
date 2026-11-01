@@ -2,53 +2,22 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
-import Combine
-import UIKit
 import TextureLayerView
 
 @preconcurrency import CoreData
 
-/// Texture layers managed by Core Data
+/// Core Data read/write for texture layer metadata (`TextureLayerStorage` model).
 @MainActor
-public final class CoreDataTextureLayerStorage: ObservableObject {
-
-    private var textureLayers: TextureLayersState
+public final class CoreDataTextureLayerStorage {
 
     private let storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>
 
-    private var cancellables = Set<AnyCancellable>()
-
-    convenience init(
-        textureLayers: TextureLayersState,
-        context: NSManagedObjectContext
-    ) {
-        self.init(
-            textureLayers: textureLayers,
-            storage: CoreDataStorage(context: context)
-        )
+    public convenience init(context: NSManagedObjectContext) {
+        self.init(storage: CoreDataStorage(context: context))
     }
 
-    init(
-        textureLayers: TextureLayersState,
-        storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>
-    ) {
+    init(storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>) {
         self.storage = storage
-        self.textureLayers = textureLayers
-
-        // Save to Core Data when any of the properties are updated
-        Publishers.Merge3(
-            textureLayers.$layerModels.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
-        )
-        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] _ in
-            Task {
-                await self?.save()
-            }
-        }
-        .store(in: &cancellables)
     }
 
     public func fetch() -> TextureLayerArrayEntity? {
@@ -62,10 +31,8 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
             Logger.error("Failed to clear Core Data storage: \(error)")
         }
     }
-}
 
-private extension CoreDataTextureLayerStorage {
-    func save() async {
+    func save(from textureLayers: TextureLayersState) async {
         guard
             let context = storage.context,
             let request = storage.fetchRequest()
@@ -77,7 +44,7 @@ private extension CoreDataTextureLayerStorage {
             let selectedLayerId = textureLayers.selectedLayerModel?.id
         else { return }
 
-        let textureSize = self.textureLayers.textureSize
+        let textureSize = textureLayers.textureSize
         let layers = textureLayers.layerModels
 
         request.fetchLimit = 1
@@ -146,4 +113,3 @@ private extension CoreDataTextureLayerStorage {
         }
     }
 }
-
