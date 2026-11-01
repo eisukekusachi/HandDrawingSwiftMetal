@@ -4,6 +4,8 @@
 
 import UIKit
 
+@preconcurrency import CoreData
+
 final class DrawingTool: ObservableObject {
 
     private(set) var id: UUID
@@ -30,5 +32,12 @@ final class DrawingTool: ObservableObject {
 
     func swapTool(_ type: DrawingToolType) {
         self.type = type == .brush ? .eraser: .brush
+    }
+
+    func apply(_ entity: DrawingToolEntity) {
+        setId(entity.id ?? UUID())
+        type = .init(rawValue: Int(entity.type))
+        brushDiameter = Int(entity.brushDiameter)
+        eraserDiameter = Int(entity.eraserDiameter)
     }
 }

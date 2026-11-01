@@ -9,6 +9,8 @@ import PaletteEditView
 import PaletteView
 import UIKit
 
+@preconcurrency import CoreData
+
 fileprivate let initializeAlphas: [Int] = [
     255,
     225,
@@ -114,6 +116,20 @@ extension EraserPalette {
     func duplicateSelected() {
         guard let alpha else { return }
         insert(alpha, at: selectedIndex + 1)
+    }
+
+    func apply(_ entity: EraserPaletteEntity) {
+        setId(entity.id ?? UUID())
+
+        let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
+            Int($0.alpha)
+        } ?? []
+        let index = max(0, min(Int(entity.index), alphas.count - 1))
+
+        update(
+            alphas: alphas,
+            selectedIndex: index
+        )
     }
 }
 

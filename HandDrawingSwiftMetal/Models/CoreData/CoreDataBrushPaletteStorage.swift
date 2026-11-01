@@ -2,7 +2,6 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
 import UIKit
 
 @preconcurrency import CoreData
@@ -26,39 +25,6 @@ extension CoreDataBrushPaletteStorage {
 
     func fetch() throws -> BrushPaletteEntity? {
         try storage.fetch()
-    }
-
-    func update(_ entity: BrushPaletteEntity, palette: BrushPalette) {
-        palette.setId(entity.id ?? UUID())
-
-        let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
-            guard let hex = $0.hex else { return nil }
-            return UIColor(hex: hex)
-        } ?? []
-        let index = max(0, min(Int(entity.index), colors.count - 1))
-
-        palette.update(colors: colors, selectedIndex: index)
-    }
-
-    func update(directoryURL: URL, palette: BrushPalette) throws {
-        guard
-            let result = try? BrushPaletteSnapshot(in: directoryURL)
-        else {
-            let nsError = NSError(
-                domain: String(describing: Self.self),
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
-                    "directoryURL": directoryURL.path
-                ]
-            )
-            Logger.error(nsError)
-            throw nsError
-        }
-        palette.update(
-            colors: result.hexColors.map { UIColor(hex: $0) },
-            selectedIndex: result.index
-        )
     }
 
     func save(from palette: BrushPalette) async {

@@ -312,16 +312,16 @@ private extension HandDrawingViewModel {
     /// Restores domain models from Core Data when the canvas loads.
     func fetchDataFromCoreDataIfAvailable() throws {
         if let projectEntity = try projectStorage.fetch() {
-            projectStorage.update(projectEntity, project: project)
+            project.apply(projectEntity)
         }
         if let drawingToolEntity = try drawingToolStorage.fetch() {
-            drawingToolStorage.update(drawingToolEntity, drawingTool: drawingTool)
+            drawingTool.apply(drawingToolEntity)
         }
         if let brushEntity = try brushPaletteStorage.fetch() {
-            brushPaletteStorage.update(brushEntity, palette: brushPalette)
+            brushPalette.apply(brushEntity)
         }
         if let eraserEntity = try eraserPaletteStorage.fetch() {
-            eraserPaletteStorage.update(eraserEntity, palette: eraserPalette)
+            eraserPalette.apply(eraserEntity)
         }
     }
 }

@@ -8,6 +8,8 @@
 import Core
 import Foundation
 
+@preconcurrency import CoreData
+
 final class ProjectData {
 
     @Published public var currentProjectName: String
@@ -48,5 +50,17 @@ final class ProjectData {
 
     func updateUpdatedAt() {
         self.updatedAt = Date()
+    }
+
+    func apply(_ entity: ProjectEntity) {
+        if let projectName = entity.projectName,
+           let createdAt = entity.createdAt,
+           let updatedAt = entity.updatedAt {
+            update(
+                projectName: projectName,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            )
+        }
     }
 }

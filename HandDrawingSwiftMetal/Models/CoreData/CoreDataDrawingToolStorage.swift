@@ -2,9 +2,6 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
-import UIKit
-
 @preconcurrency import CoreData
 
 /// DrawingTool managed by Core Data
@@ -26,51 +23,6 @@ extension CoreDataDrawingToolStorage {
 
     func fetch() throws -> DrawingToolEntity? {
         try storage.fetch()
-    }
-
-    func update(
-        type: DrawingToolType,
-        brushDiameter: Int,
-        eraserDiameter: Int,
-        drawingTool: DrawingTool
-    ) {
-        drawingTool.type = type
-        drawingTool.brushDiameter = brushDiameter
-        drawingTool.eraserDiameter = eraserDiameter
-    }
-
-    func update(_ entity: DrawingToolEntity, drawingTool: DrawingTool) {
-        drawingTool.setId(entity.id ?? UUID())
-        update(
-            type: .init(rawValue: Int(entity.type)),
-            brushDiameter: Int(entity.brushDiameter),
-            eraserDiameter: Int(entity.eraserDiameter),
-            drawingTool: drawingTool
-        )
-    }
-
-    func update(directoryURL: URL, drawingTool: DrawingTool) throws {
-        guard
-            let result = try? DrawingToolSnapshot(in: directoryURL)
-        else {
-            let nsError = NSError(
-                domain: String(describing: Self.self),
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
-                    "directoryURL": directoryURL.path
-                ]
-            )
-            Logger.error(nsError)
-            throw nsError
-        }
-
-        update(
-            type: .init(rawValue: result.type),
-            brushDiameter: result.brushDiameter,
-            eraserDiameter: result.eraserDiameter,
-            drawingTool: drawingTool
-        )
     }
 
     func save(from drawingTool: DrawingTool) async {

@@ -2,9 +2,6 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
-import UIKit
-
 @preconcurrency import CoreData
 
 /// Alpha palette managed by Core Data
@@ -26,41 +23,6 @@ extension CoreDataEraserPaletteStorage {
 
     func fetch() throws -> EraserPaletteEntity? {
         try storage.fetch()
-    }
-
-    func update(_ entity: EraserPaletteEntity, palette: EraserPalette) {
-        palette.setId(entity.id ?? UUID())
-
-        let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
-            Int($0.alpha)
-        } ?? []
-        let index = max(0, min(Int(entity.index), alphas.count - 1))
-
-        palette.update(
-            alphas: alphas,
-            selectedIndex: index
-        )
-    }
-
-    func update(directoryURL: URL, palette: EraserPalette) throws {
-        guard
-            let result = try? EraserPaletteSnapshot(in: directoryURL)
-        else {
-            let nsError = NSError(
-                domain: String(describing: Self.self),
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Failed to find file in \(directoryURL).",
-                    "directoryURL": directoryURL.path
-                ]
-            )
-            Logger.error(nsError)
-            throw nsError
-        }
-        palette.update(
-            alphas: result.alphas,
-            selectedIndex: result.index
-        )
     }
 
     func save(from palette: EraserPalette) async {

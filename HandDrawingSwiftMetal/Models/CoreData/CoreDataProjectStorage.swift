@@ -2,9 +2,6 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
-import UIKit
-
 @preconcurrency import CoreData
 
 @MainActor
@@ -25,37 +22,6 @@ extension CoreDataProjectStorage {
 
     func fetch() throws -> ProjectEntity? {
         try storage.fetch()
-    }
-
-    func update(_ entity: ProjectEntity, project: ProjectData) {
-        if let projectName = entity.projectName,
-           let createdAt = entity.createdAt,
-           let updatedAt = entity.updatedAt {
-            project.update(
-                projectName: projectName,
-                createdAt: createdAt,
-                updatedAt: updatedAt
-            )
-        }
-    }
-
-    func update(directoryURL: URL, projectName: String, project: ProjectData) throws {
-        guard
-            let result = try? ProjectSnapshot(in: directoryURL)
-        else {
-            let error = NSError(
-                title: String(localized: "Error"),
-                message: String(format: String(localized: "Failed to find file in %@."), directoryURL.absoluteString)
-            )
-            Logger.error(error)
-            throw error
-        }
-
-        project.update(
-            projectName: projectName,
-            createdAt: result.createdAt,
-            updatedAt: result.updatedAt
-        )
     }
 
     func save(from project: ProjectData) async {
