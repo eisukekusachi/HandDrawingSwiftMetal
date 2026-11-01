@@ -34,8 +34,8 @@ final class HandDrawingViewModel: ObservableObject {
 
     let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
-    let brushPalette: BrushPalette
-    let eraserPalette: EraserPalette
+    let brushPalette: BrushPalette = .init()
+    let eraserPalette: EraserPalette = .init()
 
     let undoableTextureLayers: TextureLayersUndoableState
 
@@ -116,8 +116,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.fileList = .init(fileSuffix: fileSuffix)
         self.documentsDataStore = .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
-        self.brushPalette = .init()
-        self.eraserPalette = .init()
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
