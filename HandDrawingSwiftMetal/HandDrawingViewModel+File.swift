@@ -192,11 +192,9 @@ private extension HandDrawingViewModel {
         )
 
         if let tool = loaded.drawingTool {
-            drawingToolStorage.update(
-                type: .init(rawValue: tool.type),
-                brushDiameter: tool.brushDiameter,
-                eraserDiameter: tool.eraserDiameter
-            )
+            drawingTool.type = .init(rawValue: tool.type)
+            drawingTool.brushDiameter = tool.brushDiameter
+            drawingTool.eraserDiameter = tool.eraserDiameter
         }
         if let brush = loaded.brushPalette {
             brushPalette.update(

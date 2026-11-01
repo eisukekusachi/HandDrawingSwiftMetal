@@ -1,87 +1,36 @@
-// TODO: Move to Core Package
-
 //
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
-import Combine
-import UIKit
 import TextureLayerView
 
 @preconcurrency import CoreData
 
-/// Texture layers managed by Core Data
+/// Core Data read/write for texture layer metadata (`TextureLayerStorage` model).
 @MainActor
-public final class CoreDataTextureLayerStorage: ObservableObject {
+final class CoreDataTextureLayerStorage: CoreDataStorage<TextureLayerArrayEntity> {
 
-    private var textureLayers: TextureLayersState
-
-    private var storage: CoreDataStorage<TextureLayerArrayEntity>?
-
-    private var cancellables = Set<AnyCancellable>()
-
-    init(
-        textureLayers: TextureLayersState,
-        context: NSManagedObjectContext
-    ) {
-        self.storage = .init(context: context)
-        self.textureLayers = textureLayers
-
-        // Save to Core Data when any of the properties are updated
-        Publishers.Merge3(
-            textureLayers.$layerModels.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$selectedLayerId.map { _ in () }.eraseToAnyPublisher(),
-            textureLayers.$textureSize.map { _ in () }.eraseToAnyPublisher()
-        )
-        .debounce(for: .milliseconds(coreDataSaveDebounceMilliseconds), scheduler: RunLoop.main)
-        .sink { [weak self] _ in
-            Task {
-                await self?.save()
-            }
-        }
-        .store(in: &cancellables)
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
-    public func fetch() -> TextureLayerArrayEntity? {
-        try? storage?.fetch()
+    init(storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>) {
+        super.init(injecting: storage)
     }
 
-    public func clearAll() {
+    override func clearAll() throws {
         do {
-            try storage?.clearAll()
+            try super.clearAll()
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
+            throw error
         }
     }
 
-    public func textureLayersSnapshot(from entity: TextureLayerArrayEntity) -> TextureLayersSnapshot {
-        let layers: [TextureLayerModel] = entity.textureLayerItems?
-            .compactMap { $0 as? TextureLayerEntity }
-            .map { layer -> TextureLayerModel in
-                .init(
-                    id: layer.id ?? LayerId(),
-                    title: layer.title ?? "",
-                    alpha: Int(layer.alpha),
-                    isVisible: layer.isVisible
-                )
-            } ?? []
-        let layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-        let textureSize: CGSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
-        return .init(
-            layers: layers,
-            layerIndex: layerIndex,
-            textureSize: textureSize
-        )
-    }
-}
-
-private extension CoreDataTextureLayerStorage {
-    func save() async {
+    func save(from textureLayers: TextureLayersState) async {
         guard
-            let storage,
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         guard
@@ -90,7 +39,7 @@ private extension CoreDataTextureLayerStorage {
             let selectedLayerId = textureLayers.selectedLayerModel?.id
         else { return }
 
-        let textureSize = self.textureLayers.textureSize
+        let textureSize = textureLayers.textureSize
         let layers = textureLayers.layerModels
 
         request.fetchLimit = 1
@@ -159,4 +108,3 @@ private extension CoreDataTextureLayerStorage {
         }
     }
 }
-

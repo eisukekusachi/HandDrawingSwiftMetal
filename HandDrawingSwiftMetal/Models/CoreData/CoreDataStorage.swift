@@ -1,16 +1,13 @@
-// TODO: Move to Core Package
-
 //
-//  CoreDataStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/02/01.
+//  Created by Eisuke Kusachi
 //
 
 import CoreData
 import Foundation
 
-protocol CoreDataStorageProtocol {
+/// Core Data fetch / clear access for a single root entity type.
+@MainActor
+protocol CoreDataStorageProtocol<Entity>: AnyObject {
     associatedtype Entity: NSManagedObject
     var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>?
@@ -18,14 +15,25 @@ protocol CoreDataStorageProtocol {
     func clearAll() throws
 }
 
-final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
-    public let context: NSManagedObjectContext?
+@MainActor
+class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
+    let context: NSManagedObjectContext?
+    private let backend: (any CoreDataStorageProtocol<Entity>)?
 
-    public init(context: NSManagedObjectContext?) {
+    init(context: NSManagedObjectContext?) {
         self.context = context
+        self.backend = nil
     }
 
-    public func fetchRequest() -> NSFetchRequest<Entity>? {
+    init(injecting backend: any CoreDataStorageProtocol<Entity>) {
+        self.context = backend.context
+        self.backend = backend
+    }
+
+    func fetchRequest() -> NSFetchRequest<Entity>? {
+        if let backend {
+            return backend.fetchRequest()
+        }
         guard let context else { return nil }
 
         let name = Entity.entity().name
@@ -42,12 +50,19 @@ final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
         return request
     }
 
-    public func fetch() throws -> Entity? {
+    func fetch() throws -> Entity? {
+        if let backend {
+            return try backend.fetch()
+        }
         guard let context, let request = fetchRequest() else { return nil }
         return try context.fetch(request).first
     }
 
-    public func clearAll() throws {
+    func clearAll() throws {
+        if let backend {
+            try backend.clearAll()
+            return
+        }
         guard let context else { return }
         guard let entityName = Entity.entity().name else { return }
 
@@ -56,5 +71,16 @@ final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
 
         try context.execute(deleteRequest)
         context.reset()
+    }
+}
+
+@MainActor
+extension CoreDataStorage {
+    func resolvedContext() -> NSManagedObjectContext? {
+        backend?.context ?? context
+    }
+
+    func resolvedFetchRequest() -> NSFetchRequest<Entity>? {
+        fetchRequest()
     }
 }

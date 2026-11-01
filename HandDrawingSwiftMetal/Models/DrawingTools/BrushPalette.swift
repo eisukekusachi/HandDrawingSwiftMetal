@@ -9,6 +9,8 @@ import PaletteEditView
 import PaletteView
 import UIKit
 
+@preconcurrency import CoreData
+
 fileprivate let initializeColors: [UIColor] = [
     .black.withAlphaComponent(0.8),
     .gray.withAlphaComponent(0.8),
@@ -114,6 +116,18 @@ extension BrushPalette {
     func duplicateSelected() {
         guard let color else { return }
         insert(color, at: selectedIndex + 1)
+    }
+
+    func apply(_ entity: BrushPaletteEntity) {
+        setId(entity.id ?? UUID())
+
+        let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
+            guard let hex = $0.hex else { return nil }
+            return UIColor(hex: hex)
+        } ?? []
+        let index = max(0, min(Int(entity.index), colors.count - 1))
+
+        update(colors: colors, selectedIndex: index)
     }
 }
 

@@ -154,7 +154,9 @@ extension HandDrawingViewModel {
             commandQueue: commandQueue
         )
 
-        drawingToolStorage.initializeData()
+        drawingTool.type = .brush
+        drawingTool.brushDiameter = 8
+        drawingTool.eraserDiameter = 8
         brushPalette.initializeData()
         eraserPalette.initializeData()
     }

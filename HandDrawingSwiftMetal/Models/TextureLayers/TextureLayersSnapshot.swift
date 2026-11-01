@@ -6,6 +6,8 @@ import Core
 import TextureLayerView
 import UIKit
 
+@preconcurrency import CoreData
+
 /// A struct that represents the snapshot of `TextureLayersState`.
 /// Used when saving and restoring layer data.
 public struct TextureLayersSnapshot: Codable, Equatable, Sendable {
@@ -28,6 +30,32 @@ public struct TextureLayersSnapshot: Codable, Equatable, Sendable {
             self.layerIndex = max(0, min(layerIndex, layers.count - 1))
         }
         self.textureSize = textureSize
+    }
+}
+
+extension TextureLayersSnapshot {
+
+    public init(entity: TextureLayerArrayEntity) {
+        let layers: [TextureLayerModel] = entity.textureLayerItems?
+            .compactMap { $0 as? TextureLayerEntity }
+            .map { layer in
+                TextureLayerModel(
+                    id: layer.id ?? LayerId(),
+                    title: layer.title ?? "",
+                    alpha: Int(layer.alpha),
+                    isVisible: layer.isVisible
+                )
+            } ?? []
+        let layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
+        let textureSize = CGSize(
+            width: Int(entity.textureWidth),
+            height: Int(entity.textureHeight)
+        )
+        self.init(
+            layers: layers,
+            layerIndex: layerIndex,
+            textureSize: textureSize
+        )
     }
 }
 
