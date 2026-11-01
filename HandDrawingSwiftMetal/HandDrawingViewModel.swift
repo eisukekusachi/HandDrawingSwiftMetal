@@ -112,20 +112,12 @@ final class HandDrawingViewModel: ObservableObject {
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
-        self.fileList = FileList(fileSuffix: fileSuffix)
         self.thumbnailFileName = thumbnailFileName
-
-        self.documentsDataStore = DocumentsDataStore(
-            fileManager: dependencies.fileManager
-        )
-
+        self.fileList = .init(fileSuffix: fileSuffix)
+        self.documentsDataStore = .init(fileManager: dependencies.fileManager)
+        self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
         self.brushPalette = .init()
         self.eraserPalette = .init()
-
-        let undoableTextureLayers = TextureLayersUndoableState(
-            repository: dependencies.documentsTextureDataRepository
-        )
-        self.undoableTextureLayers = undoableTextureLayers
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
