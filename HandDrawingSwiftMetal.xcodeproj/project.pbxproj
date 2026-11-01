@@ -118,6 +118,7 @@
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
 		D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */; };
 		D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */; };
+		D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */; };
 		D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */; };
 		D4F1A0092FBE010400C55A4D /* ProjectContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0082FBE010400C55A4D /* ProjectContent.swift */; };
 		D4F525732EAC96BE00439FFF /* ToastMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525722EAC96BE00439FFF /* ToastMessage.swift */; };
@@ -256,6 +257,7 @@
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
 		D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewController+FileView.swift"; sourceTree = "<group>"; };
 		D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+File.swift"; sourceTree = "<group>"; };
+		D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+CoreData.swift"; sourceTree = "<group>"; };
 		D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+IO.swift"; sourceTree = "<group>"; };
 		D4F1A0082FBE010400C55A4D /* ProjectContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectContent.swift; sourceTree = "<group>"; };
 		D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = "<group>"; };
@@ -617,6 +619,7 @@
 				D44B52B12DB3928000EE213C /* HandDrawingViewController.xib */,
 				D4BF61112E4892A600CE94F4 /* HandDrawingViewModel.swift */,
 				D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */,
+				D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */,
 				D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */,
 				D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */,
 				D4E1ECE72752388E00D4A23D /* LaunchScreen.storyboard */,
@@ -858,6 +861,7 @@
 				D44B52CB2DB3928000EE213C /* HandDrawingViewController.swift in Sources */,
 				D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */,
 				D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */,
+				D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */,
 				D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */,
 				D49C694A2F2EE85400B66608 /* CoreDataTextureLayerStorage.swift in Sources */,
 				D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */,
