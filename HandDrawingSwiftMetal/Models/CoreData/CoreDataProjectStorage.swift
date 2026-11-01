@@ -5,29 +5,23 @@
 @preconcurrency import CoreData
 
 @MainActor
-final class CoreDataProjectStorage {
+final class CoreDataProjectStorage: CoreDataStorage<ProjectEntity> {
 
-    private let storage: any CoreDataStorageProtocol<ProjectEntity>
-
-    convenience init(context: NSManagedObjectContext) {
-        self.init(storage: CoreDataStorage(context: context))
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
     init(storage: any CoreDataStorageProtocol<ProjectEntity>) {
-        self.storage = storage
+        super.init(injecting: storage)
     }
 }
 
 extension CoreDataProjectStorage {
 
-    func fetch() throws -> ProjectEntity? {
-        try storage.fetch()
-    }
-
     func save(from project: ProjectData) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         let projectName = project.currentProjectName

@@ -6,29 +6,23 @@
 
 /// DrawingTool managed by Core Data
 @MainActor
-final class CoreDataDrawingToolStorage {
+final class CoreDataDrawingToolStorage: CoreDataStorage<DrawingToolEntity> {
 
-    private let storage: any CoreDataStorageProtocol<DrawingToolEntity>
-
-    convenience init(context: NSManagedObjectContext) {
-        self.init(storage: CoreDataStorage(context: context))
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
     init(storage: any CoreDataStorageProtocol<DrawingToolEntity>) {
-        self.storage = storage
+        super.init(injecting: storage)
     }
 }
 
 extension CoreDataDrawingToolStorage {
 
-    func fetch() throws -> DrawingToolEntity? {
-        try storage.fetch()
-    }
-
     func save(from drawingTool: DrawingTool) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         let id: UUID = drawingTool.id

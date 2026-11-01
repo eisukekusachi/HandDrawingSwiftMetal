@@ -8,34 +8,29 @@ import TextureLayerView
 
 /// Core Data read/write for texture layer metadata (`TextureLayerStorage` model).
 @MainActor
-public final class CoreDataTextureLayerStorage {
+final class CoreDataTextureLayerStorage: CoreDataStorage<TextureLayerArrayEntity> {
 
-    private let storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>
-
-    public convenience init(context: NSManagedObjectContext) {
-        self.init(storage: CoreDataStorage(context: context))
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
     init(storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>) {
-        self.storage = storage
+        super.init(injecting: storage)
     }
 
-    public func fetch() -> TextureLayerArrayEntity? {
-        try? storage.fetch()
-    }
-
-    public func clearAll() {
+    override func clearAll() throws {
         do {
-            try storage.clearAll()
+            try super.clearAll()
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
+            throw error
         }
     }
 
     func save(from textureLayers: TextureLayersState) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         guard

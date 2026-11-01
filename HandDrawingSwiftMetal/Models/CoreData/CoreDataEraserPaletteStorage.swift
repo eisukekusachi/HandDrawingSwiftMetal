@@ -6,29 +6,23 @@
 
 /// Alpha palette managed by Core Data
 @MainActor
-final class CoreDataEraserPaletteStorage {
+final class CoreDataEraserPaletteStorage: CoreDataStorage<EraserPaletteEntity> {
 
-    private let storage: any CoreDataStorageProtocol<EraserPaletteEntity>
-
-    convenience init(context: NSManagedObjectContext) {
-        self.init(storage: CoreDataStorage(context: context))
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
     init(storage: any CoreDataStorageProtocol<EraserPaletteEntity>) {
-        self.storage = storage
+        super.init(injecting: storage)
     }
 }
 
 extension CoreDataEraserPaletteStorage {
 
-    func fetch() throws -> EraserPaletteEntity? {
-        try storage.fetch()
-    }
-
     func save(from palette: EraserPalette) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         let id = palette.id

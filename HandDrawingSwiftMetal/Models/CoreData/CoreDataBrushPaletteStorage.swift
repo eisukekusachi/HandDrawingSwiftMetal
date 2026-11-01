@@ -8,29 +8,23 @@ import UIKit
 
 /// Color palette managed by Core Data
 @MainActor
-final class CoreDataBrushPaletteStorage {
+final class CoreDataBrushPaletteStorage: CoreDataStorage<BrushPaletteEntity> {
 
-    private let storage: any CoreDataStorageProtocol<BrushPaletteEntity>
-
-    convenience init(context: NSManagedObjectContext) {
-        self.init(storage: CoreDataStorage(context: context))
+    init(context: NSManagedObjectContext) {
+        super.init(context: context)
     }
 
     init(storage: any CoreDataStorageProtocol<BrushPaletteEntity>) {
-        self.storage = storage
+        super.init(injecting: storage)
     }
 }
 
 extension CoreDataBrushPaletteStorage {
 
-    func fetch() throws -> BrushPaletteEntity? {
-        try storage.fetch()
-    }
-
     func save(from palette: BrushPalette) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = resolvedContext(),
+            let request = resolvedFetchRequest()
         else { return }
 
         let id: UUID = palette.id

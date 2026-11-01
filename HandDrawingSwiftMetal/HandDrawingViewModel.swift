@@ -59,21 +59,25 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    private let textureLayerStorage: CoreDataTextureLayerStorage
-    let projectStorage: CoreDataProjectStorage
-    let drawingToolStorage: CoreDataDrawingToolStorage
-    let brushPaletteStorage: CoreDataBrushPaletteStorage
-    let eraserPaletteStorage: CoreDataEraserPaletteStorage
+    private var textureLayerStorage: CoreDataTextureLayerStorage {
+        dependencies.textureLayerStorage
+    }
 
-    private let textureLayersStorageController = PersistenceController(
-        xcdatamodeldName: "TextureLayerStorage"
-    )
-    private let projectStorageController = PersistenceController(
-        xcdatamodeldName: "ProjectStorage"
-    )
-    private let drawingToolStorageController = PersistenceController(
-        xcdatamodeldName: "DrawingToolStorage"
-    )
+    var projectStorage: CoreDataProjectStorage {
+        dependencies.projectStorage
+    }
+
+    var drawingToolStorage: CoreDataDrawingToolStorage {
+        dependencies.drawingToolStorage
+    }
+
+    var brushPaletteStorage: CoreDataBrushPaletteStorage {
+        dependencies.brushPaletteStorage
+    }
+
+    var eraserPaletteStorage: CoreDataEraserPaletteStorage {
+        dependencies.eraserPaletteStorage
+    }
 
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
@@ -122,13 +126,6 @@ final class HandDrawingViewModel: ObservableObject {
             repository: dependencies.documentsTextureDataRepository
         )
         self.undoableTextureLayers = undoableTextureLayers
-        self.textureLayerStorage = .init(
-            context: textureLayersStorageController.viewContext
-        )
-        self.projectStorage = .init(context: projectStorageController.viewContext)
-        self.drawingToolStorage = .init(context: drawingToolStorageController.viewContext)
-        self.brushPaletteStorage = .init(context: drawingToolStorageController.viewContext)
-        self.eraserPaletteStorage = .init(context: drawingToolStorageController.viewContext)
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
@@ -168,7 +165,7 @@ final class HandDrawingViewModel: ObservableObject {
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
-        if let entity = textureLayerStorage.fetch() {
+        if let entity = try? textureLayerStorage.fetch() {
             let snapshot = TextureLayersSnapshot(entity: entity)
             do {
                 // Load MTLTextures from the documents directory.
@@ -181,7 +178,7 @@ final class HandDrawingViewModel: ObservableObject {
                 return snapshot.textureSize
             } catch {
                 // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
-                textureLayerStorage.clearAll()
+                try? textureLayerStorage.clearAll()
             }
         }
 
