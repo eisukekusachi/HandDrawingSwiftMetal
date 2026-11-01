@@ -10,6 +10,8 @@ import MetalKit
 final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked Sendable {
 
     var removedIds: [UUID] = []
+    var restoreTexturesError: (any Error)?
+    private(set) var restoreTexturesCalls: [(ids: [UUID], textureSize: CGSize)] = []
 
     func initializeTexture(
         id: UUID,
@@ -22,7 +24,12 @@ final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked 
         ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
-    ) throws {}
+    ) throws {
+        restoreTexturesCalls.append((ids, textureSize))
+        if let restoreTexturesError {
+            throw restoreTexturesError
+        }
+    }
 
     func duplicatedTexture(
         _ id: UUID,
