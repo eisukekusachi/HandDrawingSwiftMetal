@@ -62,26 +62,6 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
             Logger.error("Failed to clear Core Data storage: \(error)")
         }
     }
-
-    public func textureLayersSnapshot(from entity: TextureLayerArrayEntity) -> TextureLayersSnapshot {
-        let layers: [TextureLayerModel] = entity.textureLayerItems?
-            .compactMap { $0 as? TextureLayerEntity }
-            .map { layer -> TextureLayerModel in
-                .init(
-                    id: layer.id ?? LayerId(),
-                    title: layer.title ?? "",
-                    alpha: Int(layer.alpha),
-                    isVisible: layer.isVisible
-                )
-            } ?? []
-        let layerIndex = layers.firstIndex(where: { $0.id == entity.selectedLayerId }) ?? 0
-        let textureSize: CGSize = .init(width: Int(entity.textureWidth), height: Int(entity.textureHeight))
-        return .init(
-            layers: layers,
-            layerIndex: layerIndex,
-            textureSize: textureSize
-        )
-    }
 }
 
 private extension CoreDataTextureLayerStorage {

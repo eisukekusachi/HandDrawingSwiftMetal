@@ -179,7 +179,7 @@ final class HandDrawingViewModel: ObservableObject {
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
         if let entity = textureLayerStorage.fetch() {
-            let snapshot = textureLayerStorage.textureLayersSnapshot(from: entity)
+            let snapshot = TextureLayersSnapshot(entity: entity)
             do {
                 // Load MTLTextures from the documents directory.
                 try dependencies.documentsTextureDataRepository.restoreTextures(
