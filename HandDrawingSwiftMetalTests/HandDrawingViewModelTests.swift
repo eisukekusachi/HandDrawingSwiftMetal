@@ -16,14 +16,12 @@ struct HandDrawingViewModelTests {
     @MainActor
     struct LoadTexturesFromDocuments {
 
-        private let savedTextureSize = CGSize(width: 320, height: 240)
-        private let fallbackTextureSize = CGSize(width: 512, height: 512)
-
         private let layer0: TextureLayerModel = .generate(title: "layer0")
         private let layer1: TextureLayerModel = .generate(title: "layer1")
 
         @Test
         func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
+            let fallbackTextureSize = TestUtils.randomSize()
             let textureRepository = TextureRepositoryStub()
             let coreDataStub = CoreDataStorageStub<TextureLayerArrayEntity>()
             let (device, commandQueue) = try makeMetal()
@@ -55,6 +53,7 @@ struct HandDrawingViewModelTests {
 
         @Test
         func `When metadata and pixel files are available, it restores layers from Core Data`() async throws {
+            let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
             let context = try TestUtils.makeInMemoryTextureLayerContext()
             let rootEntity = TestUtils.makeTextureLayerArrayEntity(
                 context: context,
@@ -96,6 +95,7 @@ struct HandDrawingViewModelTests {
 
         @Test
         func `When pixel restore fails, it clears stale Core Data and installs a blank layer`() async throws {
+            let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
             let context = try TestUtils.makeInMemoryTextureLayerContext()
             let rootEntity = TestUtils.makeTextureLayerArrayEntity(
                 context: context,

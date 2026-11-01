@@ -11,6 +11,17 @@ import TextureLayerView
 /// Shared helpers for unit tests.
 enum TestUtils {
 
+    /// Random canvas size safe for `TextureLayerArrayEntity` (`Int16` width/height).
+    static func randomSize(
+        width: ClosedRange<Int> = 64...1024,
+        height: ClosedRange<Int> = 64...1024
+    ) -> CGSize {
+        CGSize(
+            width: Int.random(in: width),
+            height: Int.random(in: height)
+        )
+    }
+
     @MainActor
     static func makeInMemoryTextureLayerContext() throws -> NSManagedObjectContext {
         let bundle = Bundle(for: CoreDataTextureLayerStorage.self)
