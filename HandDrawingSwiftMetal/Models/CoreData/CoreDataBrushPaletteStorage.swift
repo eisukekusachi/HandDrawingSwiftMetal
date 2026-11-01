@@ -14,13 +14,23 @@ final class CoreDataBrushPaletteStorage {
 
     private var palette: BrushPalette
 
-    private let storage: CoreDataStorage<BrushPaletteEntity>
+    private let persistence: any CoreDataPersistProtocol<BrushPaletteEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(palette: BrushPalette, context: NSManagedObjectContext) {
+    convenience init(palette: BrushPalette, context: NSManagedObjectContext) {
+        self.init(
+            palette: palette,
+            persistence: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        palette: BrushPalette,
+        persistence: any CoreDataPersistProtocol<BrushPaletteEntity>
+    ) {
         self.palette = palette
-        self.storage = .init(context: context)
+        self.persistence = persistence
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
@@ -41,7 +51,7 @@ final class CoreDataBrushPaletteStorage {
 extension CoreDataBrushPaletteStorage {
 
     func fetch() throws -> BrushPaletteEntity? {
-        try storage.fetch()
+        try persistence.fetch()
     }
 
     func update(_ entity: BrushPaletteEntity) {
@@ -84,8 +94,8 @@ private extension CoreDataBrushPaletteStorage {
 
     func save(_ target: BrushPalette) async {
         guard
-            let context = self.storage.context,
-            let request = self.storage.fetchRequest()
+            let context = persistence.context,
+            let request = persistence.fetchRequest()
         else { return }
 
         let id: UUID = target.id

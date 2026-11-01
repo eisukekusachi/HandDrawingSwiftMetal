@@ -13,13 +13,23 @@ final class CoreDataProjectStorage {
 
     private let project: ProjectData
 
-    private let storage: CoreDataStorage<ProjectEntity>
+    private let persistence: any CoreDataPersistProtocol<ProjectEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(project: ProjectData, context: NSManagedObjectContext) {
+    convenience init(project: ProjectData, context: NSManagedObjectContext) {
+        self.init(
+            project: project,
+            persistence: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        project: ProjectData,
+        persistence: any CoreDataPersistProtocol<ProjectEntity>
+    ) {
         self.project = project
-        self.storage = .init(context: context)
+        self.persistence = persistence
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -41,7 +51,7 @@ final class CoreDataProjectStorage {
 extension CoreDataProjectStorage {
 
     func fetch() throws -> ProjectEntity? {
-        try storage.fetch()
+        try persistence.fetch()
     }
 
     func update(_ entity: ProjectEntity) {
@@ -80,8 +90,8 @@ extension CoreDataProjectStorage {
 private extension CoreDataProjectStorage {
     func save(_ target: ProjectData) async {
         guard
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = persistence.context,
+            let request = persistence.fetchRequest()
         else { return }
 
         let projectName = target.currentProjectName

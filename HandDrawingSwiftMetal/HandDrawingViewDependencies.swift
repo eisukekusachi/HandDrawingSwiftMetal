@@ -18,15 +18,20 @@ final class HandDrawingViewDependencies {
     /// Repository for undo textures. Kept in memory because undo needs fast access.
     let inMemoryTextureRepository: MTLTextureRepositoryProtocol
 
+    /// When set, supplies saved layer metadata for tests. Default is on-disk Core Data in the view model.
+    let textureLayerStorage: ((TextureLayersUndoableState) -> any TextureLayersSnapshotReading)?
+
     init(
         fileManager: FileManaging? = nil,
         documentsTextureDataRepository: MTLTextureDataRepositoryProtocol? = nil,
-        inMemoryTextureRepository: MTLTextureRepositoryProtocol? = nil
+        inMemoryTextureRepository: MTLTextureRepositoryProtocol? = nil,
+        textureLayerStorage: ((TextureLayersUndoableState) -> any TextureLayersSnapshotReading)? = nil
     ) {
         self.fileManager = fileManager ?? FileManagerWrapper()
         self.documentsTextureDataRepository =
             documentsTextureDataRepository ?? DocumentsTextureDataRepository.shared
         self.inMemoryTextureRepository =
             inMemoryTextureRepository ?? InMemoryTextureRepository.shared
+        self.textureLayerStorage = textureLayerStorage
     }
 }

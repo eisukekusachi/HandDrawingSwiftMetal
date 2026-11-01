@@ -13,19 +13,29 @@ import TextureLayerView
 
 /// Texture layers managed by Core Data
 @MainActor
-public final class CoreDataTextureLayerStorage: ObservableObject {
+public final class CoreDataTextureLayerStorage: ObservableObject, TextureLayersSnapshotReading {
 
     private var textureLayers: TextureLayersState
 
-    private var storage: CoreDataStorage<TextureLayerArrayEntity>?
+    private let persistence: any CoreDataPersistProtocol<TextureLayerArrayEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(
+    convenience init(
         textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {
-        self.storage = .init(context: context)
+        self.init(
+            textureLayers: textureLayers,
+            persistence: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        textureLayers: TextureLayersState,
+        persistence: any CoreDataPersistProtocol<TextureLayerArrayEntity>
+    ) {
+        self.persistence = persistence
         self.textureLayers = textureLayers
 
         // Save to Core Data when any of the properties are updated
@@ -44,15 +54,24 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
     }
 
     public func fetch() -> TextureLayerArrayEntity? {
-        try? storage?.fetch()
+        try? persistence.fetch()
     }
 
     public func clearAll() {
         do {
-            try storage?.clearAll()
+            try persistence.clearAll()
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
         }
+    }
+
+    public func savedLayersSnapshot() -> TextureLayersSnapshot? {
+        guard let entity = fetch() else { return nil }
+        return textureLayersSnapshot(from: entity)
+    }
+
+    public func clearSavedLayers() {
+        clearAll()
     }
 
     public func textureLayersSnapshot(from entity: TextureLayerArrayEntity) -> TextureLayersSnapshot {
@@ -79,9 +98,8 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 private extension CoreDataTextureLayerStorage {
     func save() async {
         guard
-            let storage,
-            let context = storage.context,
-            let request = storage.fetchRequest()
+            let context = persistence.context,
+            let request = persistence.fetchRequest()
         else { return }
 
         guard
@@ -159,4 +177,3 @@ private extension CoreDataTextureLayerStorage {
         }
     }
 }
-

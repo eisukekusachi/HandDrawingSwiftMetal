@@ -15,7 +15,11 @@ final class PersistenceController {
 
     private let container: NSPersistentContainer
 
-    public init(xcdatamodeldName: String, excludeFromBackup: Bool = true) {
+    public init(
+        xcdatamodeldName: String,
+        inMemory: Bool = false,
+        excludeFromBackup: Bool = true
+    ) {
         let bundle: Bundle = .main
 
         guard
@@ -27,10 +31,16 @@ final class PersistenceController {
 
         container = NSPersistentContainer(name: xcdatamodeldName, managedObjectModel: model)
 
+        if inMemory {
+            let description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+            container.persistentStoreDescriptions = [description]
+        }
+
         container.loadPersistentStores { storeDescription, _error in
             precondition(_error == nil, "Store load failed: \(_error!)")
 
-            if excludeFromBackup {
+            if excludeFromBackup, !inMemory {
                 self.excludeStoreFilesFromBackup()
             }
         }

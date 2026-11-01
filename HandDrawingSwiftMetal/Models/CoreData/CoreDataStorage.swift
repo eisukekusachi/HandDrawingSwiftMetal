@@ -10,7 +10,9 @@
 import CoreData
 import Foundation
 
-protocol CoreDataStorageProtocol {
+/// Core Data fetch / clear access for a single root entity type.
+@MainActor
+protocol CoreDataPersistProtocol<Entity>: AnyObject {
     associatedtype Entity: NSManagedObject
     var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>?
@@ -18,7 +20,7 @@ protocol CoreDataStorageProtocol {
     func clearAll() throws
 }
 
-final class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
+final class CoreDataStorage<Entity: NSManagedObject>: CoreDataPersistProtocol {
     public let context: NSManagedObjectContext?
 
     public init(context: NSManagedObjectContext?) {

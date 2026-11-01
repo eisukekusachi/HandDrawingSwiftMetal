@@ -59,7 +59,8 @@ final class HandDrawingViewModel: ObservableObject {
         )
     }
 
-    private let textureLayerStorage: CoreDataTextureLayerStorage
+    private let textureLayerSnapshotReader: any TextureLayersSnapshotReading
+    private let coreDataTextureLayerStorage: CoreDataTextureLayerStorage?
     let projectStorage: CoreDataProjectStorage
     let drawingToolStorage: CoreDataDrawingToolStorage
     let brushPaletteStorage: CoreDataBrushPaletteStorage
@@ -122,10 +123,18 @@ final class HandDrawingViewModel: ObservableObject {
             repository: dependencies.documentsTextureDataRepository
         )
         self.undoableTextureLayers = undoableTextureLayers
-        self.textureLayerStorage = .init(
-            textureLayers: undoableTextureLayers,
-            context: textureLayersStorageController.viewContext
-        )
+        if let makeTextureLayerStorage = dependencies.textureLayerStorage {
+            let reader = makeTextureLayerStorage(undoableTextureLayers)
+            self.textureLayerSnapshotReader = reader
+            self.coreDataTextureLayerStorage = reader as? CoreDataTextureLayerStorage
+        } else {
+            let storage = CoreDataTextureLayerStorage(
+                textureLayers: undoableTextureLayers,
+                context: textureLayersStorageController.viewContext
+            )
+            self.textureLayerSnapshotReader = storage
+            self.coreDataTextureLayerStorage = storage
+        }
         self.projectStorage = .init(
             project: project,
             context: projectStorageController.viewContext
@@ -173,13 +182,13 @@ final class HandDrawingViewModel: ObservableObject {
         }
     }
 
+    /// Loads textures from the documents directory.
     func loadTexturesFromDocuments(
         device: MTLDevice,
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
-        if let entity = textureLayerStorage.fetch() {
-            let snapshot = textureLayerStorage.textureLayersSnapshot(from: entity)
+        if let snapshot = textureLayerSnapshotReader.savedLayersSnapshot() {
             do {
                 // Load MTLTextures from the documents directory.
                 try dependencies.documentsTextureDataRepository.restoreTextures(
@@ -191,7 +200,7 @@ final class HandDrawingViewModel: ObservableObject {
                 return snapshot.textureSize
             } catch {
                 // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
-                textureLayerStorage.clearAll()
+                textureLayerSnapshotReader.clearSavedLayers()
             }
         }
 
