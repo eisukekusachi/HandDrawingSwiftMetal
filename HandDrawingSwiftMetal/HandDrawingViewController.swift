@@ -41,33 +41,34 @@ class HandDrawingViewController: UIViewController {
         return device
     }()
 
-    private lazy var undoCoordinator: UndoCoordinator = {
-        .init(
-            canvasView: canvasView,
-            textureLayersState: viewModel.undoableTextureLayers,
-            inMemoryTextureRepository: viewModel.dependencies.inMemoryTextureRepository
+    private let drawingRenderers: [DrawingToolType: any HighPrecisionDrawingRenderer] = [
+        .brush: BrushDrawingRenderer(),
+        .eraser: EraserDrawingRenderer()
+    ]
+
+    private lazy var canvasViewDependencies: TextureLayerCanvasViewDependencies = {
+        let device = sharedDevice
+        guard let commandQueue = device.makeCommandQueue() else {
+            fatalError("Failed to create command queue.")
+        }
+        let renderer = MTLRenderer(device: device, commandQueue: commandQueue)
+        return .init(
+            textureLayers: viewModel.undoableTextureLayers,
+            documentsTextureDataRepository: viewModel.dependencies.documentsTextureDataRepository,
+            renderer: renderer
         )
     }()
 
     private(set) lazy var canvasView: TextureLayerCanvasView = {
-        TextureLayerCanvasView(
-            textureLayer: viewModel.undoableTextureLayers,
+        .init(
+            dependencies: canvasViewDependencies,
             device: sharedDevice,
-            configuration: configuration.canvasConfiguration
+            configuration: configuration.canvasConfiguration,
+            onUpdateLayerThumbnail: { [weak viewModel] id, thumbnail in
+                viewModel?.undoableTextureLayers.updateLayerThumbnail(id, thumbnail: thumbnail)
+            }
         )
     }()
-
-    private lazy var textureLayerUndo = TextureLayerUndoRegistrar(
-        device: sharedDevice,
-        inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
-        textureRepository: viewModel.dependencies.documentsTextureDataRepository,
-        onRegisterUndo: { [weak self] undoObjectPair in
-            self?.undoCoordinator.registerUndo(undoObjectPair)
-        },
-        showError: { [weak self] error in
-            self?.viewModel.showError(error)
-        }
-    )
 
     private(set) lazy var textureLayerView: TextureLayerView = {
         TextureLayerView(
@@ -81,10 +82,27 @@ class HandDrawingViewController: UIViewController {
         )
     }()
 
-    private let drawingRenderers: [DrawingToolType: any HighPrecisionDrawingRenderer] = [
-        .brush: BrushDrawingRenderer(),
-        .eraser: EraserDrawingRenderer()
-    ]
+    private lazy var textureLayerUndoRegister: TextureLayerUndoRegister = {
+        .init(
+            device: sharedDevice,
+            inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
+            textureRepository: viewModel.dependencies.documentsTextureDataRepository,
+            onRegisterUndo: { [weak self] undoObjectPair in
+                self?.undoCoordinator.registerUndo(undoObjectPair)
+            },
+            showError: { [weak self] error in
+                self?.viewModel.showError(error)
+            }
+        )
+    }()
+
+    private lazy var undoCoordinator: UndoCoordinator = {
+        .init(
+            canvasView: canvasView,
+            textureLayersState: viewModel.undoableTextureLayers,
+            inMemoryTextureRepository: viewModel.dependencies.inMemoryTextureRepository
+        )
+    }()
 
     private lazy var colorPaletteEditViewModel = ColorPaletteEditViewModel(
         colorSource: viewModel.brushPalette,
@@ -123,7 +141,7 @@ class HandDrawingViewController: UIViewController {
         viewModel.onViewDidLoad(
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue,
-            undo: textureLayerUndo,
+            undoRegister: textureLayerUndoRegister,
             canvasView: canvasView
         )
         layoutViews()
@@ -141,7 +159,7 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                let textureSize = await viewModel.prepareTextureLayers(
+                let textureSize = try await viewModel.loadTexturesFromDocuments(
                     device: sharedDevice,
                     fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
@@ -149,12 +167,12 @@ class HandDrawingViewController: UIViewController {
 
                 try await initializeCanvas(textureSize)
 
-                await viewModel.updateThumbnails(device: sharedDevice)
-
                 // Initialize the textures in DrawingRenderer
                 for renderer in drawingRenderers.values {
                     renderer.initializeTextures(textureSize)
                 }
+
+                await viewModel.updateThumbnails(device: sharedDevice)
 
                 showActivityIndicator(false)
                 showContentView(true)
@@ -183,6 +201,7 @@ class HandDrawingViewController: UIViewController {
 }
 
 extension HandDrawingViewController {
+
     func initializeCanvas(_ textureSize: CGSize) async throws {
         try await canvasView.initializeCanvas(textureSize)
 

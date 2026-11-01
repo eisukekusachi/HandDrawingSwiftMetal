@@ -8,7 +8,7 @@ import MetalKit
 import TextureLayerView
 
 @MainActor
-final class TextureLayerUndoRegistrar {
+final class TextureLayerUndoRegister {
 
     private let device: MTLDevice
 
@@ -232,7 +232,7 @@ final class TextureLayerUndoRegistrar {
     }
 }
 
-private extension TextureLayerUndoRegistrar {
+private extension TextureLayerUndoRegister {
 
     func registerAdditionUndo(
         newTexture: MTLTexture?,

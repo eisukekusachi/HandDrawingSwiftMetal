@@ -65,11 +65,15 @@ final class HandDrawingViewModel: ObservableObject {
     let brushPaletteStorage: CoreDataBrushPaletteStorage
     let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
-    private let textureLayersStorageController: PersistenceController = PersistenceController(
+    private let textureLayersStorageController = PersistenceController(
         xcdatamodeldName: "TextureLayerStorage"
     )
-    private let projectStorageController: PersistenceController
-    private let drawingToolStorageController: PersistenceController
+    private let projectStorageController = PersistenceController(
+        xcdatamodeldName: "ProjectStorage"
+    )
+    private let drawingToolStorageController = PersistenceController(
+        xcdatamodeldName: "DrawingToolStorage"
+    )
 
     /// A publisher that emits a request to show or hide the activity indicator
     var activityIndicator: AnyPublisher<Bool, Never> {
@@ -122,12 +126,6 @@ final class HandDrawingViewModel: ObservableObject {
             textureLayers: undoableTextureLayers,
             context: textureLayersStorageController.viewContext
         )
-        self.projectStorageController = .init(
-            xcdatamodeldName: "ProjectStorage"
-        )
-        self.drawingToolStorageController = PersistenceController(
-            xcdatamodeldName: "DrawingToolStorage"
-        )
         self.projectStorage = .init(
             project: project,
             context: projectStorageController.viewContext
@@ -155,7 +153,7 @@ final class HandDrawingViewModel: ObservableObject {
     func onViewDidLoad(
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
-        undo: TextureLayerUndoRegistrar,
+        undoRegister: TextureLayerUndoRegister,
         canvasView: TextureLayerCanvasView
     ) {
         undoableTextureLayers.setup(
@@ -163,7 +161,7 @@ final class HandDrawingViewModel: ObservableObject {
             commandQueue: commandQueue,
             canvasView: canvasView
         )
-        undoableTextureLayers.setUndo(undo: undo)
+        undoableTextureLayers.setUndo(undoRegister: undoRegister)
 
         do {
             try fetchDataFromCoreDataIfAvailable()
@@ -175,76 +173,61 @@ final class HandDrawingViewModel: ObservableObject {
         }
     }
 
-    func prepareTextureLayers(
+    func loadTexturesFromDocuments(
         device: MTLDevice,
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
-    ) async -> CGSize {
-        if let restoredTextureLayerDataFromCoreData {
+    ) async throws -> CGSize {
+        if let entity = textureLayerStorage.fetch() {
+            let snapshot = textureLayerStorage.textureLayersSnapshot(from: entity)
             do {
+                // Load MTLTextures from the documents directory.
                 try dependencies.documentsTextureDataRepository.restoreTextures(
-                    ids: restoredTextureLayerDataFromCoreData.layers.map(\.id),
-                    textureSize: restoredTextureLayerDataFromCoreData.textureSize,
+                    ids: snapshot.layers.map(\.id),
+                    textureSize: snapshot.textureSize,
                     device: device
                 )
-                undoableTextureLayers.setLayers(restoredTextureLayerDataFromCoreData)
-                return restoredTextureLayerDataFromCoreData.textureSize
+                undoableTextureLayers.setLayers(snapshot)
+                return snapshot.textureSize
             } catch {
-                let textureSize = await installBlankLayerOrAbort(
-                    textureSize: fallbackTextureSize,
-                    device: device,
-                    commandQueue: commandQueue
-                )
+                // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
                 textureLayerStorage.clearAll()
-                return textureSize
             }
         }
 
-        return await installBlankLayerOrAbort(
+        try await installBlankLayer(
             textureSize: fallbackTextureSize,
             device: device,
             commandQueue: commandQueue
         )
+        return fallbackTextureSize
     }
 
+    /// Creates one default layer with an empty texture file and applies it as the current layer stack.
     func installBlankLayer(
         textureSize: CGSize,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
+        // Default single layer.
         let layer = TextureLayerModel(
             id: LayerId(),
             title: TimeStampFormatter.currentDate,
             alpha: 255,
             isVisible: true
         )
+        // Blank pixel buffer for the layer in the documents directory.
         try await dependencies.documentsTextureDataRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
             device: device,
             commandQueue: commandQueue
         )
+        // Replace layer list with this layer and set canvas size.
         undoableTextureLayers.setLayers(
             [layer],
             textureSize: textureSize
         )
-    }
-
-    private func installBlankLayerOrAbort(
-        textureSize: CGSize,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async -> CGSize {
-        do {
-            try await installBlankLayer(
-                textureSize: textureSize,
-                device: device,
-                commandQueue: commandQueue
-            )
-            return textureSize
-        } catch {
-            fatalError("Failed to initialize texture")
-        }
     }
 
     func toggleDrawingTool() {
@@ -265,13 +248,6 @@ final class HandDrawingViewModel: ObservableObject {
 }
 
 private extension HandDrawingViewModel {
-
-    var restoredTextureLayerDataFromCoreData: TextureLayersSnapshot? {
-        guard
-            let entity = textureLayerStorage.fetch()
-        else { return nil }
-        return textureLayerStorage.textureLayersSnapshot(from: entity)
-    }
 
     func fetchDataFromCoreDataIfAvailable() throws {
         if let projectEntity = try projectStorage.fetch() {

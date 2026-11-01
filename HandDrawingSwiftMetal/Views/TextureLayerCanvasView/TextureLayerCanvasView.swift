@@ -13,13 +13,12 @@ import TextureLayerView
     /// A debouncer used to prevent continuous input during drawing
     private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
 
-    private let textureLayer: TextureLayersCompositingProtocol
+    private let dependencies: TextureLayerCanvasViewDependencies
+
+    private let onUpdateLayerThumbnail: (@MainActor @Sendable (UUID, UIImage?) -> Void)?
 
     private lazy var viewModel: TextureLayerCanvasViewModel = {
-        .init(
-            textureLayer: textureLayer,
-            renderer: renderer
-        )
+        .init(dependencies: dependencies)
     }()
 
     private var cancellables = Set<AnyCancellable>()
@@ -27,15 +26,18 @@ import TextureLayerView
     private let configuration: CanvasConfiguration
 
     public init(
-        textureLayer: TextureLayersCompositingProtocol,
+        dependencies: TextureLayerCanvasViewDependencies,
         device: MTLDevice? = nil,
-        configuration: CanvasConfiguration
+        configuration: CanvasConfiguration,
+        onUpdateLayerThumbnail: (@MainActor @Sendable (UUID, UIImage?) -> Void)? = nil
     ) {
-        self.textureLayer = textureLayer
+        self.dependencies = dependencies
+        self.onUpdateLayerThumbnail = onUpdateLayerThumbnail
         self.configuration = configuration
         super.init(
             device: device,
-            configuration: configuration
+            configuration: configuration,
+            renderer: dependencies.renderer
         )
         self.bindData()
     }
@@ -63,7 +65,7 @@ import TextureLayerView
     private func completeDrawing() {
         guard
             let texture = currentTexture,
-            let layerId = textureLayer.selectedLayer?.id
+            let layerId = dependencies.textureLayers.selectedLayer?.id
         else { return }
 
         let device = renderer.device
@@ -80,9 +82,9 @@ import TextureLayerView
                     layerId: layerId,
                     textureData: textureData
                 )
-                if let thumbnail = texture.makeThumbnail(),
-                   let layersState = self.textureLayer as? TextureLayersState {
-                    layersState.updateLayerThumbnail(layerId, thumbnail: thumbnail)
+                let thumbnail = texture.makeThumbnail()
+                await MainActor.run {
+                    self.onUpdateLayerThumbnail?(layerId, thumbnail)
                 }
             } catch {
                 Logger.error(error)
@@ -92,7 +94,7 @@ import TextureLayerView
 
     public func updateFullCanvas() async throws {
         guard
-            let selectedLayer = textureLayer.selectedLayer,
+            let selectedLayer = dependencies.textureLayers.selectedLayer,
             let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
                 selectedLayer.id
             ),

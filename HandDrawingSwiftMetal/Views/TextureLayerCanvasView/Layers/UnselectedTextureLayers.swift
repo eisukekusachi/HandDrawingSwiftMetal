@@ -32,9 +32,12 @@ struct UnselectedTextureLayers {
         self.layers = layers
         self.selectedIndex = selectedIndex
     }
+}
 
-    init?(source: TextureLayersCompositingProtocol) {
-        guard let selectedIndex = source.selectedLayerIndex else { return nil }
-        self.init(layers: source.layers, selectedIndex: selectedIndex)
+extension UnselectedTextureLayers {
+
+    init?(textureLayers: TextureLayersCompositingProtocol) {
+        guard let selectedIndex = textureLayers.selectedLayerIndex else { return nil }
+        self.init(layers: textureLayers.layers, selectedIndex: selectedIndex)
     }
 }
