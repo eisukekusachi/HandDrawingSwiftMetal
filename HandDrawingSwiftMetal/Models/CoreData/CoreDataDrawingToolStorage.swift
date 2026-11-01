@@ -14,16 +14,26 @@ final class CoreDataDrawingToolStorage {
 
     private let drawingTool: DrawingTool
 
-    private let storage: CoreDataStorage<DrawingToolEntity>
+    private let storage: any CoreDataStorageProtocol<DrawingToolEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(
+    convenience init(
         drawingTool: DrawingTool,
         context: NSManagedObjectContext
     ) {
+        self.init(
+            drawingTool: drawingTool,
+            storage: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        drawingTool: DrawingTool,
+        storage: any CoreDataStorageProtocol<DrawingToolEntity>
+    ) {
         self.drawingTool = drawingTool
-        self.storage = .init(context: context)
+        self.storage = storage
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(
@@ -99,8 +109,8 @@ extension CoreDataDrawingToolStorage {
 private extension CoreDataDrawingToolStorage {
     func save(_ target: DrawingTool) async {
         guard
-            let context = self.storage.context,
-            let request = self.storage.fetchRequest()
+            let context = storage.context,
+            let request = storage.fetchRequest()
         else { return }
 
         let id: UUID = target.id

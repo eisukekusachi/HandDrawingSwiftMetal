@@ -14,13 +14,23 @@ final class CoreDataEraserPaletteStorage {
 
     private var palette: EraserPalette
 
-    private let storage: CoreDataStorage<EraserPaletteEntity>
+    private let storage: any CoreDataStorageProtocol<EraserPaletteEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(palette: EraserPalette, context: NSManagedObjectContext) {
+    convenience init(palette: EraserPalette, context: NSManagedObjectContext) {
+        self.init(
+            palette: palette,
+            storage: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        palette: EraserPalette,
+        storage: any CoreDataStorageProtocol<EraserPaletteEntity>
+    ) {
         self.palette = palette
-        self.storage = .init(context: context)
+        self.storage = storage
 
         // Save to Core Data when the properties are updated
         Publishers.Merge(
@@ -84,8 +94,8 @@ extension CoreDataEraserPaletteStorage {
 private extension CoreDataEraserPaletteStorage {
     func save(_ target: EraserPalette) async {
         guard
-            let context = self.storage.context,
-            let request = self.storage.fetchRequest()
+            let context = storage.context,
+            let request = storage.fetchRequest()
         else { return }
 
         let id = target.id

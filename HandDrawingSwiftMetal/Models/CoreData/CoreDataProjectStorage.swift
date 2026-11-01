@@ -13,13 +13,23 @@ final class CoreDataProjectStorage {
 
     private let project: ProjectData
 
-    private let storage: CoreDataStorage<ProjectEntity>
+    private let storage: any CoreDataStorageProtocol<ProjectEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(project: ProjectData, context: NSManagedObjectContext) {
+    convenience init(project: ProjectData, context: NSManagedObjectContext) {
+        self.init(
+            project: project,
+            storage: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        project: ProjectData,
+        storage: any CoreDataStorageProtocol<ProjectEntity>
+    ) {
         self.project = project
-        self.storage = .init(context: context)
+        self.storage = storage
 
         // Save to Core Data when the properties are updated
         Publishers.Merge3(

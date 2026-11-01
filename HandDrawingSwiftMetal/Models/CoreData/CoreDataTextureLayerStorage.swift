@@ -1,5 +1,3 @@
-// TODO: Move to Core Package
-
 //
 //  Created by Eisuke Kusachi
 //
@@ -17,15 +15,25 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 
     private var textureLayers: TextureLayersState
 
-    private var storage: CoreDataStorage<TextureLayerArrayEntity>?
+    private let storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(
+    convenience init(
         textureLayers: TextureLayersState,
         context: NSManagedObjectContext
     ) {
-        self.storage = .init(context: context)
+        self.init(
+            textureLayers: textureLayers,
+            storage: CoreDataStorage(context: context)
+        )
+    }
+
+    init(
+        textureLayers: TextureLayersState,
+        storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>
+    ) {
+        self.storage = storage
         self.textureLayers = textureLayers
 
         // Save to Core Data when any of the properties are updated
@@ -44,12 +52,12 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
     }
 
     public func fetch() -> TextureLayerArrayEntity? {
-        try? storage?.fetch()
+        try? storage.fetch()
     }
 
     public func clearAll() {
         do {
-            try storage?.clearAll()
+            try storage.clearAll()
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
         }
@@ -79,7 +87,6 @@ public final class CoreDataTextureLayerStorage: ObservableObject {
 private extension CoreDataTextureLayerStorage {
     func save() async {
         guard
-            let storage,
             let context = storage.context,
             let request = storage.fetchRequest()
         else { return }

@@ -1,8 +1,5 @@
 //
-//  CoreDataSaveDebounceMilliseconds.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/02/01.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation

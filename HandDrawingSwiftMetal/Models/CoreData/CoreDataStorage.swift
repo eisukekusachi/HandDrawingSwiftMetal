@@ -1,16 +1,13 @@
-// TODO: Move to Core Package
-
 //
-//  CoreDataStorage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2026/02/01.
+//  Created by Eisuke Kusachi
 //
 
 import CoreData
 import Foundation
 
-protocol CoreDataStorageProtocol {
+/// Core Data fetch / clear access for a single root entity type.
+@MainActor
+protocol CoreDataStorageProtocol<Entity>: AnyObject {
     associatedtype Entity: NSManagedObject
     var context: NSManagedObjectContext? { get }
     func fetchRequest() -> NSFetchRequest<Entity>?
