@@ -4,8 +4,9 @@
 
 import CoreGraphics
 @preconcurrency import CoreData
-@testable import HandDrawingSwiftMetal
 import TextureLayerView
+
+@testable import HandDrawingSwiftMetal
 
 /// Shared helpers for unit tests.
 enum TestUtils {
