@@ -20,13 +20,11 @@ final class HandDrawingViewDependencies {
 
     init(
         fileManager: FileManaging? = nil,
-        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol? = nil,
-        inMemoryTextureRepository: MTLTextureRepositoryProtocol? = nil
+        textureDataRepository: MTLTextureDataRepositoryProtocol? = nil,
+        textureRepository: MTLTextureRepositoryProtocol? = nil
     ) {
         self.fileManager = fileManager ?? FileManagerWrapper()
-        self.documentsTextureDataRepository =
-            documentsTextureDataRepository ?? DocumentsTextureDataRepository.shared
-        self.inMemoryTextureRepository =
-            inMemoryTextureRepository ?? InMemoryTextureRepository.shared
+        self.documentsTextureDataRepository = textureDataRepository ?? DocumentsTextureDataRepository.shared
+        self.inMemoryTextureRepository = textureRepository ?? InMemoryTextureRepository.shared
     }
 }
