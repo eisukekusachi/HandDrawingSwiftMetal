@@ -53,34 +53,30 @@ extension HandDrawingViewModel {
         }
     }
 
-    /// Creates a new canvas file, loads it, and asks the view to refresh.
+    /// Creates a new canvas file and loads it into the view model.
     func createFile(
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async {
+    ) async throws {
         showActivityIndicator(true)
         defer { showActivityIndicator(false) }
 
-        do {
-            let zipFileURL = try await newCanvas(
-                fileName: fileName,
-                device: device,
-                commandQueue: commandQueue
-            )
-            let loaded = try await readProject(
-                device: device,
-                from: zipFileURL
-            )
+        let zipFileURL = try await newCanvas(
+            fileName: fileName,
+            device: device,
+            commandQueue: commandQueue
+        )
+        let loaded = try await readProject(
+            device: device,
+            from: zipFileURL
+        )
 
-            apply(loaded, projectName: zipFileURL.baseName)
+        apply(loaded, projectName: zipFileURL.baseName)
 
-            try await onCanvasUpdate?()
+        try await onCanvasUpdate?()
 
-            showToast(.success)
-        } catch {
-            showError(error)
-        }
+        showToast(.success)
     }
 
     /// Renames a file in the list. Returns the stored title, or `nil` on failure.
@@ -98,29 +94,25 @@ extension HandDrawingViewModel {
         index: Int,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async {
+    ) async throws {
         showActivityIndicator(true)
         defer { showActivityIndicator(false) }
 
-        do {
-            guard let item = fileList.item(index) else {
-                throw NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Invalid Value")
-                )
-            }
+        guard fileList.item(index) != nil else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
+        }
 
-            if isOpenFile(at: index) {
-                try await clearCanvas(
-                    device: device,
-                    commandQueue: commandQueue
-                )
-                try await onCanvasUpdate?()
-            } else {
-                try deleteCanvas(index: index)
-            }
-        } catch {
-            showError(error)
+        if isOpenFile(at: index) {
+            try await clearCanvas(
+                device: device,
+                commandQueue: commandQueue
+            )
+            try await onCanvasUpdate?()
+        } else {
+            try deleteCanvas(index: index)
         }
     }
 
@@ -128,49 +120,41 @@ extension HandDrawingViewModel {
     func loadFile(
         device: MTLDevice,
         zipFileURL: URL
-    ) async {
+    ) async throws {
         showActivityIndicator(true)
         defer { showActivityIndicator(false) }
 
-        do {
-            let loaded = try await readProject(
-                device: device,
-                from: zipFileURL
-            )
-            apply(loaded, projectName: zipFileURL.baseName)
-            try await onCanvasUpdate?()
-            showToast(.success)
-        } catch {
-            showError(error)
-        }
+        let loaded = try await readProject(
+            device: device,
+            from: zipFileURL
+        )
+        apply(loaded, projectName: zipFileURL.baseName)
+        try await onCanvasUpdate?()
+        showToast(.success)
     }
 
-    /// Saves the current canvas and shows success feedback.
+    /// Saves the current canvas.
     func saveFile(
         thumbnail: UIImage?,
         zipFileURL: URL
-    ) async {
+    ) async throws {
         showActivityIndicator(true)
         defer { showActivityIndicator(false) }
 
-        do {
-            try await writeProject(
-                content: .init(
-                    thumbnail: thumbnail,
-                    textureLayers: undoableTextureLayers.snapshot,
-                    project: .init(project),
-                    drawingTool: .init(drawingTool),
-                    brushPalette: .init(brushPalette),
-                    eraserPalette: .init(eraserPalette)
-                ),
-                to: zipFileURL
-            )
-            fileList.setItem(currentFileItem(thumbnail: thumbnail))
-            fileList.sortItems()
-            showToast(.success)
-        } catch {
-            showError(error)
-        }
+        try await writeProject(
+            content: .init(
+                thumbnail: thumbnail,
+                textureLayers: undoableTextureLayers.snapshot,
+                project: .init(project),
+                drawingTool: .init(drawingTool),
+                brushPalette: .init(brushPalette),
+                eraserPalette: .init(eraserPalette)
+            ),
+            to: zipFileURL
+        )
+        fileList.setItem(currentFileItem(thumbnail: thumbnail))
+        fileList.sortItems()
+        showToast(.success)
     }
 }
 

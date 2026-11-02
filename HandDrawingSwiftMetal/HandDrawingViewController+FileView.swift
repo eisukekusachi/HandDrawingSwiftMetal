@@ -40,12 +40,16 @@ extension HandDrawingViewController {
 private extension HandDrawingViewController {
     func onTapCreate() {
         Task {
-            await viewModel.createFile(
-                fileName: Calendar.currentDate,
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue
-            )
-            presentedViewController?.dismiss(animated: true)
+            do {
+                try await viewModel.createFile(
+                    fileName: Calendar.currentDate,
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+                presentedViewController?.dismiss(animated: true)
+            } catch {
+                showAlert(error)
+            }
         }
     }
 
@@ -56,24 +60,32 @@ private extension HandDrawingViewController {
     func onTapDelete(_ index: Int) {
         Task {
             let dismissesFileView = viewModel.isOpenFile(at: index)
-            await viewModel.deleteFile(
-                index: index,
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue
-            )
-            if dismissesFileView {
-                presentedViewController?.dismiss(animated: true)
+            do {
+                try await viewModel.deleteFile(
+                    index: index,
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+                if dismissesFileView {
+                    presentedViewController?.dismiss(animated: true)
+                }
+            } catch {
+                showAlert(error)
             }
         }
     }
 
     func onSelectItem(_ zipFileURL: URL) {
         Task {
-            await viewModel.loadFile(
-                device: sharedDevice,
-                zipFileURL: zipFileURL
-            )
-            presentedViewController?.dismiss(animated: true)
+            do {
+                try await viewModel.loadFile(
+                    device: sharedDevice,
+                    zipFileURL: zipFileURL
+                )
+                presentedViewController?.dismiss(animated: true)
+            } catch {
+                showAlert(error)
+            }
         }
     }
 }
