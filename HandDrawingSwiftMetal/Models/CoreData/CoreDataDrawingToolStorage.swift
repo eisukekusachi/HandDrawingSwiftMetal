@@ -4,26 +4,28 @@
 
 @preconcurrency import CoreData
 
-/// DrawingTool managed by Core Data
+/// Core Data read/write for drawing tool settings.
 @MainActor
-final class CoreDataDrawingToolStorage: CoreDataStorage<DrawingToolEntity> {
+final class CoreDataDrawingToolStorage {
+
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        super.init(context: context)
+        self.context = context
     }
 
-    init(storage: any CoreDataStorageProtocol<DrawingToolEntity>) {
-        super.init(injecting: storage)
+    func fetch() throws -> DrawingToolEntity? {
+        try CoreDataRootEntityStore.fetch(for: DrawingToolEntity.self, in: context)
     }
-}
 
-extension CoreDataDrawingToolStorage {
+    func clearAll() throws {
+        try CoreDataRootEntityStore.clearAll(for: DrawingToolEntity.self, in: context)
+    }
 
     func save(from drawingTool: DrawingTool) async {
-        guard
-            let context = resolvedContext(),
-            let request = resolvedFetchRequest()
-        else { return }
+        guard let request = CoreDataRootEntityStore.fetchRequest(for: DrawingToolEntity.self, in: context) else {
+            return
+        }
 
         let id: UUID = drawingTool.id
         let type: Int = drawingTool.type.rawValue

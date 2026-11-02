@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import CoreGraphics
 import MetalKit
 import Testing
@@ -20,55 +21,23 @@ struct HandDrawingViewModelTests {
         private let layer1: TextureLayerModel = .generate(title: "layer1")
 
         @Test
-        func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
-            let fallbackTextureSize = TestUtils.randomSize()
-            let textureRepository = TextureRepositoryStub()
-            let coreDataStub = CoreDataStorageStub<TextureLayerArrayEntity>()
-            let (device, commandQueue) = try makeMetal()
-
-            let subject: Subject = .init(
-                dependencies: .init(
-                    textureDataRepository: textureRepository,
-                    textureLayerStorage: CoreDataTextureLayerStorage(storage: coreDataStub)
-                )
-            )
-
-            let size = try await subject.loadTexturesFromDocuments(
-                device: device,
-                fallbackTextureSize: fallbackTextureSize,
-                commandQueue: commandQueue
-            )
-
-            // No Core Data metadata, so the method returns the fallback canvas size.
-            #expect(size == fallbackTextureSize)
-            // installBlankLayer applies the same fallback size to the layer state.
-            #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
-            // Starts with one newly created empty layer.
-            #expect(subject.undoableTextureLayers.layerModels.count == 1)
-            // Nothing to restore from documents when metadata is missing.
-            #expect(textureRepository.restoreTexturesCalls.isEmpty)
-            // Stale-metadata cleanup is not triggered.
-            #expect(coreDataStub.clearAllCallCount == 0)
-        }
-
-        @Test
         func `When metadata and pixel files are available, it restores layers from Core Data`() async throws {
             let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
-            let context = try TestUtils.makeInMemoryTextureLayerContext()
-            let rootEntity = TestUtils.makeTextureLayerArrayEntity(
+            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
+            let context = textureLayersCoreDataStorage.viewContext
+            _ = TestUtils.makeTextureLayerArrayEntity(
                 context: context,
                 layers: [layer0, layer1],
                 textureSize: savedTextureSize
             )
+            try context.save()
             let textureRepository = TextureRepositoryStub()
-            let coreDataStub = CoreDataStorageStub<TextureLayerArrayEntity>()
-            coreDataStub.fetchedEntity = rootEntity
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: .init(
+                dependencies: dependencies(
                     textureDataRepository: textureRepository,
-                    textureLayerStorage: CoreDataTextureLayerStorage(storage: coreDataStub)
+                    textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
             )
 
@@ -78,40 +47,63 @@ struct HandDrawingViewModelTests {
                 commandQueue: commandQueue
             )
 
-            // Metadata and pixels are valid, so the saved canvas size is returned (not fallback).
+            // Use saved size, make two layers: layer metadata used.
             #expect(size == savedTextureSize)
             #expect(subject.undoableTextureLayers.textureSize == savedTextureSize)
-            // Layer list is rebuilt from the Core Data snapshot.
             #expect(subject.undoableTextureLayers.layerModels.count == 2)
             #expect(subject.undoableTextureLayers.layerModels.map(\.id) == [layer0.id, layer1.id])
             #expect(subject.undoableTextureLayers.layerModels.map(\.title) == ["layer0", "layer1"])
-            // Pixel files are loaded from the documents repository once.
             #expect(textureRepository.restoreTexturesCalls.count == 1)
             #expect(textureRepository.restoreTexturesCalls.first?.ids == [layer0.id, layer1.id])
             #expect(textureRepository.restoreTexturesCalls.first?.textureSize == savedTextureSize)
-            // Successful restore does not clear Core Data.
-            #expect(coreDataStub.clearAllCallCount == 0)
+        }
+
+        @Test
+        func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
+            let fallbackTextureSize = TestUtils.randomSize()
+            let textureRepository = TextureRepositoryStub()
+            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
+            let (device, commandQueue) = try makeMetal()
+
+            let subject: Subject = .init(
+                dependencies: dependencies(
+                    textureDataRepository: textureRepository,
+                    textureLayersCoreDataStorage: textureLayersCoreDataStorage
+                )
+            )
+
+            let size = try await subject.loadTexturesFromDocuments(
+                device: device,
+                fallbackTextureSize: fallbackTextureSize,
+                commandQueue: commandQueue
+            )
+
+            // Use fallback size, make one blank layer: layer metadata not used.
+            #expect(size == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.layerModels.count == 1)
+            #expect(textureRepository.restoreTexturesCalls.isEmpty)
         }
 
         @Test
         func `When pixel restore fails, it clears stale Core Data and installs a blank layer`() async throws {
             let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
-            let context = try TestUtils.makeInMemoryTextureLayerContext()
-            let rootEntity = TestUtils.makeTextureLayerArrayEntity(
+            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
+            let context = textureLayersCoreDataStorage.viewContext
+            _ = TestUtils.makeTextureLayerArrayEntity(
                 context: context,
                 layers: [layer0, layer1],
                 textureSize: savedTextureSize
             )
+            try context.save()
             let textureRepository = TextureRepositoryStub()
             textureRepository.restoreTexturesError = NSError(domain: "error", code: 1)
-            let coreDataStub = CoreDataStorageStub<TextureLayerArrayEntity>()
-            coreDataStub.fetchedEntity = rootEntity
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: .init(
+                dependencies: dependencies(
                     textureDataRepository: textureRepository,
-                    textureLayerStorage: CoreDataTextureLayerStorage(storage: coreDataStub)
+                    textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
             )
 
@@ -121,21 +113,37 @@ struct HandDrawingViewModelTests {
                 commandQueue: commandQueue
             )
 
-            // Restore failed, so the flow falls back to a blank canvas at fallbackTextureSize.
+            // After failed pixel restore, use fallback size, make one new layer: layer metadata not used.
             #expect(size == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
-            // installBlankLayer replaces stale layers with one new empty layer.
             #expect(subject.undoableTextureLayers.layerModels.count == 1)
             #expect(subject.undoableTextureLayers.layerModels.map(\.id) != [layer0.id, layer1.id])
-            // Metadata existed, so restore was attempted before falling back.
             #expect(textureRepository.restoreTexturesCalls.count == 1)
-            // Stale Core Data metadata is discarded after a failed pixel restore.
-            #expect(coreDataStub.clearAllCallCount == 1)
+            #expect(try subject.dependencies.textureLayerStorage.fetch() == nil)
         }
     }
 }
 
 extension HandDrawingViewModelTests.LoadTexturesFromDocuments {
+
+    /// Test-only `HandDrawingViewDependencies` using in-memory Core Data stacks (no SQLite).
+    private func dependencies(
+        textureDataRepository: MTLTextureDataRepositoryProtocol,
+        textureLayersCoreDataStorage: CoreDataStorage
+    ) -> HandDrawingViewDependencies {
+        .init(
+            textureDataRepository: textureDataRepository,
+            projectCoreDataStorage: CoreDataStorage(
+                inMemory: "ProjectStorage",
+                bundle: Bundle(for: CoreDataProjectStorage.self)
+            ),
+            textureLayersCoreDataStorage: textureLayersCoreDataStorage,
+            drawingToolCoreDataStorage: CoreDataStorage(
+                inMemory: "DrawingToolStorage",
+                bundle: Bundle(for: CoreDataDrawingToolStorage.self)
+            )
+        )
+    }
 
     private func makeMetal() throws -> (MTLDevice, MTLCommandQueue) {
         let device = try #require(MTLCreateSystemDefaultDevice())

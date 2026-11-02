@@ -22,29 +22,13 @@ enum TestUtils {
         )
     }
 
+    /// In-memory `CoreDataStorage` for layer metadata tests (no SQLite side effects).
     @MainActor
-    static func makeInMemoryTextureLayerContext() throws -> NSManagedObjectContext {
-        let bundle = Bundle(for: CoreDataTextureLayerStorage.self)
-        guard
-            let modelURL = bundle.url(forResource: "TextureLayerStorage", withExtension: "momd"),
-            let model = NSManagedObjectModel(contentsOf: modelURL)
-        else {
-            throw NSError(domain: "TestUtils", code: 1)
-        }
-
-        let container = NSPersistentContainer(name: "TextureLayerStorage", managedObjectModel: model)
-        let description = NSPersistentStoreDescription()
-        description.type = NSInMemoryStoreType
-        container.persistentStoreDescriptions = [description]
-
-        var loadError: Error?
-        container.loadPersistentStores { _, error in
-            loadError = error
-        }
-        if let loadError {
-            throw loadError
-        }
-        return container.viewContext
+    static func makeInMemoryTextureLayersCoreDataStorage() -> CoreDataStorage {
+        CoreDataStorage(
+            inMemory: "TextureLayerStorage",
+            bundle: Bundle(for: CoreDataTextureLayerStorage.self)
+        )
     }
 
     @MainActor

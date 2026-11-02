@@ -34,8 +34,8 @@ final class HandDrawingViewModel: ObservableObject {
 
     let project: ProjectData = .init()
     let drawingTool: DrawingTool = .init()
-    let brushPalette: BrushPalette
-    let eraserPalette: EraserPalette
+    let brushPalette: BrushPalette = .init()
+    let eraserPalette: EraserPalette = .init()
 
     let undoableTextureLayers: TextureLayersUndoableState
 
@@ -57,26 +57,6 @@ final class HandDrawingViewModel: ObservableObject {
             projectName: projectName,
             suffix: fileList.fileSuffix
         )
-    }
-
-    private var textureLayerStorage: CoreDataTextureLayerStorage {
-        dependencies.textureLayerStorage
-    }
-
-    var projectStorage: CoreDataProjectStorage {
-        dependencies.projectStorage
-    }
-
-    var drawingToolStorage: CoreDataDrawingToolStorage {
-        dependencies.drawingToolStorage
-    }
-
-    var brushPaletteStorage: CoreDataBrushPaletteStorage {
-        dependencies.brushPaletteStorage
-    }
-
-    var eraserPaletteStorage: CoreDataEraserPaletteStorage {
-        dependencies.eraserPaletteStorage
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
@@ -116,8 +96,6 @@ final class HandDrawingViewModel: ObservableObject {
         self.fileList = .init(fileSuffix: fileSuffix)
         self.documentsDataStore = .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
-        self.brushPalette = .init()
-        self.eraserPalette = .init()
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
@@ -157,7 +135,7 @@ final class HandDrawingViewModel: ObservableObject {
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
-        if let entity = try? textureLayerStorage.fetch() {
+        if let entity = try? dependencies.textureLayerStorage.fetch() {
             let snapshot = TextureLayersSnapshot(entity: entity)
             do {
                 // Load MTLTextures from the documents directory.
@@ -170,7 +148,7 @@ final class HandDrawingViewModel: ObservableObject {
                 return snapshot.textureSize
             } catch {
                 // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
-                try? textureLayerStorage.clearAll()
+                try? dependencies.textureLayerStorage.clearAll()
             }
         }
 
@@ -226,8 +204,6 @@ final class HandDrawingViewModel: ObservableObject {
     }
 }
 
-// MARK: - Core Data
-
 private extension HandDrawingViewModel {
 
     /// Subscribes to domain model changes and debounces writes to `CoreData*Storage`.
@@ -243,7 +219,7 @@ private extension HandDrawingViewModel {
         .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task { await self.textureLayerStorage.save(from: self.undoableTextureLayers) }
+            Task { await self.dependencies.textureLayerStorage.save(from: self.undoableTextureLayers) }
         }
         .store(in: &cancellables)
 
@@ -256,7 +232,7 @@ private extension HandDrawingViewModel {
         .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task { await self.projectStorage.save(from: self.project) }
+            Task { await self.dependencies.projectStorage.save(from: self.project) }
         }
         .store(in: &cancellables)
 
@@ -269,7 +245,7 @@ private extension HandDrawingViewModel {
         .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task { await self.drawingToolStorage.save(from: self.drawingTool) }
+            Task { await self.dependencies.drawingToolStorage.save(from: self.drawingTool) }
         }
         .store(in: &cancellables)
 
@@ -281,7 +257,7 @@ private extension HandDrawingViewModel {
         .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task { await self.brushPaletteStorage.save(from: self.brushPalette) }
+            Task { await self.dependencies.brushPaletteStorage.save(from: self.brushPalette) }
         }
         .store(in: &cancellables)
 
@@ -293,24 +269,8 @@ private extension HandDrawingViewModel {
         .debounce(for: .milliseconds(debounce), scheduler: RunLoop.main)
         .sink { [weak self] in
             guard let self else { return }
-            Task { await self.eraserPaletteStorage.save(from: self.eraserPalette) }
+            Task { await self.dependencies.eraserPaletteStorage.save(from: self.eraserPalette) }
         }
         .store(in: &cancellables)
-    }
-
-    /// Restores domain models from Core Data when the canvas loads.
-    func fetchDataFromCoreDataIfAvailable() throws {
-        if let projectEntity = try projectStorage.fetch() {
-            project.apply(projectEntity)
-        }
-        if let drawingToolEntity = try drawingToolStorage.fetch() {
-            drawingTool.apply(drawingToolEntity)
-        }
-        if let brushEntity = try brushPaletteStorage.fetch() {
-            brushPalette.apply(brushEntity)
-        }
-        if let eraserEntity = try eraserPaletteStorage.fetch() {
-            eraserPalette.apply(eraserEntity)
-        }
     }
 }

@@ -6,21 +6,41 @@ import TextureLayerView
 
 @preconcurrency import CoreData
 
-/// Core Data read/write for texture layer metadata (`TextureLayerStorage` model).
+/// Core Data read/write for texture layer metadata.
 @MainActor
-final class CoreDataTextureLayerStorage: CoreDataStorage<TextureLayerArrayEntity> {
+final class CoreDataTextureLayerStorage {
+
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        super.init(context: context)
+        self.context = context
     }
 
-    init(storage: any CoreDataStorageProtocol<TextureLayerArrayEntity>) {
-        super.init(injecting: storage)
+    func fetch() throws -> TextureLayerArrayEntity? {
+        try CoreDataRootEntityStore.fetch(for: TextureLayerArrayEntity.self, in: context)
     }
 
-    override func clearAll() throws {
+    func clearAll() throws {
         do {
-            try super.clearAll()
+            guard
+                let rootEntityName = CoreDataRootEntityStore.entityName(
+                    for: TextureLayerArrayEntity.self,
+                    in: context
+                )
+            else { return }
+
+            let rootRequest = NSFetchRequest<TextureLayerArrayEntity>(entityName: rootEntityName)
+            let roots = try context.fetch(rootRequest)
+            for root in roots {
+                root.textureLayerItems?
+                    .compactMap { $0 as? TextureLayerEntity }
+                    .forEach { context.delete($0) }
+                context.delete(root)
+            }
+
+            if context.hasChanges {
+                try context.save()
+            }
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
             throw error
@@ -28,10 +48,10 @@ final class CoreDataTextureLayerStorage: CoreDataStorage<TextureLayerArrayEntity
     }
 
     func save(from textureLayers: TextureLayersState) async {
-        guard
-            let context = resolvedContext(),
-            let request = resolvedFetchRequest()
-        else { return }
+        guard let request = CoreDataRootEntityStore.fetchRequest(
+            for: TextureLayerArrayEntity.self,
+            in: context
+        ) else { return }
 
         guard
             textureLayers.layers.count != 0,

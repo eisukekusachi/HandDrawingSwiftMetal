@@ -6,26 +6,28 @@ import UIKit
 
 @preconcurrency import CoreData
 
-/// Color palette managed by Core Data
+/// Core Data read/write for brush palette.
 @MainActor
-final class CoreDataBrushPaletteStorage: CoreDataStorage<BrushPaletteEntity> {
+final class CoreDataBrushPaletteStorage {
+
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        super.init(context: context)
+        self.context = context
     }
 
-    init(storage: any CoreDataStorageProtocol<BrushPaletteEntity>) {
-        super.init(injecting: storage)
+    func fetch() throws -> BrushPaletteEntity? {
+        try CoreDataRootEntityStore.fetch(for: BrushPaletteEntity.self, in: context)
     }
-}
 
-extension CoreDataBrushPaletteStorage {
+    func clearAll() throws {
+        try CoreDataRootEntityStore.clearAll(for: BrushPaletteEntity.self, in: context)
+    }
 
     func save(from palette: BrushPalette) async {
-        guard
-            let context = resolvedContext(),
-            let request = resolvedFetchRequest()
-        else { return }
+        guard let request = CoreDataRootEntityStore.fetchRequest(for: BrushPaletteEntity.self, in: context) else {
+            return
+        }
 
         let id: UUID = palette.id
         let index = palette.selectedIndex
