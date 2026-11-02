@@ -40,6 +40,9 @@ extension HandDrawingViewController {
 private extension HandDrawingViewController {
     func onTapCreate() {
         Task {
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
             do {
                 try await viewModel.createFile(
                     fileName: Calendar.currentDate,
@@ -59,6 +62,9 @@ private extension HandDrawingViewController {
 
     func onTapDelete(_ index: Int) {
         Task {
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
             let dismissesFileView = viewModel.isOpenFile(at: index)
             do {
                 try await viewModel.deleteFile(
@@ -77,6 +83,9 @@ private extension HandDrawingViewController {
 
     func onSelectItem(_ zipFileURL: URL) {
         Task {
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
             do {
                 try await viewModel.loadFile(
                     device: sharedDevice,

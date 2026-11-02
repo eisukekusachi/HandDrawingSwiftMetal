@@ -332,6 +332,9 @@ extension HandDrawingViewController {
         contentView.tapSaveButton = { [weak self] in
             guard let self else { return }
             Task {
+                self.showActivityIndicator(true)
+                defer { self.showActivityIndicator(false) }
+
                 do {
                     try await self.viewModel.saveFile(
                         thumbnail: self.canvasView.thumbnail,

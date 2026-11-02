@@ -59,9 +59,6 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
-
         let zipFileURL = try await newCanvas(
             fileName: fileName,
             device: device,
@@ -95,9 +92,6 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
-
         guard fileList.item(index) != nil else {
             throw NSError(
                 title: String(localized: "Error"),
@@ -121,9 +115,6 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         zipFileURL: URL
     ) async throws {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
-
         let loaded = try await readProject(
             device: device,
             from: zipFileURL
@@ -138,9 +129,6 @@ extension HandDrawingViewModel {
         thumbnail: UIImage?,
         zipFileURL: URL
     ) async throws {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
-
         try await writeProject(
             content: .init(
                 thumbnail: thumbnail,
