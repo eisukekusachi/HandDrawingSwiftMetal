@@ -59,11 +59,8 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    /// Requests canvas load.
-    var requestingCanvasLoad: AnyPublisher<Void, Never> {
-        requestingCanvasLoadSubject.eraseToAnyPublisher()
-    }
-    let requestingCanvasLoadSubject = PassthroughSubject<Void, Never>()
+    /// Updates the canvas and drawing components.
+    private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
 
     let documentsDataStore: DocumentsDataStore
 
@@ -95,8 +92,11 @@ final class HandDrawingViewModel: ObservableObject {
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
         undoRegister: TextureLayerUndoRegister,
-        canvasView: TextureLayerCanvasView
+        canvasView: TextureLayerCanvasView,
+        onCanvasUpdate: @escaping @MainActor () async throws -> Void
     ) {
+        self.onCanvasUpdate = onCanvasUpdate
+
         undoableTextureLayers.setup(
             device: device,
             commandQueue: commandQueue,

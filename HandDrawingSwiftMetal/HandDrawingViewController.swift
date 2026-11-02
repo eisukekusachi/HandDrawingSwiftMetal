@@ -142,7 +142,13 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue,
             undoRegister: textureLayerUndoRegister,
-            canvasView: canvasView
+            canvasView: canvasView,
+            onCanvasUpdate: { [weak self] in
+                guard let self else { return }
+                try await self.initializeCanvas(self.viewModel.textureSize)
+                await self.viewModel.updateThumbnails(device: self.sharedDevice)
+                self.updateDrawingComponents()
+            }
         )
         layoutViews()
 
@@ -269,22 +275,6 @@ extension HandDrawingViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
-            }
-            .store(in: &cancellables)
-
-        viewModel.requestingCanvasLoad
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                guard let self else { return }
-                Task { @MainActor in
-                    do {
-                        try await self.initializeCanvas(self.viewModel.textureSize)
-                        await self.viewModel.updateThumbnails(device: self.sharedDevice)
-                        self.updateDrawingComponents()
-                    } catch {
-                        self.showAlert(error)
-                    }
-                }
             }
             .store(in: &cancellables)
 

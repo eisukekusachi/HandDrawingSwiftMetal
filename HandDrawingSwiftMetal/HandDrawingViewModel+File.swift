@@ -75,9 +75,9 @@ extension HandDrawingViewModel {
 
             apply(loaded, projectName: zipFileURL.baseName)
 
-            showToast(.success)
+            try await onCanvasUpdate?()
 
-            requestingCanvasLoadSubject.send()
+            showToast(.success)
         } catch {
             showError(error)
         }
@@ -115,7 +115,7 @@ extension HandDrawingViewModel {
                     device: device,
                     commandQueue: commandQueue
                 )
-                requestingCanvasLoadSubject.send()
+                try await onCanvasUpdate?()
             } else {
                 try deleteCanvas(index: index)
             }
@@ -138,8 +138,8 @@ extension HandDrawingViewModel {
                 from: zipFileURL
             )
             apply(loaded, projectName: zipFileURL.baseName)
+            try await onCanvasUpdate?()
             showToast(.success)
-            requestingCanvasLoadSubject.send()
         } catch {
             showError(error)
         }
