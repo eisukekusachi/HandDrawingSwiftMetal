@@ -477,8 +477,8 @@ struct FileViewModelTests {
             )
 
             #expect(subject.isSelectedFileOpen == true)
-            #expect(subject.deleteConfirmationTitle == "Reset this canvas?")
-            #expect(subject.deleteConfirmationMessage == "The drawing will be cleared. The file will remain.")
+            #expect(subject.deleteConfirmationTitle == "Clear this canvas?")
+            #expect(subject.deleteConfirmationMessage == "The drawing will be cleared.")
             #expect(subject.deleteConfirmationButtonTitle == "Reset")
         }
 
@@ -498,7 +498,7 @@ struct FileViewModelTests {
 
             #expect(subject.isSelectedFileOpen == false)
             #expect(subject.deleteConfirmationTitle == "Delete this file?")
-            #expect(subject.deleteConfirmationMessage == "This file will be removed from the device")
+            #expect(subject.deleteConfirmationMessage == "This file will be removed from this device.")
             #expect(subject.deleteConfirmationButtonTitle == "Delete")
         }
     }

@@ -48,17 +48,17 @@ public struct FileViewStrings: Equatable, Sendable {
         self.notSavedYet = notSavedYet
             ?? String(localized: "Not saved yet", bundle: .module)
         self.resetCanvasTitle = resetCanvasTitle
-            ?? String(localized: "Reset this canvas?", bundle: .module)
+            ?? String(localized: "Clear this canvas?", bundle: .module)
         self.deleteFileTitle = deleteFileTitle
             ?? String(localized: "Delete this file?", bundle: .module)
         self.resetCanvasMessage = resetCanvasMessage
             ?? String(
-                localized: "The drawing will be cleared. The file will remain.",
+                localized: "The drawing will be cleared.",
                 bundle: .module
             )
         self.deleteFileMessage = deleteFileMessage
             ?? String(
-                localized: "This file will be removed from the device",
+                localized: "This file will be removed from this device.",
                 bundle: .module
             )
         self.reset = reset

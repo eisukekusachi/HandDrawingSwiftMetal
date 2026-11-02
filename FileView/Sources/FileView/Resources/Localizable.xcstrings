@@ -28,13 +28,13 @@
     "Reset" : {
       "extractionState" : "manual"
     },
-    "Reset this canvas?" : {
+    "Clear this canvas?" : {
       "extractionState" : "manual"
     },
-    "The drawing will be cleared. The file will remain." : {
+    "The drawing will be cleared." : {
       "extractionState" : "manual"
     },
-    "This file will be removed from the device" : {
+    "This file will be removed from this device." : {
       "extractionState" : "manual"
     }
   },
