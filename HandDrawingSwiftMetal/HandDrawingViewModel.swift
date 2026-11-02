@@ -9,16 +9,6 @@ import FileView
 import TextureLayerView
 import UIKit
 
-/// Asks the view to reinitialize the canvas after a file action.
-struct InitializeCanvasRequest: Equatable {
-    /// Whether the presented file list should be dismissed after initialization
-    let dismissFileView: Bool
-
-    init(dismissFileView: Bool = false) {
-        self.dismissFileView = dismissFileView
-    }
-}
-
 @MainActor
 final class HandDrawingViewModel: ObservableObject {
 
@@ -69,10 +59,11 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    var initializeCanvasRequest: AnyPublisher<InitializeCanvasRequest, Never> {
+    /// Reinitialize the canvas after a file action. The value is whether to dismiss the file list afterward.
+    var initializeCanvasRequest: AnyPublisher<Bool, Never> {
         initializeCanvasRequestSubject.eraseToAnyPublisher()
     }
-    let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
+    let initializeCanvasRequestSubject = PassthroughSubject<Bool, Never>()
 
     let documentsDataStore: DocumentsDataStore
 

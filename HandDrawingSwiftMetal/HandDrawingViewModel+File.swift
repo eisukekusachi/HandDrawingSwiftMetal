@@ -72,9 +72,7 @@ extension HandDrawingViewModel {
 
             showToast(.success)
 
-            initializeCanvasRequestSubject.send(
-                .init(dismissFileView: true)
-            )
+            initializeCanvasRequestSubject.send(true)
         } catch {
             showError(error)
         }
@@ -112,9 +110,7 @@ extension HandDrawingViewModel {
                     device: device,
                     commandQueue: commandQueue
                 )
-                initializeCanvasRequestSubject.send(
-                    .init(dismissFileView: true)
-                )
+                initializeCanvasRequestSubject.send(true)
             } else {
                 try deleteCanvas(index: index)
             }
@@ -123,7 +119,7 @@ extension HandDrawingViewModel {
         }
     }
 
-    /// Loads a zip into the editor and asks the view to refresh.
+    /// Restores the canvas from a saved project file.
     func loadFile(
         device: MTLDevice,
         zipFileURL: URL
@@ -138,7 +134,7 @@ extension HandDrawingViewModel {
             )
             apply(loaded, projectName: zipFileURL.baseName)
             showToast(.success)
-            initializeCanvasRequestSubject.send(.init())
+            initializeCanvasRequestSubject.send(false)
         } catch {
             showError(error)
         }
