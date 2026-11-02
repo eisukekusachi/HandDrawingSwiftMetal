@@ -12,6 +12,7 @@ final class CoreDataStorage {
 
     private let container: NSPersistentContainer
 
+    /// Core Data stack backed by **SQLite on disk** (default for the app).
     init(xcdatamodeldName: String, excludeFromBackup: Bool = true) {
         let bundle: Bundle = .main
 
@@ -29,6 +30,32 @@ final class CoreDataStorage {
             if excludeFromBackup {
                 Self.excludeStoreFilesFromBackup(container: self.container)
             }
+        }
+
+        container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
+        container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+
+    /// Core Data stack backed by **in-memory store** (discarded on `deinit`).
+    init(inMemory xcdatamodeldName: String, bundle: Bundle = .main) {
+        guard
+            let modelURL = bundle.url(forResource: xcdatamodeldName, withExtension: "momd"),
+            let model = NSManagedObjectModel(contentsOf: modelURL)
+        else {
+            fatalError("Failed to load Core Data model '\(xcdatamodeldName)' from bundle: \(bundle)")
+        }
+
+        container = NSPersistentContainer(name: xcdatamodeldName, managedObjectModel: model)
+
+        // In-memory store. nothing is written to disk.
+        // The store is discarded when this `CoreDataStorage` is deallocated.
+        // When a test method’s locals go out of scope.
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        container.persistentStoreDescriptions = [description]
+
+        container.loadPersistentStores { _, error in
+            precondition(error == nil, "Store load failed: \(error!)")
         }
 
         container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
