@@ -22,7 +22,25 @@ final class CoreDataTextureLayerStorage {
 
     func clearAll() throws {
         do {
-            try CoreDataRootEntityStore.clearAll(for: TextureLayerArrayEntity.self, in: context)
+            guard
+                let rootEntityName = CoreDataRootEntityStore.entityName(
+                    for: TextureLayerArrayEntity.self,
+                    in: context
+                )
+            else { return }
+
+            let rootRequest = NSFetchRequest<TextureLayerArrayEntity>(entityName: rootEntityName)
+            let roots = try context.fetch(rootRequest)
+            for root in roots {
+                root.textureLayerItems?
+                    .compactMap { $0 as? TextureLayerEntity }
+                    .forEach { context.delete($0) }
+                context.delete(root)
+            }
+
+            if context.hasChanges {
+                try context.save()
+            }
         } catch {
             Logger.error("Failed to clear Core Data storage: \(error)")
             throw error

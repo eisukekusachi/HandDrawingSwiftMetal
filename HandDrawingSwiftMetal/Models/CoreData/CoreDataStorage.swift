@@ -91,18 +91,32 @@ final class CoreDataStorage {
 
 @MainActor
 enum CoreDataRootEntityStore {
+    /// Resolves the entity name from this context's model (not `Entity.entity()`, which breaks with multiple stacks).
+    static func entityName<Entity: NSManagedObject>(
+        for entityType: Entity.Type,
+        in context: NSManagedObjectContext
+    ) -> String? {
+        guard
+            let model = context.persistentStoreCoordinator?.managedObjectModel
+        else { return nil }
+
+        let className = NSStringFromClass(entityType)
+        let shortClassName = className.split(separator: ".").last.map(String.init) ?? className
+
+        if let name = model.entitiesByName[shortClassName]?.name {
+            return name
+        }
+
+        return model.entities.first { entity in
+            entity.managedObjectClassName == className || entity.managedObjectClassName == shortClassName
+        }?.name
+    }
 
     static func fetchRequest<Entity: NSManagedObject>(
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) -> NSFetchRequest<Entity>? {
-        let name = entityType.entity().name
-        guard let entityName = name, !entityName.isEmpty else { return nil }
-
-        guard
-            let model = context.persistentStoreCoordinator?.managedObjectModel,
-            model.entitiesByName[entityName] != nil
-        else { return nil }
+        guard let entityName = entityName(for: entityType, in: context), !entityName.isEmpty else { return nil }
 
         let request = NSFetchRequest<Entity>(entityName: entityName)
         request.fetchLimit = 1
@@ -122,12 +136,14 @@ enum CoreDataRootEntityStore {
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) throws {
-        guard let entityName = entityType.entity().name else { return }
+        guard let entityName = entityName(for: entityType, in: context) else { return }
 
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+        let request = NSFetchRequest<Entity>(entityName: entityName)
+        let objects = try context.fetch(request)
+        objects.forEach { context.delete($0) }
 
-        try context.execute(deleteRequest)
-        context.reset()
+        if context.hasChanges {
+            try context.save()
+        }
     }
 }
