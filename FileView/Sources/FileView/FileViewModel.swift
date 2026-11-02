@@ -40,7 +40,7 @@ final class FileViewModel: ObservableObject {
             let index = selectedIndex,
             fileList.item(index) != nil
         else { return true }
-        return false
+        return isSelectedFileOpen
     }
 
     /// Whether the selected file is the canvas currently open outside this list
@@ -54,23 +54,17 @@ final class FileViewModel: ObservableObject {
 
     /// Title for the delete confirmation dialog
     var deleteConfirmationTitle: String {
-        isSelectedFileOpen
-            ? strings.resetCanvasTitle
-            : strings.deleteFileTitle
+        strings.deleteFileTitle
     }
 
     /// Message for the delete confirmation dialog
     var deleteConfirmationMessage: String {
-        isSelectedFileOpen
-            ? strings.resetCanvasMessage
-            : strings.deleteFileMessage
+        strings.deleteFileMessage
     }
 
     /// Destructive button title for the delete confirmation dialog
     var deleteConfirmationButtonTitle: String {
-        isSelectedFileOpen
-            ? strings.reset
-            : strings.delete
+        strings.delete
     }
 
     /// Whether the delete confirmation dialog is presented

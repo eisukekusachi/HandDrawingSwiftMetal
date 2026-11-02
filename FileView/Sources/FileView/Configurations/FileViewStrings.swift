@@ -20,6 +20,7 @@ public struct FileViewStrings: Equatable, Sendable {
     public var deleteFileMessage: String
     public var reset: String
     public var delete: String
+    public var clear: String
 
     public init(
         renameTitle: String? = nil,
@@ -33,7 +34,8 @@ public struct FileViewStrings: Equatable, Sendable {
         resetCanvasMessage: String? = nil,
         deleteFileMessage: String? = nil,
         reset: String? = nil,
-        delete: String? = nil
+        delete: String? = nil,
+        clear: String? = nil
     ) {
         self.renameTitle = renameTitle
             ?? String(localized: "Rename", bundle: .module)
@@ -65,5 +67,7 @@ public struct FileViewStrings: Equatable, Sendable {
             ?? String(localized: "Reset", bundle: .module)
         self.delete = delete
             ?? String(localized: "Delete", bundle: .module)
+        self.clear = clear
+            ?? String(localized: "Clear", bundle: .module)
     }
 }

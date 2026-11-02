@@ -22,6 +22,7 @@ final class HandDrawingContentView: UIView {
 
     @IBOutlet private(set) weak var exportImageButton: UIButton!
     @IBOutlet private(set) weak var layerButton: UIButton!
+    @IBOutlet private(set) weak var clearCanvasButton: UIButton!
 
     @IBOutlet weak var drawingToolButton: UIButton!
 
@@ -34,6 +35,7 @@ final class HandDrawingContentView: UIView {
     var tapResetTransforming: (() -> Void)?
     var tapSaveButton: (() -> Void)?
     var tapLayerButton: (() -> Void)?
+    var tapClearCanvasButton: (() -> Void)?
     var tapLoadButton: (() -> Void)?
     var tapExportImageButton: (() -> Void)?
     var tapNewButton: (() -> Void)?
@@ -60,6 +62,8 @@ final class HandDrawingContentView: UIView {
         backgroundColor = .white
 
         baseView.alpha = 0.0
+
+        clearCanvasButton.tintColor = .systemRed
 
         addEvents()
     }
@@ -95,6 +99,7 @@ final class HandDrawingContentView: UIView {
 
         exportImageButton.isUserInteractionEnabled = isUserInteractionEnabled
         layerButton.isUserInteractionEnabled = isUserInteractionEnabled
+        clearCanvasButton.isUserInteractionEnabled = isUserInteractionEnabled
 
         drawingToolButton.isUserInteractionEnabled = isUserInteractionEnabled
 
@@ -118,6 +123,10 @@ private extension HandDrawingContentView {
 
         layerButton.addAction(.init { [weak self] _ in
             self?.tapLayerButton?()
+        }, for: .touchUpInside)
+
+        clearCanvasButton.addAction(.init { [weak self] _ in
+            self?.tapClearCanvasButton?()
         }, for: .touchUpInside)
 
         loadButton.addAction(.init { [weak self] _ in

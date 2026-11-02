@@ -19,6 +19,7 @@
                 <outlet property="eraserPaletteView" destination="gZx-i3-2bH" id="DeH-vJ-8z5"/>
                 <outlet property="exportImageButton" destination="ioX-rL-sY3" id="eAt-Cd-vUS"/>
                 <outlet property="layerButton" destination="RSE-Ca-Pvz" id="dIw-HO-d4T"/>
+                <outlet property="clearCanvasButton" destination="Clr-Ca-nvs" id="Clr-Ca-out"/>
                 <outlet property="loadButton" destination="4Ve-sD-YOE" id="xqZ-2r-6f6"/>
                 <outlet property="redoButton" destination="UCl-eJ-tD6" id="kxf-0N-cn7"/>
                 <outlet property="resetTransformButton" destination="IVg-Dj-hIn" id="dWm-1g-ASc"/>
@@ -52,6 +53,10 @@
                             <rect key="frame" x="51" y="0.0" width="48.333333333333336" height="34.333333333333336"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down.fill" catalog="system"/>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Clr-Ca-nvs">
+                            <rect key="frame" x="99.333333333333343" y="0.0" width="48" height="34.333333333333336"/>
+                            <buttonConfiguration key="configuration" style="plain" image="clear" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
                             <rect key="frame" x="99.333333333333343" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
@@ -175,6 +180,7 @@
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
         <image name="folder" catalog="system" width="128" height="94"/>
         <image name="photo" catalog="system" width="128" height="93"/>
+        <image name="clear" catalog="system" width="128" height="114"/>
         <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
         <image name="square.and.arrow.down.fill" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">

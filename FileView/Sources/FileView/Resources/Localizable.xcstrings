@@ -4,6 +4,9 @@
     "Cancel" : {
       "extractionState" : "manual"
     },
+    "Clear" : {
+      "extractionState" : "manual"
+    },
     "Delete" : {
       "extractionState" : "manual"
     },

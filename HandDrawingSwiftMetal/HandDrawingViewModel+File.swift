@@ -39,13 +39,30 @@ extension HandDrawingViewModel {
         }
     }
 
+    /// Clears the open canvas and bumps the project updatedAt.
+    func clearCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        project.update(updatedAt: Date())
+        fileList.setItem(currentFileItem(thumbnail: nil))
+        fileList.sortItems()
+
+        try await onCanvasUpdate?()
+    }
+
     /// Creates a new canvas file and loads it into the view model.
     func createFile(
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
-        let zipFileURL = try await newCanvas(
+        let zipFileURL = try await newProject(
             fileName: fileName,
             device: device,
             commandQueue: commandQueue
@@ -67,7 +84,7 @@ extension HandDrawingViewModel {
         try renameCanvas(index: index, newName: newName)
     }
 
-    /// Deletes a saved file, or clears the open canvas when that file is selected.
+    /// Deletes a saved file that is not the open project.
     func deleteFile(
         index: Int,
         device: MTLDevice,
@@ -80,15 +97,14 @@ extension HandDrawingViewModel {
             )
         }
 
-        if isOpenFile(at: index) {
-            try await clearCanvas(
-                device: device,
-                commandQueue: commandQueue
+        guard !isOpenFile(at: index) else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
             )
-            try await onCanvasUpdate?()
-        } else {
-            try deleteCanvas(index: index)
         }
+
+        try deleteCanvas(index: index)
     }
 
     /// Restores the canvas from a saved project file.
@@ -123,8 +139,10 @@ extension HandDrawingViewModel {
             ),
             to: zipFileURL
         )
+
         fileList.setItem(currentFileItem(thumbnail: thumbnail))
         fileList.sortItems()
+
         showToast(.success)
     }
 }

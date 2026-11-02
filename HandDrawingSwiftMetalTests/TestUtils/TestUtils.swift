@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import CanvasView
 import CoreGraphics
 @preconcurrency import CoreData
 import TextureLayerView
@@ -11,10 +12,10 @@ import TextureLayerView
 /// Shared helpers for unit tests.
 enum TestUtils {
 
-    /// Random canvas size safe for `TextureLayerArrayEntity` (`Int16` width/height).
+    /// Random canvas size within app-supported texture bounds.
     static func randomSize(
-        width: ClosedRange<Int> = 64...1024,
-        height: ClosedRange<Int> = 64...1024
+        width: ClosedRange<Int> = canvasMinimumTextureLength ... 4096,
+        height: ClosedRange<Int> = canvasMinimumTextureLength ... 4096
     ) -> CGSize {
         CGSize(
             width: Int.random(in: width),

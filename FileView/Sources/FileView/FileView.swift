@@ -168,11 +168,7 @@ private extension FileView {
 
             Button(
                 action: { viewModel.onTapDelete() },
-                label: {
-                    toolbarIcon(
-                        viewModel.isSelectedFileOpen ? icons.clearCanvas : icons.delete
-                    )
-                }
+                label: { toolbarIcon(icons.delete) }
             )
             .grayedOutWhenDisabled(
                 viewModel.deleteDisabled,

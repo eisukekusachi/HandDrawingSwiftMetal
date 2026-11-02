@@ -11,11 +11,15 @@ public final class DocumentsDataStore {
     private let fileManager: FileManaging
     let localFileIO: LocalFileIO
 
-    public init(fileManager: FileManaging) {
+    public init(
+        fileManager: FileManaging,
+        zipHandler: ZipHandling? = nil
+    ) {
         self.fileManager = fileManager
         self.localFileIO = LocalFileIO(
             workingDirectoryURL: fileManager.temporaryDirectory.appendingPathComponent("TmpFolder"),
-            fileManager: fileManager
+            fileManager: fileManager,
+            zipHandler: zipHandler
         )
     }
 

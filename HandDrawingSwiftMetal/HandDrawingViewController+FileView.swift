@@ -70,16 +70,12 @@ private extension HandDrawingViewController {
             showActivityIndicator(true)
             defer { showActivityIndicator(false) }
 
-            let dismissesFileView = viewModel.isOpenFile(at: index)
             do {
                 try await viewModel.deleteFile(
                     index: index,
                     device: sharedDevice,
                     commandQueue: canvasView.sharedCommandQueue
                 )
-                if dismissesFileView {
-                    presentedViewController?.dismiss(animated: true)
-                }
             } catch {
                 showAlert(error)
             }

@@ -70,13 +70,14 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
+        documentsDataStore: DocumentsDataStore? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsDataStore = .init(fileManager: dependencies.fileManager)
+        self.documentsDataStore = documentsDataStore ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
 
         self.fileList.objectWillChange
