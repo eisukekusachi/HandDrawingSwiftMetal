@@ -279,9 +279,7 @@ extension HandDrawingViewController {
                 Task { @MainActor in
                     do {
                         try await self.initializeCanvas(self.viewModel.textureSize)
-                        if request.updateLayerList {
-                            await self.viewModel.updateThumbnails(device: self.sharedDevice)
-                        }
+                        await self.viewModel.updateThumbnails(device: self.sharedDevice)
                         self.updateDrawingComponents()
                         if request.dismissFileView {
                             self.presentedViewController?.dismiss(animated: true)

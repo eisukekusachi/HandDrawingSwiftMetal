@@ -70,8 +70,6 @@ extension HandDrawingViewModel {
 
             apply(loaded, projectName: zipFileURL.baseName)
 
-            await updateThumbnails(device: device)
-
             showToast(.success)
 
             initializeCanvasRequestSubject.send(
@@ -115,10 +113,7 @@ extension HandDrawingViewModel {
                     commandQueue: commandQueue
                 )
                 initializeCanvasRequestSubject.send(
-                    .init(
-                        updateLayerList: true,
-                        dismissFileView: true
-                    )
+                    .init(dismissFileView: true)
                 )
             } else {
                 try deleteCanvas(index: index)
@@ -142,7 +137,6 @@ extension HandDrawingViewModel {
                 from: zipFileURL
             )
             apply(loaded, projectName: zipFileURL.baseName)
-            await updateThumbnails(device: device)
             showToast(.success)
             initializeCanvasRequestSubject.send(.init())
         } catch {

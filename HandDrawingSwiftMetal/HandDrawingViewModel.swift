@@ -11,16 +11,10 @@ import UIKit
 
 /// Asks the view to reinitialize the canvas after a file action.
 struct InitializeCanvasRequest: Equatable {
-    /// Whether the layer list UI should reload from `textureLayers`
-    let updateLayerList: Bool
     /// Whether the presented file list should be dismissed after initialization
     let dismissFileView: Bool
 
-    init(
-        updateLayerList: Bool = false,
-        dismissFileView: Bool = false
-    ) {
-        self.updateLayerList = updateLayerList
+    init(dismissFileView: Bool = false) {
         self.dismissFileView = dismissFileView
     }
 }
