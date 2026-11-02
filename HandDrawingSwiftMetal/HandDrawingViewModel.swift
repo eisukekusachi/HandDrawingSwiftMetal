@@ -59,11 +59,11 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    /// Reinitialize the canvas after a file action. The value is whether to dismiss the file list afterward.
-    var initializeCanvasRequest: AnyPublisher<Bool, Never> {
-        initializeCanvasRequestSubject.eraseToAnyPublisher()
+    /// Requests canvas load.
+    var requestingCanvasLoad: AnyPublisher<Void, Never> {
+        requestingCanvasLoadSubject.eraseToAnyPublisher()
     }
-    let initializeCanvasRequestSubject = PassthroughSubject<Bool, Never>()
+    let requestingCanvasLoadSubject = PassthroughSubject<Void, Never>()
 
     let documentsDataStore: DocumentsDataStore
 

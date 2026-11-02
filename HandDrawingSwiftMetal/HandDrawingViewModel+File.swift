@@ -9,6 +9,11 @@ import Metal
 import UIKit
 
 extension HandDrawingViewModel {
+    func isOpenFile(at index: Int) -> Bool {
+        guard let item = fileList.item(index) else { return false }
+        return item.fileURL == zipFileURL(projectName: project.currentProjectName)
+    }
+
     /// Scans Documents for zip files and refreshes the file list.
     func setupFileList() async {
         let fileURLs = URL.documents.allFileURLs(suffix: fileList.fileSuffix)
@@ -72,7 +77,7 @@ extension HandDrawingViewModel {
 
             showToast(.success)
 
-            initializeCanvasRequestSubject.send(true)
+            requestingCanvasLoadSubject.send()
         } catch {
             showError(error)
         }
@@ -105,12 +110,12 @@ extension HandDrawingViewModel {
                 )
             }
 
-            if item.fileURL == zipFileURL(projectName: project.currentProjectName) {
+            if isOpenFile(at: index) {
                 try await clearCanvas(
                     device: device,
                     commandQueue: commandQueue
                 )
-                initializeCanvasRequestSubject.send(true)
+                requestingCanvasLoadSubject.send()
             } else {
                 try deleteCanvas(index: index)
             }
@@ -134,7 +139,7 @@ extension HandDrawingViewModel {
             )
             apply(loaded, projectName: zipFileURL.baseName)
             showToast(.success)
-            initializeCanvasRequestSubject.send(false)
+            requestingCanvasLoadSubject.send()
         } catch {
             showError(error)
         }

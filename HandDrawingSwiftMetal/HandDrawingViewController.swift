@@ -272,18 +272,15 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.initializeCanvasRequest
+        viewModel.requestingCanvasLoad
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] dismissFileView in
+            .sink { [weak self] in
                 guard let self else { return }
                 Task { @MainActor in
                     do {
                         try await self.initializeCanvas(self.viewModel.textureSize)
                         await self.viewModel.updateThumbnails(device: self.sharedDevice)
                         self.updateDrawingComponents()
-                        if dismissFileView {
-                            self.presentedViewController?.dismiss(animated: true)
-                        }
                     } catch {
                         self.showAlert(error)
                     }

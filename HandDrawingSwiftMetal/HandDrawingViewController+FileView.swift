@@ -45,6 +45,7 @@ private extension HandDrawingViewController {
                 device: sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue
             )
+            presentedViewController?.dismiss(animated: true)
         }
     }
 
@@ -54,21 +55,25 @@ private extension HandDrawingViewController {
 
     func onTapDelete(_ index: Int) {
         Task {
+            let dismissesFileView = viewModel.isOpenFile(at: index)
             await viewModel.deleteFile(
                 index: index,
                 device: sharedDevice,
                 commandQueue: canvasView.sharedCommandQueue
             )
+            if dismissesFileView {
+                presentedViewController?.dismiss(animated: true)
+            }
         }
     }
 
     func onSelectItem(_ zipFileURL: URL) {
-        presentedViewController?.dismiss(animated: true)
         Task {
             await viewModel.loadFile(
                 device: sharedDevice,
                 zipFileURL: zipFileURL
             )
+            presentedViewController?.dismiss(animated: true)
         }
     }
 }
