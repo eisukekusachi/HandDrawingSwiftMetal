@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import CoreGraphics
 import MetalKit
 import Testing
@@ -34,7 +35,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: .init(
+                dependencies: dependencies(
                     textureDataRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -65,7 +66,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: .init(
+                dependencies: dependencies(
                     textureDataRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -100,7 +101,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: .init(
+                dependencies: dependencies(
                     textureDataRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -124,6 +125,25 @@ struct HandDrawingViewModelTests {
 }
 
 extension HandDrawingViewModelTests.LoadTexturesFromDocuments {
+
+    /// Test-only `HandDrawingViewDependencies` using in-memory Core Data stacks (no SQLite).
+    private func dependencies(
+        textureDataRepository: MTLTextureDataRepositoryProtocol,
+        textureLayersCoreDataStorage: CoreDataStorage
+    ) -> HandDrawingViewDependencies {
+        .init(
+            textureDataRepository: textureDataRepository,
+            projectCoreDataStorage: CoreDataStorage(
+                inMemory: "ProjectStorage",
+                bundle: Bundle(for: CoreDataProjectStorage.self)
+            ),
+            textureLayersCoreDataStorage: textureLayersCoreDataStorage,
+            drawingToolCoreDataStorage: CoreDataStorage(
+                inMemory: "DrawingToolStorage",
+                bundle: Bundle(for: CoreDataDrawingToolStorage.self)
+            )
+        )
+    }
 
     private func makeMetal() throws -> (MTLDevice, MTLCommandQueue) {
         let device = try #require(MTLCreateSystemDefaultDevice())
