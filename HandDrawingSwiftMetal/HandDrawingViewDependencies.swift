@@ -18,10 +18,19 @@ final class HandDrawingViewDependencies {
     /// Repository for undo textures. Kept in memory because undo needs fast access.
     let inMemoryTextureRepository: MTLTextureRepositoryProtocol
 
-    let textureLayerStorage: CoreDataTextureLayerStorage
+    /// Project metadata saved in Core Data.
     let projectStorage: CoreDataProjectStorage
+
+    /// Layer list metadata saved in Core Data.
+    let textureLayerStorage: CoreDataTextureLayerStorage
+
+    /// Drawing tool settings saved in Core Data.
     let drawingToolStorage: CoreDataDrawingToolStorage
+
+    /// Brush palette saved in Core Data.
     let brushPaletteStorage: CoreDataBrushPaletteStorage
+
+    /// Eraser palette saved in Core Data.
     let eraserPaletteStorage: CoreDataEraserPaletteStorage
 
     /// Keeps SQLite stores alive when using the default Core Data stack.
@@ -33,8 +42,8 @@ final class HandDrawingViewDependencies {
         fileManager: FileManaging? = nil,
         textureDataRepository: MTLTextureDataRepositoryProtocol? = nil,
         textureRepository: MTLTextureRepositoryProtocol? = nil,
-        textureLayerStorage: CoreDataTextureLayerStorage? = nil,
         projectStorage: CoreDataProjectStorage? = nil,
+        textureLayerStorage: CoreDataTextureLayerStorage? = nil,
         drawingToolStorage: CoreDataDrawingToolStorage? = nil,
         brushPaletteStorage: CoreDataBrushPaletteStorage? = nil,
         eraserPaletteStorage: CoreDataEraserPaletteStorage? = nil
@@ -43,37 +52,32 @@ final class HandDrawingViewDependencies {
         self.documentsTextureDataRepository = textureDataRepository ?? DocumentsTextureDataRepository.shared
         self.inMemoryTextureRepository = textureRepository ?? InMemoryTextureRepository.shared
 
-        if let textureLayerStorage {
-            self.textureLayersStorageController = nil
-            self.textureLayerStorage = textureLayerStorage
-        } else {
-            let controller = PersistenceController(
-                xcdatamodeldName: "TextureLayerStorage"
-            )
-            self.textureLayersStorageController = controller
-            self.textureLayerStorage = .init(context: controller.viewContext)
-        }
-
-        if let projectStorage {
-            self.projectStorageController = nil
-            self.projectStorage = projectStorage
-        } else {
+        // Project metadata saved in Core Data.
+        if projectStorage == nil {
             let controller = PersistenceController(
                 xcdatamodeldName: "ProjectStorage"
             )
             self.projectStorageController = controller
             self.projectStorage = .init(context: controller.viewContext)
+        } else {
+            self.projectStorageController = nil
+            self.projectStorage = projectStorage!
         }
 
-        if let drawingToolStorage,
-           let brushPaletteStorage,
-           let eraserPaletteStorage
-        {
-            self.drawingToolStorageController = nil
-            self.drawingToolStorage = drawingToolStorage
-            self.brushPaletteStorage = brushPaletteStorage
-            self.eraserPaletteStorage = eraserPaletteStorage
+        // Layer list metadata saved in Core Data.
+        if textureLayerStorage == nil {
+            let controller = PersistenceController(
+                xcdatamodeldName: "TextureLayerStorage"
+            )
+            self.textureLayersStorageController = controller
+            self.textureLayerStorage = .init(context: controller.viewContext)
         } else {
+            self.textureLayersStorageController = nil
+            self.textureLayerStorage = textureLayerStorage!
+        }
+
+        // Drawing tool settings saved in Core Data.
+        if drawingToolStorage == nil || brushPaletteStorage == nil || eraserPaletteStorage == nil {
             let controller = PersistenceController(
                 xcdatamodeldName: "DrawingToolStorage"
             )
@@ -82,6 +86,11 @@ final class HandDrawingViewDependencies {
             self.drawingToolStorage = drawingToolStorage ?? .init(context: context)
             self.brushPaletteStorage = brushPaletteStorage ?? .init(context: context)
             self.eraserPaletteStorage = eraserPaletteStorage ?? .init(context: context)
+        } else {
+            self.drawingToolStorageController = nil
+            self.drawingToolStorage = drawingToolStorage!
+            self.brushPaletteStorage = brushPaletteStorage!
+            self.eraserPaletteStorage = eraserPaletteStorage!
         }
     }
 }
