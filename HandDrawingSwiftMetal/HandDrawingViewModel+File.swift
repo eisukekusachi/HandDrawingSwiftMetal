@@ -76,14 +76,9 @@ extension HandDrawingViewModel {
         showToast(.success)
     }
 
-    /// Renames a file in the list. Returns the stored title, or `nil` on failure.
-    func renameFile(index: Int, newName: String) -> String? {
-        do {
-            return try renameCanvas(index: index, newName: newName)
-        } catch {
-            showError(error)
-            return nil
-        }
+    /// Renames a file in the list and returns the stored title.
+    func renameFile(index: Int, newName: String) throws -> String {
+        try renameCanvas(index: index, newName: newName)
     }
 
     /// Deletes a saved file, or clears the open canvas when that file is selected.

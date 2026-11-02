@@ -57,7 +57,12 @@ private extension HandDrawingViewController {
     }
 
     func onTapRename(_ index: Int, _ newName: String) -> String? {
-        viewModel.renameFile(index: index, newName: newName)
+        do {
+            return try viewModel.renameFile(index: index, newName: newName)
+        } catch {
+            showAlert(error)
+            return nil
+        }
     }
 
     func onTapDelete(_ index: Int) {
