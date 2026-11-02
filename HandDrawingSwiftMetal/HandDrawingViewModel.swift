@@ -104,11 +104,7 @@ final class HandDrawingViewModel: ObservableObject {
         )
         undoableTextureLayers.setUndo(undoRegister: undoRegister)
 
-        do {
-            try fetchDataFromCoreDataIfAvailable()
-        } catch {
-            Logger.error(error)
-        }
+        fetchDataFromCoreDataIfAvailable()
     }
 
     func loadTexturesFromDocuments(
