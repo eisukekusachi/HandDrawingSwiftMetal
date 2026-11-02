@@ -14,41 +14,27 @@ extension HandDrawingViewModel {
         return item.fileURL == zipFileURL(projectName: project.currentProjectName)
     }
 
-    /// Scans Documents for zip files and refreshes the file list.
-    func setupFileList() async {
-        let fileURLs = URL.documents.allFileURLs(suffix: fileList.fileSuffix)
-        let needsUnzip = fileURLs.contains { url in
-            fileList.index(fileURL: url) == nil
-        }
+    /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
+    func setupFileList(from fileURLs: [URL]) async throws {
 
-        if needsUnzip {
-            showActivityIndicator(true)
-        }
-        defer {
-            if needsUnzip {
-                showActivityIndicator(false)
-            }
-        }
-
-        await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
+        // `loadItems` keeps existing list rows and calls `makeItem` only for zips not yet in the list.
+        try await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
-            do {
-                return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
-                    let thumbnailURL = workingDirectoryURL.appendingPathComponent(
+
+            // Unzip once to read project metadata and the list thumbnail (not the layer textures).
+            return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
+                let thumbnailData = try? Data(
+                    contentsOf: workingDirectoryURL.appendingPathComponent(
                         self.thumbnailFileName
                     )
-                    let thumbnailData = try? Data(contentsOf: thumbnailURL)
-                    return FileItem(
-                        createdAt: projectMetaData.createdAt,
-                        updatedAt: projectMetaData.updatedAt,
-                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                        fileURL: zipFileURL
-                    )
-                }
-            } catch {
-                Logger.error(error)
-                return nil
+                )
+                return .init(
+                    createdAt: projectMetaData.createdAt,
+                    updatedAt: projectMetaData.updatedAt,
+                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                    fileURL: zipFileURL
+                )
             }
         }
     }
@@ -115,7 +101,9 @@ extension HandDrawingViewModel {
             from: zipFileURL
         )
         apply(loaded, projectName: zipFileURL.baseName)
+
         try await onCanvasUpdate?()
+
         showToast(.success)
     }
 

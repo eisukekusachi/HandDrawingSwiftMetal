@@ -109,10 +109,6 @@ final class HandDrawingViewModel: ObservableObject {
         } catch {
             Logger.error(error)
         }
-
-        Task {
-            await setupFileList()
-        }
     }
 
     func loadTexturesFromDocuments(

@@ -98,8 +98,8 @@ extension FileList {
     public func loadItems(
         from fileURLs: [URL],
         by order: (FileItem, FileItem) -> Bool = { $0.updatedAt > $1.updatedAt },
-        makeItem: (URL) async -> FileItem?
-    ) async {
+        makeItem: (URL) async throws -> FileItem?
+    ) async rethrows {
         let fileURLs = fileURLs.filter(naming.isSupportedFileURL)
 
         let existingByTitle = Dictionary(
@@ -115,7 +115,7 @@ extension FileList {
                     existing.update(fileURL: fileURL)
                 }
                 items.append(existing)
-            } else if let item = await makeItem(fileURL) {
+            } else if let item = try await makeItem(fileURL) {
                 items.append(item)
             }
         }
