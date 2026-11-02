@@ -53,7 +53,6 @@
 		D48CA07E2F3C18D3008C6E9E /* UndoAdditionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48CA0652F3C18D3008C6E9E /* UndoAdditionObject.swift */; };
 		D49833F92E4A028200B6E89D /* UIStackViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */; };
 		D49C691F2F23A3F400B66608 /* ProjectStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D49C691D2F23A3F400B66608 /* ProjectStorage.xcdatamodeld */; };
-		D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69202F23A5A400B66608 /* PersistenceController.swift */; };
 		D49C69232F23A64200B66608 /* CoreDataProjectStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69222F23A64200B66608 /* CoreDataProjectStorage.swift */; };
 		D49C69252F23A69100B66608 /* ProjectData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C69242F23A69100B66608 /* ProjectData.swift */; };
 		D49C692C2F23A76400B66608 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49C692B2F23A76400B66608 /* Logger.swift */; };
@@ -87,7 +86,6 @@
 		D4C3A0833069000100009F91 /* TextureLayersUndoableStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0823069000100009F91 /* TextureLayersUndoableStateTests.swift */; };
 		D4C3A08F3069000100009F91 /* TextureRepositoryStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */; };
 		D4C3A0913069000100009F91 /* InMemoryTextureRepositoryStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0903069000100009F91 /* InMemoryTextureRepositoryStub.swift */; };
-		D4F5A0602FBE0D0400C55A4D /* CoreDataStorageStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A05F2FBE0D0400C55A4D /* CoreDataStorageStub.swift */; };
 		D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */; };
 		D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */; };
 		D4C4C0012F94000100C55A4C /* TextureLayerCanvasUpdating.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */; };
@@ -188,7 +186,6 @@
 		D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoDrawing.swift; sourceTree = "<group>"; };
 		D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackViewExtensions.swift; sourceTree = "<group>"; };
 		D49C691E2F23A3F400B66608 /* ProjectStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ProjectStorage.xcdatamodel; sourceTree = "<group>"; };
-		D49C69202F23A5A400B66608 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		D49C69222F23A64200B66608 /* CoreDataProjectStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataProjectStorage.swift; sourceTree = "<group>"; };
 		D49C69242F23A69100B66608 /* ProjectData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectData.swift; sourceTree = "<group>"; };
 		D49C692B2F23A76400B66608 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -222,7 +219,6 @@
 		D4C3A0823069000100009F91 /* TextureLayersUndoableStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersUndoableStateTests.swift; sourceTree = "<group>"; };
 		D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureRepositoryStub.swift; sourceTree = "<group>"; };
 		D4C3A0903069000100009F91 /* InMemoryTextureRepositoryStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryTextureRepositoryStub.swift; sourceTree = "<group>"; };
-		D4F5A05F2FBE0D0400C55A4D /* CoreDataStorageStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStorageStub.swift; sourceTree = "<group>"; };
 		D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelTests.swift; sourceTree = "<group>"; };
 		D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasUpdating.swift; sourceTree = "<group>"; };
@@ -327,7 +323,6 @@
 				D49C694B2F2EF0C400B66608 /* CoreDataSaveDebounceMilliseconds.swift */,
 				D49C69562F2F685300B66608 /* CoreDataStorage.swift */,
 				D49C69492F2EE85400B66608 /* CoreDataTextureLayerStorage.swift */,
-				D49C69202F23A5A400B66608 /* PersistenceController.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -371,7 +366,6 @@
 		D43E75E030961B4700272262 /* Stubs */ = {
 			isa = PBXGroup;
 			children = (
-				D4F5A05F2FBE0D0400C55A4D /* CoreDataStorageStub.swift */,
 				D4C3A0903069000100009F91 /* InMemoryTextureRepositoryStub.swift */,
 				D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */,
 			);
@@ -912,7 +906,6 @@
 				D4C3A0633069000100009F91 /* TextureLayersState.swift in Sources */,
 				D4C3A0813069000100009F91 /* TextureLayersUndoableState.swift in Sources */,
 				D4C3A06B3069000100009F91 /* TimeStampFormatter.swift in Sources */,
-				D49C69212F23A5A400B66608 /* PersistenceController.swift in Sources */,
 				D4C4C0012F94000100C55A4C /* TextureLayerCanvasUpdating.swift in Sources */,
 				D4C4C0022F94000100C55A4C /* TextureLayerCanvasView.swift in Sources */,
 				D4C4C0032F94000100C55A4C /* TextureLayerCanvasViewModel.swift in Sources */,
@@ -942,7 +935,6 @@
 				D4C3A07B3069000100009F91 /* TextureLayerModelDummy.swift in Sources */,
 				D4C3A0913069000100009F91 /* InMemoryTextureRepositoryStub.swift in Sources */,
 				D4C3A08F3069000100009F91 /* TextureRepositoryStub.swift in Sources */,
-				D4F5A0602FBE0D0400C55A4D /* CoreDataStorageStub.swift in Sources */,
 				D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */,
 				D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,

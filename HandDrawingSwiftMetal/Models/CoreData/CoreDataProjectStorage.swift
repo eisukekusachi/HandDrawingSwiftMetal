@@ -4,25 +4,28 @@
 
 @preconcurrency import CoreData
 
+/// Core Data read/write for project metadata.
 @MainActor
-final class CoreDataProjectStorage: CoreDataStorage<ProjectEntity> {
+final class CoreDataProjectStorage {
+
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        super.init(context: context)
+        self.context = context
     }
 
-    init(storage: any CoreDataStorageProtocol<ProjectEntity>) {
-        super.init(injecting: storage)
+    func fetch() throws -> ProjectEntity? {
+        try CoreDataRootEntityStore.fetch(for: ProjectEntity.self, in: context)
     }
-}
 
-extension CoreDataProjectStorage {
+    func clearAll() throws {
+        try CoreDataRootEntityStore.clearAll(for: ProjectEntity.self, in: context)
+    }
 
     func save(from project: ProjectData) async {
-        guard
-            let context = resolvedContext(),
-            let request = resolvedFetchRequest()
-        else { return }
+        guard let request = CoreDataRootEntityStore.fetchRequest(for: ProjectEntity.self, in: context) else {
+            return
+        }
 
         let projectName = project.currentProjectName
         let createdAt = project.createdAt

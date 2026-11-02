@@ -4,26 +4,28 @@
 
 @preconcurrency import CoreData
 
-/// Alpha palette managed by Core Data
+/// Core Data read/write for eraser palette.
 @MainActor
-final class CoreDataEraserPaletteStorage: CoreDataStorage<EraserPaletteEntity> {
+final class CoreDataEraserPaletteStorage {
+
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
-        super.init(context: context)
+        self.context = context
     }
 
-    init(storage: any CoreDataStorageProtocol<EraserPaletteEntity>) {
-        super.init(injecting: storage)
+    func fetch() throws -> EraserPaletteEntity? {
+        try CoreDataRootEntityStore.fetch(for: EraserPaletteEntity.self, in: context)
     }
-}
 
-extension CoreDataEraserPaletteStorage {
+    func clearAll() throws {
+        try CoreDataRootEntityStore.clearAll(for: EraserPaletteEntity.self, in: context)
+    }
 
     func save(from palette: EraserPalette) async {
-        guard
-            let context = resolvedContext(),
-            let request = resolvedFetchRequest()
-        else { return }
+        guard let request = CoreDataRootEntityStore.fetchRequest(for: EraserPaletteEntity.self, in: context) else {
+            return
+        }
 
         let id = palette.id
         let index = palette.selectedIndex

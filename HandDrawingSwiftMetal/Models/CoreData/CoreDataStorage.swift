@@ -5,38 +5,71 @@
 import CoreData
 import Foundation
 
-/// Core Data fetch / clear access for a single root entity type.
-@MainActor
-protocol CoreDataStorageProtocol<Entity>: AnyObject {
-    associatedtype Entity: NSManagedObject
-    var context: NSManagedObjectContext? { get }
-    func fetchRequest() -> NSFetchRequest<Entity>?
-    func fetch() throws -> Entity?
-    func clearAll() throws
+/// Core Data storage for one model (`.xcdatamodeld`).
+final class CoreDataStorage {
+
+    var viewContext: NSManagedObjectContext { container.viewContext }
+
+    private let container: NSPersistentContainer
+
+    init(xcdatamodeldName: String, excludeFromBackup: Bool = true) {
+        let bundle: Bundle = .main
+
+        guard
+            let modelURL = bundle.url(forResource: xcdatamodeldName, withExtension: "momd"),
+            let model = NSManagedObjectModel(contentsOf: modelURL)
+        else {
+            fatalError("Failed to load Core Data model '\(xcdatamodeldName)' from bundle: \(bundle)")
+        }
+
+        container = NSPersistentContainer(name: xcdatamodeldName, managedObjectModel: model)
+
+        container.loadPersistentStores { _, error in
+            precondition(error == nil, "Store load failed: \(error!)")
+            if excludeFromBackup {
+                Self.excludeStoreFilesFromBackup(container: self.container)
+            }
+        }
+
+        container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
+        container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+
+    private static func excludeStoreFilesFromBackup(container: NSPersistentContainer) {
+        let coordinator = container.persistentStoreCoordinator
+        for store in coordinator.persistentStores {
+            guard store.type == NSSQLiteStoreType, let baseURL = store.url else { continue }
+
+            let walURL = baseURL.deletingPathExtension().appendingPathExtension("sqlite-wal")
+            let shmURL = baseURL.deletingPathExtension().appendingPathExtension("sqlite-shm")
+
+            [baseURL, walURL, shmURL].forEach { setExcludedFromBackup(true, for: $0) }
+        }
+    }
+
+    private static func setExcludedFromBackup(_ exclude: Bool, for url: URL) {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            var values = URLResourceValues()
+            values.isExcludedFromBackup = exclude
+            var mutableURL = url
+            try mutableURL.setResourceValues(values)
+        } catch {
+            print("⚠️ Failed to set isExcludedFromBackup for \(url.lastPathComponent): \(error)")
+        }
+    }
 }
 
+// MARK: - Root entity fetch / clear
+
 @MainActor
-class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
-    let context: NSManagedObjectContext?
-    private let backend: (any CoreDataStorageProtocol<Entity>)?
+enum CoreDataRootEntityStore {
 
-    init(context: NSManagedObjectContext?) {
-        self.context = context
-        self.backend = nil
-    }
-
-    init(injecting backend: any CoreDataStorageProtocol<Entity>) {
-        self.context = backend.context
-        self.backend = backend
-    }
-
-    func fetchRequest() -> NSFetchRequest<Entity>? {
-        if let backend {
-            return backend.fetchRequest()
-        }
-        guard let context else { return nil }
-
-        let name = Entity.entity().name
+    static func fetchRequest<Entity: NSManagedObject>(
+        for entityType: Entity.Type,
+        in context: NSManagedObjectContext
+    ) -> NSFetchRequest<Entity>? {
+        let name = entityType.entity().name
         guard let entityName = name, !entityName.isEmpty else { return nil }
 
         guard
@@ -50,37 +83,24 @@ class CoreDataStorage<Entity: NSManagedObject>: CoreDataStorageProtocol {
         return request
     }
 
-    func fetch() throws -> Entity? {
-        if let backend {
-            return try backend.fetch()
-        }
-        guard let context, let request = fetchRequest() else { return nil }
+    static func fetch<Entity: NSManagedObject>(
+        for entityType: Entity.Type,
+        in context: NSManagedObjectContext
+    ) throws -> Entity? {
+        guard let request = fetchRequest(for: entityType, in: context) else { return nil }
         return try context.fetch(request).first
     }
 
-    func clearAll() throws {
-        if let backend {
-            try backend.clearAll()
-            return
-        }
-        guard let context else { return }
-        guard let entityName = Entity.entity().name else { return }
+    static func clearAll<Entity: NSManagedObject>(
+        for entityType: Entity.Type,
+        in context: NSManagedObjectContext
+    ) throws {
+        guard let entityName = entityType.entity().name else { return }
 
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
 
         try context.execute(deleteRequest)
         context.reset()
-    }
-}
-
-@MainActor
-extension CoreDataStorage {
-    func resolvedContext() -> NSManagedObjectContext? {
-        backend?.context ?? context
-    }
-
-    func resolvedFetchRequest() -> NSFetchRequest<Entity>? {
-        fetchRequest()
     }
 }
