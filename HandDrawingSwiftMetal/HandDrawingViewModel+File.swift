@@ -121,6 +121,8 @@ extension HandDrawingViewModel {
         thumbnail: UIImage?,
         zipFileURL: URL
     ) async throws {
+        let updatedAt = Date()
+
         try await writeProject(
             content: .init(
                 thumbnail: thumbnail,
@@ -130,9 +132,11 @@ extension HandDrawingViewModel {
                 brushPalette: .init(brushPalette),
                 eraserPalette: .init(eraserPalette)
             ),
-            to: zipFileURL
+            to: zipFileURL,
+            projectUpdatedAt: updatedAt
         )
 
+        project.update(updatedAt: updatedAt)
         fileList.update(currentFileItem(thumbnail: thumbnail))
         fileList.sortItems()
 
