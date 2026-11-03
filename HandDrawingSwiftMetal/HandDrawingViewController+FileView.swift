@@ -71,11 +71,7 @@ private extension HandDrawingViewController {
             defer { showActivityIndicator(false) }
 
             do {
-                try await viewModel.deleteFile(
-                    index: index,
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
+                try viewModel.deleteFile(index: index)
             } catch {
                 showAlert(error)
             }
