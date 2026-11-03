@@ -112,6 +112,23 @@ final class HandDrawingViewModel: ObservableObject {
 
 extension HandDrawingViewModel {
 
+    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
+    func clearCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        project.update(updatedAt: Date())
+        fileList.update(currentFileItem(thumbnail: nil))
+        fileList.sortItems()
+
+        try await onCanvasUpdate?()
+    }
+
     func loadTexturesFromDocuments(
         device: MTLDevice,
         fallbackTextureSize: CGSize,
@@ -185,23 +202,6 @@ extension HandDrawingViewModel {
         drawingTool.eraserDiameter = 8
         brushPalette.initializeData()
         eraserPalette.initializeData()
-    }
-
-    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
-    func clearCanvas(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        project.update(updatedAt: Date())
-        fileList.update(currentFileItem(thumbnail: nil))
-        fileList.sortItems()
-
-        try await onCanvasUpdate?()
     }
 
     func toggleDrawingTool() {

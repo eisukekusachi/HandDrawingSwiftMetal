@@ -62,6 +62,35 @@ extension HandDrawingViewModel {
         showToast(.success)
     }
 
+    /// Deletes the saved file at `index` from disk and the file list.
+    func deleteFile(index: Int) throws {
+        guard let item = fileList.item(index) else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
+        }
+
+        try documentsDataStore.removeFile(at: item.fileURL)
+        fileList.deleteItem(title: item.title)
+    }
+
+    /// Restores the canvas from a saved project file.
+    func loadFile(
+        device: MTLDevice,
+        zipFileURL: URL
+    ) async throws {
+        let loaded = try await readProject(
+            device: device,
+            from: zipFileURL
+        )
+        apply(loaded, projectName: zipFileURL.baseName)
+
+        try await onCanvasUpdate?()
+
+        showToast(.success)
+    }
+
     /// Renames a saved file on disk and updates the file list.
     /// - Returns: The title stored in the file list after renaming.
     @discardableResult
@@ -105,35 +134,6 @@ extension HandDrawingViewModel {
         fileList.renameItem(title: oldTitle, newTitle: uniqueName)
 
         return uniqueName
-    }
-
-    /// Deletes the saved file at `index` from disk and the file list.
-    func deleteFile(index: Int) throws {
-        guard let item = fileList.item(index) else {
-            throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
-            )
-        }
-
-        try documentsDataStore.removeFile(at: item.fileURL)
-        fileList.deleteItem(title: item.title)
-    }
-
-    /// Restores the canvas from a saved project file.
-    func loadFile(
-        device: MTLDevice,
-        zipFileURL: URL
-    ) async throws {
-        let loaded = try await readProject(
-            device: device,
-            from: zipFileURL
-        )
-        apply(loaded, projectName: zipFileURL.baseName)
-
-        try await onCanvasUpdate?()
-
-        showToast(.success)
     }
 
     /// Saves the current canvas.
