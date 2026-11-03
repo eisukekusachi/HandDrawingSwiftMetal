@@ -13,7 +13,20 @@ public protocol FileManaging: Sendable {
     func createDirectory(at url: URL, withIntermediateDirectories createIntermediates: Bool) throws
     func contentsOfDirectory(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?) throws -> [URL]
     func moveItem(at sourceURL: URL, to destinationURL: URL) throws
+    func copyItem(at sourceURL: URL, to destinationURL: URL) throws
     func removeItem(at url: URL) throws
+    func contents(atPath path: String) -> Data?
+    func createFile(
+        atPath path: String,
+        contents data: Data?,
+        attributes attr: [FileAttributeKey: Any]?
+    ) -> Bool
+    func replaceItemAt(
+        _ originalItemURL: URL,
+        withItemAt newItemURL: URL,
+        backupItemName: String?,
+        options: FileManager.ItemReplacementOptions
+    ) throws -> URL?
     func unzipItem(at sourceURL: URL, to destinationURL: URL) throws
 }
 
@@ -62,8 +75,38 @@ public struct FileManagerWrapper: FileManaging {
         try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
     }
 
+    public func copyItem(at sourceURL: URL, to destinationURL: URL) throws {
+        try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+    }
+
     public func removeItem(at url: URL) throws {
         try FileManager.default.removeItem(at: url)
+    }
+
+    public func contents(atPath path: String) -> Data? {
+        FileManager.default.contents(atPath: path)
+    }
+
+    public func createFile(
+        atPath path: String,
+        contents data: Data?,
+        attributes attr: [FileAttributeKey: Any]?
+    ) -> Bool {
+        FileManager.default.createFile(atPath: path, contents: data, attributes: attr)
+    }
+
+    public func replaceItemAt(
+        _ originalItemURL: URL,
+        withItemAt newItemURL: URL,
+        backupItemName: String?,
+        options: FileManager.ItemReplacementOptions
+    ) throws -> URL? {
+        try FileManager.default.replaceItemAt(
+            originalItemURL,
+            withItemAt: newItemURL,
+            backupItemName: backupItemName,
+            options: options
+        )
     }
 
     public func unzipItem(at sourceURL: URL, to destinationURL: URL) throws {
