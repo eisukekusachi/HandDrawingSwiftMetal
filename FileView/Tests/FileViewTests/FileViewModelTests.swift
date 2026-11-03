@@ -25,12 +25,11 @@ struct FileViewModelTests {
                 fileList: .init(
                     fileSuffix: "zip",
                     items: [fileItemA, fileItemB]
-                )
+                ),
+                currentOpenFileURL: fileItemA.fileURL
             )
 
-            subject.setup(
-                selectedFileURL: fileItemB.fileURL
-            )
+            subject.selectedIndex = 1
 
             #expect(subject.selectedIndex == 1)
             #expect(subject.deleteDisabled == false)
@@ -89,6 +88,23 @@ struct FileViewModelTests {
 
             subject.selectedIndex = index
 
+            #expect(subject.deleteDisabled == true)
+        }
+
+        @Test
+        func `Verify that delete is disabled when the open file is selected`() {
+            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
+            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
+
+            let subject: Subject = .init(
+                fileList: .init(
+                    fileSuffix: "zip",
+                    items: [fileItemA, fileItemB]
+                ),
+                currentOpenFileURL: fileItemA.fileURL
+            )
+
+            #expect(subject.selectedIndex == 0)
             #expect(subject.deleteDisabled == true)
         }
     }
@@ -191,7 +207,7 @@ struct FileViewModelTests {
 
             #expect(subject.selectedIndex == 1)
             #expect(subject.renameDisabled == false)
-            #expect(subject.deleteDisabled == false)
+            #expect(subject.deleteDisabled == true)
         }
 
         @Test
@@ -463,44 +479,6 @@ struct FileViewModelTests {
             #expect(deletedIndex == nil)
         }
 
-        @Test
-        func `Verify that confirmation copy uses reset wording for the open file`() {
-            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
-            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
-
-            let subject: Subject = .init(
-                fileList: .init(
-                    fileSuffix: "zip",
-                    items: [fileItemA, fileItemB]
-                ),
-                currentOpenFileURL: fileItemA.fileURL
-            )
-
-            #expect(subject.isSelectedFileOpen == true)
-            #expect(subject.deleteConfirmationTitle == "Reset this canvas?")
-            #expect(subject.deleteConfirmationMessage == "The drawing will be cleared. The file will remain.")
-            #expect(subject.deleteConfirmationButtonTitle == "Reset")
-        }
-
-        @Test
-        func `Verify that confirmation copy uses delete wording for another file`() {
-            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
-            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
-
-            let subject: Subject = .init(
-                fileList: .init(
-                    fileSuffix: "zip",
-                    items: [fileItemA, fileItemB]
-                ),
-                currentOpenFileURL: fileItemA.fileURL
-            )
-            subject.selectedIndex = 1
-
-            #expect(subject.isSelectedFileOpen == false)
-            #expect(subject.deleteConfirmationTitle == "Delete this file?")
-            #expect(subject.deleteConfirmationMessage == "This file will be removed from the device")
-            #expect(subject.deleteConfirmationButtonTitle == "Delete")
-        }
     }
 
     @Suite

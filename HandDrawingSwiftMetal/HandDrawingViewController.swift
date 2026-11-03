@@ -4,6 +4,7 @@
 
 import CanvasView
 import Combine
+import FileView
 import PaletteEditView
 import PaletteView
 import PopupView
@@ -142,7 +143,13 @@ class HandDrawingViewController: UIViewController {
             device: sharedDevice,
             commandQueue: canvasView.sharedCommandQueue,
             undoRegister: textureLayerUndoRegister,
-            canvasView: canvasView
+            canvasView: canvasView,
+            onCanvasUpdate: { [weak self] in
+                guard let self else { return }
+                try await self.initializeCanvas(self.viewModel.textureSize)
+                await self.viewModel.updateThumbnails(device: self.sharedDevice)
+                self.updateDrawingComponents()
+            }
         )
         layoutViews()
 
@@ -173,6 +180,12 @@ class HandDrawingViewController: UIViewController {
                 }
 
                 await viewModel.updateThumbnails(device: sharedDevice)
+
+                try await viewModel.setupFileList(
+                    from: URL.documents.allFileURLs(
+                        suffix: viewModel.fileList.fileSuffix
+                    )
+                )
 
                 showActivityIndicator(false)
                 showContentView(true)
@@ -272,27 +285,6 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.initializeCanvasRequest
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] request in
-                guard let self else { return }
-                Task { @MainActor in
-                    do {
-                        try await self.initializeCanvas(self.viewModel.textureSize)
-                        if request.updateLayerList {
-                            await self.viewModel.updateThumbnails(device: self.sharedDevice)
-                        }
-                        self.updateDrawingComponents()
-                        if request.dismissFileView {
-                            self.presentedViewController?.dismiss(animated: true)
-                        }
-                    } catch {
-                        self.showAlert(error)
-                    }
-                }
-            }
-            .store(in: &cancellables)
-
         viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, let newColor = viewModel.brushPalette.color(at: index) else { return }
@@ -344,15 +336,25 @@ extension HandDrawingViewController {
                 self.textureLayerViewModel.hide()
             }
         }
+        contentView.tapClearCanvasButton = { [weak self] in
+            self?.onTapClearCanvasButton()
+        }
         contentView.tapSaveButton = { [weak self] in
             guard let self else { return }
             Task {
-                await self.viewModel.saveFile(
-                    thumbnail: self.canvasView.thumbnail,
-                    zipFileURL: self.viewModel.zipFileURL(
-                        projectName: self.viewModel.project.currentProjectName
+                self.showActivityIndicator(true)
+                defer { self.showActivityIndicator(false) }
+
+                do {
+                    try await self.viewModel.saveFile(
+                        thumbnail: self.canvasView.thumbnail,
+                        zipFileURL: self.viewModel.zipFileURL(
+                            projectName: self.viewModel.project.currentProjectName
+                        )
                     )
-                )
+                } catch {
+                    self.showAlert(error)
+                }
             }
         }
         contentView.tapLoadButton = { [weak self] in
@@ -655,6 +657,38 @@ extension HandDrawingViewController {
     func enableComponentsInteraction(_ isUserInteractionEnabled: Bool) {
         contentView.enableComponentsInteraction(isUserInteractionEnabled)
         popupPassthroughView?.enablePopupInteraction(isUserInteractionEnabled)
+    }
+}
+
+extension HandDrawingViewController {
+    func onTapClearCanvasButton() {
+        let strings = FileViewStrings()
+        dialogPresenter.configuration = .init(
+            title: strings.resetCanvasTitle,
+            message: strings.resetCanvasMessage,
+            buttonTitles: [strings.cancel, strings.clear],
+            buttonActions: [
+                0: {},
+                1: { [weak self] in self?.clearCanvas() }
+            ]
+        )
+        dialogPresenter.presentAlert(on: self)
+    }
+
+    private func clearCanvas() {
+        Task {
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
+            do {
+                try await viewModel.clearCanvas(
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+            } catch {
+                showAlert(error)
+            }
+        }
     }
 }
 

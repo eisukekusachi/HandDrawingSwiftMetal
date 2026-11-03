@@ -9,35 +9,37 @@ import TextureLayerView
 import UIKit
 
 extension HandDrawingViewModel {
-    /// Clears the open canvas in place and overwrites the same zip.
-    func clearCanvas(
+    /// Creates a new project file with a blank canvas and adds it to the file list.
+    func newProject(
+        fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
+    ) async throws -> URL {
+        let targetURL = try documentsDataStore.uniqueZipFileURL(
+            fileName: fileName,
+            suffix: fileList.fileSuffix
         )
+        let createdAt = Date()
         let updatedAt = Date()
 
-        try await writeProject(
-            content: .init(
-                thumbnail: nil,
-                textureLayers: undoableTextureLayers.snapshot,
-                project: .init(project),
-                drawingTool: .init(drawingTool),
-                brushPalette: .init(brushPalette),
-                eraserPalette: .init(eraserPalette)
-            ),
-            to: zipFileURL(
-                projectName: project.currentProjectName
-            ),
+        try await saveBlankProject(
+            to: targetURL,
+            device: device,
+            commandQueue: commandQueue,
+            projectCreatedAt: createdAt,
             projectUpdatedAt: updatedAt
         )
 
-        project.update(updatedAt: updatedAt)
-        fileList.setItem(currentFileItem(thumbnail: nil))
+        project.update(
+            projectName: targetURL.baseName,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+
+        fileList.append(currentFileItem(thumbnail: nil))
         fileList.sortItems()
+
+        return targetURL
     }
 
     /// Deletes a saved file from disk and the file list.
@@ -51,49 +53,6 @@ extension HandDrawingViewModel {
 
         try documentsDataStore.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
-    }
-
-    /// Clears the canvas, assigns a new file name, and saves so the file list gains an item.
-    func newCanvas(
-        fileName: String,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws -> URL {
-        let targetURL = try documentsDataStore.uniqueZipFileURL(
-            fileName: fileName,
-            suffix: fileList.fileSuffix
-        )
-        let createdAt = Date()
-        let updatedAt = Date()
-
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        try await writeProject(
-            content: .init(
-                thumbnail: nil,
-                textureLayers: undoableTextureLayers.snapshot,
-                project: .init(project),
-                drawingTool: .init(drawingTool),
-                brushPalette: .init(brushPalette),
-                eraserPalette: .init(eraserPalette)
-            ),
-            to: targetURL,
-            projectCreatedAt: createdAt,
-            projectUpdatedAt: updatedAt
-        )
-
-        project.update(
-            projectName: targetURL.baseName,
-            createdAt: createdAt,
-            updatedAt: updatedAt
-        )
-        fileList.setItem(currentFileItem(thumbnail: nil))
-        fileList.sortItems()
-
-        return targetURL
     }
 
     /// Renames a saved file on disk and updates the file list.
@@ -143,8 +102,9 @@ extension HandDrawingViewModel {
 }
 
 extension HandDrawingViewModel {
+
     /// Creates blank canvas textures and resets drawing tool / palettes.
-    fileprivate func makeBlankCanvas(
+    func makeBlankCanvas(
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
@@ -255,5 +215,34 @@ extension HandDrawingViewModel {
                 eraserPalette: try? .init(in: workingDirectoryURL)
             )
         }
+    }
+}
+
+private extension HandDrawingViewModel {
+
+    func saveBlankProject(
+        to zipFileURL: URL,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue,
+        projectCreatedAt: Date?,
+        projectUpdatedAt: Date
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+        try await writeProject(
+            content: .init(
+                thumbnail: nil,
+                textureLayers: undoableTextureLayers.snapshot,
+                project: .init(project),
+                drawingTool: .init(drawingTool),
+                brushPalette: .init(brushPalette),
+                eraserPalette: .init(eraserPalette)
+            ),
+            to: zipFileURL,
+            projectCreatedAt: projectCreatedAt,
+            projectUpdatedAt: projectUpdatedAt
+        )
     }
 }

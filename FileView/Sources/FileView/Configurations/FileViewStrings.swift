@@ -20,6 +20,7 @@ public struct FileViewStrings: Equatable, Sendable {
     public var deleteFileMessage: String
     public var reset: String
     public var delete: String
+    public var clear: String
 
     public init(
         renameTitle: String? = nil,
@@ -33,7 +34,8 @@ public struct FileViewStrings: Equatable, Sendable {
         resetCanvasMessage: String? = nil,
         deleteFileMessage: String? = nil,
         reset: String? = nil,
-        delete: String? = nil
+        delete: String? = nil,
+        clear: String? = nil
     ) {
         self.renameTitle = renameTitle
             ?? String(localized: "Rename", bundle: .module)
@@ -48,22 +50,24 @@ public struct FileViewStrings: Equatable, Sendable {
         self.notSavedYet = notSavedYet
             ?? String(localized: "Not saved yet", bundle: .module)
         self.resetCanvasTitle = resetCanvasTitle
-            ?? String(localized: "Reset this canvas?", bundle: .module)
+            ?? String(localized: "Clear this canvas?", bundle: .module)
         self.deleteFileTitle = deleteFileTitle
             ?? String(localized: "Delete this file?", bundle: .module)
         self.resetCanvasMessage = resetCanvasMessage
             ?? String(
-                localized: "The drawing will be cleared. The file will remain.",
+                localized: "The drawing will be cleared.",
                 bundle: .module
             )
         self.deleteFileMessage = deleteFileMessage
             ?? String(
-                localized: "This file will be removed from the device",
+                localized: "This file will be removed from this device.",
                 bundle: .module
             )
         self.reset = reset
             ?? String(localized: "Reset", bundle: .module)
         self.delete = delete
             ?? String(localized: "Delete", bundle: .module)
+        self.clear = clear
+            ?? String(localized: "Clear", bundle: .module)
     }
 }

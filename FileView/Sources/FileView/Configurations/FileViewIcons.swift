@@ -10,6 +10,8 @@ import SwiftUI
 public struct FileViewIcons {
     public var create: Image
     public var rename: Image
+    /// Clears the open canvas (file remains).
+    public var clearCanvas: Image
     public var delete: Image
     public var close: Image
     public var selectionBadge: Image
@@ -18,6 +20,7 @@ public struct FileViewIcons {
     public init(
         create: Image = Image(systemName: "plus.circle"),
         rename: Image = Image(systemName: "pencil"),
+        clearCanvas: Image = Image(systemName: "clear"),
         delete: Image = Image(systemName: "trash"),
         close: Image = Image(systemName: "xmark.circle.fill"),
         selectionBadge: Image = Image(systemName: "checkmark.circle.fill"),
@@ -25,6 +28,7 @@ public struct FileViewIcons {
     ) {
         self.create = create
         self.rename = rename
+        self.clearCanvas = clearCanvas
         self.delete = delete
         self.close = close
         self.selectionBadge = selectionBadge

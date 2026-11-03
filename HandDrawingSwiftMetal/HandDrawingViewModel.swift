@@ -9,22 +9,6 @@ import FileView
 import TextureLayerView
 import UIKit
 
-/// Asks the view to reinitialize the canvas after a file action.
-struct InitializeCanvasRequest: Equatable {
-    /// Whether the layer list UI should reload from `textureLayers`
-    let updateLayerList: Bool
-    /// Whether the presented file list should be dismissed after initialization
-    let dismissFileView: Bool
-
-    init(
-        updateLayerList: Bool = false,
-        dismissFileView: Bool = false
-    ) {
-        self.updateLayerList = updateLayerList
-        self.dismissFileView = dismissFileView
-    }
-}
-
 @MainActor
 final class HandDrawingViewModel: ObservableObject {
 
@@ -75,10 +59,8 @@ final class HandDrawingViewModel: ObservableObject {
     }
     let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
-    var initializeCanvasRequest: AnyPublisher<InitializeCanvasRequest, Never> {
-        initializeCanvasRequestSubject.eraseToAnyPublisher()
-    }
-    let initializeCanvasRequestSubject = PassthroughSubject<InitializeCanvasRequest, Never>()
+    /// Updates the canvas and drawing components.
+    private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
 
     let documentsDataStore: DocumentsDataStore
 
@@ -88,13 +70,14 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
+        documentsDataStore: DocumentsDataStore? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsDataStore = .init(fileManager: dependencies.fileManager)
+        self.documentsDataStore = documentsDataStore ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
 
         self.fileList.objectWillChange
@@ -110,8 +93,11 @@ final class HandDrawingViewModel: ObservableObject {
         device: MTLDevice,
         commandQueue: MTLCommandQueue,
         undoRegister: TextureLayerUndoRegister,
-        canvasView: TextureLayerCanvasView
+        canvasView: TextureLayerCanvasView,
+        onCanvasUpdate: @escaping @MainActor () async throws -> Void
     ) {
+        self.onCanvasUpdate = onCanvasUpdate
+
         undoableTextureLayers.setup(
             device: device,
             commandQueue: commandQueue,
@@ -119,15 +105,7 @@ final class HandDrawingViewModel: ObservableObject {
         )
         undoableTextureLayers.setUndo(undoRegister: undoRegister)
 
-        do {
-            try fetchDataFromCoreDataIfAvailable()
-        } catch {
-            Logger.error(error)
-        }
-
-        Task {
-            await setupFileList()
-        }
+        fetchDataFromCoreDataIfAvailable()
     }
 
     func loadTexturesFromDocuments(

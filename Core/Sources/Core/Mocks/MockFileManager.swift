@@ -58,6 +58,13 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         }
     }
 
+    /// Marks `url` as an existing file path for `fileExists(atPath:)`.
+    public func appendFile(at url: URL) {
+        lock.lock()
+        defer { lock.unlock() }
+        _existingPaths.insert(url.path)
+    }
+
     public func setContentsOfDirectory(_ urls: [URL], at directoryURL: URL) {
         lock.lock()
         defer { lock.unlock() }

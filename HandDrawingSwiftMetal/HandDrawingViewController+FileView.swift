@@ -40,35 +40,62 @@ extension HandDrawingViewController {
 private extension HandDrawingViewController {
     func onTapCreate() {
         Task {
-            await viewModel.createFile(
-                fileName: Calendar.currentDate,
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue
-            )
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
+            do {
+                try await viewModel.createFile(
+                    fileName: Calendar.currentDate,
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+                presentedViewController?.dismiss(animated: true)
+            } catch {
+                showAlert(error)
+            }
         }
     }
 
     func onTapRename(_ index: Int, _ newName: String) -> String? {
-        viewModel.renameFile(index: index, newName: newName)
+        do {
+            return try viewModel.renameFile(index: index, newName: newName)
+        } catch {
+            showAlert(error)
+            return nil
+        }
     }
 
     func onTapDelete(_ index: Int) {
         Task {
-            await viewModel.deleteFile(
-                index: index,
-                device: sharedDevice,
-                commandQueue: canvasView.sharedCommandQueue
-            )
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
+            do {
+                try await viewModel.deleteFile(
+                    index: index,
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
+            } catch {
+                showAlert(error)
+            }
         }
     }
 
     func onSelectItem(_ zipFileURL: URL) {
-        presentedViewController?.dismiss(animated: true)
         Task {
-            await viewModel.loadFile(
-                device: sharedDevice,
-                zipFileURL: zipFileURL
-            )
+            showActivityIndicator(true)
+            defer { showActivityIndicator(false) }
+
+            do {
+                try await viewModel.loadFile(
+                    device: sharedDevice,
+                    zipFileURL: zipFileURL
+                )
+                presentedViewController?.dismiss(animated: true)
+            } catch {
+                showAlert(error)
+            }
         }
     }
 }

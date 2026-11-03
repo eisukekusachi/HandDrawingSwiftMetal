@@ -63,7 +63,7 @@ final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked 
 
     func removeAll() throws {}
 
-    func copyTexture(id: UUID, to: URL) async throws -> Bool { false }
+    func copyTexture(id: UUID, to: URL) async throws -> Bool { true }
 
     func writeDataToDisk(id: UUID, data: Data) async throws {}
 }

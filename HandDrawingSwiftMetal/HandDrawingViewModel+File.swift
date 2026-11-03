@@ -9,173 +9,138 @@ import Metal
 import UIKit
 
 extension HandDrawingViewModel {
-    /// Scans Documents for zip files and refreshes the file list.
-    func setupFileList() async {
-        let fileURLs = URL.documents.allFileURLs(suffix: fileList.fileSuffix)
-        let needsUnzip = fileURLs.contains { url in
-            fileList.index(fileURL: url) == nil
-        }
+    func isOpenFile(at index: Int) -> Bool {
+        guard let item = fileList.item(index) else { return false }
+        return item.fileURL == zipFileURL(projectName: project.currentProjectName)
+    }
 
-        if needsUnzip {
-            showActivityIndicator(true)
-        }
-        defer {
-            if needsUnzip {
-                showActivityIndicator(false)
-            }
-        }
+    /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
+    func setupFileList(from fileURLs: [URL]) async throws {
 
-        await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
+        // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
+        try await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
-            do {
-                return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
-                    let thumbnailURL = workingDirectoryURL.appendingPathComponent(
+
+            // Unzip once to read project metadata and the list thumbnail (not the layer textures).
+            return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
+                let thumbnailData = try? Data(
+                    contentsOf: workingDirectoryURL.appendingPathComponent(
                         self.thumbnailFileName
                     )
-                    let thumbnailData = try? Data(contentsOf: thumbnailURL)
-                    return FileItem(
-                        createdAt: projectMetaData.createdAt,
-                        updatedAt: projectMetaData.updatedAt,
-                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                        fileURL: zipFileURL
-                    )
-                }
-            } catch {
-                Logger.error(error)
-                return nil
+                )
+                return .init(
+                    createdAt: projectMetaData.createdAt,
+                    updatedAt: projectMetaData.updatedAt,
+                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                    fileURL: zipFileURL
+                )
             }
         }
     }
 
-    /// Creates a new canvas file, loads it, and asks the view to refresh.
+    /// Clears the open canvas and bumps the project updatedAt.
+    func clearCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        project.update(updatedAt: Date())
+        fileList.update(currentFileItem(thumbnail: nil))
+        fileList.sortItems()
+
+        try await onCanvasUpdate?()
+    }
+
+    /// Creates a new canvas file and loads it into the view model.
     func createFile(
         fileName: String,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
+    ) async throws {
+        let zipFileURL = try await newProject(
+            fileName: fileName,
+            device: device,
+            commandQueue: commandQueue
+        )
+        let loaded = try await readProject(
+            device: device,
+            from: zipFileURL
+        )
 
-        do {
-            let zipFileURL = try await newCanvas(
-                fileName: fileName,
-                device: device,
-                commandQueue: commandQueue
-            )
-            let loaded = try await readProject(
-                device: device,
-                from: zipFileURL
-            )
+        apply(loaded, projectName: zipFileURL.baseName)
 
-            apply(loaded, projectName: zipFileURL.baseName)
+        try await onCanvasUpdate?()
 
-            await updateThumbnails(device: device)
-
-            showToast(.success)
-
-            initializeCanvasRequestSubject.send(
-                .init(dismissFileView: true)
-            )
-        } catch {
-            showError(error)
-        }
+        showToast(.success)
     }
 
-    /// Renames a file in the list. Returns the stored title, or `nil` on failure.
-    func renameFile(index: Int, newName: String) -> String? {
-        do {
-            return try renameCanvas(index: index, newName: newName)
-        } catch {
-            showError(error)
-            return nil
-        }
+    /// Renames a file in the list and returns the stored title.
+    func renameFile(index: Int, newName: String) throws -> String {
+        try renameCanvas(index: index, newName: newName)
     }
 
-    /// Deletes a saved file, or clears the open canvas when that file is selected.
+    /// Deletes the saved file at `index` from disk and the file list.
     func deleteFile(
         index: Int,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
-    ) async {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
-
-        do {
-            guard let item = fileList.item(index) else {
-                throw NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Invalid Value")
-                )
-            }
-
-            if item.fileURL == zipFileURL(projectName: project.currentProjectName) {
-                try await clearCanvas(
-                    device: device,
-                    commandQueue: commandQueue
-                )
-                initializeCanvasRequestSubject.send(
-                    .init(
-                        updateLayerList: true,
-                        dismissFileView: true
-                    )
-                )
-            } else {
-                try deleteCanvas(index: index)
-            }
-        } catch {
-            showError(error)
+    ) async throws {
+        guard fileList.item(index) != nil else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
         }
+
+        try deleteCanvas(index: index)
     }
 
-    /// Loads a zip into the editor and asks the view to refresh.
+    /// Restores the canvas from a saved project file.
     func loadFile(
         device: MTLDevice,
         zipFileURL: URL
-    ) async {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
+    ) async throws {
+        let loaded = try await readProject(
+            device: device,
+            from: zipFileURL
+        )
+        apply(loaded, projectName: zipFileURL.baseName)
 
-        do {
-            let loaded = try await readProject(
-                device: device,
-                from: zipFileURL
-            )
-            apply(loaded, projectName: zipFileURL.baseName)
-            await updateThumbnails(device: device)
-            showToast(.success)
-            initializeCanvasRequestSubject.send(.init())
-        } catch {
-            showError(error)
-        }
+        try await onCanvasUpdate?()
+
+        showToast(.success)
     }
 
-    /// Saves the current canvas and shows success feedback.
+    /// Saves the current canvas.
     func saveFile(
         thumbnail: UIImage?,
         zipFileURL: URL
-    ) async {
-        showActivityIndicator(true)
-        defer { showActivityIndicator(false) }
+    ) async throws {
+        let updatedAt = Date()
 
-        do {
-            try await writeProject(
-                content: .init(
-                    thumbnail: thumbnail,
-                    textureLayers: undoableTextureLayers.snapshot,
-                    project: .init(project),
-                    drawingTool: .init(drawingTool),
-                    brushPalette: .init(brushPalette),
-                    eraserPalette: .init(eraserPalette)
-                ),
-                to: zipFileURL
-            )
-            fileList.setItem(currentFileItem(thumbnail: thumbnail))
-            fileList.sortItems()
-            showToast(.success)
-        } catch {
-            showError(error)
-        }
+        try await writeProject(
+            content: .init(
+                thumbnail: thumbnail,
+                textureLayers: undoableTextureLayers.snapshot,
+                project: .init(project),
+                drawingTool: .init(drawingTool),
+                brushPalette: .init(brushPalette),
+                eraserPalette: .init(eraserPalette)
+            ),
+            to: zipFileURL,
+            projectUpdatedAt: updatedAt
+        )
+
+        project.update(updatedAt: updatedAt)
+        fileList.update(currentFileItem(thumbnail: thumbnail))
+        fileList.sortItems()
+
+        showToast(.success)
     }
 }
 
