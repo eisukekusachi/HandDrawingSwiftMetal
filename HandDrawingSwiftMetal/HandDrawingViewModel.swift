@@ -111,7 +111,6 @@ final class HandDrawingViewModel: ObservableObject {
 }
 
 extension HandDrawingViewModel {
-
     /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
     func clearCanvas(
         device: MTLDevice,
@@ -159,6 +158,24 @@ extension HandDrawingViewModel {
         return fallbackTextureSize
     }
 
+    /// Creates blank canvas textures and resets drawing tool / palettes.
+    func makeBlankCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankLayer(
+            textureSize: undoableTextureLayers.textureSize,
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        drawingTool.type = .brush
+        drawingTool.brushDiameter = 8
+        drawingTool.eraserDiameter = 8
+        brushPalette.initializeData()
+        eraserPalette.initializeData()
+    }
+
     /// Creates one default layer with an empty texture file and applies it as the current layer stack.
     func makeBlankLayer(
         textureSize: CGSize,
@@ -184,24 +201,6 @@ extension HandDrawingViewModel {
             [layer],
             textureSize: textureSize
         )
-    }
-
-    /// Creates blank canvas textures and resets drawing tool / palettes.
-    func makeBlankCanvas(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankLayer(
-            textureSize: undoableTextureLayers.textureSize,
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        drawingTool.type = .brush
-        drawingTool.brushDiameter = 8
-        drawingTool.eraserDiameter = 8
-        brushPalette.initializeData()
-        eraserPalette.initializeData()
     }
 
     func toggleDrawingTool() {
