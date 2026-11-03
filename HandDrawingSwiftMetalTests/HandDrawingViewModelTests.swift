@@ -4,8 +4,10 @@
 
 import Core
 import CoreGraphics
+@preconcurrency import CoreData
 import MetalKit
 import Testing
+import TextureLayerView
 
 @testable import HandDrawingSwiftMetal
 
@@ -23,14 +25,12 @@ struct HandDrawingViewModelTests {
         @Test
         func `When metadata and pixel files are available, it restores layers from Core Data`() async throws {
             let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
-            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
-            let context = textureLayersCoreDataStorage.viewContext
-            _ = TestUtils.makeTextureLayerArrayEntity(
-                context: context,
+            let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
+            try makeTextureLayerArrayEntityInCoreData(
+                context: textureLayersCoreDataStorage.viewContext,
                 layers: [layer0, layer1],
                 textureSize: savedTextureSize
             )
-            try context.save()
             let textureRepository = TextureRepositoryStub()
             let (device, commandQueue) = try makeMetal()
 
@@ -62,7 +62,7 @@ struct HandDrawingViewModelTests {
         func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
             let fallbackTextureSize = TestUtils.randomSize()
             let textureRepository = TextureRepositoryStub()
-            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
+            let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
@@ -88,14 +88,12 @@ struct HandDrawingViewModelTests {
         @Test
         func `When pixel restore fails, it clears stale Core Data and installs a blank layer`() async throws {
             let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
-            let textureLayersCoreDataStorage = TestUtils.makeInMemoryTextureLayersCoreDataStorage()
-            let context = textureLayersCoreDataStorage.viewContext
-            _ = TestUtils.makeTextureLayerArrayEntity(
-                context: context,
+            let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
+            try makeTextureLayerArrayEntityInCoreData(
+                context: textureLayersCoreDataStorage.viewContext,
                 layers: [layer0, layer1],
                 textureSize: savedTextureSize
             )
-            try context.save()
             let textureRepository = TextureRepositoryStub()
             textureRepository.restoreTexturesError = NSError(domain: "error", code: 1)
             let (device, commandQueue) = try makeMetal()
@@ -149,5 +147,36 @@ extension HandDrawingViewModelTests.LoadTexturesFromDocuments {
         let device = try #require(MTLCreateSystemDefaultDevice())
         let commandQueue = try #require(device.makeCommandQueue())
         return (device, commandQueue)
+    }
+
+    private func makeInMemoryCoreDataStorage() -> CoreDataStorage {
+        CoreDataStorage(
+            inMemory: "TextureLayerStorage",
+            bundle: Bundle(for: CoreDataTextureLayerStorage.self)
+        )
+    }
+
+    /// Persists layer metadata in an in-memory Core Data stack for load tests.
+    private func makeTextureLayerArrayEntityInCoreData(
+        context: NSManagedObjectContext,
+        layers: [TextureLayerModel],
+        textureSize: CGSize,
+        selectedLayerId: LayerId? = nil
+    ) throws {
+        let root = TextureLayerArrayEntity(context: context)
+        root.textureWidth = Int16(textureSize.width)
+        root.textureHeight = Int16(textureSize.height)
+        root.selectedLayerId = selectedLayerId ?? layers.first?.id
+
+        let layerEntities = layers.map { model -> TextureLayerEntity in
+            let entity = TextureLayerEntity(context: context)
+            entity.id = model.id
+            entity.title = model.title
+            entity.alpha = Int16(model.alpha)
+            entity.isVisible = model.isVisible
+            return entity
+        }
+        root.textureLayerItems = NSOrderedSet(array: layerEntities)
+        try context.save()
     }
 }
