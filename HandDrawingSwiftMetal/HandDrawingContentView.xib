@@ -56,7 +56,7 @@
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Clr-Ca-nvs">
                             <rect key="frame" x="99.333333333333343" y="0.0" width="48" height="34.333333333333336"/>
-                            <buttonConfiguration key="configuration" style="plain" image="clear" catalog="system"/>
+                            <buttonConfiguration key="configuration" style="plain" image="trash" catalog="system"/>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ioX-rL-sY3">
                             <rect key="frame" x="99.333333333333343" y="0.0" width="54.666666666666657" height="34.333333333333336"/>
@@ -180,7 +180,7 @@
         <image name="arrow.uturn.forward.square" catalog="system" width="128" height="114"/>
         <image name="folder" catalog="system" width="128" height="94"/>
         <image name="photo" catalog="system" width="128" height="93"/>
-        <image name="clear" catalog="system" width="128" height="114"/>
+        <image name="trash" catalog="system" width="117" height="128"/>
         <image name="square.3.layers.3d" catalog="system" width="128" height="125"/>
         <image name="square.and.arrow.down.fill" catalog="system" width="110" height="128"/>
         <systemColor name="systemBackgroundColor">
