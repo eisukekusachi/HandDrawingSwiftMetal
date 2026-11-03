@@ -17,6 +17,52 @@ struct HandDrawingViewModelFileTests {
     private typealias Subject = HandDrawingViewModel
 
     @MainActor
+    struct ClearCanvas {
+
+        @Test
+        func `When clearing the open file, it updates updatedAt and re-sorts without writing the zip`() async throws {
+            let fileManager = MockFileManager()
+            let zipHandler = MockZipHandler()
+            let (device, commandQueue) = try makeMetal()
+
+            let firstURL = zipURL(named: "first", fileManager: fileManager)
+            let secondURL = zipURL(named: "second", fileManager: fileManager)
+            let thirdURL = zipURL(named: "third", fileManager: fileManager)
+            fileManager.appendFile(at: firstURL)
+            fileManager.appendFile(at: secondURL)
+            fileManager.appendFile(at: thirdURL)
+
+            let subject: Subject = .init(
+                dependencies: dependencies(fileManager: fileManager),
+                documentsDataStore: .init(fileManager: fileManager, zipHandler: zipHandler)
+            )
+
+            subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
+            let projectUpdatedAtBefore = subject.project.updatedAt
+
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 2), fileURL: firstURL))
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 1), fileURL: secondURL))
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 0), fileURL: thirdURL))
+            subject.fileList.sortItems()
+
+            #expect(subject.fileList.items.map(\.title) == ["first", "second", "third"])
+
+            try await subject.clearCanvas(
+                device: device,
+                commandQueue: commandQueue
+            )
+
+            // Cleared row gets a new updatedAt; sortItems moves it to the top.
+            #expect(subject.fileList.items.map(\.title) == ["second", "first", "third"])
+            #expect(subject.fileList.items[0].updatedAt == subject.project.updatedAt)
+            // In-memory project metadata matches the list row.
+            #expect(subject.project.updatedAt > projectUpdatedAtBefore)
+            // Clear does not write the zip; persistence waits until save.
+            #expect(zipHandler.zipCalls.isEmpty)
+        }
+    }
+
+    @MainActor
     struct DeleteFile {
 
         @Test
@@ -86,10 +132,10 @@ struct HandDrawingViewModelFileTests {
     }
 
     @MainActor
-    struct ClearCanvas {
+    struct SaveFile {
 
         @Test
-        func `When clearing the open file, it updates updatedAt and re-sorts without writing the zip`() async throws {
+        func `When saving the open file, it updates updatedAt and re-sorts the list`() async throws {
             let fileManager = MockFileManager()
             let zipHandler = MockZipHandler()
             let (device, commandQueue) = try makeMetal()
@@ -106,31 +152,28 @@ struct HandDrawingViewModelFileTests {
                 documentsDataStore: .init(fileManager: fileManager, zipHandler: zipHandler)
             )
 
-            let oldestUpdatedAt = Date(timeIntervalSince1970: 0)
-            let middleUpdatedAt = Date(timeIntervalSince1970: 1)
-            let newestUpdatedAt = Date(timeIntervalSince1970: 2)
-            subject.project.update(projectName: "second", updatedAt: middleUpdatedAt)
+            subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
             let projectUpdatedAtBefore = subject.project.updatedAt
 
-            subject.fileList.append(.init(updatedAt: newestUpdatedAt, fileURL: firstURL))
-            subject.fileList.append(.init(updatedAt: middleUpdatedAt, fileURL: secondURL))
-            subject.fileList.append(.init(updatedAt: oldestUpdatedAt, fileURL: thirdURL))
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 2), fileURL: firstURL))
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 1), fileURL: secondURL))
+            subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 0), fileURL: thirdURL))
             subject.fileList.sortItems()
 
-            #expect(subject.fileList.items.map(\.title) == ["first", "second", "third"])
-
-            try await subject.clearCanvas(
+            try await subject.makeBlankCanvas(
                 device: device,
                 commandQueue: commandQueue
             )
 
-            // Cleared row gets a new updatedAt; sortItems moves it to the top.
+            try await subject.saveFile(
+                thumbnail: nil,
+                zipFileURL: secondURL
+            )
+
+            // Saved row gets a new updatedAt; sortItems moves it to the top.
             #expect(subject.fileList.items.map(\.title) == ["second", "first", "third"])
             #expect(subject.fileList.items[0].updatedAt == subject.project.updatedAt)
-            // In-memory project metadata matches the list row.
             #expect(subject.project.updatedAt > projectUpdatedAtBefore)
-            // Clear does not write the zip; persistence waits until save.
-            #expect(zipHandler.zipCalls.isEmpty)
         }
     }
 }
