@@ -15,52 +15,6 @@ struct FileListTests {
 
     @Suite
     @MainActor
-    struct Append {
-        @Test
-        func `Verify that append adds items with distinct titles`() {
-            let subject: Subject = .init(fileSuffix: "zip")
-
-            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
-            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
-            let fileItemC = FileItem(fileURL: URL(fileURLWithPath: "/tmp/c.zip"))
-
-            subject.append(fileItemA)
-            subject.append(fileItemB)
-            subject.append(fileItemC)
-
-            #expect(subject.items.count == 3)
-            #expect(subject.items.map(\.fileURL) == [
-                fileItemA.fileURL,
-                fileItemB.fileURL,
-                fileItemC.fileURL
-            ])
-        }
-
-        @Test
-        func `Verify that append ignores duplicate titles`() {
-            let subject: Subject = .init(fileSuffix: "zip")
-            let fileURL = URL(fileURLWithPath: "/tmp/a.zip")
-
-            subject.append(FileItem(updatedAt: Date(timeIntervalSince1970: 0), fileURL: fileURL))
-            subject.append(FileItem(updatedAt: Date(timeIntervalSince1970: 100), fileURL: fileURL))
-
-            #expect(subject.items.count == 1)
-            #expect(subject.items[0].updatedAt == Date(timeIntervalSince1970: 0))
-        }
-
-        @Test
-        func `Verify that append ignores items that do not match fileSuffix`() {
-            let subject: Subject = .init(fileSuffix: "zip")
-            let txtItem = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.txt"))
-
-            subject.append(txtItem)
-
-            #expect(subject.items.isEmpty)
-        }
-    }
-
-    @Suite
-    @MainActor
     struct Update {
         @Test
         func `Verify that update refreshes updatedAt for an existing title`() {
@@ -111,18 +65,6 @@ struct FileListTests {
 
             #expect(subject.items.isEmpty)
         }
-
-        @Test
-        func `Verify that update ignores items that do not match fileSuffix`() {
-            let subject: Subject = .init(fileSuffix: "zip")
-            let zipURL = URL(fileURLWithPath: "/tmp/a.zip")
-            subject.append(FileItem(fileURL: zipURL))
-
-            subject.update(FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.txt")))
-
-            #expect(subject.items.count == 1)
-            #expect(subject.items[0].fileURL == zipURL)
-        }
     }
 
     @Suite
@@ -131,15 +73,15 @@ struct FileListTests {
         @Test
         func `Verify that sortItems orders items by updatedAt with the newest first`() {
             let fileItemA = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 1_000),
+                updatedAt: Date(timeIntervalSince1970: 1),
                 fileURL: URL(fileURLWithPath: "/tmp/a.zip")
             )
             let fileItemB = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 3_000),
+                updatedAt: Date(timeIntervalSince1970: 3),
                 fileURL: URL(fileURLWithPath: "/tmp/b.zip")
             )
             let fileItemC = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 2_000),
+                updatedAt: Date(timeIntervalSince1970: 2),
                 fileURL: URL(fileURLWithPath: "/tmp/c.zip")
             )
 
@@ -152,6 +94,7 @@ struct FileListTests {
 
             subject.sortItems()
 
+            // Newest updatedAt first.
             #expect(subject.items.map(\.title) == ["b", "c", "a"])
             #expect(subject.items.map(\.updatedAt) == [
                 fileItemB.updatedAt,
@@ -163,25 +106,25 @@ struct FileListTests {
 
     @Suite
     @MainActor
-    struct LoadItems {
+    struct UpdateItems {
         @Test
-        func `Verify that loadItems builds sorted items from the given URLs`() async {
+        func `Verify that updateItems builds sorted items from the given URLs`() async {
             let older = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 1_000),
+                updatedAt: Date(timeIntervalSince1970: 1),
                 fileURL: URL(fileURLWithPath: "/tmp/older.zip")
             )
             let newer = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 2_000),
+                updatedAt: Date(timeIntervalSince1970: 2),
                 fileURL: URL(fileURLWithPath: "/tmp/newer.zip")
             )
             let ignored = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 3_000),
+                updatedAt: Date(timeIntervalSince1970: 3),
                 fileURL: URL(fileURLWithPath: "/tmp/ignored.txt")
             )
 
             let subject: Subject = .init(fileSuffix: "zip")
 
-            await subject.loadItems(
+            await subject.updateItems(
                 from: [
                     older.fileURL,
                     newer.fileURL,
@@ -200,17 +143,17 @@ struct FileListTests {
         }
 
         @Test
-        func `Verify that loadItems reuses existing titles and only builds new ones`() async {
+        func `Verify that updateItems reuses existing titles and only builds new ones`() async {
             let existing = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 1_000),
+                updatedAt: Date(timeIntervalSince1970: 1),
                 fileURL: URL(fileURLWithPath: "/tmp/existing.zip")
             )
             let newItem = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 2_000),
+                updatedAt: Date(timeIntervalSince1970: 2),
                 fileURL: URL(fileURLWithPath: "/tmp/new.zip")
             )
             let removed = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 3_000),
+                updatedAt: Date(timeIntervalSince1970: 3),
                 fileURL: URL(fileURLWithPath: "/tmp/removed.zip")
             )
 
@@ -221,7 +164,7 @@ struct FileListTests {
 
             var madeURLs: [URL] = []
 
-            await subject.loadItems(
+            await subject.updateItems(
                 from: [existing.fileURL, newItem.fileURL]
             ) { fileURL in
                 madeURLs.append(fileURL)
@@ -239,13 +182,13 @@ struct FileListTests {
         }
 
         @Test
-        func `Verify that loadItems does not refresh metadata for existing titles`() async {
+        func `Verify that updateItems does not refresh metadata for existing titles`() async {
             let existing = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 1_000),
+                updatedAt: Date(timeIntervalSince1970: 1),
                 fileURL: URL(fileURLWithPath: "/tmp/existing.zip")
             )
             let newItem = FileItem(
-                updatedAt: Date(timeIntervalSince1970: 9_000),
+                updatedAt: Date(timeIntervalSince1970: 2),
                 thumbnail: UIImage(),
                 fileURL: existing.fileURL
             )
@@ -256,13 +199,13 @@ struct FileListTests {
 
             var madeURLs: [URL] = []
 
-            await subject.loadItems(from: [existing.fileURL]) { fileURL in
+            await subject.updateItems(from: [existing.fileURL]) { fileURL in
                 madeURLs.append(fileURL)
                 // Production would create a FileItem here; the test reuses the fixtures above.
                 return [newItem].first { $0.fileURL == fileURL }
             }
 
-            // If the file URL is already registered, makeItem is skipped.
+            // If the file URL is already registered, makeItemFromDocuments is skipped.
             #expect(madeURLs.isEmpty)
             #expect(subject.items.count == 1)
             #expect(subject.items[0] === existing)

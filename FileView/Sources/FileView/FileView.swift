@@ -31,7 +31,6 @@ public struct FileView: View {
         self._viewModel = StateObject(
             wrappedValue: FileViewModel(
                 fileList: fileList,
-                strings: strings,
                 currentOpenFileURL: currentOpenFileURL,
                 eventHandler: eventHandler
             )
@@ -87,9 +86,9 @@ public struct FileView: View {
             dismiss()
         }
         .alertDestructiveConfirmation(
-            title: viewModel.deleteConfirmationTitle,
-            message: viewModel.deleteConfirmationMessage,
-            destructiveButtonTitle: viewModel.deleteConfirmationButtonTitle,
+            title: strings.deleteFileTitle,
+            message: strings.deleteFileMessage,
+            destructiveButtonTitle: strings.delete,
             cancelButtonTitle: strings.cancel,
             isPresented: $viewModel.isShowingDeleteConfirmDialog,
             onDestructive: { viewModel.confirmDelete() }

@@ -63,21 +63,15 @@ extension FileList {
         return items[index]
     }
 
-    /// Appends an item when no row with the same title exists.
-    /// Items that do not match `naming`, or duplicate titles, are ignored.
+    /// Appends an item to the list.
     public func append(_ item: FileItem) {
-        guard naming.isSupportedFileURL(item.fileURL) else { return }
-        guard index(title: item.title) == nil else { return }
-
         var items = self.items
         items.append(item)
         self.items = items
     }
 
     /// Updates the row with the same title.
-    /// Items that do not match `naming`, or unknown titles, are ignored.
     public func update(_ item: FileItem) {
-        guard naming.isSupportedFileURL(item.fileURL) else { return }
         guard let index = index(title: item.title) else { return }
 
         var items = self.items
@@ -97,37 +91,36 @@ extension FileList {
         self.items = items
     }
 
-    /// Loads items from the given file URLs.
+    /// Updates the list from `fileURLs` (one row per URL, sorted by `order`).
     ///
-    /// Existing titles are reused so `makeItem` runs only for new URLs.
-    /// That matters when `makeItem` is expensive (e.g. unzip).
-    public func loadItems(
+    /// Rows whose title is already in memory are reused unchanged; `makeItemFromDocuments` runs only for new titles.
+    public func updateItems(
         from fileURLs: [URL],
         by order: (FileItem, FileItem) -> Bool = { $0.updatedAt > $1.updatedAt },
-        makeItem: (URL) async throws -> FileItem?
+        makeItemFromDocuments: (URL) async throws -> FileItem?
     ) async rethrows {
-        let fileURLs = fileURLs.filter(naming.isSupportedFileURL)
+        let supportedURLs = fileURLs.filter(naming.isSupportedFileURL)
 
-        let existingByTitle = Dictionary(
+        let existingItemDictionary = Dictionary(
             uniqueKeysWithValues: items.map { ($0.title, $0) }
         )
 
-        var items: [FileItem] = []
+        var loadedItems: [FileItem] = []
+        loadedItems.reserveCapacity(supportedURLs.count)
 
-        for fileURL in fileURLs {
+        for fileURL in supportedURLs {
             let title = fileURL.baseName
-            if let existing = existingByTitle[title] {
-                if existing.fileURL != fileURL {
-                    existing.update(fileURL: fileURL)
-                }
-                items.append(existing)
-            } else if let item = try await makeItem(fileURL) {
-                items.append(item)
+
+            // Reuse the in-memory row; otherwise load from disk.
+            if let existing = existingItemDictionary[title] {
+                loadedItems.append(existing)
+            } else if let newRow = try await makeItemFromDocuments(fileURL) {
+                loadedItems.append(newRow)
             }
         }
 
-        items.sort(by: order)
-        self.items = items.filter { naming.isSupportedFileURL($0.fileURL) }
+        loadedItems.sort(by: order)
+        self.items = loadedItems
     }
 
     /// Renames the item with the matching title

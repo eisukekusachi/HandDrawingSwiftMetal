@@ -17,8 +17,8 @@ extension HandDrawingViewModel {
     /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
     func setupFileList(from fileURLs: [URL]) async throws {
 
-        // `loadItems` keeps existing list rows and calls `makeItem` only for zips not yet in the list.
-        try await fileList.loadItems(from: fileURLs) { [weak self] zipFileURL in
+        // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
+        try await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
 
             // Unzip once to read project metadata and the list thumbnail (not the layer textures).

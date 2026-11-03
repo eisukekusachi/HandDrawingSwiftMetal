@@ -52,21 +52,6 @@ final class FileViewModel: ObservableObject {
         return item.fileURL == currentOpenFileURL
     }
 
-    /// Title for the delete confirmation dialog
-    var deleteConfirmationTitle: String {
-        strings.deleteFileTitle
-    }
-
-    /// Message for the delete confirmation dialog
-    var deleteConfirmationMessage: String {
-        strings.deleteFileMessage
-    }
-
-    /// Destructive button title for the delete confirmation dialog
-    var deleteConfirmationButtonTitle: String {
-        strings.delete
-    }
-
     /// Whether the delete confirmation dialog is presented
     @Published var isShowingDeleteConfirmDialog = false
 
@@ -81,9 +66,6 @@ final class FileViewModel: ObservableObject {
     /// File URL of the canvas that is currently open outside this list
     private var currentOpenFileURL: URL?
 
-    /// User-facing copy
-    private let strings: FileViewStrings
-
     /// Callbacks for create, rename, delete, and open actions
     private let eventHandler: FileViewEventHandler?
 
@@ -91,12 +73,10 @@ final class FileViewModel: ObservableObject {
 
     init(
         fileList: FileList,
-        strings: FileViewStrings = .init(),
         currentOpenFileURL: URL? = nil,
         eventHandler: FileViewEventHandler? = nil
     ) {
         self.fileList = fileList
-        self.strings = strings
         self.eventHandler = eventHandler
         self.currentOpenFileURL = currentOpenFileURL
 

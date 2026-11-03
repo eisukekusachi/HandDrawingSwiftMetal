@@ -479,25 +479,6 @@ struct FileViewModelTests {
             #expect(deletedIndex == nil)
         }
 
-        @Test
-        func `Verify that confirmation copy uses delete wording for another file`() {
-            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
-            let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
-
-            let subject: Subject = .init(
-                fileList: .init(
-                    fileSuffix: "zip",
-                    items: [fileItemA, fileItemB]
-                ),
-                currentOpenFileURL: fileItemA.fileURL
-            )
-            subject.selectedIndex = 1
-
-            #expect(subject.isSelectedFileOpen == false)
-            #expect(subject.deleteConfirmationTitle == "Delete this file?")
-            #expect(subject.deleteConfirmationMessage == "This file will be removed from this device.")
-            #expect(subject.deleteConfirmationButtonTitle == "Delete")
-        }
     }
 
     @Suite
