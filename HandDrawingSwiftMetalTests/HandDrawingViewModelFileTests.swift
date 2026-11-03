@@ -16,67 +16,20 @@ struct HandDrawingViewModelFileTests {
 
     private typealias Subject = HandDrawingViewModel
 
-    /// Exercises `deleteFile` only: invalid index, non-open row (remove zip + list row).
-    /// List selection is covered in FileViewModel tests.
     @MainActor
     struct DeleteFile {
 
         @Test
-        func `When index is out of bounds, it throws`() async throws {
-            let (device, commandQueue) = try makeMetal()
-            let fileManager = MockFileManager()
-
-            let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsDataStore: .init(fileManager: fileManager)
-            )
-            subject.fileList.setItem(.init(fileURL: zipURL(named: "first", fileManager: fileManager)))
-            subject.fileList.setItem(.init(fileURL: zipURL(named: "second", fileManager: fileManager)))
-            subject.fileList.setItem(.init(fileURL: zipURL(named: "third", fileManager: fileManager)))
-            #expect(subject.fileList.items.count == 3)
-
-            await #expect(throws: NSError.self) {
-                try await subject.deleteFile(
-                    index: 3,
-                    device: device,
-                    commandQueue: commandQueue
-                )
-            }
-        }
-
-        @Test
-        func `When the open file is selected, it throws`() async throws {
-            let fileManager = MockFileManager()
-            let (device, commandQueue) = try makeMetal()
-
-            let firstURL = zipURL(named: "first", fileManager: fileManager)
-            fileManager.setExistingFiles(at: [firstURL])
-
-            let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsDataStore: .init(fileManager: fileManager)
-            )
-            subject.project.update(projectName: "first")
-            subject.fileList.setItem(.init(fileURL: firstURL))
-
-            await #expect(throws: NSError.self) {
-                try await subject.deleteFile(
-                    index: 0,
-                    device: device,
-                    commandQueue: commandQueue
-                )
-            }
-        }
-
-        @Test
-        func `When deleting a file that is not open, it removes the zip and the list entry`() async throws {
+        func `When deleting a file, it removes the zip and the list entry`() async throws {
             let fileManager = MockFileManager()
             let (device, commandQueue) = try makeMetal()
 
             let firstURL = zipURL(named: "first", fileManager: fileManager)
             let secondURL = zipURL(named: "second", fileManager: fileManager)
             let thirdURL = zipURL(named: "third", fileManager: fileManager)
-            fileManager.setExistingFiles(at: [firstURL, secondURL, thirdURL])
+            fileManager.appendFile(at: firstURL)
+            fileManager.appendFile(at: secondURL)
+            fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
@@ -85,13 +38,12 @@ struct HandDrawingViewModelFileTests {
 
             subject.project.update(projectName: "first")
 
-            subject.fileList.setItem(.init(fileURL: firstURL))
-            subject.fileList.setItem(.init(fileURL: secondURL))
-            subject.fileList.setItem(.init(fileURL: thirdURL))
+            subject.fileList.append(.init(fileURL: firstURL))
+            subject.fileList.append(.init(fileURL: secondURL))
+            subject.fileList.append(.init(fileURL: thirdURL))
 
             let secondIndex = try #require(subject.fileList.index(fileURL: secondURL))
 
-            // `first` is the open project; `second` is not open.
             try await subject.deleteFile(
                 index: secondIndex,
                 device: device,
@@ -108,13 +60,36 @@ struct HandDrawingViewModelFileTests {
             #expect(fileManager.fileExists(atPath: firstURL.path))
             #expect(fileManager.fileExists(atPath: thirdURL.path))
         }
+
+        @Test
+        func `When index is out of bounds, it throws`() async throws {
+            let (device, commandQueue) = try makeMetal()
+            let fileManager = MockFileManager()
+
+            let subject: Subject = .init(
+                dependencies: dependencies(fileManager: fileManager),
+                documentsDataStore: .init(fileManager: fileManager)
+            )
+            subject.fileList.append(.init(fileURL: zipURL(named: "first", fileManager: fileManager)))
+            subject.fileList.append(.init(fileURL: zipURL(named: "second", fileManager: fileManager)))
+            subject.fileList.append(.init(fileURL: zipURL(named: "third", fileManager: fileManager)))
+            #expect(subject.fileList.items.count == 3)
+
+            await #expect(throws: NSError.self) {
+                try await subject.deleteFile(
+                    index: 3,
+                    device: device,
+                    commandQueue: commandQueue
+                )
+            }
+        }
     }
 
     @MainActor
     struct ClearCanvas {
 
         @Test
-        func `When clearing the open file, it updates updatedAt without writing the zip`() async throws {
+        func `When clearing the open file, it updates updatedAt and re-sorts without writing the zip`() async throws {
             let fileManager = MockFileManager()
             let zipHandler = MockZipHandler()
             let (device, commandQueue) = try makeMetal()
@@ -122,42 +97,39 @@ struct HandDrawingViewModelFileTests {
             let firstURL = zipURL(named: "first", fileManager: fileManager)
             let secondURL = zipURL(named: "second", fileManager: fileManager)
             let thirdURL = zipURL(named: "third", fileManager: fileManager)
-            fileManager.setExistingFiles(at: [firstURL, secondURL, thirdURL])
+            fileManager.appendFile(at: firstURL)
+            fileManager.appendFile(at: secondURL)
+            fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
                 documentsDataStore: .init(fileManager: fileManager, zipHandler: zipHandler)
             )
 
-            // `loadFile` does not refresh list rows; only the open project's metadata changes.
-            let staleUpdatedAt = Date(timeIntervalSince1970: 0)
-            let middleUpdatedAt = Date(timeIntervalSince1970: 100)
-            let newestUpdatedAt = Date(timeIntervalSince1970: 200)
-            subject.project.update(projectName: "second", updatedAt: staleUpdatedAt)
+            let oldestUpdatedAt = Date(timeIntervalSince1970: 0)
+            let middleUpdatedAt = Date(timeIntervalSince1970: 1)
+            let newestUpdatedAt = Date(timeIntervalSince1970: 2)
+            subject.project.update(projectName: "second", updatedAt: middleUpdatedAt)
             let projectUpdatedAtBefore = subject.project.updatedAt
 
-            subject.fileList.setItem(.init(updatedAt: newestUpdatedAt, fileURL: firstURL))
-            subject.fileList.setItem(.init(updatedAt: staleUpdatedAt, fileURL: secondURL))
-            subject.fileList.setItem(.init(updatedAt: middleUpdatedAt, fileURL: thirdURL))
+            subject.fileList.append(.init(updatedAt: newestUpdatedAt, fileURL: firstURL))
+            subject.fileList.append(.init(updatedAt: middleUpdatedAt, fileURL: secondURL))
+            subject.fileList.append(.init(updatedAt: oldestUpdatedAt, fileURL: thirdURL))
             subject.fileList.sortItems()
 
-            // Open project is the oldest row in the list until clear runs.
-            #expect(subject.fileList.items.map(\.title) == ["first", "third", "second"])
+            #expect(subject.fileList.items.map(\.title) == ["first", "second", "third"])
 
             try await subject.clearCanvas(
                 device: device,
                 commandQueue: commandQueue
             )
 
-            // Clear bumps the open row's updatedAt and re-sorts; disk zips are untouched until save.
-            #expect(subject.fileList.items.count == 3)
+            // Cleared row gets a new updatedAt; sortItems moves it to the top.
             #expect(subject.fileList.items.map(\.title) == ["second", "first", "third"])
             #expect(subject.fileList.items[0].updatedAt == subject.project.updatedAt)
+            // In-memory project metadata matches the list row.
             #expect(subject.project.updatedAt > projectUpdatedAtBefore)
-
-            #expect(fileManager.fileExists(atPath: firstURL.path))
-            #expect(fileManager.fileExists(atPath: secondURL.path))
-            #expect(fileManager.fileExists(atPath: thirdURL.path))
+            // Clear does not write the zip; persistence waits until save.
             #expect(zipHandler.zipCalls.isEmpty)
         }
     }

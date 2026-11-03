@@ -50,7 +50,7 @@ extension HandDrawingViewModel {
         )
 
         project.update(updatedAt: Date())
-        fileList.setItem(currentFileItem(thumbnail: nil))
+        fileList.update(currentFileItem(thumbnail: nil))
         fileList.sortItems()
 
         try await onCanvasUpdate?()
@@ -84,20 +84,13 @@ extension HandDrawingViewModel {
         try renameCanvas(index: index, newName: newName)
     }
 
-    /// Deletes a saved file that is not the open project.
+    /// Deletes the saved file at `index` from disk and the file list.
     func deleteFile(
         index: Int,
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws {
         guard fileList.item(index) != nil else {
-            throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Invalid Value")
-            )
-        }
-
-        guard !isOpenFile(at: index) else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Invalid Value")
@@ -140,7 +133,7 @@ extension HandDrawingViewModel {
             to: zipFileURL
         )
 
-        fileList.setItem(currentFileItem(thumbnail: thumbnail))
+        fileList.update(currentFileItem(thumbnail: thumbnail))
         fileList.sortItems()
 
         showToast(.success)

@@ -36,7 +36,7 @@ extension HandDrawingViewModel {
             updatedAt: updatedAt
         )
 
-        fileList.setItem(currentFileItem(thumbnail: nil))
+        fileList.append(currentFileItem(thumbnail: nil))
         fileList.sortItems()
 
         return targetURL

@@ -63,22 +63,28 @@ extension FileList {
         return items[index]
     }
 
-    /// Sets an item by title: updates the matching item, or appends if not found.
-    /// Items that do not match `naming` are ignored.
-    public func setItem(_ item: FileItem) {
+    /// Appends an item when no row with the same title exists.
+    /// Items that do not match `naming`, or duplicate titles, are ignored.
+    public func append(_ item: FileItem) {
         guard naming.isSupportedFileURL(item.fileURL) else { return }
+        guard index(title: item.title) == nil else { return }
 
         var items = self.items
+        items.append(item)
+        self.items = items
+    }
 
-        if let index = items.firstIndex(where: { $0.title == item.title }) {
-            items[index].update(
-                updatedAt: item.updatedAt,
-                thumbnail: .set(item.thumbnail)
-            )
-        } else {
-            items.append(item)
-        }
+    /// Updates the row with the same title.
+    /// Items that do not match `naming`, or unknown titles, are ignored.
+    public func update(_ item: FileItem) {
+        guard naming.isSupportedFileURL(item.fileURL) else { return }
+        guard let index = index(title: item.title) else { return }
 
+        var items = self.items
+        items[index].update(
+            updatedAt: item.updatedAt,
+            thumbnail: .set(item.thumbnail)
+        )
         self.items = items
     }
 

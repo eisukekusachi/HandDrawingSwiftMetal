@@ -15,64 +15,78 @@ struct FileListTests {
 
     @Suite
     @MainActor
-    struct SetItem {
+    struct Append {
         @Test
-        func `Verify that a new item is added if the title is different, and updated if the title is the same`() {
+        func `Verify that append adds items with distinct titles`() {
             let subject: Subject = .init(fileSuffix: "zip")
 
             let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
             let fileItemB = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.zip"))
             let fileItemC = FileItem(fileURL: URL(fileURLWithPath: "/tmp/c.zip"))
 
+            subject.append(fileItemA)
+            subject.append(fileItemB)
+            subject.append(fileItemC)
+
+            #expect(subject.items.count == 3)
+            #expect(subject.items.map(\.fileURL) == [
+                fileItemA.fileURL,
+                fileItemB.fileURL,
+                fileItemC.fileURL
+            ])
+        }
+
+        @Test
+        func `Verify that append ignores duplicate titles`() {
+            let subject: Subject = .init(fileSuffix: "zip")
+            let fileURL = URL(fileURLWithPath: "/tmp/a.zip")
+
+            subject.append(FileItem(updatedAt: Date(timeIntervalSince1970: 0), fileURL: fileURL))
+            subject.append(FileItem(updatedAt: Date(timeIntervalSince1970: 100), fileURL: fileURL))
+
+            #expect(subject.items.count == 1)
+            #expect(subject.items[0].updatedAt == Date(timeIntervalSince1970: 0))
+        }
+
+        @Test
+        func `Verify that append ignores items that do not match fileSuffix`() {
+            let subject: Subject = .init(fileSuffix: "zip")
+            let txtItem = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.txt"))
+
+            subject.append(txtItem)
+
+            #expect(subject.items.isEmpty)
+        }
+    }
+
+    @Suite
+    @MainActor
+    struct Update {
+        @Test
+        func `Verify that update refreshes updatedAt for an existing title`() {
+            let subject: Subject = .init(fileSuffix: "zip")
+
+            let fileItemA = FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip"))
             let newUpdatedAt = Date()
             let fileItemUpdated = FileItem(
                 updatedAt: newUpdatedAt,
                 fileURL: fileItemA.fileURL
             )
 
-            subject.setItem(fileItemA)
+            subject.append(fileItemA)
+            subject.update(fileItemUpdated)
 
             #expect(subject.items.count == 1)
-            #expect(subject.items.map(\.fileURL) == [
-                fileItemA.fileURL
-            ])
-
-            subject.setItem(fileItemB)
-
-            #expect(subject.items.count == 2)
-            #expect(subject.items.map(\.fileURL) == [
-                fileItemA.fileURL,
-                fileItemB.fileURL
-            ])
-
-            subject.setItem(fileItemC)
-
-            #expect(subject.items.count == 3)
-            #expect(subject.items.map(\.fileURL) == [
-                fileItemA.fileURL,
-                fileItemB.fileURL,
-                fileItemC.fileURL
-            ])
-
-            subject.setItem(fileItemUpdated)
-
-            #expect(subject.items.count == 3)
-            // Same title keeps `fileURL` unchanged.
-            #expect(subject.items.map(\.fileURL) == [
-                fileItemA.fileURL,
-                fileItemB.fileURL,
-                fileItemC.fileURL
-            ])
-            // Updates `updatedAt`.
+            #expect(subject.items[0].fileURL == fileItemA.fileURL)
             #expect(subject.items[0].updatedAt == newUpdatedAt)
         }
 
         @Test
-        func `Verify that setItem clears thumbnail when the update has no thumbnail`() {
+        func `Verify that update clears thumbnail when the update has no thumbnail`() {
             let fileURL = URL(fileURLWithPath: "/tmp/a.zip")
             let subject: Subject = .init(fileSuffix: "zip")
 
-            subject.setItem(
+            subject.append(
                 FileItem(
                     thumbnail: UIImage(),
                     fileURL: fileURL
@@ -80,13 +94,34 @@ struct FileListTests {
             )
             #expect(subject.items[0].thumbnail != nil)
 
-            subject.setItem(
+            subject.update(
                 FileItem(
                     thumbnail: nil,
                     fileURL: fileURL
                 )
             )
             #expect(subject.items[0].thumbnail == nil)
+        }
+
+        @Test
+        func `Verify that update ignores unknown titles`() {
+            let subject: Subject = .init(fileSuffix: "zip")
+
+            subject.update(FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.zip")))
+
+            #expect(subject.items.isEmpty)
+        }
+
+        @Test
+        func `Verify that update ignores items that do not match fileSuffix`() {
+            let subject: Subject = .init(fileSuffix: "zip")
+            let zipURL = URL(fileURLWithPath: "/tmp/a.zip")
+            subject.append(FileItem(fileURL: zipURL))
+
+            subject.update(FileItem(fileURL: URL(fileURLWithPath: "/tmp/a.txt")))
+
+            #expect(subject.items.count == 1)
+            #expect(subject.items[0].fileURL == zipURL)
         }
     }
 
@@ -290,16 +325,6 @@ struct FileListTests {
             )
 
             #expect(subject.items.map(\.fileURL) == [zipItem.fileURL])
-        }
-
-        @Test
-        func `Verify that setItem ignores items that do not match fileSuffix`() {
-            let subject: Subject = .init(fileSuffix: "zip")
-            let txtItem = FileItem(fileURL: URL(fileURLWithPath: "/tmp/b.txt"))
-
-            subject.setItem(txtItem)
-
-            #expect(subject.items.isEmpty)
         }
     }
 
