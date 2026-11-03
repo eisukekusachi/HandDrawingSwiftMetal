@@ -66,9 +66,8 @@ struct HandDrawingViewModelFileTests {
     struct DeleteFile {
 
         @Test
-        func `When deleting a file, it removes the zip and the list entry`() async throws {
+        func `When deleting a file, it removes the zip and the list entry`() throws {
             let fileManager = MockFileManager()
-            let (device, commandQueue) = try makeMetal()
 
             let firstURL = zipURL(named: "first", fileManager: fileManager)
             let secondURL = zipURL(named: "second", fileManager: fileManager)
@@ -90,11 +89,7 @@ struct HandDrawingViewModelFileTests {
 
             let secondIndex = try #require(subject.fileList.index(fileURL: secondURL))
 
-            try await subject.deleteFile(
-                index: secondIndex,
-                device: device,
-                commandQueue: commandQueue
-            )
+            try subject.deleteFile(index: secondIndex)
 
             // Drop only the deleted row; the open project and the other saved file remain in the list.
             #expect(subject.fileList.items.count == 2)
@@ -108,8 +103,7 @@ struct HandDrawingViewModelFileTests {
         }
 
         @Test
-        func `When index is out of bounds, it throws`() async throws {
-            let (device, commandQueue) = try makeMetal()
+        func `When index is out of bounds, it throws`() {
             let fileManager = MockFileManager()
 
             let subject: Subject = .init(
@@ -121,12 +115,8 @@ struct HandDrawingViewModelFileTests {
             subject.fileList.append(.init(fileURL: zipURL(named: "third", fileManager: fileManager)))
             #expect(subject.fileList.items.count == 3)
 
-            await #expect(throws: NSError.self) {
-                try await subject.deleteFile(
-                    index: 3,
-                    device: device,
-                    commandQueue: commandQueue
-                )
+            #expect(throws: NSError.self) {
+                try subject.deleteFile(index: 3)
             }
         }
     }

@@ -39,23 +39,6 @@ extension HandDrawingViewModel {
         }
     }
 
-    /// Clears the open canvas and bumps the project updatedAt.
-    func clearCanvas(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        project.update(updatedAt: Date())
-        fileList.update(currentFileItem(thumbnail: nil))
-        fileList.sortItems()
-
-        try await onCanvasUpdate?()
-    }
-
     /// Creates a new canvas file and loads it into the view model.
     func createFile(
         fileName: String,
@@ -79,25 +62,62 @@ extension HandDrawingViewModel {
         showToast(.success)
     }
 
-    /// Renames a file in the list and returns the stored title.
+    /// Renames a saved file on disk and updates the file list.
+    /// - Returns: The title stored in the file list after renaming.
+    @discardableResult
     func renameFile(index: Int, newName: String) throws -> String {
-        try renameCanvas(index: index, newName: newName)
-    }
-
-    /// Deletes the saved file at `index` from disk and the file list.
-    func deleteFile(
-        index: Int,
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        guard fileList.item(index) != nil else {
+        guard let item = fileList.item(index) else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Invalid Value")
             )
         }
 
-        try deleteCanvas(index: index)
+        let oldFileURL = item.fileURL
+        let oldTitle = item.title
+        let normalizedName = URL.normalizedName(
+            fallbackName: oldTitle,
+            newName: newName
+        )
+
+        guard normalizedName != oldTitle else {
+            return oldTitle
+        }
+
+        let newFileURL = try documentsDataStore.uniqueZipFileURL(
+            fileName: normalizedName,
+            suffix: fileList.fileSuffix,
+            excludeURL: oldFileURL
+        )
+        let uniqueName = newFileURL.baseName
+        guard uniqueName != oldTitle else {
+            return oldTitle
+        }
+
+        try documentsDataStore.renameFile(at: oldFileURL, to: newFileURL)
+
+        if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
+            project.update(
+                projectName: uniqueName,
+                updatedAt: Date()
+            )
+        }
+        fileList.renameItem(title: oldTitle, newTitle: uniqueName)
+
+        return uniqueName
+    }
+
+    /// Deletes the saved file at `index` from disk and the file list.
+    func deleteFile(index: Int) throws {
+        guard let item = fileList.item(index) else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Invalid Value")
+            )
+        }
+
+        try documentsDataStore.removeFile(at: item.fileURL)
+        fileList.deleteItem(title: item.title)
     }
 
     /// Restores the canvas from a saved project file.
