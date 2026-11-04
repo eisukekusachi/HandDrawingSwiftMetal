@@ -2,7 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
-import CanvasView
+import Core
 import CoreGraphics
 
 /// Shared helpers for unit tests.
@@ -10,8 +10,8 @@ enum TestUtils {
 
     /// Random canvas size within app-supported texture bounds.
     static func randomSize(
-        width: ClosedRange<Int> = canvasMinimumTextureLength ... 4096,
-        height: ClosedRange<Int> = canvasMinimumTextureLength ... 4096
+        width: ClosedRange<Int> = textureMinimumLength ... 4096,
+        height: ClosedRange<Int> = textureMinimumLength ... 4096
     ) -> CGSize {
         CGSize(
             width: Int.random(in: width),

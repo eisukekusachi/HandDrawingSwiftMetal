@@ -46,7 +46,7 @@ public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProto
         commandQueue: MTLCommandQueue
     ) async throws {
         guard
-            Int(textureSize.width) >= TextureBytes.minimumLength && Int(textureSize.height) >= TextureBytes.minimumLength,
+            Int(textureSize.width) >= textureMinimumLength && Int(textureSize.height) >= textureMinimumLength,
             let newTexture = TextureBytes.makeTexture(
                 width: Int(textureSize.width),
                 height: Int(textureSize.height),
@@ -139,8 +139,8 @@ public extension DocumentsTextureDataRepository {
         device: MTLDevice
     ) async throws -> MTLTexture {
         guard
-            Int(textureSize.width) >= TextureBytes.minimumLength &&
-            Int(textureSize.height) >= TextureBytes.minimumLength
+            Int(textureSize.width) >= textureMinimumLength &&
+            Int(textureSize.height) >= textureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -181,8 +181,8 @@ public extension DocumentsTextureDataRepository {
         device: MTLDevice
     ) async throws -> [(UUID, MTLTexture)] {
         guard
-            Int(textureSize.width) >= TextureBytes.minimumLength,
-            Int(textureSize.height) >= TextureBytes.minimumLength
+            Int(textureSize.width) >= textureMinimumLength,
+            Int(textureSize.height) >= textureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -463,7 +463,6 @@ private func writeDataAtomically(
 }
 
 private enum TextureBytes {
-    static let minimumLength = 16
     static func loadHexadecimalData(
         from url: URL,
         fileManager: FileManaging

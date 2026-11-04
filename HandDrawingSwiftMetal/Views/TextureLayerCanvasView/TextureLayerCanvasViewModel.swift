@@ -38,8 +38,8 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
     func initializeTextures(_ textureSize: CGSize) throws {
         guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-                Int(textureSize.height) >= canvasMinimumTextureLength
+            Int(textureSize.width) >= Core.textureMinimumLength &&
+                Int(textureSize.height) >= Core.textureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),
