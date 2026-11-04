@@ -15,6 +15,7 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
     private var _removeCalls: [URL] = []
     private var _createDirectoryCalls: [URL] = []
     private var _unzipCalls: [(URL, URL)] = []
+    private let mockDocumentsDirectoryURL: URL
 
     public var moveCalls: [(URL, URL)] {
         lock.lock()
@@ -46,15 +47,22 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         return _unzipCalls
     }
 
-    public init() {}
+    public init() {
+        mockDocumentsDirectoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MockDocuments-\(UUID().uuidString)", isDirectory: true)
+    }
+
+    deinit {
+        try? FileManager.default.removeItem(at: mockDocumentsDirectoryURL)
+    }
 
     public var temporaryDirectory: URL {
         FileManager.default.temporaryDirectory
     }
 
-    /// Stand-in for the app Documents directory; uses `tmp/MockDocuments` so tests do not touch real user files.
+    /// Stand-in for the app Documents directory; uses a unique folder under `tmp` so tests do not touch real user files.
     public var documentsDirectory: URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent("MockDocuments")
+        mockDocumentsDirectoryURL
     }
 
     public func setFileExists(_ exists: Bool, atPath path: String) {
@@ -136,6 +144,10 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         _moveCalls.append((sourceURL, destinationURL))
         lock.unlock()
 
+        try FileManager.default.createDirectory(
+            at: destinationURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         try FileManager.default.moveItem(at: sourceURL, to: destinationURL)
 
         lock.lock()
