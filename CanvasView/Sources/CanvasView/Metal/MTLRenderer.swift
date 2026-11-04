@@ -140,8 +140,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         let rgba = color.rgba
         let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / canvasMinimumTextureLength),
-            height: Int(grayscaleTexture.height / canvasMinimumTextureLength),
+            width: Int(grayscaleTexture.width / canvasTextureMinimumLength),
+            height: Int(grayscaleTexture.height / canvasTextureMinimumLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -218,8 +218,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         }
 
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / canvasMinimumTextureLength),
-            height: Int(destinationTexture.height / canvasMinimumTextureLength),
+            width: Int(destinationTexture.width / canvasTextureMinimumLength),
+            height: Int(destinationTexture.height / canvasTextureMinimumLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(

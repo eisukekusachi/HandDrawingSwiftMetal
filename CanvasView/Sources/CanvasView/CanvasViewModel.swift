@@ -83,8 +83,8 @@ final class CanvasViewModel {
 
     func initializeCanvas(_ textureSize: CGSize) async throws {
         guard
-            Int(textureSize.width) >= canvasMinimumTextureLength &&
-            Int(textureSize.height) >= canvasMinimumTextureLength
+            Int(textureSize.width) >= canvasTextureMinimumLength &&
+            Int(textureSize.height) >= canvasTextureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
