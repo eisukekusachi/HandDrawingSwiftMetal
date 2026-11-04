@@ -115,21 +115,16 @@ extension HandDrawingViewModel {
                 throw error
             }
 
-            let restoredLayers: TextureLayersSnapshot?
-            if try await DocumentsTextureDataRepository.shared.restoreStorage(
+            try await DocumentsTextureDataRepository.shared.restoreStorage(
                 from: workingDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
                 textureSize: newTextureLayers.textureSize,
                 device: device
-            ) {
-                restoredLayers = newTextureLayers
-            } else {
-                restoredLayers = nil
-            }
+            )
 
             return ProjectContent(
                 thumbnail: nil,
-                textureLayers: restoredLayers,
+                textureLayers: newTextureLayers,
                 project: try .init(in: workingDirectoryURL),
                 drawingTool: try? .init(in: workingDirectoryURL),
                 brushPalette: try? .init(in: workingDirectoryURL),

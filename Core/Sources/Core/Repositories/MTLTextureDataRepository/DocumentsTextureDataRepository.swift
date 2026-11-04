@@ -9,33 +9,34 @@ import Foundation
 
 /// Stores `MTLTexture` data in a `Documents` directory, keyed by id.
 public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProtocol {
+
     @MainActor
     public static let shared = {
         do {
             return try DocumentsTextureDataRepository(
                 storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage"
+                directoryName: "TextureStorage",
+                fileManager: FileManagerWrapper()
             )
         } catch {
             fatalError("Failed to initialize DocumentsTextureDataRepository: \(error)")
         }
     }()
 
+    private let fileManager: FileManaging
     private let workingDirectoryURL: URL
 
-    private init(
+    init(
         storageDirectoryURL: URL,
-        directoryName: String
+        directoryName: String,
+        fileManager: FileManaging = FileManagerWrapper()
     ) throws {
+        self.fileManager = fileManager
         self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        try FileManager.createDirectory(workingDirectoryURL)
-
+        try fileManager.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true)
         // Do not back up because this is an intermediate directory
-        var url = workingDirectoryURL
-        var resourceValues = URLResourceValues()
-        resourceValues.isExcludedFromBackup = true
-        try url.setResourceValues(resourceValues)
+        try excludeFromBackup(workingDirectoryURL)
     }
 
     public func initializeTexture(
@@ -92,7 +93,7 @@ public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProto
         ids: [UUID],
         textureSize: CGSize,
         device: MTLDevice
-    ) async throws -> Bool {
+    ) async throws {
         try loadTexturesIfValid(
             from: sourceFolderURL,
             ids: ids,
@@ -100,16 +101,13 @@ public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProto
             device: device
         )
 
-        try removeAll()
-
-        try ids.forEach { id in
-            try FileManager.default.moveItem(
-                at: sourceFolderURL.appendingPathComponent(id.uuidString),
-                to: workingDirectoryURL.appendingPathComponent(id.uuidString)
+        try replaceWorkingStorageAfterStaging { stagingURL in
+            try copyLayerTextures(
+                ids: ids,
+                from: sourceFolderURL,
+                to: stagingURL
             )
         }
-
-        return true
     }
 }
 
@@ -121,7 +119,7 @@ public extension DocumentsTextureDataRepository {
         id: UUID
     ) async throws -> Bool {
         guard
-            !FileManager.default.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
+            !fileManager.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             Logger.info("File already exists")
             return false
@@ -160,6 +158,7 @@ public extension DocumentsTextureDataRepository {
             let newTexture: MTLTexture = try TextureBytes.makeTexture(
                 url: destinationUrl,
                 size: textureSize,
+                fileManager: fileManager,
                 with: device
             )
         else {
@@ -197,12 +196,18 @@ public extension DocumentsTextureDataRepository {
 
         let width = Int(textureSize.width)
         let height = Int(textureSize.height)
+        let fileManager = fileManager
         let sources: [TextureSource] = try await withThrowingTaskGroup(of: TextureSource.self) { group in
             for id in ids {
                 let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
                 group.addTask {
-                    guard let hexadecimalData = try TextureBytes.loadHexadecimalData(from: url) else {
+                    guard
+                        let hexadecimalData = try TextureBytes.loadHexadecimalData(
+                            from: url,
+                            fileManager: fileManager
+                        )
+                    else {
                         let error = NSError(
                             title: String(localized: "Error"),
                             message: String(localized: "File not found: \(url.path)")
@@ -246,7 +251,10 @@ public extension DocumentsTextureDataRepository {
     }
 
     func removeAll() throws {
-        try FileManager.createNewDirectory(workingDirectoryURL)
+        if fileManager.fileExists(atPath: workingDirectoryURL.path) {
+            try fileManager.removeItem(at: workingDirectoryURL)
+        }
+        try fileManager.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true)
     }
 
     @discardableResult
@@ -254,12 +262,12 @@ public extension DocumentsTextureDataRepository {
         let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
-            FileManager.default.fileExists(atPath: fileURL.path)
+            fileManager.fileExists(atPath: fileURL.path)
         else {
             Logger.info("Unable to find \(id.uuidString)")
             return false
         }
-        try FileManager.default.removeItem(at: fileURL)
+        try fileManager.removeItem(at: fileURL)
 
         return true
     }
@@ -273,13 +281,13 @@ public extension DocumentsTextureDataRepository {
         let destinationFileURL = destinationURL.appendingPathComponent(id.uuidString)
 
         guard
-            FileManager.default.fileExists(atPath: sourceURL.path)
+            fileManager.fileExists(atPath: sourceURL.path)
         else {
             Logger.info("Unable to find \(id.uuidString)")
             return false
         }
 
-        try FileManager.default.copyItem(at: sourceURL, to: destinationFileURL)
+        try fileManager.copyItem(at: sourceURL, to: destinationFileURL)
 
         return true
     }
@@ -290,13 +298,77 @@ public extension DocumentsTextureDataRepository {
     ) async throws {
         let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
 
-        try await Task.detached(priority: .utility) { [data, url] in
-            try data.write(to: url, options: .atomic)
+        let fileManager = fileManager
+        try await Task.detached(priority: .utility) { [data, url, fileManager] in
+            try writeDataAtomically(data: data, to: url, fileManager: fileManager)
         }.value
     }
 }
 
 private extension DocumentsTextureDataRepository {
+
+    func excludeFromBackup(_ directoryURL: URL) throws {
+        var url = directoryURL
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try url.setResourceValues(resourceValues)
+    }
+
+    func siblingDirectoryURL(prefix: String) -> URL {
+        workingDirectoryURL
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                "\(workingDirectoryURL.lastPathComponent)-\(prefix)-\(UUID().uuidString)"
+            )
+    }
+
+    func replaceWorkingStorageAfterStaging(
+        prepareStaging: (URL) throws -> Void
+    ) throws {
+        let stagingURL = siblingDirectoryURL(prefix: "staging")
+        let backupURL = siblingDirectoryURL(prefix: "backup")
+
+        try fileManager.createDirectory(at: stagingURL, withIntermediateDirectories: true)
+        defer {
+            try? fileManager.removeItem(at: stagingURL)
+            try? fileManager.removeItem(at: backupURL)
+        }
+
+        // Prepare staging via the caller.
+        try prepareStaging(stagingURL)
+
+        // Move the working directory to the backup directory.
+        try fileManager.moveItem(at: workingDirectoryURL, to: backupURL)
+
+        do {
+            // Move the staging directory to the working directory path.
+            try fileManager.moveItem(at: stagingURL, to: workingDirectoryURL)
+        } catch {
+            // Move the backup directory back to the working directory path.
+            if fileManager.fileExists(atPath: backupURL.path),
+               !fileManager.fileExists(atPath: workingDirectoryURL.path) {
+                try? fileManager.moveItem(at: backupURL, to: workingDirectoryURL)
+            }
+            throw error
+        }
+
+        // The swapped-in directory is a new folder, so the backup exclusion has to be set again.
+        // Failure here must not undo a completed swap.
+        try? excludeFromBackup(workingDirectoryURL)
+    }
+
+    func copyLayerTextures(
+        ids: [UUID],
+        from sourceDirectoryURL: URL,
+        to destinationDirectoryURL: URL
+    ) throws {
+        try ids.forEach { id in
+            try fileManager.copyItem(
+                at: sourceDirectoryURL.appendingPathComponent(id.uuidString),
+                to: destinationDirectoryURL.appendingPathComponent(id.uuidString)
+            )
+        }
+    }
 
     func loadTexturesIfValid(
         from directoryURL: URL,
@@ -304,9 +376,13 @@ private extension DocumentsTextureDataRepository {
         textureSize: CGSize,
         device: MTLDevice
     ) throws {
-        guard FileManager.containsAllFileNames(
+        let fileURLs = try fileManager.contentsOfDirectory(
+            at: directoryURL,
+            includingPropertiesForKeys: nil
+        )
+        guard containsAllFileNames(
             fileNames: ids.map(\.uuidString),
-            in: FileManager.contentsOfDirectory(directoryURL)
+            in: fileURLs
         ) else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -317,9 +393,15 @@ private extension DocumentsTextureDataRepository {
         }
 
         try ids.forEach { id in
-            let textureData = try Data(
-                contentsOf: directoryURL.appendingPathComponent(id.uuidString)
-            )
+            let filePath = directoryURL.appendingPathComponent(id.uuidString).path
+            guard let textureData = fileManager.contents(atPath: filePath) else {
+                let error = NSError(
+                    title: String(localized: "Error"),
+                    message: String(localized: "Unable to load required data")
+                )
+                Logger.error(error)
+                throw error
+            }
 
             guard !textureData.isEmpty else {
                 let error = NSError(
@@ -338,15 +420,55 @@ private extension DocumentsTextureDataRepository {
             )
         }
     }
+
+    func containsAllFileNames(fileNames: [String], in fileURLs: [URL]) -> Bool {
+        guard !fileNames.isEmpty else { return false }
+        return Set(fileNames).isSubset(of: Set(fileURLs.map(\.lastPathComponent)))
+    }
+}
+
+private func writeDataAtomically(
+    data: Data,
+    to url: URL,
+    fileManager: FileManaging
+) throws {
+    let temporaryURL = url.deletingLastPathComponent().appendingPathComponent(UUID().uuidString)
+    guard fileManager.createFile(atPath: temporaryURL.path, contents: data, attributes: nil) else {
+        throw CocoaError(.fileWriteUnknown)
+    }
+
+    do {
+        if fileManager.fileExists(atPath: url.path) {
+            guard
+                try fileManager.replaceItemAt(
+                    url,
+                    withItemAt: temporaryURL,
+                    backupItemName: nil,
+                    options: []
+                ) != nil
+            else {
+                throw CocoaError(.fileWriteUnknown)
+            }
+        } else {
+            try fileManager.moveItem(at: temporaryURL, to: url)
+        }
+    } catch {
+        try? fileManager.removeItem(at: temporaryURL)
+        throw error
+    }
+
+    if fileManager.fileExists(atPath: temporaryURL.path) {
+        try? fileManager.removeItem(at: temporaryURL)
+    }
 }
 
 private enum TextureBytes {
     static let minimumLength = 16
-
     static func loadHexadecimalData(
-        from url: URL
+        from url: URL,
+        fileManager: FileManaging
     ) throws -> [UInt8]? {
-        let data = try Data(contentsOf: url)
+        guard let data = fileManager.contents(atPath: url.path) else { return nil }
         guard !data.isEmpty else { return nil }
         return [UInt8](data)
     }
@@ -354,10 +476,11 @@ private enum TextureBytes {
     static func makeTexture(
         url: URL,
         size: CGSize,
+        fileManager: FileManaging,
         with device: MTLDevice
     ) throws -> MTLTexture? {
         guard
-            let hexadecimalData = try loadHexadecimalData(from: url)
+            let hexadecimalData = try loadHexadecimalData(from: url, fileManager: fileManager)
         else { return nil }
         return try makeTexture(
             width: Int(size.width),
