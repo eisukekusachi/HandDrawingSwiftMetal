@@ -494,6 +494,15 @@ private enum TextureBytes {
         height: Int,
         with device: MTLDevice
     ) -> MTLTexture? {
+        guard width >= textureMinimumLength, height >= textureMinimumLength else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Texture size is below the minimum: \(width) \(height)")
+            )
+            Logger.error(error)
+            return nil
+        }
+
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,
             width: width,
