@@ -52,6 +52,7 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         FileManager.default.temporaryDirectory
     }
 
+    /// Stand-in for the app Documents directory; uses `tmp/MockDocuments` so tests do not touch real user files.
     public var documentsDirectory: URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("MockDocuments")
     }
@@ -66,11 +67,20 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         }
     }
 
-    /// Marks `url` as an existing file path for `fileExists(atPath:)`.
+    /// Marks `url` as an existing file and creates it on disk for move/remove tests.
     public func appendFile(at url: URL) {
+        let parentURL = url.deletingLastPathComponent()
+        try? FileManager.default.createDirectory(at: parentURL, withIntermediateDirectories: true)
+        if !FileManager.default.fileExists(atPath: url.path) {
+            FileManager.default.createFile(atPath: url.path, contents: Data(), attributes: nil)
+        }
+
         lock.lock()
         defer { lock.unlock() }
         registerFileURL(url)
+        if let data = FileManager.default.contents(atPath: url.path) {
+            _fileContents[url.path] = data
+        }
     }
 
     public func setContentsOfDirectory(_ urls: [URL], at directoryURL: URL) {

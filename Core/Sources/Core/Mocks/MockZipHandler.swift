@@ -26,8 +26,16 @@ public final class MockZipHandler: ZipHandling, @unchecked Sendable {
 
     public func zip(sourceURLs: [URL], to zipFileURL: URL) throws {
         lock.lock()
-        defer { lock.unlock() }
         _zipCalls.append((sourceURLs, zipFileURL))
+        lock.unlock()
+
+        try FileManager.default.createDirectory(
+            at: zipFileURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        guard FileManager.default.createFile(atPath: zipFileURL.path, contents: Data(), attributes: nil) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
     }
 
     public func unzip(sourceURL: URL, to destinationURL: URL, priority: TaskPriority?) async throws {
