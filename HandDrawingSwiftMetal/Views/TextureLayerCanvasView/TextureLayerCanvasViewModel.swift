@@ -18,6 +18,8 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
     let dependencies: TextureLayerCanvasViewDependencies
 
+    private let textureMinimumLength: Int
+
     /// Texture that combines the textures of all layers below the selected layer
     private var unselectedBottomTexture: MTLTexture?
 
@@ -31,15 +33,17 @@ final class TextureLayerCanvasViewModel: ObservableObject {
     }()
 
     init(
-        dependencies: TextureLayerCanvasViewDependencies
+        dependencies: TextureLayerCanvasViewDependencies,
+        textureMinimumLength: Int
     ) {
         self.dependencies = dependencies
+        self.textureMinimumLength = textureMinimumLength
     }
 
     func initializeTextures(_ textureSize: CGSize) throws {
         guard
-            Int(textureSize.width) >= Core.textureMinimumLength &&
-                Int(textureSize.height) >= Core.textureMinimumLength
+            Int(textureSize.width) >= textureMinimumLength &&
+                Int(textureSize.height) >= textureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error"),

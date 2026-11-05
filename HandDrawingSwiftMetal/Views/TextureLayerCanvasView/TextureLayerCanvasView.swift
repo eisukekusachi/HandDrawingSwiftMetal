@@ -18,7 +18,10 @@ import TextureLayerView
     private let onUpdateLayerThumbnail: (@MainActor @Sendable (UUID, UIImage?) -> Void)?
 
     private lazy var viewModel: TextureLayerCanvasViewModel = {
-        .init(dependencies: dependencies)
+        .init(
+            dependencies: dependencies,
+            textureMinimumLength: configuration.textureMinimumLength
+        )
     }()
 
     private var cancellables = Set<AnyCancellable>()
