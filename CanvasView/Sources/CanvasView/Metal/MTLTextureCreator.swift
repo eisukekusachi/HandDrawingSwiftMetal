@@ -21,6 +21,7 @@ public enum MTLTextureCreator {
         label: String? = nil,
         url: URL,
         size: CGSize,
+        minimumLength: Int = 16,
         with device: MTLDevice
     ) throws -> MTLTexture? {
         guard
@@ -31,6 +32,7 @@ public enum MTLTextureCreator {
             width: Int(size.width),
             height: Int(size.height),
             from: hexadecimalData,
+            minimumLength: minimumLength,
             with: device
         )
     }
@@ -39,9 +41,10 @@ public enum MTLTextureCreator {
         label: String? = nil,
         width: Int,
         height: Int,
+        minimumLength: Int = 16,
         with device: MTLDevice
     ) -> MTLTexture? {
-        guard width >= canvasTextureMinimumLength, height >= canvasTextureMinimumLength else {
+        guard width >= minimumLength, height >= minimumLength else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),
                 message: String(
@@ -77,6 +80,7 @@ public enum MTLTextureCreator {
         width: Int,
         height: Int,
         from colorArray: [UInt8],
+        minimumLength: Int = 16,
         with device: MTLDevice
     ) -> MTLTexture? {
         let bytesPerPixel = 4
@@ -96,6 +100,7 @@ public enum MTLTextureCreator {
             label: label,
             width: width,
             height: height,
+            minimumLength: minimumLength,
             with: device
         ) else {
             return nil
@@ -122,7 +127,8 @@ public enum MTLTextureCreator {
     @MainActor
     public static func duplicateTexture(
         texture: MTLTexture?,
-        renderer: MTLRendering
+        renderer: MTLRendering,
+        minimumLength: Int = 16
     ) async throws -> MTLTexture? {
         guard
             let texture,
@@ -131,6 +137,7 @@ public enum MTLTextureCreator {
                 label: texture.label,
                 width: texture.width,
                 height: texture.height,
+                minimumLength: minimumLength,
                 with: renderer.device
             )
         else {

@@ -15,16 +15,16 @@ struct CanvasConfigurationTests {
 
     typealias Subject = CanvasConfiguration
 
-    @Test
-    func `If textureSize is nil, the screen size is used`() {
-        let subject: Subject = .init(textureSize: nil)
+    @Test(arguments: [10, 0])
+    func `When textureMinimumLength is invalid, it is set to the minimum`(textureMinimumLength: Int) {
+        let subject = Subject(textureMinimumLength: textureMinimumLength, textureSize: nil)
 
-        #expect(subject.textureSize.equalTo(CanvasConfiguration.screenSize))
+        #expect(subject.textureMinimumLength == 16)
     }
 
     @Test(
         arguments: [
-            CGSize(width: 10, height: 10),
+            CGSize(width: 16, height: 16),
             CGSize(width: 2000, height: 1500)
         ]
     )

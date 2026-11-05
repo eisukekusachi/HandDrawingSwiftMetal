@@ -64,11 +64,14 @@ final class CanvasViewModel {
 
     private let transforming = Transforming()
 
+    private let textureMinimumLength: Int
+
     init(
         canvasRenderer: CanvasRenderer,
         configuration: CanvasConfiguration
     ) {
         self.canvasRenderer = canvasRenderer
+        self.textureMinimumLength = configuration.textureMinimumLength
 
         // Set the gesture recognition durations in seconds
         self.touchGestureState.setDrawingGestureRecognitionSecond(
@@ -83,8 +86,8 @@ final class CanvasViewModel {
 
     func initializeCanvas(_ textureSize: CGSize) async throws {
         guard
-            Int(textureSize.width) >= canvasTextureMinimumLength &&
-            Int(textureSize.height) >= canvasTextureMinimumLength
+            Int(textureSize.width) >= textureMinimumLength &&
+            Int(textureSize.height) >= textureMinimumLength
         else {
             let error = NSError(
                 title: String(localized: "Error", bundle: .module),

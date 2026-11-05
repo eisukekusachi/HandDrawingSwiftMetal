@@ -24,10 +24,14 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     private let pipelines: MTLPipelines
 
+    private let textureMinimumLength: Int
+
     public init(
         device: MTLDevice,
-        commandQueue: MTLCommandQueue
+        commandQueue: MTLCommandQueue,
+        textureMinimumLength: Int = 16
     ) {
+        self.textureMinimumLength = textureMinimumLength
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -140,8 +144,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         let rgba = color.rgba
         let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / canvasTextureMinimumLength),
-            height: Int(grayscaleTexture.height / canvasTextureMinimumLength),
+            width: Int(grayscaleTexture.width / textureMinimumLength),
+            height: Int(grayscaleTexture.height / textureMinimumLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -218,8 +222,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         }
 
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / canvasTextureMinimumLength),
-            height: Int(destinationTexture.height / canvasTextureMinimumLength),
+            width: Int(destinationTexture.width / textureMinimumLength),
+            height: Int(destinationTexture.height / textureMinimumLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -359,6 +363,7 @@ public final class MTLRenderer: Sendable, MTLRendering {
         let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
+            minimumLength: textureMinimumLength,
             with: device
         )
         texture?.label = label
