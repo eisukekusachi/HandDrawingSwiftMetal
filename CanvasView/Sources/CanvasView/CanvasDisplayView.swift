@@ -47,7 +47,8 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     init(
         frame: CGRect = .zero,
         device: MTLDevice,
-        commandQueue: MTLCommandQueue
+        commandQueue: MTLCommandQueue,
+        textureMinimumLength: Int = 16
     ) {
         guard
             let flippedTextureBuffer = MTLBuffers.makeTextureBuffers(
@@ -57,7 +58,11 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         else {
             fatalError("Metal is not supported on this device.")
         }
-        self.renderer = MTLRenderer(device: device, commandQueue: commandQueue)
+        self.renderer = MTLRenderer(
+            device: device,
+            commandQueue: commandQueue,
+            textureMinimumLength: textureMinimumLength
+        )
         self.flippedTextureBuffers = flippedTextureBuffer
         self.commandQueue = commandQueue
         super.init(frame: frame, device: renderer.device)

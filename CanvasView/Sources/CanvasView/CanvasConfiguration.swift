@@ -10,6 +10,8 @@ import UIKit
 @MainActor
 public struct CanvasConfiguration {
 
+    public let textureMinimumLength: Int
+
     public let textureSize: CGSize
 
     /// The background color of the canvas
@@ -25,14 +27,20 @@ public struct CanvasConfiguration {
     let transformingGestureRecognitionSecond: TimeInterval
 
     public init(
+        textureMinimumLength: Int = 16,
         textureSize: CGSize? = nil,
         backgroundColor: UIColor = .white,
         baseBackgroundColor: UIColor = UIColor(230, 230, 230),
         drawingGestureRecognitionSecond: TimeInterval = 0.1,
         transformingGestureRecognitionSecond: TimeInterval = 0.05
     ) {
-        // The screen size is used when the value is nil
-        self.textureSize = textureSize ?? Self.screenSize
+        let resolvedTextureMinimumLength = max(textureMinimumLength, 16)
+        let sourceTextureSize = textureSize ?? Self.screenSize
+        self.textureMinimumLength = resolvedTextureMinimumLength
+        self.textureSize = CGSize(
+            width: max(Int(sourceTextureSize.width), resolvedTextureMinimumLength),
+            height: max(Int(sourceTextureSize.height), resolvedTextureMinimumLength)
+        )
         self.backgroundColor = backgroundColor
         self.baseBackgroundColor = baseBackgroundColor
         self.drawingGestureRecognitionSecond = drawingGestureRecognitionSecond
@@ -41,6 +49,7 @@ public struct CanvasConfiguration {
 
     public func newTextureSize(_ textureSize: CGSize) -> Self {
         .init(
+            textureMinimumLength: textureMinimumLength,
             textureSize: textureSize,
             backgroundColor: backgroundColor,
             baseBackgroundColor: baseBackgroundColor,

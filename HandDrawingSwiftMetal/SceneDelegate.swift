@@ -5,6 +5,8 @@
 //  Created by Eisuke Kusachi on 2021/11/27.
 //
 
+import CanvasView
+import Core
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -18,10 +20,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: scene)
+
         window.rootViewController = HandDrawingViewController.create(
             configuration: .init(
                 fileSuffix: "zip",
-                canvasConfiguration: .init()
+                canvasConfiguration: CanvasConfiguration(textureMinimumLength: textureMinimumLength)
             )
         )
         self.window = window

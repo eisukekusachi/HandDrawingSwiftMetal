@@ -128,6 +128,7 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
         guard let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
+            minimumLength: textureMinimumLength,
             with: device
         ) else {
             throw NSError(

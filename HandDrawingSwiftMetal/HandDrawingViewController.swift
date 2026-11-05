@@ -4,6 +4,7 @@
 
 import CanvasView
 import Combine
+import Core
 import FileView
 import PaletteEditView
 import PaletteView
@@ -52,7 +53,11 @@ class HandDrawingViewController: UIViewController {
         guard let commandQueue = device.makeCommandQueue() else {
             fatalError("Failed to create command queue.")
         }
-        let renderer = MTLRenderer(device: device, commandQueue: commandQueue)
+        let renderer = MTLRenderer(
+            device: device,
+            commandQueue: commandQueue,
+            textureMinimumLength: textureMinimumLength
+        )
         return .init(
             textureLayers: viewModel.undoableTextureLayers,
             documentsTextureDataRepository: viewModel.dependencies.documentsTextureDataRepository,
