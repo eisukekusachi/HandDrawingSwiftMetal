@@ -47,8 +47,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
     init(
         frame: CGRect = .zero,
         device: MTLDevice,
-        commandQueue: MTLCommandQueue,
-        textureMinimumLength: Int = 16
+        commandQueue: MTLCommandQueue
     ) {
         guard
             let flippedTextureBuffer = MTLBuffers.makeTextureBuffers(
@@ -60,8 +59,7 @@ class CanvasDisplayView: MTKView, MTKViewDelegate, CanvasDisplayable {
         }
         self.renderer = MTLRenderer(
             device: device,
-            commandQueue: commandQueue,
-            textureMinimumLength: textureMinimumLength
+            commandQueue: commandQueue
         )
         self.flippedTextureBuffers = flippedTextureBuffer
         self.commandQueue = commandQueue
