@@ -1,11 +1,11 @@
 //
-//  MTLRenderer.swift
-//  CanvasView
-//
-//  Created by Eisuke Kusachi on 2024/07/28.
+//  Created by Eisuke Kusachi
 //
 
 @preconcurrency import MetalKit
+
+/// Threadgroup sizing for compute kernels in this renderer (`width / length` must be non-zero).
+private let rendererComputeThreadgroupLength: Int = 16
 
 /// Executes Metal rendering and texture operations
 @MainActor
@@ -24,14 +24,10 @@ public final class MTLRenderer: Sendable, MTLRendering {
 
     private let pipelines: MTLPipelines
 
-    private let textureMinimumLength: Int
-
     public init(
         device: MTLDevice,
-        commandQueue: MTLCommandQueue,
-        textureMinimumLength: Int = 16
+        commandQueue: MTLCommandQueue
     ) {
-        self.textureMinimumLength = textureMinimumLength
         guard let buffer = MTLBuffers.makeTextureBuffers(
             nodes: .flippedTextureNodes,
             with: device
@@ -144,8 +140,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
     ) {
         let rgba = color.rgba
         let threadGroupSize = MTLSize(
-            width: Int(grayscaleTexture.width / textureMinimumLength),
-            height: Int(grayscaleTexture.height / textureMinimumLength),
+            width: Int(grayscaleTexture.width / rendererComputeThreadgroupLength),
+            height: Int(grayscaleTexture.height / rendererComputeThreadgroupLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -222,8 +218,8 @@ public final class MTLRenderer: Sendable, MTLRendering {
         }
 
         let threadGroupSize = MTLSize(
-            width: Int(destinationTexture.width / textureMinimumLength),
-            height: Int(destinationTexture.height / textureMinimumLength),
+            width: Int(destinationTexture.width / rendererComputeThreadgroupLength),
+            height: Int(destinationTexture.height / rendererComputeThreadgroupLength),
             depth: 1
         )
         let threadGroupCount = MTLSize(
@@ -363,7 +359,6 @@ public final class MTLRenderer: Sendable, MTLRendering {
         let texture = MTLTextureCreator.makeTexture(
             width: Int(textureSize.width),
             height: Int(textureSize.height),
-            minimumLength: textureMinimumLength,
             with: device
         )
         texture?.label = label
