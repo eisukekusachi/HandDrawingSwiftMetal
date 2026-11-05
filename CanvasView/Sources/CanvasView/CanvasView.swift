@@ -96,15 +96,13 @@ open class CanvasView: UIView, CanvasUpdating {
             }
             self.renderer = MTLRenderer(
                 device: sharedDevice,
-                commandQueue: commandQueue,
-                textureMinimumLength: configuration.textureMinimumLength
+                commandQueue: commandQueue
             )
             self.sharedCommandQueue = commandQueue
         }
         self.displayView = .init(
             device: sharedDevice,
-            commandQueue: sharedCommandQueue,
-            textureMinimumLength: configuration.textureMinimumLength
+            commandQueue: sharedCommandQueue
         )
         self.canvasRenderer = .init(
             renderer: self.renderer,
