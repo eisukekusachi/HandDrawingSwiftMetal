@@ -30,6 +30,14 @@ struct URLExtensionsTests {
         #expect(URL.fileName(name: "fileName", fileSuffix: "zip") == "fileName.zip")
     }
 
+    @Test
+    func `fileName sanitizes fileSuffix`() {
+        #expect(URL.fileName(name: "fileName", fileSuffix: ".zip") == "fileName.zip")
+        #expect(URL.fileName(name: "fileName", fileSuffix: " .z.i.p ") == "fileName.zip")
+        #expect(URL.fileName(name: "fileName", fileSuffix: "z/ip") == "fileName.zip")
+        #expect(URL.fileName(name: "fileName", fileSuffix: "////") == "fileName")
+    }
+
     @Suite
     struct UniqueFileURL {
         @Test

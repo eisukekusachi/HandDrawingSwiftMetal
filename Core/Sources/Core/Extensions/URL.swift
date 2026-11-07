@@ -58,12 +58,19 @@ public extension URL {
         return string
     }
 
-    /// Last path component: `name`, or `name` + `.` + `fileSuffix` when `fileSuffix` is non-empty.
+    /// File name: `name` and `fileSuffix` combined.
     static func fileName(name: String, fileSuffix: String = "") -> String {
-        if fileSuffix.isEmpty {
+        let suffix = sanitizedSuffix(fileSuffix)
+        if suffix.isEmpty {
             return name
         }
-        return name + "." + fileSuffix
+        return name + "." + suffix
+    }
+
+    /// Drops `.` and whitespace throughout `fileSuffix`, then removes other path-invalid characters.
+    static func sanitizedSuffix(_ raw: String) -> String {
+        let trimmed = raw.filter { !$0.isWhitespace && $0 != "." }
+        return sanitizedName(trimmed)
     }
 
     /// Picks an unused file URL under `directory`, appending `_2`, `_3`, … to the base name when taken.
