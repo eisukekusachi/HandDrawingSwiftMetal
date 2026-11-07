@@ -663,7 +663,7 @@
 		D4E395032F95000100C55A4C /* Domain */ = {
 			isa = PBXGroup;
 			children = (
-				D4E397032F95000100C55A4C /* Disk */,
+				D4E397032F95000100C55A4C /* Persistence */,
 				D4E398032F95000100C55A4C /* Undo */,
 			);
 			path = Domain;
@@ -677,13 +677,13 @@
 			path = Domain;
 			sourceTree = "<group>";
 		};
-		D4E397032F95000100C55A4C /* Disk */ = {
+		D4E397032F95000100C55A4C /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
 				D43E7682309ECBCB00272262 /* CoreData */,
 				D43E7681309ECBC000272262 /* Documents */,
 			);
-			path = Disk;
+			path = Persistence;
 			sourceTree = "<group>";
 		};
 		D4E397062F95000100C55A4C /* Persistence */ = {
