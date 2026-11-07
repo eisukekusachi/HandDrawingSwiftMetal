@@ -33,4 +33,26 @@ struct DocumentsZipFileStorageTests {
             fileManager.temporaryDirectory.appendingPathComponent("CustomTmp")
         )
     }
+
+    @Test
+    func `init sanitizes stagingRootName`() {
+        let fileManager = MockFileManager()
+        let subject = Subject(fileManager: fileManager, stagingRootName: "  foo/bar  ")
+
+        #expect(
+            subject.stagingRootURL ==
+            fileManager.temporaryDirectory.appendingPathComponent("foobar")
+        )
+    }
+
+    @Test
+    func `init falls back to TmpFolder when stagingRootName is empty after sanitization`() {
+        let fileManager = MockFileManager()
+        let subject = Subject(fileManager: fileManager, stagingRootName: "////")
+
+        #expect(
+            subject.stagingRootURL ==
+            fileManager.temporaryDirectory.appendingPathComponent("TmpFolder")
+        )
+    }
 }

@@ -10,6 +10,8 @@ import Foundation
 @MainActor
 final class DocumentsZipFileStorage {
 
+    private static let defaultStagingRootName = "TmpFolder"
+
     private let fileManager: FileManaging
     private let zipHandler: ZipHandling
 
@@ -19,12 +21,13 @@ final class DocumentsZipFileStorage {
     init(
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil,
-        stagingRootName: String = "TmpFolder"
+        stagingRootName: String = defaultStagingRootName
     ) {
         self.fileManager = fileManager
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)
+        let sanitizedRootName = Self.sanitizedStagingRootName(stagingRootName)
         self.stagingRootURL = fileManager.temporaryDirectory
-            .appendingPathComponent(stagingRootName)
+            .appendingPathComponent(sanitizedRootName)
     }
 
     /// Stages files under a temp directory, zips them to `dst`, then removes the staging directory.
@@ -77,6 +80,12 @@ final class DocumentsZipFileStorage {
 }
 
 private extension DocumentsZipFileStorage {
+
+    static func sanitizedStagingRootName(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sanitized = URL.sanitizedName(trimmed)
+        return sanitized.isEmpty ? defaultStagingRootName : sanitized
+    }
 
     func withStagingDirectory<T>(
         _ operation: (_ stagingDirectory: URL) async throws -> T
