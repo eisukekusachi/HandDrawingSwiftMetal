@@ -7,26 +7,13 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// Stores `MTLTexture` data on local disk under Application Support, keyed by id.
+/// Stores layer texture data as files on local disk, keyed by id.
 public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol {
-
-    @MainActor
-    public static let shared = {
-        do {
-            return try LocalTextureFileRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                fileManager: FileManagerWrapper()
-            )
-        } catch {
-            fatalError("Failed to initialize LocalTextureFileRepository: \(error)")
-        }
-    }()
 
     private let fileManager: FileManaging
     private let workingDirectoryURL: URL
 
-    init(
+    public init(
         storageDirectoryURL: URL,
         directoryName: String,
         fileManager: FileManaging = FileManagerWrapper()
