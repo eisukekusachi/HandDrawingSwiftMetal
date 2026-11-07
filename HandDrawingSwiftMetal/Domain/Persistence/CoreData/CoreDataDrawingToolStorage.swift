@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 @preconcurrency import CoreData
 
 /// Core Data read/write for drawing tool settings.
