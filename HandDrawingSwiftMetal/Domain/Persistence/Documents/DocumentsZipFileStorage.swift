@@ -5,12 +5,14 @@
 import Core
 import Foundation
 
+private enum DocumentsZipFileStorageStaging {
+    static let defaultRootName = "TmpFolder"
+}
+
 /// Zip archives in the Documents directory: zip/unzip session workflows and related file operations.
 /// Each session uses a disposable staging directory under the system temp folder.
 @MainActor
 final class DocumentsZipFileStorage {
-
-    private static let defaultStagingRootName = "TmpFolder"
 
     private let fileManager: FileManaging
     private let zipHandler: ZipHandling
@@ -21,7 +23,7 @@ final class DocumentsZipFileStorage {
     init(
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil,
-        stagingRootName: String = defaultStagingRootName
+        stagingRootName: String = DocumentsZipFileStorageStaging.defaultRootName
     ) {
         self.fileManager = fileManager
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)
@@ -84,7 +86,7 @@ private extension DocumentsZipFileStorage {
     static func sanitizedStagingRootName(_ raw: String) -> String {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         let sanitized = URL.sanitizedName(trimmed)
-        return sanitized.isEmpty ? defaultStagingRootName : sanitized
+        return sanitized.isEmpty ? DocumentsZipFileStorageStaging.defaultRootName : sanitized
     }
 
     func withStagingDirectory<T>(
