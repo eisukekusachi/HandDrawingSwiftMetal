@@ -22,6 +22,18 @@ final class CoreDataEraserPaletteStorage {
         try CoreDataRootEntityStore.clearAll(for: EraserPaletteEntity.self, in: context)
     }
 
+    func load(into palette: EraserPalette) throws {
+        guard let entity = try fetch() else { return }
+        palette.setId(entity.id ?? UUID())
+
+        let alphas: [Int] = (entity.paletteAlphaGroup?.array as? [PaletteAlphaEntity])?.compactMap {
+            Int($0.alpha)
+        } ?? []
+        let index = max(0, min(Int(entity.index), alphas.count - 1))
+
+        palette.update(alphas: alphas, selectedIndex: index)
+    }
+
     func save(from palette: EraserPalette) async {
         guard let request = CoreDataRootEntityStore.fetchRequest(for: EraserPaletteEntity.self, in: context) else {
             return
