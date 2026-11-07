@@ -40,14 +40,7 @@ public final class DocumentsZipFileStorage {
             let fileName = dst.lastPathComponent
             let tempZipURL = stagingDirectory.appendingPathComponent(fileName)
             try zipHandler.zip(sourceURLs: fileURLs, to: tempZipURL)
-            if fileManager.fileExists(atPath: dst.path),
-                // fileExists does not distinguish letter case, so skip remove when
-                // only the case differs; otherwise the source file would be deleted.
-                tempZipURL.path.lowercased() != dst.path.lowercased()
-            {
-                try fileManager.removeItem(at: dst)
-            }
-            try fileManager.moveItem(at: tempZipURL, to: dst)
+            try fileManager.overwriteItem(src: tempZipURL, dst: dst)
         }
     }
 

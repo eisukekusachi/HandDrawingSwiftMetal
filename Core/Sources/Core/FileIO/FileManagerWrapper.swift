@@ -30,6 +30,19 @@ public protocol FileManaging: Sendable {
     func unzipItem(at sourceURL: URL, to destinationURL: URL) throws
 }
 
+public extension FileManaging {
+    /// Replaces `dst` with `src` by moving when no file is at `dst`, or by removing then moving when one exists.
+    ///
+    /// ``FileManaging/moveItem(at:to:)`` fails if the destination path is already taken.
+    /// This removes the destination item first when `fileExists` reports one, then performs the move.
+    func overwriteItem(src: URL, dst: URL) throws {
+        if fileExists(atPath: dst.path) {
+            try removeItem(at: dst)
+        }
+        try moveItem(at: src, to: dst)
+    }
+}
+
 /// Thin wrapper around `FileManager.default`.
 public struct FileManagerWrapper: FileManaging {
     public init() {}
