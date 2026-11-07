@@ -15,26 +15,31 @@ extension HandDrawingViewModel {
     }
 
     /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
-    func setupFileList(from fileURLs: [URL]) async throws {
+    func setupFileList(from fileURLs: [URL]) async {
 
         // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
-        try await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
+        await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
 
-            // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-            return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
-                let thumbnailData = try? Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(
-                        self.thumbnailFileName
+            do {
+                // Unzip once to read project metadata and the list thumbnail (not the layer textures).
+                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
+                    let thumbnailData = try? Data(
+                        contentsOf: workingDirectoryURL.appendingPathComponent(
+                            self.thumbnailFileName
+                        )
                     )
-                )
-                return .init(
-                    createdAt: projectMetaData.createdAt,
-                    updatedAt: projectMetaData.updatedAt,
-                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                    fileURL: zipFileURL
-                )
+                    return .init(
+                        createdAt: projectMetaData.createdAt,
+                        updatedAt: projectMetaData.updatedAt,
+                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                        fileURL: zipFileURL
+                    )
+                }
+            } catch {
+                Logger.error(error)
+                return nil
             }
         }
     }

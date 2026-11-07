@@ -181,7 +181,7 @@ class HandDrawingViewController: UIViewController {
 
                 await viewModel.updateThumbnails(device: sharedDevice)
 
-                try await viewModel.setupFileList(
+                await viewModel.setupFileList(
                     from: URL.documents.allFileURLs(
                         suffix: viewModel.fileList.fileSuffix
                     )
