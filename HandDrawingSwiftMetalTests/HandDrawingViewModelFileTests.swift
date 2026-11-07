@@ -34,7 +34,7 @@ struct HandDrawingViewModelFileTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
-                documentsZipFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
@@ -78,7 +78,7 @@ struct HandDrawingViewModelFileTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
-                documentsZipFileStorage: .init(fileManager: fileManager)
+                documentsProjectFileStorage: .init(fileManager: fileManager)
             )
 
             subject.project.update(projectName: "first")
@@ -108,7 +108,7 @@ struct HandDrawingViewModelFileTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
-                documentsZipFileStorage: .init(fileManager: fileManager)
+                documentsProjectFileStorage: .init(fileManager: fileManager)
             )
             subject.fileList.append(.init(fileURL: zipURL(named: "first", fileManager: fileManager)))
             subject.fileList.append(.init(fileURL: zipURL(named: "second", fileManager: fileManager)))
@@ -139,7 +139,7 @@ struct HandDrawingViewModelFileTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(fileManager: fileManager),
-                documentsZipFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))

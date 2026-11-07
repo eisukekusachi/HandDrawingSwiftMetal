@@ -64,7 +64,8 @@ final class HandDrawingViewModel: ObservableObject {
     /// Updates the canvas and drawing components.
     private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
 
-    let documentsZipFileStorage: DocumentsZipFileStorage
+    /// Zip-based project file I/O in Documents (save, open, delete, rename).
+    let documentsProjectFileStorage: DocumentsProjectFileStorage
 
     let dependencies: HandDrawingViewDependencies
 
@@ -72,14 +73,14 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsZipFileStorage: DocumentsZipFileStorage? = nil,
+        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsZipFileStorage = documentsZipFileStorage ?? .init(fileManager: dependencies.fileManager)
+        self.documentsProjectFileStorage = documentsProjectFileStorage ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange

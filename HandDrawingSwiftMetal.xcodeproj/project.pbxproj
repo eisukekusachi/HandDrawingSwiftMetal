@@ -110,8 +110,8 @@
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
 		D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4E2A1032FCD010100C55A4D /* PaletteEditView */; };
-		D4E395022F95000100C55A4C /* DocumentsZipFileStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */; };
-		D4E395052F95000100C55A4C /* DocumentsZipFileStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */; };
+		D4E395022F95000100C55A4C /* DocumentsProjectFileStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395012F95000100C55A4C /* DocumentsProjectFileStorage.swift */; };
+		D4E395052F95000100C55A4C /* DocumentsProjectFileStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395042F95000100C55A4C /* DocumentsProjectFileStorageTests.swift */; };
 		D4E396022F96000100C55A4C /* LocalTextureFileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E396012F96000100C55A4C /* LocalTextureFileRepository.swift */; };
 		D4E396062F96000100C55A4C /* InMemoryTextureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E396052F96000100C55A4C /* InMemoryTextureRepository.swift */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
@@ -251,8 +251,8 @@
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D4E2A1022FCD010100C55A4D /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
-		D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsZipFileStorage.swift; sourceTree = "<group>"; };
-		D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsZipFileStorageTests.swift; sourceTree = "<group>"; };
+		D4E395012F95000100C55A4C /* DocumentsProjectFileStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsProjectFileStorage.swift; sourceTree = "<group>"; };
+		D4E395042F95000100C55A4C /* DocumentsProjectFileStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsProjectFileStorageTests.swift; sourceTree = "<group>"; };
 		D4E396012F96000100C55A4C /* LocalTextureFileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTextureFileRepository.swift; sourceTree = "<group>"; };
 		D4E396052F96000100C55A4C /* InMemoryTextureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryTextureRepository.swift; sourceTree = "<group>"; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
@@ -369,7 +369,7 @@
 		D43E7681309ECBC000272262 /* Documents */ = {
 			isa = PBXGroup;
 			children = (
-				D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */,
+				D4E395012F95000100C55A4C /* DocumentsProjectFileStorage.swift */,
 			);
 			path = Documents;
 			sourceTree = "<group>";
@@ -700,7 +700,7 @@
 		D4E397062F95000100C55A4C /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
-				D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */,
+				D4E395042F95000100C55A4C /* DocumentsProjectFileStorageTests.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -909,7 +909,7 @@
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,
 				D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */,
-				D4E395022F95000100C55A4C /* DocumentsZipFileStorage.swift in Sources */,
+				D4E395022F95000100C55A4C /* DocumentsProjectFileStorage.swift in Sources */,
 				D4E396062F96000100C55A4C /* InMemoryTextureRepository.swift in Sources */,
 				D4E396022F96000100C55A4C /* LocalTextureFileRepository.swift in Sources */,
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
@@ -1008,7 +1008,7 @@
 				D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */,
 				D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */,
 				D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */,
-				D4E395052F95000100C55A4C /* DocumentsZipFileStorageTests.swift in Sources */,
+				D4E395052F95000100C55A4C /* DocumentsProjectFileStorageTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
 				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,

@@ -8,9 +8,9 @@ import Testing
 @testable import HandDrawingSwiftMetal
 
 @MainActor
-struct DocumentsZipFileStorageTests {
+struct DocumentsProjectFileStorageTests {
 
-    private typealias Subject = DocumentsZipFileStorage
+    private typealias Subject = DocumentsProjectFileStorage
 
     @Test
     func `init uses TmpFolder under the temporary directory`() {
@@ -24,7 +24,7 @@ struct DocumentsZipFileStorageTests {
     }
 
     @Test
-    func `init uses custom zip sessions directory name under the temporary directory`() {
+    func `init uses custom staging root name under the temporary directory`() {
         let fileManager = MockFileManager()
         let subject = Subject(fileManager: fileManager, stagingRootName: "CustomTmp")
 

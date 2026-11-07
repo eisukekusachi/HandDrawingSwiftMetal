@@ -50,7 +50,7 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsZipFileStorage.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
+        try await documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
                     to: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
@@ -106,7 +106,7 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await documentsZipFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+        try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
             let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(

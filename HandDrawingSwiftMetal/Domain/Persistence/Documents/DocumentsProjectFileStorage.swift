@@ -5,14 +5,14 @@
 import Core
 import Foundation
 
-private enum DocumentsZipFileStorageStaging {
+private enum DocumentsProjectFileStorageStaging {
     static let defaultRootName = "TmpFolder"
 }
 
-/// Zip archives in the Documents directory: zip/unzip session workflows and related file operations.
+/// Project zip files in the Documents directory: zip/unzip session workflows and related file I/O.
 /// Each session uses a disposable staging directory under the system temp folder.
 @MainActor
-final class DocumentsZipFileStorage {
+final class DocumentsProjectFileStorage {
 
     private let fileManager: FileManaging
     private let zipHandler: ZipHandling
@@ -23,7 +23,7 @@ final class DocumentsZipFileStorage {
     init(
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil,
-        stagingRootName: String = DocumentsZipFileStorageStaging.defaultRootName
+        stagingRootName: String = DocumentsProjectFileStorageStaging.defaultRootName
     ) {
         self.fileManager = fileManager
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)
@@ -65,10 +65,12 @@ final class DocumentsZipFileStorage {
         }
     }
 
+    /// Removes a project zip (or file) at `url`.
     func removeFile(at url: URL) throws {
         try fileManager.removeItem(at: url)
     }
 
+    /// Renames a project zip in Documents (e.g. after the user renames the project).
     func renameFile(src: URL, dst: URL) throws {
         if fileManager.fileExists(atPath: dst.path),
             // fileExists does not distinguish letter case, so skip remove when
@@ -81,12 +83,12 @@ final class DocumentsZipFileStorage {
     }
 }
 
-private extension DocumentsZipFileStorage {
+private extension DocumentsProjectFileStorage {
 
     static func sanitizedStagingRootName(_ raw: String) -> String {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         let sanitized = URL.sanitizedName(trimmed)
-        return sanitized.isEmpty ? DocumentsZipFileStorageStaging.defaultRootName : sanitized
+        return sanitized.isEmpty ? DocumentsProjectFileStorageStaging.defaultRootName : sanitized
     }
 
     func withStagingDirectory<T>(
