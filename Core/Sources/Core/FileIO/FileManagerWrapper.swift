@@ -21,6 +21,7 @@ public protocol FileManaging: Sendable {
         contents data: Data?,
         attributes attr: [FileAttributeKey: Any]?
     ) -> Bool
+    @discardableResult
     func replaceItemAt(
         _ originalItemURL: URL,
         withItemAt newItemURL: URL,
@@ -31,15 +32,25 @@ public protocol FileManaging: Sendable {
 }
 
 public extension FileManaging {
-    /// Replaces `dst` with `src` by moving when no file is at `dst`, or by removing then moving when one exists.
+    /// Writes `src` to `dst`, creating `dst` when missing or replacing it atomically when present.
     ///
-    /// ``FileManaging/moveItem(at:to:)`` fails if the destination path is already taken.
-    /// This removes the destination item first when `fileExists` reports one, then performs the move.
+    /// Uses ``replaceItemAt(_:withItemAt:backupItemName:options:)`` when `dst` already exists so a failed
+    /// replace leaves the previous file at `dst` intact.
     func overwriteItem(src: URL, dst: URL) throws {
         if fileExists(atPath: dst.path) {
-            try removeItem(at: dst)
+            try replaceItemAt(
+                dst,
+                withItemAt: src,
+                backupItemName: nil,
+                options: []
+            )
+        } else {
+            try createDirectory(
+                at: dst.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try moveItem(at: src, to: dst)
         }
-        try moveItem(at: src, to: dst)
     }
 }
 
