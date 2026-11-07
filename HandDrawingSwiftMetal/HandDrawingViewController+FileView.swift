@@ -19,7 +19,7 @@ extension HandDrawingViewController {
                 onTapDelete: { [weak self] index in self?.onTapDelete(index) },
                 onSelectItem: { [weak self] zipFileURL in self?.onSelectItem(zipFileURL) }
             ),
-            currentOpenFileURL: viewModel.zipFileURL(
+            currentOpenFileURL: viewModel.fileURL(
                 projectName: viewModel.project.currentProjectName
             )
         )

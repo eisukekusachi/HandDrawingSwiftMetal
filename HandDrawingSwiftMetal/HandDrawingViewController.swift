@@ -55,7 +55,7 @@ class HandDrawingViewController: UIViewController {
         let renderer = MTLRenderer(device: device, commandQueue: commandQueue)
         return .init(
             textureLayers: viewModel.undoableTextureLayers,
-            documentsTextureDataRepository: viewModel.dependencies.documentsTextureDataRepository,
+            localTextureFileRepository: viewModel.dependencies.localTextureFileRepository,
             renderer: renderer
         )
     }()
@@ -87,7 +87,7 @@ class HandDrawingViewController: UIViewController {
         .init(
             device: sharedDevice,
             inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
-            textureRepository: viewModel.dependencies.documentsTextureDataRepository,
+            textureRepository: viewModel.dependencies.localTextureFileRepository,
             onRegisterUndo: { [weak self] undoObjectPair in
                 self?.undoCoordinator.registerUndo(undoObjectPair)
             },
@@ -181,7 +181,7 @@ class HandDrawingViewController: UIViewController {
 
                 await viewModel.updateThumbnails(device: sharedDevice)
 
-                try await viewModel.setupFileList(
+                await viewModel.setupFileList(
                     from: URL.documents.allFileURLs(
                         suffix: viewModel.fileList.fileSuffix
                     )
@@ -348,7 +348,7 @@ extension HandDrawingViewController {
                 do {
                     try await self.viewModel.saveFile(
                         thumbnail: self.canvasView.thumbnail,
-                        zipFileURL: self.viewModel.zipFileURL(
+                        zipFileURL: self.viewModel.fileURL(
                             projectName: self.viewModel.project.currentProjectName
                         )
                     )

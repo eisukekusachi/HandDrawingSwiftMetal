@@ -10,14 +10,10 @@ import Foundation
 /// Keeping them in memory avoids blocking the main thread.
 public final actor InMemoryTextureRepository: MTLTextureRepositoryProtocol {
 
-    public static let shared: MTLTextureRepositoryProtocol = InMemoryTextureRepository(
-        textures: [:]
-    )
-
     /// A dictionary with id as the key and MTLTexture as the value
     private(set) var textures: [UUID: MTLTexture] = [:]
 
-    init(
+    public init(
         textures: [UUID: MTLTexture] = [:]
     ) {
         self.textures = textures

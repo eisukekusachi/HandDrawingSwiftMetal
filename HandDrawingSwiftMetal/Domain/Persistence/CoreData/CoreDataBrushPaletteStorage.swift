@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import UIKit
 
 @preconcurrency import CoreData
@@ -22,6 +23,19 @@ final class CoreDataBrushPaletteStorage {
 
     func clearAll() throws {
         try CoreDataRootEntityStore.clearAll(for: BrushPaletteEntity.self, in: context)
+    }
+
+    func load(into palette: BrushPalette) throws {
+        guard let entity = try fetch() else { return }
+        palette.setId(entity.id ?? UUID())
+
+        let colors: [UIColor] = (entity.paletteColorGroup?.array as? [PaletteColorEntity])?.compactMap {
+            guard let hex = $0.hex else { return nil }
+            return UIColor(hex: hex)
+        } ?? []
+        let index = max(0, min(Int(entity.index), colors.count - 1))
+
+        palette.update(colors: colors, selectedIndex: index)
     }
 
     func save(from palette: BrushPalette) async {

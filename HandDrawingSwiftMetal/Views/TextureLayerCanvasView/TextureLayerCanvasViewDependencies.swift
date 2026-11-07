@@ -13,18 +13,18 @@ public final class TextureLayerCanvasViewDependencies {
     public let textureLayers: TextureLayersCompositingProtocol
 
     /// Repository for layer texture data on disk.
-    public let documentsTextureDataRepository: MTLTextureDataRepositoryProtocol
+    public let localTextureFileRepository: MTLTextureDataRepositoryProtocol
 
     /// Metal rendering used for compositing and drawing.
     public let renderer: MTLRendering
 
     public init(
         textureLayers: TextureLayersCompositingProtocol,
-        documentsTextureDataRepository: MTLTextureDataRepositoryProtocol,
+        localTextureFileRepository: MTLTextureDataRepositoryProtocol,
         renderer: MTLRendering
     ) {
         self.textureLayers = textureLayers
-        self.documentsTextureDataRepository = documentsTextureDataRepository
+        self.localTextureFileRepository = localTextureFileRepository
         self.renderer = renderer
     }
 }

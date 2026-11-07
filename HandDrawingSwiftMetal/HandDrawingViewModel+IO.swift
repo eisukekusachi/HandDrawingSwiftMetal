@@ -15,9 +15,11 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> URL {
-        let targetURL = try documentsDataStore.uniqueZipFileURL(
-            fileName: fileName,
-            suffix: fileList.fileSuffix
+        let targetURL = try URL.uniqueFileURL(
+            name: fileName,
+            in: dependencies.fileManager.documentsDirectory,
+            fileSuffix: fileList.fileSuffix,
+            fileExists: { dependencies.fileManager.fileExists(atPath: $0.path) }
         )
         let createdAt = Date()
         let updatedAt = Date()
@@ -48,7 +50,7 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsDataStore.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
+        try await documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
                     to: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
@@ -69,7 +71,7 @@ extension HandDrawingViewModel {
 
             do {
                 for layer in textureLayers.layers {
-                    try await dependencies.documentsTextureDataRepository.copyTexture(
+                    try await dependencies.localTextureFileRepository.copyTexture(
                         id: layer.id,
                         to: workingDirectoryURL
                     )
@@ -104,7 +106,7 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await documentsDataStore.withUnzippedContents(from: zipFileURL) { workingDirectoryURL in
+        try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
             let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(
@@ -115,7 +117,7 @@ extension HandDrawingViewModel {
                 throw error
             }
 
-            try await DocumentsTextureDataRepository.shared.restoreStorage(
+            try await dependencies.localTextureFileRepository.restoreStorage(
                 from: workingDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
                 textureSize: newTextureLayers.textureSize,

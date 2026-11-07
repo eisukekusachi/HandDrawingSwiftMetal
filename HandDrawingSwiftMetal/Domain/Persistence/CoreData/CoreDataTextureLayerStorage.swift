@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import TextureLayerView
 
 @preconcurrency import CoreData

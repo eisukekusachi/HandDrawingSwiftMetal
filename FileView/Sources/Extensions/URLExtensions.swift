@@ -38,7 +38,7 @@ extension URL {
         fileSuffix: String = ""
     ) -> URL {
         directory.appendingPathComponent(
-            URL.projectName(name: name, fileSuffix: fileSuffix)
+            URL.fileName(name: name, fileSuffix: fileSuffix)
         )
     }
 }

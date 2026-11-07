@@ -21,6 +21,7 @@ public protocol FileManaging: Sendable {
         contents data: Data?,
         attributes attr: [FileAttributeKey: Any]?
     ) -> Bool
+    @discardableResult
     func replaceItemAt(
         _ originalItemURL: URL,
         withItemAt newItemURL: URL,
@@ -28,6 +29,29 @@ public protocol FileManaging: Sendable {
         options: FileManager.ItemReplacementOptions
     ) throws -> URL?
     func unzipItem(at sourceURL: URL, to destinationURL: URL) throws
+}
+
+public extension FileManaging {
+    /// Writes `src` to `dst`, creating `dst` when missing or replacing it atomically when present.
+    ///
+    /// Uses ``replaceItemAt(_:withItemAt:backupItemName:options:)`` when `dst` already exists so a failed
+    /// replace leaves the previous file at `dst` intact.
+    func overwriteItem(src: URL, dst: URL) throws {
+        if fileExists(atPath: dst.path) {
+            try replaceItemAt(
+                dst,
+                withItemAt: src,
+                backupItemName: nil,
+                options: []
+            )
+        } else {
+            try createDirectory(
+                at: dst.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try moveItem(at: src, to: dst)
+        }
+    }
 }
 
 /// Thin wrapper around `FileManager.default`.
