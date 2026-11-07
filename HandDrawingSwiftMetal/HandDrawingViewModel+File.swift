@@ -22,7 +22,7 @@ extension HandDrawingViewModel {
             guard let self else { return nil }
 
             // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-            return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+            return try await documentsZipFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
                 let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
                 let thumbnailData = try? Data(
                     contentsOf: workingDirectoryURL.appendingPathComponent(
@@ -71,7 +71,7 @@ extension HandDrawingViewModel {
             )
         }
 
-        try documentsDataStore.removeFile(at: item.fileURL)
+        try documentsZipFileStorage.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
     }
 
@@ -113,7 +113,7 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        let newFileURL = try documentsDataStore.uniqueZipFileURL(
+        let newFileURL = try documentsZipFileStorage.uniqueZipFileURL(
             fileName: normalizedName,
             suffix: fileList.fileSuffix,
             excludeURL: oldFileURL
@@ -123,7 +123,7 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        try documentsDataStore.renameFile(at: oldFileURL, to: newFileURL)
+        try documentsZipFileStorage.renameFile(at: oldFileURL, to: newFileURL)
 
         if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
             project.update(

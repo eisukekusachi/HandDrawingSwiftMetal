@@ -15,7 +15,7 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> URL {
-        let targetURL = try documentsDataStore.uniqueZipFileURL(
+        let targetURL = try documentsZipFileStorage.uniqueZipFileURL(
             fileName: fileName,
             suffix: fileList.fileSuffix
         )
@@ -48,7 +48,7 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsDataStore.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
+        try await documentsZipFileStorage.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
                     to: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
@@ -104,7 +104,7 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await documentsDataStore.withUnzippedContents(from: zipFileURL) { workingDirectoryURL in
+        try await documentsZipFileStorage.withUnzippedContents(from: zipFileURL) { workingDirectoryURL in
             let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(

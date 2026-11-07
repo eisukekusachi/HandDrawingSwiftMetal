@@ -7,9 +7,9 @@ import Testing
 @testable import Core
 
 @MainActor
-struct DocumentsDataStoreTests {
+struct DocumentsZipFileStorageTests {
 
-    private typealias Subject = DocumentsDataStore
+    private typealias Subject = DocumentsZipFileStorage
 
     @Test
     func `init uses TmpFolder under the temporary directory`() {
@@ -17,8 +17,19 @@ struct DocumentsDataStoreTests {
         let subject = Subject(fileManager: fileManager)
 
         #expect(
-            subject.localFileIO.workingDirectoryURL ==
+            subject.zipSessionsWorkingRootURL ==
             fileManager.temporaryDirectory.appendingPathComponent("TmpFolder")
+        )
+    }
+
+    @Test
+    func `init uses custom zip sessions directory name under the temporary directory`() {
+        let fileManager = MockFileManager()
+        let subject = Subject(fileManager: fileManager, zipSessionsDirectoryName: "CustomTmp")
+
+        #expect(
+            subject.zipSessionsWorkingRootURL ==
+            fileManager.temporaryDirectory.appendingPathComponent("CustomTmp")
         )
     }
 

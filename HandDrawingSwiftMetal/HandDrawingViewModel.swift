@@ -38,7 +38,7 @@ final class HandDrawingViewModel: ObservableObject {
     }
 
     func zipFileURL(projectName: String) -> URL {
-        documentsDataStore.zipFileURL(
+        documentsZipFileStorage.zipFileURL(
             projectName: projectName,
             suffix: fileList.fileSuffix
         )
@@ -63,7 +63,7 @@ final class HandDrawingViewModel: ObservableObject {
     /// Updates the canvas and drawing components.
     private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
 
-    let documentsDataStore: DocumentsDataStore
+    let documentsZipFileStorage: DocumentsZipFileStorage
 
     let dependencies: HandDrawingViewDependencies
 
@@ -71,14 +71,14 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsDataStore: DocumentsDataStore? = nil,
+        documentsZipFileStorage: DocumentsZipFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsDataStore = documentsDataStore ?? .init(fileManager: dependencies.fileManager)
+        self.documentsZipFileStorage = documentsZipFileStorage ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
 
         self.fileList.objectWillChange
