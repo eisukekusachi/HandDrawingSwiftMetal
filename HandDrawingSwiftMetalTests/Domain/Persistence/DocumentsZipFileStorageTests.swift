@@ -2,9 +2,10 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import Foundation
 import Testing
-@testable import Core
+@testable import HandDrawingSwiftMetal
 
 @MainActor
 struct DocumentsZipFileStorageTests {

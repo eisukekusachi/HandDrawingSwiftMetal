@@ -86,9 +86,6 @@
 		D4C3A0833069000100009F91 /* TextureLayersUndoableStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0823069000100009F91 /* TextureLayersUndoableStateTests.swift */; };
 		D4C3A08F3069000100009F91 /* TextureRepositoryStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */; };
 		D4C3A0913069000100009F91 /* InMemoryTextureRepositoryStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C3A0903069000100009F91 /* InMemoryTextureRepositoryStub.swift */; };
-		D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */; };
-		D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */; };
-		D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */; };
 		D4C4C0012F94000100C55A4C /* TextureLayerCanvasUpdating.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */; };
 		D4C4C0022F94000100C55A4C /* TextureLayerCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1022F94000100C55A4C /* TextureLayerCanvasView.swift */; };
 		D4C4C0032F94000100C55A4C /* TextureLayerCanvasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C4C1032F94000100C55A4C /* TextureLayerCanvasViewModel.swift */; };
@@ -114,13 +111,18 @@
 		D4E1ECFE2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */; };
 		D4E1ED002752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */; };
 		D4E2A1012FCD010100C55A4D /* PaletteEditView in Frameworks */ = {isa = PBXBuildFile; productRef = D4E2A1032FCD010100C55A4D /* PaletteEditView */; };
+		D4E395022F95000100C55A4C /* DocumentsZipFileStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */; };
+		D4E395052F95000100C55A4C /* DocumentsZipFileStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */; };
 		D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F0BF052E38F79600C3E441 /* CanvasView */; };
 		D4F1A0012FBE010100C55A4D /* HandDrawingViewController+FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */; };
 		D4F1A0052FBE010200C55A4D /* HandDrawingViewModel+File.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */; };
-		D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */; };
 		D4F1A0072FBE010300C55A4D /* HandDrawingViewModel+IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */; };
 		D4F1A0092FBE010400C55A4D /* ProjectContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1A0082FBE010400C55A4D /* ProjectContent.swift */; };
 		D4F525732EAC96BE00439FFF /* ToastMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F525722EAC96BE00439FFF /* ToastMessage.swift */; };
+		D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */; };
+		D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */; };
+		D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */; };
+		D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */; };
 		D4F8B2052FD2010500C55A4E /* FileView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F8B2062FD2010600C55A4E /* FileView */; };
 /* End PBXBuildFile section */
 
@@ -220,9 +222,6 @@
 		D4C3A0823069000100009F91 /* TextureLayersUndoableStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayersUndoableStateTests.swift; sourceTree = "<group>"; };
 		D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureRepositoryStub.swift; sourceTree = "<group>"; };
 		D4C3A0903069000100009F91 /* InMemoryTextureRepositoryStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryTextureRepositoryStub.swift; sourceTree = "<group>"; };
-		D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
-		D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelTests.swift; sourceTree = "<group>"; };
-		D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelFileTests.swift; sourceTree = "<group>"; };
 		D4C4C1012F94000100C55A4C /* TextureLayerCanvasUpdating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasUpdating.swift; sourceTree = "<group>"; };
 		D4C4C1022F94000100C55A4C /* TextureLayerCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasView.swift; sourceTree = "<group>"; };
 		D4C4C1032F94000100C55A4C /* TextureLayerCanvasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureLayerCanvasViewModel.swift; sourceTree = "<group>"; };
@@ -252,14 +251,19 @@
 		D4E1ECFD2752388E00D4A23D /* HandDrawingSwiftMetalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITests.swift; sourceTree = "<group>"; };
 		D4E1ECFF2752388E00D4A23D /* HandDrawingSwiftMetalUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingSwiftMetalUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		D4E2A1022FCD010100C55A4D /* PaletteEditView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PaletteEditView; sourceTree = "<group>"; };
+		D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsZipFileStorage.swift; sourceTree = "<group>"; };
+		D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsZipFileStorageTests.swift; sourceTree = "<group>"; };
 		D4F0BF042E38F78900C3E441 /* CanvasView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasView; sourceTree = "<group>"; };
 		D4F1A0002FBE010100C55A4D /* HandDrawingViewController+FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewController+FileView.swift"; sourceTree = "<group>"; };
 		D4F1A0042FBE010200C55A4D /* HandDrawingViewModel+File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+File.swift"; sourceTree = "<group>"; };
-		D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+CoreData.swift"; sourceTree = "<group>"; };
 		D4F1A0062FBE010300C55A4D /* HandDrawingViewModel+IO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+IO.swift"; sourceTree = "<group>"; };
 		D4F1A0082FBE010400C55A4D /* ProjectContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectContent.swift; sourceTree = "<group>"; };
 		D4F362E32FA5227E001B5544 /* HandDrawingSwiftMetalTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = HandDrawingSwiftMetalTests.xctestplan; sourceTree = "<group>"; };
 		D4F525722EAC96BE00439FFF /* ToastMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastMessage.swift; sourceTree = "<group>"; };
+		D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
+		D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelTests.swift; sourceTree = "<group>"; };
+		D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelFileTests.swift; sourceTree = "<group>"; };
+		D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+CoreData.swift"; sourceTree = "<group>"; };
 		D4F8B2042FD2010400C55A4E /* FileView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FileView; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -315,20 +319,6 @@
 			path = VerticalDiameterSlider;
 			sourceTree = "<group>";
 		};
-		D41C72172E6C479500D524DE /* CoreData */ = {
-			isa = PBXGroup;
-			children = (
-				D41C72182E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift */,
-				D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */,
-				D41C721A2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift */,
-				D49C69222F23A64200B66608 /* CoreDataProjectStorage.swift */,
-				D49C694B2F2EF0C400B66608 /* CoreDataSaveDebounceMilliseconds.swift */,
-				D49C69562F2F685300B66608 /* CoreDataStorage.swift */,
-				D49C69492F2EE85400B66608 /* CoreDataTextureLayerStorage.swift */,
-			);
-			path = CoreData;
-			sourceTree = "<group>";
-		};
 		D426FC622E5C4B3000CC116D /* DrawingTools */ = {
 			isa = PBXGroup;
 			children = (
@@ -372,6 +362,28 @@
 				D4C3A08E3069000100009F91 /* TextureRepositoryStub.swift */,
 			);
 			path = Stubs;
+			sourceTree = "<group>";
+		};
+		D43E7681309ECBC000272262 /* Documents */ = {
+			isa = PBXGroup;
+			children = (
+				D4E395012F95000100C55A4C /* DocumentsZipFileStorage.swift */,
+			);
+			path = Documents;
+			sourceTree = "<group>";
+		};
+		D43E7682309ECBCB00272262 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				D41C72182E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift */,
+				D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */,
+				D41C721A2E6C73C300D524DE /* CoreDataEraserPaletteStorage.swift */,
+				D49C69222F23A64200B66608 /* CoreDataProjectStorage.swift */,
+				D49C694B2F2EF0C400B66608 /* CoreDataSaveDebounceMilliseconds.swift */,
+				D49C69562F2F685300B66608 /* CoreDataStorage.swift */,
+				D49C69492F2EE85400B66608 /* CoreDataTextureLayerStorage.swift */,
+			);
+			path = CoreData;
 			sourceTree = "<group>";
 		};
 		D4732C7A2FA0EE4E00119C55 /* Models */ = {
@@ -437,11 +449,9 @@
 			isa = PBXGroup;
 			children = (
 				D48CA06D2F3C18D3008C6E9E /* UndoObject */,
-				D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */,
 				D48CA06E2F3C18D3008C6E9E /* UndoRedoButtonState.swift */,
 				D48CA06F2F3C18D3008C6E9E /* UndoRedoObjectPair.swift */,
 				D48CA0702F3C18D3008C6E9E /* UndoTextureId.swift */,
-				D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */,
 			);
 			path = Undo;
 			sourceTree = "<group>";
@@ -601,6 +611,7 @@
 			isa = PBXGroup;
 			children = (
 				D47FD3E52E2B20C600F3F514 /* Extensions */,
+				D4E395032F95000100C55A4C /* Domain */,
 				D4F525742EAC96C600439FFF /* Models */,
 				D47FD3E62E2B20E800F3F514 /* Resources */,
 				D49C69292F23A75000B66608 /* Utils */,
@@ -624,18 +635,11 @@
 			path = HandDrawingSwiftMetal;
 			sourceTree = "<group>";
 		};
-		D4F5A0652FBE0D0500C55A4D /* TestUtils */ = {
-			isa = PBXGroup;
-			children = (
-				D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */,
-			);
-			path = TestUtils;
-			sourceTree = "<group>";
-		};
 		D4E1ECF22752388E00D4A23D /* HandDrawingSwiftMetalTests */ = {
 			isa = PBXGroup;
 			children = (
 				D402815830716E8400F25241 /* Dummy */,
+				D4E395062F95000100C55A4C /* Domain */,
 				D4F5A0652FBE0D0500C55A4D /* TestUtils */,
 				D4732C7A2FA0EE4E00119C55 /* Models */,
 				D4C4C2112F94000100C55A4C /* Views */,
@@ -656,17 +660,67 @@
 			path = HandDrawingSwiftMetalUITests;
 			sourceTree = "<group>";
 		};
+		D4E395032F95000100C55A4C /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				D4E397032F95000100C55A4C /* Disk */,
+				D4E398032F95000100C55A4C /* Undo */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D4E395062F95000100C55A4C /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				D4E397062F95000100C55A4C /* Persistence */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D4E397032F95000100C55A4C /* Disk */ = {
+			isa = PBXGroup;
+			children = (
+				D43E7682309ECBCB00272262 /* CoreData */,
+				D43E7681309ECBC000272262 /* Documents */,
+			);
+			path = Disk;
+			sourceTree = "<group>";
+		};
+		D4E397062F95000100C55A4C /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				D4E395042F95000100C55A4C /* DocumentsZipFileStorageTests.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		D4E398032F95000100C55A4C /* Undo */ = {
+			isa = PBXGroup;
+			children = (
+				D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */,
+				D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */,
+			);
+			path = Undo;
+			sourceTree = "<group>";
+		};
 		D4F525742EAC96C600439FFF /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				D49D7DC92F49FA5800B178EF /* Alert */,
-				D41C72172E6C479500D524DE /* CoreData */,
 				D49C693F2F24A10100B66608 /* Project */,
 				D426FC9D2E5DD8CD00CC116D /* DrawingTools */,
 				D48CA0722F3C18D3008C6E9E /* Undo */,
 				D4C3A0503069000100009F91 /* TextureLayers */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D4F5A0652FBE0D0500C55A4D /* TestUtils */ = {
+			isa = PBXGroup;
+			children = (
+				D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */,
+			);
+			path = TestUtils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -844,6 +898,7 @@
 				D4D02E412E5AA47B0064ECC3 /* DrawingToolType.swift in Sources */,
 				D48CA0732F3C18D3008C6E9E /* UndoVisibilityObject.swift in Sources */,
 				D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */,
+				D4E395022F95000100C55A4C /* DocumentsZipFileStorage.swift in Sources */,
 				D48CA0742F3C18D3008C6E9E /* UndoDeletionObject.swift in Sources */,
 				D48CA0752F3C18D3008C6E9E /* UndoSelectionObject.swift in Sources */,
 				D48CA0762F3C18D3008C6E9E /* UndoDrawingObject.swift in Sources */,
@@ -941,6 +996,7 @@
 				D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */,
 				D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */,
 				D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */,
+				D4E395052F95000100C55A4C /* DocumentsZipFileStorageTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
 				D426FC992E5C852E00CC116D /* EraserPaletteTests.swift in Sources */,

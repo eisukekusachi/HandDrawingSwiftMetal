@@ -2,12 +2,13 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 import Foundation
 
 /// Zip archives in the Documents directory: zip/unzip session workflows and related file operations.
 /// Each session uses a disposable staging directory under the system temp folder.
 @MainActor
-public final class DocumentsZipFileStorage {
+final class DocumentsZipFileStorage {
 
     private let fileManager: FileManaging
     private let zipHandler: ZipHandling
@@ -15,7 +16,7 @@ public final class DocumentsZipFileStorage {
     /// Parent of per-session staging directories (`UUID` each).
     let stagingRootURL: URL
 
-    public init(
+    init(
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil,
         stagingRootName: String = "TmpFolder"
@@ -27,7 +28,7 @@ public final class DocumentsZipFileStorage {
     }
 
     /// Stages files under a temp directory, zips them to `dst`, then removes the staging directory.
-    public func withZippedContents(
+    func withZippedContents(
         to dst: URL,
         _ operation: (_ stagingDirectory: URL) async throws -> Void
     ) async throws {
@@ -45,7 +46,7 @@ public final class DocumentsZipFileStorage {
     }
 
     /// Unzips `src` into a temp staging directory, runs `operation`, then removes the staging directory.
-    public func withUnzippedContents<T>(
+    func withUnzippedContents<T>(
         from src: URL,
         _ operation: (_ stagingDirectory: URL) async throws -> T
     ) async throws -> T {
@@ -59,11 +60,11 @@ public final class DocumentsZipFileStorage {
         }
     }
 
-    public func removeFile(at url: URL) throws {
+    func removeFile(at url: URL) throws {
         try fileManager.removeItem(at: url)
     }
 
-    public func renameFile(src: URL, dst: URL) throws {
+    func renameFile(src: URL, dst: URL) throws {
         if fileManager.fileExists(atPath: dst.path),
             // fileExists does not distinguish letter case, so skip remove when
             // only the case differs; otherwise the source file would be deleted.
