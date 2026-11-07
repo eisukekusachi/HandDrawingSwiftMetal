@@ -7,19 +7,19 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// Stores `MTLTexture` data in a `Documents` directory, keyed by id.
-public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProtocol {
+/// Stores `MTLTexture` data on local disk under Application Support, keyed by id.
+public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol {
 
     @MainActor
     public static let shared = {
         do {
-            return try DocumentsTextureDataRepository(
+            return try LocalTextureFileRepository(
                 storageDirectoryURL: URL.applicationSupport,
                 directoryName: "TextureStorage",
                 fileManager: FileManagerWrapper()
             )
         } catch {
-            fatalError("Failed to initialize DocumentsTextureDataRepository: \(error)")
+            fatalError("Failed to initialize LocalTextureFileRepository: \(error)")
         }
     }()
 
@@ -111,7 +111,7 @@ public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProto
     }
 }
 
-public extension DocumentsTextureDataRepository {
+public extension LocalTextureFileRepository {
 
     @discardableResult
     func addTextureData(
@@ -305,7 +305,7 @@ public extension DocumentsTextureDataRepository {
     }
 }
 
-private extension DocumentsTextureDataRepository {
+private extension LocalTextureFileRepository {
 
     func excludeFromBackup(_ directoryURL: URL) throws {
         var url = directoryURL

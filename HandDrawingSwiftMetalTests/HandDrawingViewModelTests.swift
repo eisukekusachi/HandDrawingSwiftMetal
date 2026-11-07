@@ -36,7 +36,7 @@ struct HandDrawingViewModelTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(
-                    textureDataRepository: textureRepository,
+                    localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
             )
@@ -67,7 +67,7 @@ struct HandDrawingViewModelTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(
-                    textureDataRepository: textureRepository,
+                    localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
             )
@@ -100,7 +100,7 @@ struct HandDrawingViewModelTests {
 
             let subject: Subject = .init(
                 dependencies: dependencies(
-                    textureDataRepository: textureRepository,
+                    localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
             )
@@ -126,11 +126,11 @@ extension HandDrawingViewModelTests.LoadTexturesFromDocuments {
 
     /// Test-only `HandDrawingViewDependencies` using in-memory Core Data stacks (no SQLite).
     private func dependencies(
-        textureDataRepository: MTLTextureDataRepositoryProtocol,
+        localTextureFileRepository: MTLTextureDataRepositoryProtocol,
         textureLayersCoreDataStorage: CoreDataStorage
     ) -> HandDrawingViewDependencies {
         .init(
-            textureDataRepository: textureDataRepository,
+            localTextureFileRepository: localTextureFileRepository,
             projectCoreDataStorage: CoreDataStorage(
                 inMemory: "ProjectStorage",
                 bundle: Bundle(for: CoreDataProjectStorage.self)

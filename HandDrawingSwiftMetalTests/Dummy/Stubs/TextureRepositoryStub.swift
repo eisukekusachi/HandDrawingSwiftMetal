@@ -31,6 +31,13 @@ final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked 
         }
     }
 
+    func restoreStorage(
+        from sourceFolderURL: URL,
+        ids: [UUID],
+        textureSize: CGSize,
+        device: MTLDevice
+    ) async throws {}
+
     func duplicatedTexture(
         _ id: UUID,
         textureSize: CGSize,

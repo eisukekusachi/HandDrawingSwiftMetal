@@ -23,6 +23,13 @@ public protocol MTLTextureDataRepositoryProtocol: Sendable, AnyObject {
         device: MTLDevice
     ) throws
 
+    func restoreStorage(
+        from sourceFolderURL: URL,
+        ids: [UUID],
+        textureSize: CGSize,
+        device: MTLDevice
+    ) async throws
+
     func duplicatedTexture(
         _ id: UUID,
         textureSize: CGSize,

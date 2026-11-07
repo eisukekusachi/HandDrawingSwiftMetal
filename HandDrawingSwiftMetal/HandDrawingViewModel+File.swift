@@ -200,7 +200,7 @@ private extension HandDrawingViewModel {
 
 extension HandDrawingViewModel {
     func updateThumbnails(device: MTLDevice) async {
-        let textures = try? await dependencies.documentsTextureDataRepository.duplicatedTextures(
+        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
             undoableTextureLayers.layers.map { $0.id },
             textureSize: undoableTextureLayers.textureSize,
             device: device

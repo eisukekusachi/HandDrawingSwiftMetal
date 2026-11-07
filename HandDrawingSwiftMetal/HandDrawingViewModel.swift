@@ -80,7 +80,7 @@ final class HandDrawingViewModel: ObservableObject {
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
         self.documentsZipFileStorage = documentsZipFileStorage ?? .init(fileManager: dependencies.fileManager)
-        self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
+        self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
@@ -138,7 +138,7 @@ extension HandDrawingViewModel {
             let snapshot = TextureLayersSnapshot(entity: entity)
             do {
                 // Load MTLTextures from the documents directory.
-                try dependencies.documentsTextureDataRepository.restoreTextures(
+                try dependencies.localTextureFileRepository.restoreTextures(
                     ids: snapshot.layers.map(\.id),
                     textureSize: snapshot.textureSize,
                     device: device
@@ -191,7 +191,7 @@ extension HandDrawingViewModel {
             isVisible: true
         )
         // Blank pixel buffer for the layer in the documents directory.
-        try await dependencies.documentsTextureDataRepository.initializeTexture(
+        try await dependencies.localTextureFileRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
             device: device,

@@ -55,7 +55,7 @@ class HandDrawingViewController: UIViewController {
         let renderer = MTLRenderer(device: device, commandQueue: commandQueue)
         return .init(
             textureLayers: viewModel.undoableTextureLayers,
-            documentsTextureDataRepository: viewModel.dependencies.documentsTextureDataRepository,
+            localTextureFileRepository: viewModel.dependencies.localTextureFileRepository,
             renderer: renderer
         )
     }()
@@ -87,7 +87,7 @@ class HandDrawingViewController: UIViewController {
         .init(
             device: sharedDevice,
             inMemoryRepository: viewModel.dependencies.inMemoryTextureRepository,
-            textureRepository: viewModel.dependencies.documentsTextureDataRepository,
+            textureRepository: viewModel.dependencies.localTextureFileRepository,
             onRegisterUndo: { [weak self] undoObjectPair in
                 self?.undoCoordinator.registerUndo(undoObjectPair)
             },

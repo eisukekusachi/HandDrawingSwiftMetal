@@ -177,7 +177,7 @@ fileprivate func zipURL(named name: String, fileManager: MockFileManager) -> URL
 fileprivate func dependencies(fileManager: MockFileManager = MockFileManager()) -> HandDrawingViewDependencies {
     .init(
         fileManager: fileManager,
-        textureDataRepository: TextureRepositoryStub(),
+        localTextureFileRepository: TextureRepositoryStub(),
         projectCoreDataStorage: CoreDataStorage(
             inMemory: "ProjectStorage",
             bundle: Bundle(for: CoreDataProjectStorage.self)
