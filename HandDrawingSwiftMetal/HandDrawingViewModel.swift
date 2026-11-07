@@ -33,14 +33,15 @@ final class HandDrawingViewModel: ObservableObject {
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            fileURL: zipFileURL(projectName: project.currentProjectName)
+            fileURL: fileURL(projectName: project.currentProjectName)
         )
     }
 
-    func zipFileURL(projectName: String) -> URL {
-        documentsZipFileStorage.zipFileURL(
-            projectName: projectName,
-            suffix: fileList.fileSuffix
+    func fileURL(projectName: String) -> URL {
+        URL.fileURL(
+            in: dependencies.fileManager.documentsDirectory,
+            name: projectName,
+            fileSuffix: fileList.fileSuffix
         )
     }
 

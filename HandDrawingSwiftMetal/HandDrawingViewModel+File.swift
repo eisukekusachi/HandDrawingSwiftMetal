@@ -11,7 +11,7 @@ import UIKit
 extension HandDrawingViewModel {
     func isOpenFile(at index: Int) -> Bool {
         guard let item = fileList.item(index) else { return false }
-        return item.fileURL == zipFileURL(projectName: project.currentProjectName)
+        return item.fileURL == fileURL(projectName: project.currentProjectName)
     }
 
     /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
@@ -113,9 +113,11 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        let newFileURL = try documentsZipFileStorage.uniqueZipFileURL(
-            fileName: normalizedName,
-            suffix: fileList.fileSuffix,
+        let newFileURL = try URL.uniqueFileURL(
+            name: normalizedName,
+            in: dependencies.fileManager.documentsDirectory,
+            fileSuffix: fileList.fileSuffix,
+            fileExists: { dependencies.fileManager.fileExists(atPath: $0.path) },
             excludeURL: oldFileURL
         )
         let uniqueName = newFileURL.baseName
@@ -123,9 +125,9 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        try documentsZipFileStorage.renameFile(at: oldFileURL, to: newFileURL)
+        try documentsZipFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
 
-        if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
+        if oldFileURL == fileURL(projectName: project.currentProjectName) {
             project.update(
                 projectName: uniqueName,
                 updatedAt: Date()

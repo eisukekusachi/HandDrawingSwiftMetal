@@ -348,7 +348,7 @@ extension HandDrawingViewController {
                 do {
                     try await self.viewModel.saveFile(
                         thumbnail: self.canvasView.thumbnail,
-                        zipFileURL: self.viewModel.zipFileURL(
+                        zipFileURL: self.viewModel.fileURL(
                             projectName: self.viewModel.project.currentProjectName
                         )
                     )

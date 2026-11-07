@@ -15,9 +15,11 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> URL {
-        let targetURL = try documentsZipFileStorage.uniqueZipFileURL(
-            fileName: fileName,
-            suffix: fileList.fileSuffix
+        let targetURL = try URL.uniqueFileURL(
+            name: fileName,
+            in: dependencies.fileManager.documentsDirectory,
+            fileSuffix: fileList.fileSuffix,
+            fileExists: { dependencies.fileManager.fileExists(atPath: $0.path) }
         )
         let createdAt = Date()
         let updatedAt = Date()

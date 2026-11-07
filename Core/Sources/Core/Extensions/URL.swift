@@ -1,5 +1,5 @@
 //
-//  Created by Eisuke Kusachi on 2026/09/26.
+//  Created by Eisuke Kusachi
 //
 
 import Foundation
@@ -58,10 +58,50 @@ public extension URL {
         return string
     }
 
-    static func projectName(name: String, fileSuffix: String = "") -> String {
+    /// Last path component: `name`, or `name` + `.` + `fileSuffix` when `fileSuffix` is non-empty.
+    static func fileName(name: String, fileSuffix: String = "") -> String {
         if fileSuffix.isEmpty {
             return name
         }
         return name + "." + fileSuffix
+    }
+
+    /// Picks an unused file URL under `directory`, appending `_2`, `_3`, … to the base name when taken.
+    static func uniqueFileURL(
+        name: String,
+        in directory: URL,
+        fileSuffix: String,
+        fileExists: (URL) -> Bool,
+        excludeURL: URL? = nil
+    ) throws -> URL {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Please enter a file name", bundle: .module)
+            )
+        }
+
+        let baseName = sanitizedName(trimmedName)
+        guard !baseName.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error", bundle: .module),
+                message: String(localized: "Invalid Value", bundle: .module)
+            )
+        }
+
+        var candidateURL = directory.appendingPathComponent(
+            fileName(name: baseName, fileSuffix: fileSuffix)
+        )
+        var suffixIndex = 2
+        while fileExists(candidateURL),
+              excludeURL.map({ $0.path.lowercased() != candidateURL.path.lowercased() }) ?? true
+        {
+            candidateURL = directory.appendingPathComponent(
+                fileName(name: "\(baseName)_\(suffixIndex)", fileSuffix: fileSuffix)
+            )
+            suffixIndex += 1
+        }
+        return candidateURL
     }
 }
