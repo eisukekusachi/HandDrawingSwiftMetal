@@ -267,11 +267,13 @@ public extension LocalTextureFileRepository {
         let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
         let destinationFileURL = destinationURL.appendingPathComponent(id.uuidString)
 
-        guard
-            fileManager.fileExists(atPath: sourceURL.path)
-        else {
-            Logger.info("Unable to find \(id.uuidString)")
-            return false
+        guard fileManager.fileExists(atPath: sourceURL.path) else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "File not found: \(sourceURL.path)")
+            )
+            Logger.error(error)
+            throw error
         }
 
         try fileManager.copyItem(at: sourceURL, to: destinationFileURL)
