@@ -164,10 +164,19 @@ extension HandDrawingViewModel {
         )
 
         project.update(updatedAt: updatedAt)
-        fileList.update(currentFileItem(thumbnail: thumbnail))
+        upsertFile(thumbnail: thumbnail)
         fileList.sortItems()
 
         showToast(.success)
+    }
+
+    func upsertFile(thumbnail: UIImage?) {
+        let item = currentFileItem(thumbnail: thumbnail)
+        if fileList.index(title: item.title) != nil {
+            fileList.update(item)
+        } else {
+            fileList.append(item)
+        }
     }
 }
 

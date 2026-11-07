@@ -124,7 +124,7 @@ extension HandDrawingViewModel {
         )
 
         project.update(updatedAt: Date())
-        fileList.update(currentFileItem(thumbnail: nil))
+        upsertFile(thumbnail: nil)
         fileList.sortItems()
 
         try await onCanvasUpdate?()
