@@ -167,7 +167,7 @@ private extension UndoCoordinator {
                 commandQueue: canvasView.renderer.commandQueue
             )
 
-            try await canvasView.saveTextureToDocumentsDirectory(
+            try await canvasView.saveTextureToLocal(
                 layerId: textureLayerId,
                 textureData: textureData
             )
@@ -197,7 +197,7 @@ private extension UndoCoordinator {
                 device: canvasView.renderer.device,
                 commandQueue: canvasView.renderer.commandQueue
             )
-            try await canvasView.saveTextureToDocumentsDirectory(
+            try await canvasView.saveTextureToLocal(
                 layerId: undoObject.textureLayer.id,
                 textureData: textureData
             )

@@ -81,7 +81,7 @@ import TextureLayerView
                     device: device,
                     commandQueue: commandQueue
                 )
-                try await self.viewModel.saveTextureToDocumentsDirectory(
+                try await self.viewModel.saveTextureToLocal(
                     layerId: layerId,
                     textureData: textureData
                 )
@@ -133,11 +133,11 @@ import TextureLayerView
         present()
     }
 
-    public func saveTextureToDocumentsDirectory(
+    public func saveTextureToLocal(
         layerId: UUID,
         textureData: Data
     ) async throws {
-        try await viewModel.saveTextureToDocumentsDirectory(
+        try await viewModel.saveTextureToLocal(
             layerId: layerId,
             textureData: textureData
         )

@@ -145,7 +145,7 @@ extension TextureLayerCanvasViewModel {
         )
     }
 
-    func saveTextureToDocumentsDirectory(
+    func saveTextureToLocal(
         layerId: UUID,
         textureData: Data
     ) async throws {
