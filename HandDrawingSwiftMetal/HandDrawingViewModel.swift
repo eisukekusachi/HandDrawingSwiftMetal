@@ -130,35 +130,22 @@ extension HandDrawingViewModel {
         try await onCanvasUpdate?()
     }
 
-    /// Sets up the texture layer list from Core Data metadata and valid repository files. If that fails, makes a blank layer.
-    func setupTextureLayers(
-        device: MTLDevice,
-        fallbackTextureSize: CGSize,
-        commandQueue: MTLCommandQueue
-    ) async throws -> CGSize {
-        // Layer pixels from the last session are already in `localTextureDirectoryURL`; labels (id, name, order, size) are in Core Data.
-        // Confirm the files exist and match the texture size, then put that metadata on the layer list.
-        if let entity = try? dependencies.textureLayerStorage.fetch() {
-            let snapshot = TextureLayersSnapshot(entity: entity)
-            do {
-                try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
-                    ids: snapshot.layers.map(\.id),
-                    textureSize: snapshot.textureSize
-                )
-                undoableTextureLayers.setLayers(snapshot)
-                return snapshot.textureSize
-            } catch {
-                // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
-                try? dependencies.textureLayerStorage.clearAll()
-            }
+    /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
+    /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
+    func setupTextureLayers() throws -> CGSize {
+        guard let entity = try dependencies.textureLayerStorage.fetch() else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to find texture layer files")
+            )
         }
-
-        try await makeBlankLayer(
-            textureSize: fallbackTextureSize,
-            device: device,
-            commandQueue: commandQueue
+        let snapshot = TextureLayersSnapshot(entity: entity)
+        try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
+            ids: snapshot.layers.map(\.id),
+            textureSize: snapshot.textureSize
         )
-        return fallbackTextureSize
+        undoableTextureLayers.setLayers(snapshot)
+        return snapshot.textureSize
     }
 
     /// Creates blank canvas textures and resets drawing tool / palettes.
