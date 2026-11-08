@@ -17,17 +17,16 @@ public protocol MTLTextureDataRepositoryProtocol: Sendable, AnyObject {
         commandQueue: MTLCommandQueue
     ) async throws
 
-    func restoreTextures(
+    /// Confirms that each id has a pixel file matching `textureSize` in the local texture directory. Does not create GPU textures.
+    func validateTextureFilesInLocalDirectory(
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) throws
 
     func restoreStorage(
         from sourceFolderURL: URL,
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) async throws
 
     func duplicatedTexture(

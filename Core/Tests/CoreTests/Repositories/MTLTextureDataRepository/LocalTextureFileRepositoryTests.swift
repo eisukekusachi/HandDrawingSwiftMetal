@@ -4,7 +4,6 @@
 
 import CoreGraphics
 import Foundation
-import Metal
 import Testing
 @testable import Core
 
@@ -25,7 +24,6 @@ struct LocalTextureFileRepositoryTests {
         try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
         defer { try? fileManager.removeItem(at: rootURL) }
 
-        let device = try makeDevice()
         let existingLayerId = UUID()
         let restoredLayerId = UUID()
 
@@ -41,8 +39,7 @@ struct LocalTextureFileRepositoryTests {
         try await subject.restoreStorage(
             from: sourceURL,
             ids: [restoredLayerId],
-            textureSize: textureSize,
-            device: device
+            textureSize: textureSize
         )
 
         // Only restoredLayerId is copied into staging; existingLayerId does not remain.
@@ -65,7 +62,6 @@ struct LocalTextureFileRepositoryTests {
         try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
         defer { try? fileManager.removeItem(at: rootURL) }
 
-        let device = try makeDevice()
         let existingLayerId = UUID()
         let missingLayerId = UUID()
 
@@ -82,8 +78,7 @@ struct LocalTextureFileRepositoryTests {
             try await subject.restoreStorage(
                 from: sourceURL,
                 ids: [missingLayerId],
-                textureSize: textureSize,
-                device: device
+                textureSize: textureSize
             )
         }
 
@@ -103,7 +98,6 @@ struct LocalTextureFileRepositoryTests {
         try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
         defer { try? fileManager.removeItem(at: rootURL) }
 
-        let device = try makeDevice()
         let existingLayerId = UUID()
         let emptyLayerId = UUID()
         let emptyLayerURL = sourceURL.appendingPathComponent(emptyLayerId.uuidString)
@@ -125,8 +119,7 @@ struct LocalTextureFileRepositoryTests {
             try await subject.restoreStorage(
                 from: sourceURL,
                 ids: [emptyLayerId],
-                textureSize: textureSize,
-                device: device
+                textureSize: textureSize
             )
         }
 
@@ -146,7 +139,6 @@ struct LocalTextureFileRepositoryTests {
         try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
         defer { try? fileManager.removeItem(at: rootURL) }
 
-        let device = try makeDevice()
         let existingLayerId = UUID()
         let restoredLayerId = UUID()
 
@@ -164,8 +156,7 @@ struct LocalTextureFileRepositoryTests {
             try await subject.restoreStorage(
                 from: sourceURL,
                 ids: [restoredLayerId, restoredLayerId],
-                textureSize: textureSize,
-                device: device
+                textureSize: textureSize
             )
         }
 
@@ -173,13 +164,76 @@ struct LocalTextureFileRepositoryTests {
         #expect(fileManager.fileExists(atPath: storageURL.appendingPathComponent(existingLayerId.uuidString).path))
         #expect(try childNames(in: rootURL, fileManager: fileManager) == ["Source", "TextureStorage"])
     }
+
+    @Test
+    func `When working layer files are valid, validateTextureFilesInLocalDirectory succeeds`() throws {
+        let fileManager = MockFileManager()
+        let rootURL = fileManager.temporaryDirectory
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+        let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
+        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: rootURL) }
+
+        let layerId = UUID()
+        let subject = try Subject(
+            storageDirectoryURL: rootURL,
+            directoryName: "TextureStorage",
+            fileManager: fileManager
+        )
+        try writeLayer(id: layerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
+
+        try subject.validateTextureFilesInLocalDirectory(
+            ids: [layerId],
+            textureSize: textureSize
+        )
+    }
+
+    @Test
+    func `When a source layer file has the wrong byte count, it keeps the current TextureStorage`() async throws {
+        let fileManager = MockFileManager()
+        let rootURL = fileManager.temporaryDirectory
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+        let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
+        let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
+        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: rootURL) }
+
+        let existingLayerId = UUID()
+        let invalidLayerId = UUID()
+        let invalidLayerURL = sourceURL.appendingPathComponent(invalidLayerId.uuidString)
+
+        let subject = try Subject(
+            storageDirectoryURL: rootURL,
+            directoryName: "TextureStorage",
+            fileManager: fileManager
+        )
+
+        try writeLayer(id: existingLayerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
+        guard fileManager.createFile(
+            atPath: invalidLayerURL.path,
+            contents: Data(repeating: 0, count: 4),
+            attributes: nil
+        ) else {
+            Issue.record("Failed to create invalid layer file")
+            return
+        }
+        fileManager.setContentsOfDirectory([invalidLayerURL], at: sourceURL)
+
+        await #expect(throws: NSError.self) {
+            try await subject.restoreStorage(
+                from: sourceURL,
+                ids: [invalidLayerId],
+                textureSize: textureSize
+            )
+        }
+
+        #expect(fileManager.fileExists(atPath: storageURL.appendingPathComponent(existingLayerId.uuidString).path))
+        #expect(try childNames(in: rootURL, fileManager: fileManager) == ["Source", "TextureStorage"])
+    }
 }
 
 extension LocalTextureFileRepositoryTests {
-
-    private func makeDevice() throws -> MTLDevice {
-        try #require(MTLCreateSystemDefaultDevice())
-    }
 
     private func childNames(in directoryURL: URL, fileManager: MockFileManager) throws -> [String] {
         try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)

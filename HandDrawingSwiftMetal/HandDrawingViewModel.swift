@@ -130,19 +130,20 @@ extension HandDrawingViewModel {
         try await onCanvasUpdate?()
     }
 
-    func loadTexturesFromDocuments(
+    /// Sets up the texture layer list from Core Data metadata and valid repository files. If that fails, makes a blank layer.
+    func setupTextureLayers(
         device: MTLDevice,
         fallbackTextureSize: CGSize,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
+        // Layer pixels from the last session are already in `localTextureDirectoryURL`; labels (id, name, order, size) are in Core Data.
+        // Confirm the files exist and match the texture size, then put that metadata on the layer list.
         if let entity = try? dependencies.textureLayerStorage.fetch() {
             let snapshot = TextureLayersSnapshot(entity: entity)
             do {
-                // Load MTLTextures from the documents directory.
-                try dependencies.localTextureFileRepository.restoreTextures(
+                try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
                     ids: snapshot.layers.map(\.id),
-                    textureSize: snapshot.textureSize,
-                    device: device
+                    textureSize: snapshot.textureSize
                 )
                 undoableTextureLayers.setLayers(snapshot)
                 return snapshot.textureSize

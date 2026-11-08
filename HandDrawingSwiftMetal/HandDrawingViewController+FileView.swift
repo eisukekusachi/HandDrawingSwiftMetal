@@ -85,7 +85,6 @@ private extension HandDrawingViewController {
 
             do {
                 try await viewModel.loadFile(
-                    device: sharedDevice,
                     zipFileURL: zipFileURL
                 )
                 presentedViewController?.dismiss(animated: true)

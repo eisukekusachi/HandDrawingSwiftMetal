@@ -11,7 +11,8 @@ import Foundation
 public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol {
 
     private let fileManager: FileManaging
-    private let workingDirectoryURL: URL
+    /// Live on-disk directory for the current layer textures, one file per id.
+    private let localTextureDirectoryURL: URL
 
     public init(
         storageDirectoryURL: URL,
@@ -19,11 +20,11 @@ public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol 
         fileManager: FileManaging = FileManagerWrapper()
     ) throws {
         self.fileManager = fileManager
-        self.workingDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
+        self.localTextureDirectoryURL = storageDirectoryURL.appendingPathComponent(directoryName)
 
-        try fileManager.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: localTextureDirectoryURL, withIntermediateDirectories: true)
         // Do not back up because this is an intermediate directory
-        try excludeFromBackup(workingDirectoryURL)
+        try excludeFromBackup(localTextureDirectoryURL)
     }
 
     public func initializeTexture(
@@ -62,30 +63,26 @@ public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol 
         )
     }
 
-    public func restoreTextures(
+    public func validateTextureFilesInLocalDirectory(
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) throws {
-        try loadTexturesIfValid(
-            from: workingDirectoryURL,
+        try validateTextureFiles(
+            from: localTextureDirectoryURL,
             ids: ids,
-            textureSize: textureSize,
-            device: device
+            textureSize: textureSize
         )
     }
 
     public func restoreStorage(
         from sourceFolderURL: URL,
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) async throws {
-        try loadTexturesIfValid(
+        try validateTextureFiles(
             from: sourceFolderURL,
             ids: ids,
-            textureSize: textureSize,
-            device: device
+            textureSize: textureSize
         )
 
         try replaceWorkingStorageAfterStaging { stagingURL in
@@ -106,7 +103,7 @@ public extension LocalTextureFileRepository {
         id: UUID
     ) async throws -> Bool {
         guard
-            !fileManager.fileExists(atPath: workingDirectoryURL.appendingPathComponent(id.uuidString).path)
+            !fileManager.fileExists(atPath: localTextureDirectoryURL.appendingPathComponent(id.uuidString).path)
         else {
             Logger.info("File already exists")
             return false
@@ -139,7 +136,7 @@ public extension LocalTextureFileRepository {
             throw error
         }
 
-        let destinationUrl = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let destinationUrl = localTextureDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
             let newTexture: MTLTexture = try TextureBytes.makeTexture(
@@ -186,7 +183,7 @@ public extension LocalTextureFileRepository {
         let fileManager = fileManager
         let sources: [TextureSource] = try await withThrowingTaskGroup(of: TextureSource.self) { group in
             for id in ids {
-                let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+                let url = localTextureDirectoryURL.appendingPathComponent(id.uuidString)
 
                 group.addTask {
                     guard
@@ -238,15 +235,15 @@ public extension LocalTextureFileRepository {
     }
 
     func removeAll() throws {
-        if fileManager.fileExists(atPath: workingDirectoryURL.path) {
-            try fileManager.removeItem(at: workingDirectoryURL)
+        if fileManager.fileExists(atPath: localTextureDirectoryURL.path) {
+            try fileManager.removeItem(at: localTextureDirectoryURL)
         }
-        try fileManager.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: localTextureDirectoryURL, withIntermediateDirectories: true)
     }
 
     @discardableResult
     func removeTexture(_ id: UUID) throws -> Bool {
-        let fileURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let fileURL = localTextureDirectoryURL.appendingPathComponent(id.uuidString)
 
         guard
             fileManager.fileExists(atPath: fileURL.path)
@@ -264,7 +261,7 @@ public extension LocalTextureFileRepository {
         id: UUID,
         to destinationURL: URL
     ) async throws -> Bool {
-        let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let sourceURL = localTextureDirectoryURL.appendingPathComponent(id.uuidString)
         let destinationFileURL = destinationURL.appendingPathComponent(id.uuidString)
 
         guard fileManager.fileExists(atPath: sourceURL.path) else {
@@ -285,7 +282,7 @@ public extension LocalTextureFileRepository {
         id: UUID,
         data: Data
     ) async throws {
-        let url = workingDirectoryURL.appendingPathComponent(id.uuidString)
+        let url = localTextureDirectoryURL.appendingPathComponent(id.uuidString)
 
         let fileManager = fileManager
         try await Task.detached(priority: .utility) { [data, url, fileManager] in
@@ -306,8 +303,8 @@ private extension LocalTextureFileRepository {
     func replaceWorkingStorageAfterStaging(
         prepareStaging: (URL) throws -> Void
     ) throws {
-        let stagingURL = workingDirectoryURL.temporaryUniqueURL()
-        let backupURL = workingDirectoryURL.temporaryUniqueURL()
+        let stagingURL = localTextureDirectoryURL.temporaryUniqueURL()
+        let backupURL = localTextureDirectoryURL.temporaryUniqueURL()
 
         try fileManager.createDirectory(at: stagingURL, withIntermediateDirectories: true)
         defer {
@@ -318,24 +315,24 @@ private extension LocalTextureFileRepository {
         // Prepare staging via the caller.
         try prepareStaging(stagingURL)
 
-        // Move the working directory to the backup directory.
-        try fileManager.moveItem(at: workingDirectoryURL, to: backupURL)
+        // Move the local texture directory to the backup directory.
+        try fileManager.moveItem(at: localTextureDirectoryURL, to: backupURL)
 
         do {
-            // Move the staging directory to the working directory path.
-            try fileManager.moveItem(at: stagingURL, to: workingDirectoryURL)
+            // Move the staging directory to the local texture directory path.
+            try fileManager.moveItem(at: stagingURL, to: localTextureDirectoryURL)
         } catch {
-            // Move the backup directory back to the working directory path.
+            // Move the backup directory back to the local texture directory path.
             if fileManager.fileExists(atPath: backupURL.path),
-               !fileManager.fileExists(atPath: workingDirectoryURL.path) {
-                try? fileManager.moveItem(at: backupURL, to: workingDirectoryURL)
+               !fileManager.fileExists(atPath: localTextureDirectoryURL.path) {
+                try? fileManager.moveItem(at: backupURL, to: localTextureDirectoryURL)
             }
             throw error
         }
 
         // The swapped-in directory is a new folder, so the backup exclusion has to be set again.
         // Failure here must not undo a completed swap.
-        try? excludeFromBackup(workingDirectoryURL)
+        try? excludeFromBackup(localTextureDirectoryURL)
     }
 
     func copyLayerTextures(
@@ -351,12 +348,25 @@ private extension LocalTextureFileRepository {
         }
     }
 
-    func loadTexturesIfValid(
+    /// Confirms each id has a pixel file matching `textureSize`. Does not create GPU textures.
+    func validateTextureFiles(
         from directoryURL: URL,
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) throws {
+        let width = Int(textureSize.width)
+        let height = Int(textureSize.height)
+        guard width >= textureMinimumLength, height >= textureMinimumLength else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(
+                    localized: "Texture size is below the minimum: \(textureSize.width) \(textureSize.height)"
+                )
+            )
+            Logger.error(error)
+            throw error
+        }
+
         let fileURLs = try fileManager.contentsOfDirectory(
             at: directoryURL,
             includingPropertiesForKeys: nil
@@ -372,6 +382,8 @@ private extension LocalTextureFileRepository {
             Logger.error(error)
             throw error
         }
+
+        let expectedByteCount = width * height * TextureBytes.bytesPerPixel
 
         try ids.forEach { id in
             let filePath = directoryURL.appendingPathComponent(id.uuidString).path
@@ -393,12 +405,14 @@ private extension LocalTextureFileRepository {
                 throw error
             }
 
-            let _ = try TextureBytes.makeTexture(
-                width: Int(textureSize.width),
-                height: Int(textureSize.height),
-                from: [UInt8](textureData),
-                with: device
-            )
+            guard textureData.count == expectedByteCount else {
+                let error = NSError(
+                    title: String(localized: "Error"),
+                    message: String(localized: "Invalid value")
+                )
+                Logger.error(error)
+                throw error
+            }
         }
     }
 
@@ -444,6 +458,8 @@ private func writeDataAtomically(
 }
 
 private enum TextureBytes {
+    static let bytesPerPixel = 4
+
     static func loadHexadecimalData(
         from url: URL,
         fileManager: FileManaging
@@ -504,8 +520,6 @@ private enum TextureBytes {
         from colorArray: [UInt8],
         with device: MTLDevice
     ) throws -> MTLTexture {
-        let bytesPerPixel = 4
-
         guard colorArray.count == width * height * bytesPerPixel else {
             let error = NSError(
                 title: String(localized: "Error"),

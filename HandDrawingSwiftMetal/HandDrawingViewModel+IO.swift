@@ -50,10 +50,10 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] workingDirectoryURL in
+        try await documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] temporaryDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
-                    to: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
+                    to: temporaryDirectoryURL.appendingPathComponent(self.thumbnailFileName)
                 )
             } catch {
                 throw NSError(
@@ -73,7 +73,7 @@ extension HandDrawingViewModel {
                 for layer in textureLayers.layers {
                     try await dependencies.localTextureFileRepository.copyTexture(
                         id: layer.id,
-                        to: workingDirectoryURL
+                        to: temporaryDirectoryURL
                     )
                 }
             } catch {
@@ -84,7 +84,7 @@ extension HandDrawingViewModel {
             }
 
             do {
-                try textureLayers.write(in: workingDirectoryURL)
+                try textureLayers.write(in: temporaryDirectoryURL)
             } catch {
                 throw NSError(
                     title: String(localized: "Error"),
@@ -92,22 +92,21 @@ extension HandDrawingViewModel {
                 )
             }
 
-            try content.drawingTool?.write(in: workingDirectoryURL)
-            try content.brushPalette?.write(in: workingDirectoryURL)
-            try content.eraserPalette?.write(in: workingDirectoryURL)
+            try content.drawingTool?.write(in: temporaryDirectoryURL)
+            try content.brushPalette?.write(in: temporaryDirectoryURL)
+            try content.eraserPalette?.write(in: temporaryDirectoryURL)
             try ProjectSnapshot(
                 createdAt: projectCreatedAt ?? content.project.createdAt,
                 updatedAt: projectUpdatedAt ?? content.project.updatedAt
-            ).write(in: workingDirectoryURL)
+            ).write(in: temporaryDirectoryURL)
         }
     }
 
     func readProject(
-        device: MTLDevice,
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-            let newTextureLayers = try TextureLayersSnapshot(in: workingDirectoryURL)
+        try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
+            let newTextureLayers = try TextureLayersSnapshot(in: temporaryDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(
                     title: String(localized: "Error"),
@@ -118,19 +117,18 @@ extension HandDrawingViewModel {
             }
 
             try await dependencies.localTextureFileRepository.restoreStorage(
-                from: workingDirectoryURL,
+                from: temporaryDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
-                textureSize: newTextureLayers.textureSize,
-                device: device
+                textureSize: newTextureLayers.textureSize
             )
 
             return ProjectContent(
                 thumbnail: nil,
                 textureLayers: newTextureLayers,
-                project: try .init(in: workingDirectoryURL),
-                drawingTool: try? .init(in: workingDirectoryURL),
-                brushPalette: try? .init(in: workingDirectoryURL),
-                eraserPalette: try? .init(in: workingDirectoryURL)
+                project: try .init(in: temporaryDirectoryURL),
+                drawingTool: try? .init(in: temporaryDirectoryURL),
+                brushPalette: try? .init(in: temporaryDirectoryURL),
+                eraserPalette: try? .init(in: temporaryDirectoryURL)
             )
         }
     }

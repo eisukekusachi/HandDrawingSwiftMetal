@@ -166,7 +166,7 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                let textureSize = try await viewModel.loadTexturesFromDocuments(
+                let textureSize = try await viewModel.setupTextureLayers(
                     device: sharedDevice,
                     fallbackTextureSize: configuration.canvasConfiguration.textureSize,
                     commandQueue: canvasView.sharedCommandQueue
