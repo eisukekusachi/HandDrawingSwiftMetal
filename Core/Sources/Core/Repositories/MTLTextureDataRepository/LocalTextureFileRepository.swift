@@ -303,19 +303,11 @@ private extension LocalTextureFileRepository {
         try url.setResourceValues(resourceValues)
     }
 
-    func siblingDirectoryURL(prefix: String) -> URL {
-        workingDirectoryURL
-            .deletingLastPathComponent()
-            .appendingPathComponent(
-                "\(workingDirectoryURL.lastPathComponent)-\(prefix)-\(UUID().uuidString)"
-            )
-    }
-
     func replaceWorkingStorageAfterStaging(
         prepareStaging: (URL) throws -> Void
     ) throws {
-        let stagingURL = siblingDirectoryURL(prefix: "staging")
-        let backupURL = siblingDirectoryURL(prefix: "backup")
+        let stagingURL = workingDirectoryURL.temporaryUniqueURL()
+        let backupURL = workingDirectoryURL.temporaryUniqueURL()
 
         try fileManager.createDirectory(at: stagingURL, withIntermediateDirectories: true)
         defer {

@@ -32,6 +32,12 @@ public extension URL {
         deletingPathExtension().lastPathComponent
     }
 
+    /// A unique temporary URL in the same directory: `tmp-{uuid}`.
+    func temporaryUniqueURL(uuid: UUID = UUID()) -> URL {
+        deletingLastPathComponent()
+            .appendingPathComponent("tmp-\(uuid.uuidString)")
+    }
+
     func allFileURLs(suffix: String = "") -> [URL] {
         do {
             let urls = try FileManager.default.contentsOfDirectory(
