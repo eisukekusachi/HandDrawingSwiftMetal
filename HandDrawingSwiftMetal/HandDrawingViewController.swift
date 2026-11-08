@@ -181,11 +181,7 @@ class HandDrawingViewController: UIViewController {
 
                 await viewModel.updateThumbnails(device: sharedDevice)
 
-                await viewModel.setupFileList(
-                    from: URL.documents.allFileURLs(
-                        suffix: viewModel.fileList.fileSuffix
-                    )
-                )
+                await viewModel.setupFileListFromDocumentsDirectory()
 
                 showActivityIndicator(false)
                 showContentView(true)

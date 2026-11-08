@@ -14,8 +14,18 @@ extension HandDrawingViewModel {
         return item.fileURL == fileURL(projectName: project.currentProjectName)
     }
 
-    /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
-    func setupFileList(from fileURLs: [URL]) async {
+    /// Scans the injected Documents directory and builds the file list.
+    func setupFileListFromDocumentsDirectory() async {
+        let fileURLs: [URL]
+        do {
+            fileURLs = try dependencies.fileManager.contentsOfDirectory(
+                at: dependencies.fileManager.documentsDirectory,
+                includingPropertiesForKeys: nil
+            )
+        } catch {
+            Logger.error(error)
+            fileURLs = []
+        }
 
         // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
         await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
