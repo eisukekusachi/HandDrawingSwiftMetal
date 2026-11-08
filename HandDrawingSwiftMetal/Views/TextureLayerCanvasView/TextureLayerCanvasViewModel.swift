@@ -85,14 +85,14 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
         try await canvasRenderer.renderLayersIntoTextures(
             layers: unselectedLayers.topLayers,
-            textureRepository: dependencies.documentsTextureDataRepository,
+            textureRepository: dependencies.localTextureFileRepository,
             on: unselectedTopTexture,
             commandBuffer: commandBuffer
         )
 
         try await canvasRenderer.renderLayersIntoTextures(
             layers: unselectedLayers.bottomLayers,
-            textureRepository: dependencies.documentsTextureDataRepository,
+            textureRepository: dependencies.localTextureFileRepository,
             on: unselectedBottomTexture,
             commandBuffer: commandBuffer
         )
@@ -125,31 +125,31 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
 extension TextureLayerCanvasViewModel {
 
-    func duplicateTextureFromDocumentsDirectory(
+    func duplicatedTexture(
         _ id: UUID
     ) async throws -> MTLTexture? {
-        try await dependencies.documentsTextureDataRepository.duplicatedTexture(
+        try await dependencies.localTextureFileRepository.duplicatedTexture(
             id,
             textureSize: textureSize,
             device: dependencies.renderer.device
         )
     }
 
-    func duplicateTexturesFromDocumentsDirectory(
+    func duplicatedTextures(
         _ ids: [UUID]
     ) async throws -> [(UUID, MTLTexture)] {
-        try await dependencies.documentsTextureDataRepository.duplicatedTextures(
+        try await dependencies.localTextureFileRepository.duplicatedTextures(
             ids,
             textureSize: textureSize,
             device: dependencies.renderer.device
         )
     }
 
-    func saveTextureToDocumentsDirectory(
+    func saveTextureToLocal(
         layerId: UUID,
         textureData: Data
     ) async throws {
-        try await dependencies.documentsTextureDataRepository.writeDataToDisk(
+        try await dependencies.localTextureFileRepository.writeDataToDisk(
             id: layerId,
             data: textureData
         )

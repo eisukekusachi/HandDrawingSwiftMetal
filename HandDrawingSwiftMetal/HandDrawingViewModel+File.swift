@@ -11,30 +11,45 @@ import UIKit
 extension HandDrawingViewModel {
     func isOpenFile(at index: Int) -> Bool {
         guard let item = fileList.item(index) else { return false }
-        return item.fileURL == zipFileURL(projectName: project.currentProjectName)
+        return item.fileURL == fileURL(projectName: project.currentProjectName)
     }
 
-    /// Builds the file list from the given project zip URLs (typically every `.zip` under Documents).
-    func setupFileList(from fileURLs: [URL]) async throws {
+    /// Scans the injected Documents directory and builds the file list.
+    func setupFileListFromDocumentsDirectory() async {
+        let fileURLs: [URL]
+        do {
+            fileURLs = try dependencies.fileManager.contentsOfDirectory(
+                at: dependencies.fileManager.documentsDirectory,
+                includingPropertiesForKeys: nil
+            )
+        } catch {
+            Logger.error(error)
+            fileURLs = []
+        }
 
         // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
-        try await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
+        await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
 
-            // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-            return try await documentsDataStore.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
-                let thumbnailData = try? Data(
-                    contentsOf: workingDirectoryURL.appendingPathComponent(
-                        self.thumbnailFileName
+            do {
+                // Unzip once to read project metadata and the list thumbnail (not the layer textures).
+                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
+                    let thumbnailData = try? Data(
+                        contentsOf: workingDirectoryURL.appendingPathComponent(
+                            self.thumbnailFileName
+                        )
                     )
-                )
-                return .init(
-                    createdAt: projectMetaData.createdAt,
-                    updatedAt: projectMetaData.updatedAt,
-                    thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
-                    fileURL: zipFileURL
-                )
+                    return .init(
+                        createdAt: projectMetaData.createdAt,
+                        updatedAt: projectMetaData.updatedAt,
+                        thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
+                        fileURL: zipFileURL
+                    )
+                }
+            } catch {
+                Logger.error(error)
+                return nil
             }
         }
     }
@@ -71,7 +86,7 @@ extension HandDrawingViewModel {
             )
         }
 
-        try documentsDataStore.removeFile(at: item.fileURL)
+        try documentsProjectFileStorage.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
     }
 
@@ -113,9 +128,11 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        let newFileURL = try documentsDataStore.uniqueZipFileURL(
-            fileName: normalizedName,
-            suffix: fileList.fileSuffix,
+        let newFileURL = try URL.uniqueFileURL(
+            name: normalizedName,
+            in: dependencies.fileManager.documentsDirectory,
+            fileSuffix: fileList.fileSuffix,
+            fileExists: { dependencies.fileManager.fileExists(atPath: $0.path) },
             excludeURL: oldFileURL
         )
         let uniqueName = newFileURL.baseName
@@ -123,9 +140,9 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        try documentsDataStore.renameFile(at: oldFileURL, to: newFileURL)
+        try documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
 
-        if oldFileURL == zipFileURL(projectName: project.currentProjectName) {
+        if oldFileURL == fileURL(projectName: project.currentProjectName) {
             project.update(
                 projectName: uniqueName,
                 updatedAt: Date()
@@ -157,10 +174,19 @@ extension HandDrawingViewModel {
         )
 
         project.update(updatedAt: updatedAt)
-        fileList.update(currentFileItem(thumbnail: thumbnail))
+        upsertFile(thumbnail: thumbnail)
         fileList.sortItems()
 
         showToast(.success)
+    }
+
+    func upsertFile(thumbnail: UIImage?) {
+        let item = currentFileItem(thumbnail: thumbnail)
+        if fileList.index(title: item.title) != nil {
+            fileList.update(item)
+        } else {
+            fileList.append(item)
+        }
     }
 }
 
@@ -198,7 +224,7 @@ private extension HandDrawingViewModel {
 
 extension HandDrawingViewModel {
     func updateThumbnails(device: MTLDevice) async {
-        let textures = try? await dependencies.documentsTextureDataRepository.duplicatedTextures(
+        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
             undoableTextureLayers.layers.map { $0.id },
             textureSize: undoableTextureLayers.textureSize,
             device: device

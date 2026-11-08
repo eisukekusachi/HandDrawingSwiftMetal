@@ -8,9 +8,9 @@ import Metal
 import Testing
 @testable import Core
 
-struct DocumentsTextureDataRepositoryTests {
+struct LocalTextureFileRepositoryTests {
 
-    private typealias Subject = DocumentsTextureDataRepository
+    private typealias Subject = LocalTextureFileRepository
 
     private let textureSize = TestUtils.randomSize()
 
@@ -18,7 +18,7 @@ struct DocumentsTextureDataRepositoryTests {
     func `When source layer files are valid, it replaces TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("DocumentsTextureDataRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
         let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
         let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
@@ -58,7 +58,7 @@ struct DocumentsTextureDataRepositoryTests {
     func `When source layer files are missing, it keeps the current TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("DocumentsTextureDataRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
         let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
         let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
@@ -96,7 +96,7 @@ struct DocumentsTextureDataRepositoryTests {
     func `When a source layer file is empty, it keeps the current TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("DocumentsTextureDataRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
         let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
         let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
@@ -139,7 +139,7 @@ struct DocumentsTextureDataRepositoryTests {
     func `When copying layer files fails, it keeps the current TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("DocumentsTextureDataRepositoryTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
         let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
         let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
         try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
@@ -175,7 +175,7 @@ struct DocumentsTextureDataRepositoryTests {
     }
 }
 
-extension DocumentsTextureDataRepositoryTests {
+extension LocalTextureFileRepositoryTests {
 
     private func makeDevice() throws -> MTLDevice {
         try #require(MTLCreateSystemDefaultDevice())

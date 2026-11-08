@@ -2,20 +2,22 @@
 //  Created by Eisuke Kusachi
 //
 
-import CoreData
+@preconcurrency import CoreData
 import Foundation
 
 /// Core Data storage for one model (`.xcdatamodeld`).
-final class CoreDataStorage {
+public final class CoreDataStorage {
 
-    var viewContext: NSManagedObjectContext { container.viewContext }
+    public var viewContext: NSManagedObjectContext { container.viewContext }
 
     private let container: NSPersistentContainer
 
     /// Core Data stack backed by **SQLite on disk** (default for the app).
-    init(xcdatamodeldName: String, excludeFromBackup: Bool = true) {
-        let bundle: Bundle = .main
-
+    public init(
+        xcdatamodeldName: String,
+        bundle: Bundle = .main,
+        excludeFromBackup: Bool = true
+    ) {
         guard
             let modelURL = bundle.url(forResource: xcdatamodeldName, withExtension: "momd"),
             let model = NSManagedObjectModel(contentsOf: modelURL)
@@ -37,7 +39,7 @@ final class CoreDataStorage {
     }
 
     /// Core Data stack backed by **in-memory store** (discarded on `deinit`).
-    init(inMemory xcdatamodeldName: String, bundle: Bundle = .main) {
+    public init(inMemory xcdatamodeldName: String, bundle: Bundle = .main) {
         guard
             let modelURL = bundle.url(forResource: xcdatamodeldName, withExtension: "momd"),
             let model = NSManagedObjectModel(contentsOf: modelURL)
@@ -90,9 +92,9 @@ final class CoreDataStorage {
 // MARK: - Root entity fetch / clear
 
 @MainActor
-enum CoreDataRootEntityStore {
+public enum CoreDataRootEntityStore {
     /// Resolves the entity name from this context's model (not `Entity.entity()`, which breaks with multiple stacks).
-    static func entityName<Entity: NSManagedObject>(
+    public static func entityName<Entity: NSManagedObject>(
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) -> String? {
@@ -112,7 +114,7 @@ enum CoreDataRootEntityStore {
         }?.name
     }
 
-    static func fetchRequest<Entity: NSManagedObject>(
+    public static func fetchRequest<Entity: NSManagedObject>(
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) -> NSFetchRequest<Entity>? {
@@ -124,7 +126,7 @@ enum CoreDataRootEntityStore {
         return request
     }
 
-    static func fetch<Entity: NSManagedObject>(
+    public static func fetch<Entity: NSManagedObject>(
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) throws -> Entity? {
@@ -132,7 +134,7 @@ enum CoreDataRootEntityStore {
         return try context.fetch(request).first
     }
 
-    static func clearAll<Entity: NSManagedObject>(
+    public static func clearAll<Entity: NSManagedObject>(
         for entityType: Entity.Type,
         in context: NSManagedObjectContext
     ) throws {

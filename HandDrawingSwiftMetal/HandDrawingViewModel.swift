@@ -33,14 +33,15 @@ final class HandDrawingViewModel: ObservableObject {
             createdAt: project.createdAt,
             updatedAt: project.updatedAt,
             thumbnail: thumbnail,
-            fileURL: zipFileURL(projectName: project.currentProjectName)
+            fileURL: fileURL(projectName: project.currentProjectName)
         )
     }
 
-    func zipFileURL(projectName: String) -> URL {
-        documentsDataStore.zipFileURL(
-            projectName: projectName,
-            suffix: fileList.fileSuffix
+    func fileURL(projectName: String) -> URL {
+        URL.fileURL(
+            in: dependencies.fileManager.documentsDirectory,
+            name: projectName,
+            fileSuffix: fileList.fileSuffix
         )
     }
 
@@ -63,7 +64,8 @@ final class HandDrawingViewModel: ObservableObject {
     /// Updates the canvas and drawing components.
     private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
 
-    let documentsDataStore: DocumentsDataStore
+    /// Zip-based project file I/O in Documents (save, open, delete, rename).
+    let documentsProjectFileStorage: DocumentsProjectFileStorage
 
     let dependencies: HandDrawingViewDependencies
 
@@ -71,15 +73,15 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsDataStore: DocumentsDataStore? = nil,
+        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsDataStore = documentsDataStore ?? .init(fileManager: dependencies.fileManager)
-        self.undoableTextureLayers = .init(repository: dependencies.documentsTextureDataRepository)
+        self.documentsProjectFileStorage = documentsProjectFileStorage ?? .init(fileManager: dependencies.fileManager)
+        self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange
             .sink { [weak self] _ in
@@ -122,7 +124,7 @@ extension HandDrawingViewModel {
         )
 
         project.update(updatedAt: Date())
-        fileList.update(currentFileItem(thumbnail: nil))
+        upsertFile(thumbnail: nil)
         fileList.sortItems()
 
         try await onCanvasUpdate?()
@@ -137,7 +139,7 @@ extension HandDrawingViewModel {
             let snapshot = TextureLayersSnapshot(entity: entity)
             do {
                 // Load MTLTextures from the documents directory.
-                try dependencies.documentsTextureDataRepository.restoreTextures(
+                try dependencies.localTextureFileRepository.restoreTextures(
                     ids: snapshot.layers.map(\.id),
                     textureSize: snapshot.textureSize,
                     device: device
@@ -190,7 +192,7 @@ extension HandDrawingViewModel {
             isVisible: true
         )
         // Blank pixel buffer for the layer in the documents directory.
-        try await dependencies.documentsTextureDataRepository.initializeTexture(
+        try await dependencies.localTextureFileRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
             device: device,

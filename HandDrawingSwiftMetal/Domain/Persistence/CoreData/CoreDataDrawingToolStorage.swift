@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
 @preconcurrency import CoreData
 
 /// Core Data read/write for drawing tool settings.
@@ -20,6 +21,14 @@ final class CoreDataDrawingToolStorage {
 
     func clearAll() throws {
         try CoreDataRootEntityStore.clearAll(for: DrawingToolEntity.self, in: context)
+    }
+
+    func load(into drawingTool: DrawingTool) throws {
+        guard let entity = try fetch() else { return }
+        drawingTool.setId(entity.id ?? UUID())
+        drawingTool.type = DrawingToolType(rawValue: Int(entity.type))
+        drawingTool.brushDiameter = Int(entity.brushDiameter)
+        drawingTool.eraserDiameter = Int(entity.eraserDiameter)
     }
 
     func save(from drawingTool: DrawingTool) async {

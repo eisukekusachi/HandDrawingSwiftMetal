@@ -7,26 +7,13 @@ import Foundation
 
 @preconcurrency import MetalKit
 
-/// Stores `MTLTexture` data in a `Documents` directory, keyed by id.
-public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProtocol {
-
-    @MainActor
-    public static let shared = {
-        do {
-            return try DocumentsTextureDataRepository(
-                storageDirectoryURL: URL.applicationSupport,
-                directoryName: "TextureStorage",
-                fileManager: FileManagerWrapper()
-            )
-        } catch {
-            fatalError("Failed to initialize DocumentsTextureDataRepository: \(error)")
-        }
-    }()
+/// Stores layer texture data as files on local disk, keyed by id.
+public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol {
 
     private let fileManager: FileManaging
     private let workingDirectoryURL: URL
 
-    init(
+    public init(
         storageDirectoryURL: URL,
         directoryName: String,
         fileManager: FileManaging = FileManagerWrapper()
@@ -111,7 +98,7 @@ public final class DocumentsTextureDataRepository: MTLTextureDataRepositoryProto
     }
 }
 
-public extension DocumentsTextureDataRepository {
+public extension LocalTextureFileRepository {
 
     @discardableResult
     func addTextureData(
@@ -280,11 +267,13 @@ public extension DocumentsTextureDataRepository {
         let sourceURL = workingDirectoryURL.appendingPathComponent(id.uuidString)
         let destinationFileURL = destinationURL.appendingPathComponent(id.uuidString)
 
-        guard
-            fileManager.fileExists(atPath: sourceURL.path)
-        else {
-            Logger.info("Unable to find \(id.uuidString)")
-            return false
+        guard fileManager.fileExists(atPath: sourceURL.path) else {
+            let error = NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "File not found: \(sourceURL.path)")
+            )
+            Logger.error(error)
+            throw error
         }
 
         try fileManager.copyItem(at: sourceURL, to: destinationFileURL)
@@ -305,7 +294,7 @@ public extension DocumentsTextureDataRepository {
     }
 }
 
-private extension DocumentsTextureDataRepository {
+private extension LocalTextureFileRepository {
 
     func excludeFromBackup(_ directoryURL: URL) throws {
         var url = directoryURL
