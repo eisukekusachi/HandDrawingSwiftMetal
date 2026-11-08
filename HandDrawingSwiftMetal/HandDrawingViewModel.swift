@@ -132,12 +132,10 @@ extension HandDrawingViewModel {
 
     /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
     /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
-    func setupTextureLayers() throws -> CGSize {
+    /// Returns `nil` when there is no previous session metadata.
+    func setupTextureLayers() throws -> CGSize? {
         guard let entity = try dependencies.textureLayerStorage.fetch() else {
-            throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to find texture layer files")
-            )
+            return nil
         }
         let snapshot = TextureLayersSnapshot(entity: entity)
         try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(

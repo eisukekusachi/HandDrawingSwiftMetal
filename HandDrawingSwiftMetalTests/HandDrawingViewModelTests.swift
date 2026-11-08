@@ -53,7 +53,7 @@ struct HandDrawingViewModelTests {
         }
 
         @Test
-        func `When Core Data has no layer metadata, it throws`() throws {
+        func `When Core Data has no layer metadata, it returns nil`() throws {
             let textureRepository = TextureRepositoryStub()
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
 
@@ -64,9 +64,7 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            #expect(throws: (any Error).self) {
-                try subject.setupTextureLayers()
-            }
+            #expect(try subject.setupTextureLayers() == nil)
             #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.isEmpty)
         }
 
