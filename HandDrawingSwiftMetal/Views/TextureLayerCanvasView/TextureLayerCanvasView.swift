@@ -98,7 +98,7 @@ import TextureLayerView
     public func updateFullCanvas() async throws {
         guard
             let selectedLayer = dependencies.textureLayers.selectedLayer,
-            let currentTexture = try await viewModel.duplicateTextureFromDocumentsDirectory(
+            let currentTexture = try await viewModel.duplicatedTexture(
                 selectedLayer.id
             ),
             let newCommandBuffer = renderer.newCommandBuffer

@@ -125,7 +125,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
 
 extension TextureLayerCanvasViewModel {
 
-    func duplicateTextureFromDocumentsDirectory(
+    func duplicatedTexture(
         _ id: UUID
     ) async throws -> MTLTexture? {
         try await dependencies.localTextureFileRepository.duplicatedTexture(
@@ -135,7 +135,7 @@ extension TextureLayerCanvasViewModel {
         )
     }
 
-    func duplicateTexturesFromDocumentsDirectory(
+    func duplicatedTextures(
         _ ids: [UUID]
     ) async throws -> [(UUID, MTLTexture)] {
         try await dependencies.localTextureFileRepository.duplicatedTextures(
