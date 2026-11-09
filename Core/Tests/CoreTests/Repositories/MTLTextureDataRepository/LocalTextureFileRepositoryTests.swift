@@ -148,14 +148,7 @@ struct LocalTextureFileRepositoryTests {
             )
 
             try writeLayer(id: existingLayerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
-            guard fileManager.createFile(
-                atPath: invalidLayerURL.path,
-                contents: Data(repeating: 0, count: 4),
-                attributes: nil
-            ) else {
-                Issue.record("Failed to create invalid layer file")
-                return
-            }
+            try writeLayer(id: invalidLayerId, byteCount: 4, in: sourceURL, fileManager: fileManager)
             fileManager.setContentsOfDirectory([invalidLayerURL], at: sourceURL)
 
             await #expect(throws: NSError.self) {
@@ -225,13 +218,7 @@ struct LocalTextureFileRepositoryTests {
                 fileManager: fileManager
             )
             try writeLayer(id: existingLayerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
-            guard fileManager.createFile(
-                atPath: invalidLayerURL.path,
-                contents: Data(repeating: 0, count: 4),
-                attributes: nil
-            ) else {
-                throw CocoaError(.fileWriteUnknown)
-            }
+            try writeLayer(id: invalidLayerId, byteCount: 4, in: storageURL, fileManager: fileManager)
 
             #expect(throws: NSError.self) {
                 try subject.validateTextureFilesInLocalDirectory(
@@ -262,9 +249,26 @@ private func writeLayer(
 ) throws {
     let width = Int(textureSize.width)
     let height = Int(textureSize.height)
-    let data = Data(repeating: 0, count: width * height * 4)
+    try writeLayer(
+        id: id,
+        byteCount: width * height * 4,
+        in: directoryURL,
+        fileManager: fileManager
+    )
+}
+
+private func writeLayer(
+    id: UUID,
+    byteCount: Int,
+    in directoryURL: URL,
+    fileManager: MockFileManager
+) throws {
     let fileURL = directoryURL.appendingPathComponent(id.uuidString)
-    guard fileManager.createFile(atPath: fileURL.path, contents: data, attributes: nil) else {
+    guard fileManager.createFile(
+        atPath: fileURL.path,
+        contents: Data(repeating: 0, count: byteCount),
+        attributes: nil
+    ) else {
         throw CocoaError(.fileWriteUnknown)
     }
 }
