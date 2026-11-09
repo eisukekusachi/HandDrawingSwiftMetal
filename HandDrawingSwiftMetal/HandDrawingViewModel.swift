@@ -177,7 +177,7 @@ extension HandDrawingViewModel {
             alpha: 255,
             isVisible: true
         )
-        // Blank pixel buffer for the layer in the documents directory.
+        // Blank pixel buffer for the layer in the local texture directory.
         try await dependencies.localTextureFileRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
