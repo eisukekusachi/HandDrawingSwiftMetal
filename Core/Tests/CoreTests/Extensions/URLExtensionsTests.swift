@@ -38,6 +38,15 @@ struct URLExtensionsTests {
         #expect(URL.fileName(name: "fileName", fileSuffix: "////") == "fileName")
     }
 
+    @Test
+    func `temporaryUniqueURL is tmp-uuid in the same directory`() {
+        let url = URL(fileURLWithPath: "/tmp/TextureStorage")
+        let uuid = UUID()
+        let result = url.temporaryUniqueURL(uuid: uuid)
+
+        #expect(result.path == "/tmp/tmp-\(uuid.uuidString)")
+    }
+
     @Suite
     struct UniqueFileURL {
         @Test

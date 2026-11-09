@@ -10,8 +10,8 @@ import MetalKit
 final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked Sendable {
 
     var removedIds: [UUID] = []
-    var restoreTexturesError: (any Error)?
-    private(set) var restoreTexturesCalls: [(ids: [UUID], textureSize: CGSize)] = []
+    var validateTextureFilesInLocalDirectoryError: (any Error)?
+    private(set) var validateTextureFilesInLocalDirectoryCalls: [(ids: [UUID], textureSize: CGSize)] = []
 
     func initializeTexture(
         id: UUID,
@@ -20,22 +20,20 @@ final class TextureRepositoryStub: MTLTextureDataRepositoryProtocol, @unchecked 
         commandQueue: MTLCommandQueue
     ) async throws {}
 
-    func restoreTextures(
+    func validateTextureFilesInLocalDirectory(
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) throws {
-        restoreTexturesCalls.append((ids, textureSize))
-        if let restoreTexturesError {
-            throw restoreTexturesError
+        validateTextureFilesInLocalDirectoryCalls.append((ids, textureSize))
+        if let validateTextureFilesInLocalDirectoryError {
+            throw validateTextureFilesInLocalDirectoryError
         }
     }
 
     func restoreStorage(
         from sourceFolderURL: URL,
         ids: [UUID],
-        textureSize: CGSize,
-        device: MTLDevice
+        textureSize: CGSize
     ) async throws {}
 
     func duplicatedTexture(

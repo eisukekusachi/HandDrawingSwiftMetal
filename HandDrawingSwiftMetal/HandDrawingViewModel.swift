@@ -130,28 +130,15 @@ extension HandDrawingViewModel {
         try await onCanvasUpdate?()
     }
 
-    func loadTexturesFromDocuments(
-        device: MTLDevice,
+    /// Restores last-session layers, or makes a blank layer when there is no previous session or files are invalid.
+    func setupTextureLayers(
         fallbackTextureSize: CGSize,
+        device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
-        if let entity = try? dependencies.textureLayerStorage.fetch() {
-            let snapshot = TextureLayersSnapshot(entity: entity)
-            do {
-                // Load MTLTextures from the documents directory.
-                try dependencies.localTextureFileRepository.restoreTextures(
-                    ids: snapshot.layers.map(\.id),
-                    textureSize: snapshot.textureSize,
-                    device: device
-                )
-                undoableTextureLayers.setLayers(snapshot)
-                return snapshot.textureSize
-            } catch {
-                // Pixel files missing or invalid. Discard stale Core Data and fall through to a blank layer.
-                try? dependencies.textureLayerStorage.clearAll()
-            }
+        if let textureSize = try? setupTextureLayersFromCoreData() {
+            return textureSize
         }
-
         try await makeBlankLayer(
             textureSize: fallbackTextureSize,
             device: device,
@@ -191,7 +178,7 @@ extension HandDrawingViewModel {
             alpha: 255,
             isVisible: true
         )
-        // Blank pixel buffer for the layer in the documents directory.
+        // Blank pixel buffer for the layer in the local texture directory.
         try await dependencies.localTextureFileRepository.initializeTexture(
             id: layer.id,
             textureSize: textureSize,
@@ -223,6 +210,22 @@ extension HandDrawingViewModel {
 }
 
 private extension HandDrawingViewModel {
+
+    /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
+    /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
+    /// Returns `nil` when there is no previous session metadata.
+    func setupTextureLayersFromCoreData() throws -> CGSize? {
+        guard let entity = try dependencies.textureLayerStorage.fetch() else {
+            return nil
+        }
+        let snapshot = TextureLayersSnapshot(entity: entity)
+        try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
+            ids: snapshot.layers.map(\.id),
+            textureSize: snapshot.textureSize
+        )
+        undoableTextureLayers.setLayers(snapshot)
+        return snapshot.textureSize
+    }
 
     /// Subscribes to domain model changes and debounces writes to `CoreData*Storage`.
     func bindCoreDataPersistence() {

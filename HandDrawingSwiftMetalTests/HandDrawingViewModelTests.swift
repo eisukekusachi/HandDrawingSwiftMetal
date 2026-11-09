@@ -17,7 +17,7 @@ struct HandDrawingViewModelTests {
     private typealias Subject = HandDrawingViewModel
 
     @MainActor
-    struct LoadTexturesFromDocuments {
+    struct SetupTextureLayers {
 
         private let layer0: TextureLayerModel = .generate(title: "layer0")
         private let layer1: TextureLayerModel = .generate(title: "layer1")
@@ -41,9 +41,9 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            let size = try await subject.loadTexturesFromDocuments(
-                device: device,
+            let size = try await subject.setupTextureLayers(
                 fallbackTextureSize: fallbackTextureSize,
+                device: device,
                 commandQueue: commandQueue
             )
 
@@ -53,9 +53,9 @@ struct HandDrawingViewModelTests {
             #expect(subject.undoableTextureLayers.layerModels.count == 2)
             #expect(subject.undoableTextureLayers.layerModels.map(\.id) == [layer0.id, layer1.id])
             #expect(subject.undoableTextureLayers.layerModels.map(\.title) == ["layer0", "layer1"])
-            #expect(textureRepository.restoreTexturesCalls.count == 1)
-            #expect(textureRepository.restoreTexturesCalls.first?.ids == [layer0.id, layer1.id])
-            #expect(textureRepository.restoreTexturesCalls.first?.textureSize == savedTextureSize)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.count == 1)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.first?.ids == [layer0.id, layer1.id])
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.first?.textureSize == savedTextureSize)
         }
 
         @Test
@@ -72,9 +72,9 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            let size = try await subject.loadTexturesFromDocuments(
-                device: device,
+            let size = try await subject.setupTextureLayers(
                 fallbackTextureSize: fallbackTextureSize,
+                device: device,
                 commandQueue: commandQueue
             )
 
@@ -82,11 +82,11 @@ struct HandDrawingViewModelTests {
             #expect(size == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.layerModels.count == 1)
-            #expect(textureRepository.restoreTexturesCalls.isEmpty)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.isEmpty)
         }
 
         @Test
-        func `When pixel restore fails, it clears stale Core Data and installs a blank layer`() async throws {
+        func `When pixel files are invalid, it installs a blank layer`() async throws {
             let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
             try makeTextureLayerArrayEntityInCoreData(
@@ -95,7 +95,7 @@ struct HandDrawingViewModelTests {
                 textureSize: savedTextureSize
             )
             let textureRepository = TextureRepositoryStub()
-            textureRepository.restoreTexturesError = NSError(domain: "error", code: 1)
+            textureRepository.validateTextureFilesInLocalDirectoryError = NSError(domain: "error", code: 1)
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
@@ -105,24 +105,23 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            let size = try await subject.loadTexturesFromDocuments(
-                device: device,
+            let size = try await subject.setupTextureLayers(
                 fallbackTextureSize: fallbackTextureSize,
+                device: device,
                 commandQueue: commandQueue
             )
 
-            // After failed pixel restore, use fallback size, make one new layer: layer metadata not used.
+            // After failed restore, use fallback size, make one new layer: layer metadata not used.
             #expect(size == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.layerModels.count == 1)
             #expect(subject.undoableTextureLayers.layerModels.map(\.id) != [layer0.id, layer1.id])
-            #expect(textureRepository.restoreTexturesCalls.count == 1)
-            #expect(try subject.dependencies.textureLayerStorage.fetch() == nil)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.count == 1)
         }
     }
 }
 
-extension HandDrawingViewModelTests.LoadTexturesFromDocuments {
+extension HandDrawingViewModelTests.SetupTextureLayers {
 
     /// Test-only `HandDrawingViewDependencies` using in-memory Core Data stacks (no SQLite).
     private func dependencies(

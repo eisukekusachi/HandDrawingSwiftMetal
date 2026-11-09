@@ -74,7 +74,7 @@ extension FileList {
     public func update(_ item: FileItem) {
         guard let index = index(title: item.title) else { return }
 
-        var items = self.items
+        let items = self.items
         items[index].update(
             updatedAt: item.updatedAt,
             thumbnail: .set(item.thumbnail)

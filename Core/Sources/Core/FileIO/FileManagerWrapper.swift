@@ -16,6 +16,7 @@ public protocol FileManaging: Sendable {
     func copyItem(at sourceURL: URL, to destinationURL: URL) throws
     func removeItem(at url: URL) throws
     func contents(atPath path: String) -> Data?
+    func attributesOfItem(atPath path: String) throws -> [FileAttributeKey: Any]
     func createFile(
         atPath path: String,
         contents data: Data?,
@@ -109,6 +110,10 @@ public struct FileManagerWrapper: FileManaging {
 
     public func contents(atPath path: String) -> Data? {
         FileManager.default.contents(atPath: path)
+    }
+
+    public func attributesOfItem(atPath path: String) throws -> [FileAttributeKey: Any] {
+        try FileManager.default.attributesOfItem(atPath: path)
     }
 
     public func createFile(

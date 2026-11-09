@@ -33,10 +33,10 @@ extension HandDrawingViewModel {
 
             do {
                 // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
-                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
+                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
+                    let projectMetaData = try ProjectSnapshot(in: temporaryDirectoryURL)
                     let thumbnailData = try? Data(
-                        contentsOf: workingDirectoryURL.appendingPathComponent(
+                        contentsOf: temporaryDirectoryURL.appendingPathComponent(
                             self.thumbnailFileName
                         )
                     )
@@ -66,7 +66,6 @@ extension HandDrawingViewModel {
             commandQueue: commandQueue
         )
         let loaded = try await readProject(
-            device: device,
             from: zipFileURL
         )
 
@@ -92,11 +91,9 @@ extension HandDrawingViewModel {
 
     /// Restores the canvas from a saved project file.
     func loadFile(
-        device: MTLDevice,
         zipFileURL: URL
     ) async throws {
         let loaded = try await readProject(
-            device: device,
             from: zipFileURL
         )
         apply(loaded, projectName: zipFileURL.baseName)
