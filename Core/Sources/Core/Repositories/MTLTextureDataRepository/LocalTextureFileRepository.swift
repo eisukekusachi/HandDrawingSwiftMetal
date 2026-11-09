@@ -356,6 +356,7 @@ private extension LocalTextureFileRepository {
     ) throws {
         let width = Int(textureSize.width)
         let height = Int(textureSize.height)
+        // Texture size must be at least the minimum drawable length.
         guard width >= textureMinimumLength, height >= textureMinimumLength else {
             let error = NSError(
                 title: String(localized: "Error"),
@@ -371,6 +372,7 @@ private extension LocalTextureFileRepository {
             at: directoryURL,
             includingPropertiesForKeys: nil
         )
+        // Each id must have a pixel file in the directory.
         guard containsAllFileNames(
             fileNames: ids.map(\.uuidString),
             in: fileURLs
@@ -387,7 +389,9 @@ private extension LocalTextureFileRepository {
 
         try ids.forEach { id in
             let filePath = directoryURL.appendingPathComponent(id.uuidString).path
-            guard let textureData = fileManager.contents(atPath: filePath) else {
+            let attributes = try fileManager.attributesOfItem(atPath: filePath)
+            // File size must be readable without loading pixel bytes.
+            guard let fileSize = attributes[.size] as? NSNumber else {
                 let error = NSError(
                     title: String(localized: "Error"),
                     message: String(localized: "Unable to load required data")
@@ -396,16 +400,8 @@ private extension LocalTextureFileRepository {
                 throw error
             }
 
-            guard !textureData.isEmpty else {
-                let error = NSError(
-                    title: String(localized: "Error"),
-                    message: String(localized: "Unable to load required data")
-                )
-                Logger.error(error)
-                throw error
-            }
-
-            guard textureData.count == expectedByteCount else {
+            // File size must match width * height * bytes per pixel.
+            guard fileSize.intValue == expectedByteCount else {
                 let error = NSError(
                     title: String(localized: "Error"),
                     message: String(localized: "Invalid value")

@@ -196,6 +196,18 @@ public final class MockFileManager: FileManaging, @unchecked Sendable {
         return FileManager.default.contents(atPath: path)
     }
 
+    public func attributesOfItem(atPath path: String) throws -> [FileAttributeKey: Any] {
+        lock.lock()
+        let cached = _fileContents[path]
+        lock.unlock()
+
+        if let cached {
+            return [.size: cached.count]
+        }
+
+        return try FileManager.default.attributesOfItem(atPath: path)
+    }
+
     public func createFile(
         atPath path: String,
         contents data: Data?,
