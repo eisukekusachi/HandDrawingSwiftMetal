@@ -136,8 +136,8 @@ extension HandDrawingViewModel {
         device: MTLDevice,
         commandQueue: MTLCommandQueue
     ) async throws -> CGSize {
-        if let restoredTextureSize = try? restoredTextureSize() {
-            return restoredTextureSize
+        if let textureSize = try? setupTextureLayersFromCoreData() {
+            return textureSize
         }
         try await makeBlankLayer(
             textureSize: fallbackTextureSize,
@@ -214,7 +214,7 @@ private extension HandDrawingViewModel {
     /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
     /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
     /// Returns `nil` when there is no previous session metadata.
-    func restoredTextureSize() throws -> CGSize? {
+    func setupTextureLayersFromCoreData() throws -> CGSize? {
         guard let entity = try dependencies.textureLayerStorage.fetch() else {
             return nil
         }
