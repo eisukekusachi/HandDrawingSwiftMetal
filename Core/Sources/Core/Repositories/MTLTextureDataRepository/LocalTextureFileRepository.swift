@@ -85,7 +85,7 @@ public final class LocalTextureFileRepository: MTLTextureDataRepositoryProtocol 
             textureSize: textureSize
         )
 
-        try replaceWorkingStorageAfterStaging { stagingURL in
+        try replaceLocalTextureDirectoryAfterStaging { stagingURL in
             try copyLayerTextures(
                 ids: ids,
                 from: sourceFolderURL,
@@ -300,7 +300,7 @@ private extension LocalTextureFileRepository {
         try url.setResourceValues(resourceValues)
     }
 
-    func replaceWorkingStorageAfterStaging(
+    func replaceLocalTextureDirectoryAfterStaging(
         prepareStaging: (URL) throws -> Void
     ) throws {
         let stagingURL = localTextureDirectoryURL.temporaryUniqueURL()
