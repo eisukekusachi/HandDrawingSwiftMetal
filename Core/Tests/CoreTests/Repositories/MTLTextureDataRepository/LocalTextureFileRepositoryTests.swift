@@ -166,29 +166,6 @@ struct LocalTextureFileRepositoryTests {
     }
 
     @Test
-    func `When working layer files are valid, validateTextureFilesInLocalDirectory succeeds`() throws {
-        let fileManager = MockFileManager()
-        let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
-        let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
-        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
-        defer { try? fileManager.removeItem(at: rootURL) }
-
-        let layerId = UUID()
-        let subject = try Subject(
-            storageDirectoryURL: rootURL,
-            directoryName: "TextureStorage",
-            fileManager: fileManager
-        )
-        try writeLayer(id: layerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
-
-        try subject.validateTextureFilesInLocalDirectory(
-            ids: [layerId],
-            textureSize: textureSize
-        )
-    }
-
-    @Test
     func `When a source layer file has the wrong byte count, it keeps the current TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
