@@ -166,18 +166,11 @@ class HandDrawingViewController: UIViewController {
 
         Task {
             do {
-                let fallbackTextureSize = configuration.canvasConfiguration.textureSize
-                let textureSize: CGSize
-                if let restoredTextureSize = try? viewModel.setupTextureLayers() {
-                    textureSize = restoredTextureSize
-                } else {
-                    try await viewModel.makeBlankLayer(
-                        textureSize: fallbackTextureSize,
-                        device: sharedDevice,
-                        commandQueue: canvasView.sharedCommandQueue
-                    )
-                    textureSize = fallbackTextureSize
-                }
+                let textureSize = try await viewModel.setupTextureLayers(
+                    fallbackTextureSize: configuration.canvasConfiguration.textureSize,
+                    device: sharedDevice,
+                    commandQueue: canvasView.sharedCommandQueue
+                )
 
                 try await initializeCanvas(textureSize)
 

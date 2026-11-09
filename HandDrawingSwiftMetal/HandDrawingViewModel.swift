@@ -130,20 +130,21 @@ extension HandDrawingViewModel {
         try await onCanvasUpdate?()
     }
 
-    /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
-    /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
-    /// Returns `nil` when there is no previous session metadata.
-    func setupTextureLayers() throws -> CGSize? {
-        guard let entity = try dependencies.textureLayerStorage.fetch() else {
-            return nil
+    /// Restores last-session layers, or makes a blank layer when there is no previous session or files are invalid.
+    func setupTextureLayers(
+        fallbackTextureSize: CGSize,
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws -> CGSize {
+        if let restoredTextureSize = try? restoredTextureSize() {
+            return restoredTextureSize
         }
-        let snapshot = TextureLayersSnapshot(entity: entity)
-        try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
-            ids: snapshot.layers.map(\.id),
-            textureSize: snapshot.textureSize
+        try await makeBlankLayer(
+            textureSize: fallbackTextureSize,
+            device: device,
+            commandQueue: commandQueue
         )
-        undoableTextureLayers.setLayers(snapshot)
-        return snapshot.textureSize
+        return fallbackTextureSize
     }
 
     /// Creates blank canvas textures and resets drawing tool / palettes.
@@ -209,6 +210,22 @@ extension HandDrawingViewModel {
 }
 
 private extension HandDrawingViewModel {
+
+    /// Layer pixels from the last session are already in the local texture directory; labels (id, name, order, size) are in Core Data.
+    /// Confirms the files exist and match the texture size, then puts that metadata on the layer list.
+    /// Returns `nil` when there is no previous session metadata.
+    func restoredTextureSize() throws -> CGSize? {
+        guard let entity = try dependencies.textureLayerStorage.fetch() else {
+            return nil
+        }
+        let snapshot = TextureLayersSnapshot(entity: entity)
+        try dependencies.localTextureFileRepository.validateTextureFilesInLocalDirectory(
+            ids: snapshot.layers.map(\.id),
+            textureSize: snapshot.textureSize
+        )
+        undoableTextureLayers.setLayers(snapshot)
+        return snapshot.textureSize
+    }
 
     /// Subscribes to domain model changes and debounces writes to `CoreData*Storage`.
     func bindCoreDataPersistence() {

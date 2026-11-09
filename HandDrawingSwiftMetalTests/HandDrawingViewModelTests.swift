@@ -5,6 +5,7 @@
 import Core
 import CoreGraphics
 @preconcurrency import CoreData
+import MetalKit
 import Testing
 import TextureLayerView
 
@@ -22,8 +23,8 @@ struct HandDrawingViewModelTests {
         private let layer1: TextureLayerModel = .generate(title: "layer1")
 
         @Test
-        func `When metadata and pixel files are available, it restores layers from Core Data`() throws {
-            let savedTextureSize = TestUtils.randomSize()
+        func `When metadata and pixel files are available, it restores layers from Core Data`() async throws {
+            let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
             try makeTextureLayerArrayEntityInCoreData(
                 context: textureLayersCoreDataStorage.viewContext,
@@ -31,6 +32,7 @@ struct HandDrawingViewModelTests {
                 textureSize: savedTextureSize
             )
             let textureRepository = TextureRepositoryStub()
+            let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
                 dependencies: dependencies(
@@ -39,7 +41,11 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            let size = try subject.setupTextureLayers()
+            let size = try await subject.setupTextureLayers(
+                fallbackTextureSize: fallbackTextureSize,
+                device: device,
+                commandQueue: commandQueue
+            )
 
             // Use saved size, make two layers: layer metadata used.
             #expect(size == savedTextureSize)
@@ -53,9 +59,11 @@ struct HandDrawingViewModelTests {
         }
 
         @Test
-        func `When Core Data has no layer metadata, it returns nil`() throws {
+        func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
+            let fallbackTextureSize = TestUtils.randomSize()
             let textureRepository = TextureRepositoryStub()
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
+            let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
                 dependencies: dependencies(
@@ -64,13 +72,22 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            #expect(try subject.setupTextureLayers() == nil)
+            let size = try await subject.setupTextureLayers(
+                fallbackTextureSize: fallbackTextureSize,
+                device: device,
+                commandQueue: commandQueue
+            )
+
+            // Use fallback size, make one blank layer: layer metadata not used.
+            #expect(size == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.layerModels.count == 1)
             #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.isEmpty)
         }
 
         @Test
-        func `When pixel files are invalid, it throws`() throws {
-            let savedTextureSize = TestUtils.randomSize()
+        func `When pixel files are invalid, it installs a blank layer`() async throws {
+            let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
             try makeTextureLayerArrayEntityInCoreData(
                 context: textureLayersCoreDataStorage.viewContext,
@@ -79,6 +96,7 @@ struct HandDrawingViewModelTests {
             )
             let textureRepository = TextureRepositoryStub()
             textureRepository.validateTextureFilesInLocalDirectoryError = NSError(domain: "error", code: 1)
+            let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
                 dependencies: dependencies(
@@ -87,9 +105,17 @@ struct HandDrawingViewModelTests {
                 )
             )
 
-            #expect(throws: (any Error).self) {
-                try subject.setupTextureLayers()
-            }
+            let size = try await subject.setupTextureLayers(
+                fallbackTextureSize: fallbackTextureSize,
+                device: device,
+                commandQueue: commandQueue
+            )
+
+            // After failed restore, use fallback size, make one new layer: layer metadata not used.
+            #expect(size == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.layerModels.count == 1)
+            #expect(subject.undoableTextureLayers.layerModels.map(\.id) != [layer0.id, layer1.id])
             #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.count == 1)
         }
     }
@@ -114,6 +140,12 @@ extension HandDrawingViewModelTests.SetupTextureLayers {
                 bundle: Bundle(for: CoreDataDrawingToolStorage.self)
             )
         )
+    }
+
+    private func makeMetal() throws -> (MTLDevice, MTLCommandQueue) {
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        return (device, commandQueue)
     }
 
     private func makeInMemoryCoreDataStorage() -> CoreDataStorage {
