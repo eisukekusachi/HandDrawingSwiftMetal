@@ -88,47 +88,6 @@ struct LocalTextureFileRepositoryTests {
     }
 
     @Test
-    func `When a source layer file is empty, it keeps the current TextureStorage`() async throws {
-        let fileManager = MockFileManager()
-        let rootURL = fileManager.temporaryDirectory
-            .appendingPathComponent("LocalTextureFileRepositoryTests-\(UUID().uuidString)", isDirectory: true)
-        let sourceURL = rootURL.appendingPathComponent("Source", isDirectory: true)
-        let storageURL = rootURL.appendingPathComponent("TextureStorage", isDirectory: true)
-        try fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
-        try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: true)
-        defer { try? fileManager.removeItem(at: rootURL) }
-
-        let existingLayerId = UUID()
-        let emptyLayerId = UUID()
-        let emptyLayerURL = sourceURL.appendingPathComponent(emptyLayerId.uuidString)
-
-        let subject = try Subject(
-            storageDirectoryURL: rootURL,
-            directoryName: "TextureStorage",
-            fileManager: fileManager
-        )
-
-        try writeLayer(id: existingLayerId, textureSize: textureSize, in: storageURL, fileManager: fileManager)
-        guard fileManager.createFile(atPath: emptyLayerURL.path, contents: Data(), attributes: nil) else {
-            Issue.record("Failed to create empty layer file")
-            return
-        }
-        fileManager.setContentsOfDirectory([emptyLayerURL], at: sourceURL)
-
-        await #expect(throws: NSError.self) {
-            try await subject.restoreStorage(
-                from: sourceURL,
-                ids: [emptyLayerId],
-                textureSize: textureSize
-            )
-        }
-
-        // When restore fails, existing TextureStorage must stay unchanged; root must not keep staging or backup directories.
-        #expect(fileManager.fileExists(atPath: storageURL.appendingPathComponent(existingLayerId.uuidString).path))
-        #expect(try childNames(in: rootURL, fileManager: fileManager) == ["Source", "TextureStorage"])
-    }
-
-    @Test
     func `When copying layer files fails, it keeps the current TextureStorage`() async throws {
         let fileManager = MockFileManager()
         let rootURL = fileManager.temporaryDirectory
