@@ -5,9 +5,10 @@
 import Core
 import Foundation
 
+/// On-disk pixels for the current project
 extension LocalTextureFileRepository {
 
-    /// Default on-disk texture cache for the app (Application Support / `TextureStorage`).
+    /// App-wide instance of that directory.
     @MainActor
     public static let shared: LocalTextureFileRepository = {
         do {

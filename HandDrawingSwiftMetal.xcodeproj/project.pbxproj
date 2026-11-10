@@ -681,7 +681,6 @@
 		D4E396032F96000100C55A4C /* Textures */ = {
 			isa = PBXGroup;
 			children = (
-				D4E396052F96000100C55A4C /* InMemoryTextureRepository.swift */,
 				D4E396012F96000100C55A4C /* LocalTextureFileRepository.swift */,
 			);
 			path = Textures;
@@ -708,6 +707,7 @@
 		D4E398032F95000100C55A4C /* Undo */ = {
 			isa = PBXGroup;
 			children = (
+				D4E396052F96000100C55A4C /* InMemoryTextureRepository.swift */,
 				D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */,
 				D48CA0712F3C18D3008C6E9E /* UndoDrawing.swift */,
 			);
