@@ -5,9 +5,10 @@
 import Core
 import MetalKit
 
+/// In-memory GPU textures for undo
 extension InMemoryTextureRepository {
 
-    /// App-wide in-memory texture cache (e.g. undo).
+    /// App-wide instance of that cache.
     @MainActor
     public static let shared: MTLTextureRepositoryProtocol = InMemoryTextureRepository(
         textures: [:]
