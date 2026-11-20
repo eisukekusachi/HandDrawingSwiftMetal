@@ -32,11 +32,11 @@ public enum Logger {
         file: String = #file,
         function: String = #function,
         line: Int = #line,
-        _ error: String
+        _ message: String
     ) {
         #if DEBUG
         let fileName = (file as NSString).lastPathComponent
-        standard.error("[\(fileName):\(line)] \(function) - \(error)")
+        standard.error("[\(fileName):\(line)] \(function) - \(message)")
         #endif
     }
 

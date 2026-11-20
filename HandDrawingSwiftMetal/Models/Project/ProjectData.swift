@@ -5,12 +5,13 @@
 //  Created by Eisuke Kusachi on 2026/01/23.
 //
 
+import Combine
 import Core
 import Foundation
 
 @preconcurrency import CoreData
 
-final class ProjectData {
+final class ProjectData: ObservableObject {
 
     @Published public var currentProjectName: String
     @Published public var createdAt: Date
