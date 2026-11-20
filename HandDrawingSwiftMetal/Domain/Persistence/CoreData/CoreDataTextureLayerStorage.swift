@@ -3,6 +3,7 @@
 //
 
 import Core
+import CoreGraphics
 import TextureLayerView
 
 @preconcurrency import CoreData

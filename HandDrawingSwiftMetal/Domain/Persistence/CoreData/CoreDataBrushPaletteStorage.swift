@@ -3,6 +3,7 @@
 //
 
 import Core
+import PaletteView
 import UIKit
 
 @preconcurrency import CoreData
