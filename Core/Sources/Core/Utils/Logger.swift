@@ -5,7 +5,7 @@
 import Foundation
 import os
 
-enum Logger {
+public enum Logger {
     #if DEBUG
     private static let standard: os.Logger = .init(
         subsystem: Bundle.main.bundleIdentifier ?? "com.unknown.app",
@@ -13,7 +13,7 @@ enum Logger {
     )
     #endif
 
-    static func error(
+    public static func error(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
@@ -25,7 +25,19 @@ enum Logger {
         #endif
     }
 
-    static func info(
+    public static func error(
+        file: String = #file,
+        function: String = #function,
+        line: Int = #line,
+        _ message: String
+    ) {
+        #if DEBUG
+        let fileName = (file as NSString).lastPathComponent
+        standard.error("[\(fileName):\(line)] \(function) - \(message)")
+        #endif
+    }
+
+    public static func info(
         file: String = #file,
         function: String = #function,
         line: Int = #line,
