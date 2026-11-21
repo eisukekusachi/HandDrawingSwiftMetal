@@ -4,14 +4,19 @@
 
 import CanvasView
 import Combine
+import Core
 import TextureLayerView
 
 @preconcurrency import MetalKit
 
 @objc public final class TextureLayerCanvasView: CanvasView, TextureLayerCanvasUpdating {
 
-    /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
+    private let liveStorage: TextureLayerCanvasLiveStorage
+
+    /// Layer whose pixels are held in `currentTexture`. May differ from the selected layer until `updateFullCanvas` completes.
+    public var currentTextureLayerId: LayerId? {
+        liveStorage.currentTextureLayerId
+    }
 
     private let dependencies: TextureLayerCanvasViewDependencies
 
@@ -37,6 +42,17 @@ import TextureLayerView
         self.dependencies = dependencies
         self.onUpdateLayerThumbnail = onUpdateLayerThumbnail
         self.configuration = configuration
+        self.liveStorage = .init(
+            writeDataToDisk: { layerId, data in
+                try await dependencies.localTextureFileRepository.writeDataToDisk(
+                    id: layerId,
+                    data: data
+                )
+            },
+            updateThumbnail: { id, thumbnail in
+                onUpdateLayerThumbnail?(id, thumbnail)
+            }
+        )
         super.init(
             device: device,
             configuration: configuration,
@@ -58,6 +74,7 @@ import TextureLayerView
     }
 
     override public func initializeCanvas(_ textureSize: CGSize) async throws {
+        liveStorage.resetActiveLayer()
         try await super.initializeCanvas(textureSize)
 
         try viewModel.initializeTextures(textureSize)
@@ -66,33 +83,13 @@ import TextureLayerView
     }
 
     private func completeDrawing() {
-        guard
-            let texture = currentTexture,
-            let layerId = dependencies.textureLayers.selectedLayer?.id
-        else { return }
+        guard let texture = currentTexture else { return }
 
-        let device = renderer.device
-        let commandQueue = renderer.commandQueue
-
-        drawingDebouncer.perform { [weak self] in
-            guard let `self` else { return }
-            do {
-                let textureData = try await texture.data(
-                    device: device,
-                    commandQueue: commandQueue
-                )
-                try await self.viewModel.saveTextureToLocal(
-                    layerId: layerId,
-                    textureData: textureData
-                )
-                let thumbnail = texture.makeThumbnail()
-                await MainActor.run {
-                    self.onUpdateLayerThumbnail?(layerId, thumbnail)
-                }
-            } catch {
-                Logger.error(error)
-            }
-        }
+        liveStorage.scheduleSaveAfterStroke(
+            texture: texture,
+            device: renderer.device,
+            commandQueue: renderer.commandQueue
+        )
     }
 
     public func updateFullCanvas() async throws {
@@ -111,6 +108,7 @@ import TextureLayerView
         try await newCommandBuffer.commitAndWaitAsync()
 
         try setCurrentTexture(currentTexture)
+        liveStorage.setActiveLayer(selectedLayer.id)
 
         updateCanvasDisplay()
     }
