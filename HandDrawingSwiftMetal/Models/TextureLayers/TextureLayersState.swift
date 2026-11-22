@@ -111,12 +111,7 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
     }
 
     func addLayer() async throws {
-        guard let canvasView else {
-            throw NSError(
-                title: String(localized: "Error"),
-                message: String(localized: "Unable to load required data")
-            )
-        }
+        guard let canvasView else { return }
         try canvasView.throwIfUnsavedDrawing()
         guard
             let repository,
