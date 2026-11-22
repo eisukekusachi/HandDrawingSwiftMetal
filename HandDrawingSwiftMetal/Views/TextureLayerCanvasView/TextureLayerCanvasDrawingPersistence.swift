@@ -13,7 +13,7 @@ import UIKit
 @MainActor
 final class TextureLayerCanvasDrawingPersistence {
 
-    /// Set when a committed stroke schedules a debounced save; cleared when the save attempt finishes (success or failure).
+    /// Active layer id.
     private(set) var activeLayerId: LayerId?
 
     /// Texture saves are expensive; with rapid strokes, only the latest line is saved after a short delay.

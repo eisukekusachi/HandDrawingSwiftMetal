@@ -70,7 +70,7 @@ import TextureLayerView
                     let layerId = dependencies.textureLayers.selectedLayer?.id
                 else { return }
 
-                // Mark the layer until Storage catches up, then save `currentTexture` (debounced).
+                // Save `currentTexture` to Storage after a short delay.
                 drawingPersistence.saveToStorageWithDebouncing(
                     layerId: layerId,
                     texture: texture,
