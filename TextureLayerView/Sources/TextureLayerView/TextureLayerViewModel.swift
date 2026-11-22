@@ -86,25 +86,25 @@ final class TextureLayerViewModel: ObservableObject {
         }
     }
 
-    func onTapVisibleButton(_ id: UUID, isVisible: Bool) {
+    func onTapVisibleButton(_ id: UUID, isVisible: Bool) async {
         do {
-            try textureLayers.setVisibility(id: id, isVisible: isVisible)
+            try await textureLayers.setVisibility(id: id, isVisible: isVisible)
         } catch {
             onError?(error)
         }
     }
 
-    func onTapCell(_ id: UUID) {
+    func onTapCell(_ id: UUID) async {
         do {
-            try textureLayers.selectLayer(id: id)
+            try await textureLayers.selectLayer(id: id)
         } catch {
             onError?(error)
         }
     }
 
-    func onMoveLayer(source: IndexSet, destination: Int) {
+    func onMoveLayer(source: IndexSet, destination: Int) async {
         do {
-            try textureLayers.moveLayers(from: source, to: destination)
+            try await textureLayers.moveLayers(from: source, to: destination)
         } catch {
             onError?(error)
         }

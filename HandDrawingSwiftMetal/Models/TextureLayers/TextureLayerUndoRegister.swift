@@ -138,11 +138,11 @@ final class TextureLayerUndoRegister {
         in state: TextureLayersState,
         id: LayerId,
         isVisible: Bool,
-        perform: () throws -> Void
-    ) rethrows {
+        perform: () async throws -> Void
+    ) async rethrows {
         guard let undoLayer = state.layer(id) else { return }
 
-        try perform()
+        try await perform()
 
         guard let redoLayer = state.layer(id) else { return }
 
@@ -161,11 +161,11 @@ final class TextureLayerUndoRegister {
     func selectLayer(
         in state: TextureLayersState,
         id: LayerId,
-        perform: () throws -> Void
-    ) rethrows {
+        perform: () async throws -> Void
+    ) async rethrows {
         guard let undoLayer = state.selectedLayerModel else { return }
 
-        try perform()
+        try await perform()
 
         guard let redoLayer = state.selectedLayerModel else { return }
 
@@ -185,11 +185,11 @@ final class TextureLayerUndoRegister {
         in state: TextureLayersState,
         source: IndexSet,
         destination: Int,
-        perform: () throws -> Void
-    ) rethrows {
+        perform: () async throws -> Void
+    ) async rethrows {
         guard let layer = state.selectedLayerModel else { return }
 
-        try perform()
+        try await perform()
 
         let redoObject = UndoMoveObject(
             indices: .init(sourceIndexSet: source, destinationIndex: destination),

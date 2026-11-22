@@ -22,7 +22,7 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms addLayer throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
+        try subject.setLayers([layer0], textureSize: textureSize)
 
         let error = await #expect(throws: NSError.self) {
             try await subject.addLayer()
@@ -35,7 +35,7 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms renameLayer throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
         let error = #expect(throws: NSError.self) {
             try subject.renameLayer(id: layer0.id, title: "renamed")
@@ -48,10 +48,10 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms moveLayers throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        let error = #expect(throws: NSError.self) {
-            try subject.moveLayers(from: IndexSet(integer: 0), to: 2)
+        let error = await #expect(throws: NSError.self) {
+            try await subject.moveLayers(from: IndexSet(integer: 0), to: 2)
         }
 
         #expect(error?.localizedFailureReason == "Undo is not set")
@@ -61,10 +61,10 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms selectLayer throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        let error = #expect(throws: NSError.self) {
-            try subject.selectLayer(id: layer1.id)
+        let error = await #expect(throws: NSError.self) {
+            try await subject.selectLayer(id: layer1.id)
         }
 
         #expect(error?.localizedFailureReason == "Undo is not set")
@@ -74,10 +74,10 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms setVisibility throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        let error = #expect(throws: NSError.self) {
-            try subject.setVisibility(id: layer0.id, isVisible: false)
+        let error = await #expect(throws: NSError.self) {
+            try await subject.setVisibility(id: layer0.id, isVisible: false)
         }
 
         #expect(error?.localizedFailureReason == "Undo is not set")
@@ -87,7 +87,7 @@ struct TextureLayersUndoableStateTests {
     @Test
     func `Confirms removeLayer throws when undo is not set`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
         let error = await #expect(throws: NSError.self) {
             try await subject.removeLayer(id: layer0.id)
@@ -113,7 +113,7 @@ struct TextureLayersUndoableStateTests {
         let registered = UndoRegistration()
         let subject = try subject(layers: [layer0, layer1], registered: registered)
 
-        try subject.selectLayer(id: layer1.id)
+        try await subject.selectLayer(id: layer1.id)
 
         #expect(subject.selectedLayerModel?.id == layer1.id)
         #expect(registered.pairs.count == 1)
@@ -124,7 +124,7 @@ struct TextureLayersUndoableStateTests {
         let registered = UndoRegistration()
         let subject = try subject(layers: [layer0, layer1], registered: registered)
 
-        try subject.setVisibility(id: layer0.id, isVisible: false)
+        try await subject.setVisibility(id: layer0.id, isVisible: false)
 
         #expect(subject.layer(layer0.id)?.isVisible == false)
         #expect(registered.pairs.count == 1)
@@ -135,7 +135,7 @@ struct TextureLayersUndoableStateTests {
         let registered = UndoRegistration()
         let subject = try subject(layers: [layer0, layer1, layer2], registered: registered)
 
-        try subject.moveLayers(from: IndexSet(integer: 0), to: 3)
+        try await subject.moveLayers(from: IndexSet(integer: 0), to: 3)
 
         #expect(subject.layers.map(\.id) == [layer2.id, layer0.id, layer1.id])
         #expect(registered.pairs.count == 1)
@@ -196,7 +196,7 @@ struct TextureLayersUndoableStateTests {
     ) throws -> Subject {
         let device = try #require(MTLCreateSystemDefaultDevice())
         let subject: Subject = .init(repository: repository)
-        subject.setLayers(layers, textureSize: textureSize)
+        try subject.setLayers(layers, textureSize: textureSize)
         subject.setUndo(
             undoRegister: .init(
                 device: device,
@@ -214,6 +214,7 @@ private final class UndoRegistration {
 }
 
 private final class CanvasUpdatingStub: TextureLayerCanvasUpdating {
+    func throwIfUnsavedDrawing() throws {}
     func updateFullCanvas() async throws {}
     func updateCanvasDisplay() {}
 }

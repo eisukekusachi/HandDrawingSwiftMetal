@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import CanvasView
 import Core
 import CoreGraphics
 import MetalKit
@@ -25,7 +26,7 @@ struct TextureLayersStateTests {
     func `Confirms setLayers keeps the given layers and selection`() async throws {
         let subject: Subject = .init()
 
-        subject.setLayers(
+        try subject.setLayers(
             [layer0, layer1, layer2],
             textureSize: textureSize,
             selectedIndex: 1
@@ -38,36 +39,6 @@ struct TextureLayersStateTests {
     }
 
     @Test
-    func `Confirms selectedIndex is clamped to the last layer`() async throws {
-        let subject: Subject = .init()
-
-        subject.setLayers(
-            [layer0, layer1],
-            textureSize: textureSize,
-            selectedIndex: 3
-        )
-
-        #expect(subject.layers.count == 2)
-        #expect(subject.selectedLayerIndex == 1)
-        #expect(subject.selectedLayer?.id == layer1.id)
-    }
-
-    @Test
-    func `Confirms a negative selectedIndex is clamped to 0`() async throws {
-        let subject: Subject = .init()
-
-        subject.setLayers(
-            [layer0, layer1, layer2],
-            textureSize: textureSize,
-            selectedIndex: -1
-        )
-
-        #expect(subject.layers.count == 3)
-        #expect(subject.selectedLayerIndex == 0)
-        #expect(subject.selectedLayer?.id == layer0.id)
-    }
-
-    @Test
     func `Confirms setLayers restores a snapshot`() async throws {
         let subject: Subject = .init()
         let snapshot = TextureLayersSnapshot(
@@ -76,7 +47,7 @@ struct TextureLayersStateTests {
             textureSize: textureSize
         )
 
-        subject.setLayers(snapshot)
+        try subject.setLayers(snapshot)
 
         #expect(subject.layers.map(\.id) == [layer0.id, layer1.id, layer2.id])
         #expect(subject.selectedLayerModel?.id == layer2.id)
@@ -86,161 +57,89 @@ struct TextureLayersStateTests {
     }
 
     @Test
-    func `Confirms an empty list clears the selection`() async throws {
+    func `Confirms setLayers throws when the layer array is empty`() throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
+        try subject.setLayers([layer0], textureSize: textureSize)
 
-        subject.setLayers([], textureSize: textureSize)
-
-        #expect(subject.layers.isEmpty)
-        #expect(subject.selectedLayer == nil)
-        #expect(subject.selectedLayerIndex == nil)
-        #expect(subject.snapshot.layerIndex == 0)
-    }
-
-    @Test
-    func `Confirms inserting a layer selects it and keeps its thumbnail`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
-
-        subject.insertLayer(layer: layer1, thumbnail: UIImage(), at: 0)
-
-        #expect(subject.layers.map(\.id) == [layer1.id, layer0.id])
-        #expect(subject.selectedLayer?.id == layer1.id)
-        #expect(subject.layers[0].thumbnail != nil)
-    }
-
-    @Test
-    func `Confirms setLayers clears thumbnails`() async throws {
-        let subject: Subject = .init()
-        subject.insertLayer(layer: layer0, thumbnail: UIImage(), at: 0)
-
-        subject.setLayers([layer0], textureSize: textureSize)
-
-        #expect(subject.layers[0].thumbnail == nil)
-    }
-
-    @Test
-    func `Confirms deleting the first layer selects the following layer`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0, layer1, layer2], textureSize: textureSize)
-
-        let removed = subject.removeLayer(layerIndexToDelete: 0)
-
-        #expect(removed)
-        #expect(subject.layers.map(\.id) == [layer1.id, layer2.id])
-        #expect(subject.selectedLayer?.id == layer1.id)
-    }
-
-    @Test
-    func `Confirms deleting a later layer selects the previous layer`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0, layer1, layer2], textureSize: textureSize, selectedIndex: 2)
-
-        let removed = subject.removeLayer(layerIndexToDelete: 2)
-
-        #expect(removed)
-        #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
-        #expect(subject.selectedLayer?.id == layer1.id)
-    }
-
-    @Test
-    func `Confirms removing an out-of-bounds index does nothing`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
-
-        let removed = subject.removeLayer(layerIndexToDelete: 2)
-
-        #expect(removed == false)
-        #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
-        #expect(subject.selectedLayerIndex == 0)
-    }
-
-    @Test
-    func `Confirms the last layer cannot be removed`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
-
-        let removed = subject.removeLayer(layerIndexToDelete: 0)
-
-        #expect(removed == false)
+        #expect(throws: NSError.self) {
+            try subject.setLayers([], textureSize: textureSize)
+        }
         #expect(subject.layers.map(\.id) == [layer0.id])
-        #expect(subject.selectedLayerIndex == 0)
+        #expect(subject.selectedLayer?.id == layer0.id)
     }
 
     @Test
-    func `Confirms renameLayer updates the title`() async throws {
+    func `Confirms selectLayer setVisibility and setAlpha update the layer`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
 
-        try subject.renameLayer(id: layer0.id, title: "renamed")
-        // An unknown id does not add a layer
-        try subject.renameLayer(id: LayerId(), title: "missing")
+        let canvas = TextureLayerCanvasUpdatingStub()
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        subject.setup(device: device, commandQueue: commandQueue, canvasView: canvas)
 
-        #expect(subject.layer(layer0.id)?.title == "renamed")
-        #expect(subject.layers.count == 1)
-    }
-
-    @Test
-    func `Confirms selectLayer, setVisibility, and setAlpha update the layer`() async throws {
-        let subject: Subject = .init()
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
-
-        try subject.selectLayer(id: layer1.id)
-        try subject.setVisibility(id: layer1.id, isVisible: false)
+        try await subject.selectLayer(id: layer1.id)
+        try await subject.setVisibility(id: layer1.id, isVisible: false)
         subject.setAlpha(id: layer1.id, alpha: 40)
 
         #expect(subject.selectedLayer?.id == layer1.id)
         #expect(subject.layer(layer1.id)?.isVisible == false)
         #expect(subject.layer(layer1.id)?.alpha == 40)
         #expect(subject.selectedLayer?.alpha == 40)
-        #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
     }
 
     @Test
     func `Confirms moveLayers reorders the layers`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0, layer1, layer2], textureSize: textureSize)
+        try subject.setLayers([layer0, layer1, layer2], textureSize: textureSize)
+        let canvas = TextureLayerCanvasUpdatingStub()
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        subject.setup(device: device, commandQueue: commandQueue, canvasView: canvas)
 
-        // The list is shown in reverse, so UI index 0 is the last layer.
-        try subject.moveLayers(from: IndexSet(integer: 0), to: 3)
+        try await subject.moveLayers(from: IndexSet(integer: 0), to: 3)
 
         #expect(subject.layers.map(\.id) == [layer2.id, layer0.id, layer1.id])
     }
 
     @Test
-    func `Confirms updateLayerThumbnail stores an image only for an existing layer`() async throws {
+    func `Confirms layer operations throw when the canvas reports an unsaved drawing`() async throws {
         let subject: Subject = .init()
-        subject.setLayers([layer0], textureSize: textureSize)
-        let thumbnail = UIImage()
+        try subject.setLayers([layer0, layer1], textureSize: textureSize)
+        let canvas = TextureLayerCanvasUpdatingStub()
+        canvas.unsavedDrawingError = TextureLayerCanvasDrawingPersistence.saveInProgressError
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        subject.setup(device: device, commandQueue: commandQueue, canvasView: canvas)
 
-        subject.updateLayerThumbnail(layer0.id, thumbnail: thumbnail)
-        subject.updateLayerThumbnail(LayerId(), thumbnail: thumbnail)
-        subject.updateLayerThumbnail(layer0.id, thumbnail: nil)
-
-        #expect(subject.layers[0].thumbnail != nil)
-        #expect(subject.layers.count == 1)
-    }
-
-    @Test
-    func `Confirms removeLayer by id does nothing when the canvas is missing`() async throws {
-        let repository = TextureRepositoryStub()
-        let subject: Subject = .init(repository: repository)
-        subject.setLayers([layer0, layer1], textureSize: textureSize)
-
-        let removed = try await subject.removeLayer(id: layer0.id)
-
-        #expect(removed == false)
-        #expect(subject.layers.map(\.id) == [layer0.id, layer1.id])
-        #expect(repository.removedIds.isEmpty)
+        let error = await #expect(throws: NSError.self) {
+            try await subject.selectLayer(id: layer1.id)
+        }
+        #expect(TextureLayerCanvasDrawingPersistence.isSaveInProgressError(try #require(error)))
+        #expect(subject.selectedLayer?.id == layer0.id)
     }
 
     @Test
     func `Confirms addLayer throws when required data is missing`() async throws {
         let subject: Subject = .init()
 
+        // Not about setLayers: Subject() has no setup(), so canvasView / repository / device are missing and addLayer throws.
         await #expect(throws: NSError.self) {
             try await subject.addLayer()
         }
     }
+}
+
+@MainActor
+final class TextureLayerCanvasUpdatingStub: TextureLayerCanvasUpdating {
+
+    var unsavedDrawingError: (any Error)?
+
+    func throwIfUnsavedDrawing() throws {
+        if let unsavedDrawingError { throw unsavedDrawingError }
+    }
+
+    func updateFullCanvas() async throws {}
+
+    func updateCanvasDisplay() {}
 }

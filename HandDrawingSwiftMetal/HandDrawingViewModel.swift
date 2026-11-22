@@ -186,7 +186,7 @@ extension HandDrawingViewModel {
             commandQueue: commandQueue
         )
         // Replace layer list with this layer and set canvas size.
-        undoableTextureLayers.setLayers(
+        try undoableTextureLayers.setLayers(
             [layer],
             textureSize: textureSize
         )
@@ -229,7 +229,7 @@ private extension HandDrawingViewModel {
             ids: snapshot.layers.map(\.id),
             textureSize: snapshot.textureSize
         )
-        undoableTextureLayers.setLayers(snapshot)
+        try undoableTextureLayers.setLayers(snapshot)
         return snapshot.textureSize
     }
 

@@ -160,7 +160,7 @@ private extension UndoCoordinator {
 
         do {
             let textureLayerId = undoObject.textureLayer.id
-            textureLayersState.selectLayer(textureLayerId)
+            textureLayersState.selectLayerForUndo(textureLayerId)
 
             let textureData = try await newTexture.data(
                 device: canvasView.renderer.device,
@@ -202,7 +202,7 @@ private extension UndoCoordinator {
                 textureData: textureData
             )
 
-            textureLayersState.insertLayer(
+            textureLayersState.insertLayerForUndo(
                 layer: undoObject.textureLayer,
                 thumbnail: newTexture.makeThumbnail(),
                 at: undoObject.insertIndex
@@ -226,9 +226,7 @@ private extension UndoCoordinator {
            return
         }
 
-        textureLayersState.removeLayer(
-            layerIndexToDelete: index
-        )
+        textureLayersState.removeLayerForUndo(layerIndexToDelete: index)
 
         Task {
             try? await canvasView.updateFullCanvas()
@@ -238,9 +236,7 @@ private extension UndoCoordinator {
     func performMoveUndo(
         _ undoObject: UndoMoveObject
     ) {
-        textureLayersState.moveLayer(
-            indices: undoObject.indices
-        )
+        textureLayersState.moveLayerForUndo(indices: undoObject.indices)
 
         Task {
             try? await canvasView.updateFullCanvas()
@@ -250,9 +246,7 @@ private extension UndoCoordinator {
     func performSelectUndo(
         _ undoObject: UndoSelectionObject
     ) async {
-        textureLayersState.selectLayer(
-            undoObject.textureLayer.id
-        )
+        textureLayersState.selectLayerForUndo(undoObject.textureLayer.id)
 
         try? await canvasView.updateFullCanvas()
     }
@@ -260,7 +254,7 @@ private extension UndoCoordinator {
     func performAlphaUndo(
         _ undoObject: UndoAlphaObject
     ) async {
-        textureLayersState.update(
+        textureLayersState.updateForUndo(
             undoObject.textureLayer.id,
             alpha: undoObject.textureLayer.alpha
         )
@@ -271,7 +265,7 @@ private extension UndoCoordinator {
     func performVisibilityUndo(
         _ undoObject: UndoVisibilityObject
     ) async {
-        textureLayersState.update(
+        textureLayersState.updateForUndo(
             undoObject.textureLayer.id,
             isVisible: undoObject.textureLayer.isVisible
         )
@@ -282,7 +276,7 @@ private extension UndoCoordinator {
     func performTitleUndo(
         _ undoObject: UndoTitleObject
     ) async {
-        textureLayersState.update(
+        textureLayersState.updateForUndo(
             undoObject.textureLayer.id,
             title: undoObject.textureLayer.title
         )

@@ -52,39 +52,39 @@ final class TextureLayersUndoableState: TextureLayersState {
         }
     }
 
-    override func moveLayers(from source: IndexSet, to destination: Int) throws {
+    override func moveLayers(from source: IndexSet, to destination: Int) async throws {
         guard let undoRegister else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Undo is not set")
             )
         }
-        try undoRegister.moveLayer(in: self, source: source, destination: destination) {
-            try super.moveLayers(from: source, to: destination)
+        try await undoRegister.moveLayer(in: self, source: source, destination: destination) {
+            try await super.moveLayers(from: source, to: destination)
         }
     }
 
-    override func selectLayer(id: LayerId) throws {
+    override func selectLayer(id: LayerId) async throws {
         guard let undoRegister else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Undo is not set")
             )
         }
-        try undoRegister.selectLayer(in: self, id: id) {
-            try super.selectLayer(id: id)
+        try await undoRegister.selectLayer(in: self, id: id) {
+            try await super.selectLayer(id: id)
         }
     }
 
-    override func setVisibility(id: LayerId, isVisible: Bool) throws {
+    override func setVisibility(id: LayerId, isVisible: Bool) async throws {
         guard let undoRegister else {
             throw NSError(
                 title: String(localized: "Error"),
                 message: String(localized: "Undo is not set")
             )
         }
-        try undoRegister.changeVisibility(in: self, id: id, isVisible: isVisible) {
-            try super.setVisibility(id: id, isVisible: isVisible)
+        try await undoRegister.changeVisibility(in: self, id: id, isVisible: isVisible) {
+            try await super.setVisibility(id: id, isVisible: isVisible)
         }
     }
 

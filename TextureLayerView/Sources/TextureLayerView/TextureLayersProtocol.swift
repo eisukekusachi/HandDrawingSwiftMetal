@@ -25,13 +25,13 @@ public protocol TextureLayersProtocol: ObservableObject where ObjectWillChangePu
     func renameLayer(id: LayerId, title: String) throws
 
     /// Moves layers from `source` to `destination`.
-    func moveLayers(from source: IndexSet, to destination: Int) throws
+    func moveLayers(from source: IndexSet, to destination: Int) async throws
 
     /// Selects the layer with `id`.
-    func selectLayer(id: LayerId) throws
+    func selectLayer(id: LayerId) async throws
 
     /// Sets whether the layer with `id` is visible.
-    func setVisibility(id: LayerId, isVisible: Bool) throws
+    func setVisibility(id: LayerId, isVisible: Bool) async throws
 
     /// Sets the opacity of the layer with `id`.
     func setAlpha(id: LayerId, alpha: Int)
