@@ -120,10 +120,24 @@ struct TextureLayersStateTests {
     }
 
     @Test
+    func `Confirms addLayer returns when the canvas is not set up`() async throws {
+        let subject: Subject = .init()
+        try subject.setLayers([layer0], textureSize: textureSize)
+
+        try await subject.addLayer()
+
+        #expect(subject.layers.count == 1)
+    }
+
+    @Test
     func `Confirms addLayer throws when required data is missing`() async throws {
         let subject: Subject = .init()
+        try subject.setLayers([layer0], textureSize: textureSize)
+        let canvas = TextureLayerCanvasUpdatingStub()
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
+        subject.setup(device: device, commandQueue: commandQueue, canvasView: canvas)
 
-        // Not about setLayers: Subject() has no setup(), so canvasView / repository / device are missing and addLayer throws.
         await #expect(throws: NSError.self) {
             try await subject.addLayer()
         }

@@ -148,7 +148,8 @@ struct TextureLayersUndoableStateTests {
         let subject = try subject(
             layers: [layer0, layer1],
             repository: repository,
-            registered: registered
+            registered: registered,
+            setupCanvas: false
         )
 
         let removed = try await subject.removeLayer(id: layer0.id)
@@ -168,15 +169,6 @@ struct TextureLayersUndoableStateTests {
             repository: repository,
             registered: registered
         )
-        let device = try #require(MTLCreateSystemDefaultDevice())
-        let commandQueue = try #require(device.makeCommandQueue())
-        let canvas = CanvasUpdatingStub()
-        subject.setup(
-            device: device,
-            commandQueue: commandQueue,
-            canvasView: canvas
-        )
-
         let removed = try await subject.removeLayer(id: layer1.id)
 
         let undoObject = try #require(registered.pairs.first?.undoObject as? UndoAdditionObject)
@@ -192,11 +184,22 @@ struct TextureLayersUndoableStateTests {
         layers: [TextureLayerModel],
         repository: TextureRepositoryStub = TextureRepositoryStub(),
         inMemoryRepository: InMemoryTextureRepositoryStub = InMemoryTextureRepositoryStub(),
-        registered: UndoRegistration
+        registered: UndoRegistration,
+        setupCanvas: Bool = true
     ) throws -> Subject {
         let device = try #require(MTLCreateSystemDefaultDevice())
+        let commandQueue = try #require(device.makeCommandQueue())
         let subject: Subject = .init(repository: repository)
         try subject.setLayers(layers, textureSize: textureSize)
+        if setupCanvas {
+            let canvas = CanvasUpdatingStub()
+            registered.canvasStub = canvas
+            subject.setup(
+                device: device,
+                commandQueue: commandQueue,
+                canvasView: canvas
+            )
+        }
         subject.setUndo(
             undoRegister: .init(
                 device: device,
@@ -211,6 +214,8 @@ struct TextureLayersUndoableStateTests {
 
 private final class UndoRegistration {
     var pairs: [UndoRedoObjectPair] = []
+    /// Keeps `TextureLayersState`’s weak `canvasView` alive for the test.
+    var canvasStub: CanvasUpdatingStub?
 }
 
 private final class CanvasUpdatingStub: TextureLayerCanvasUpdating {
