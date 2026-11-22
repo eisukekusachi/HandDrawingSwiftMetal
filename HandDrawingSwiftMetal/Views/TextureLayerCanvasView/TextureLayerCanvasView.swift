@@ -11,12 +11,8 @@ import TextureLayerView
 
 @objc public final class TextureLayerCanvasView: CanvasView, TextureLayerCanvasUpdating {
 
-    private let liveStorage: TextureLayerCanvasLiveStorage
-
-    /// Layer whose pixels are held in `currentTexture`. May differ from the selected layer until `updateFullCanvas` completes.
-    public var currentTextureLayerId: LayerId? {
-        liveStorage.currentTextureLayerId
-    }
+    /// Persists the in-progress drawing on `currentTexture` to Storage.
+    private let drawingPersistence: TextureLayerCanvasDrawingPersistence
 
     private let dependencies: TextureLayerCanvasViewDependencies
 
@@ -42,15 +38,13 @@ import TextureLayerView
         self.dependencies = dependencies
         self.onUpdateLayerThumbnail = onUpdateLayerThumbnail
         self.configuration = configuration
-        self.liveStorage = .init(
-            writeDataToDisk: { layerId, data in
+        self.drawingPersistence = .init(
+            saveLayerData: { layerId, data, thumbnail in
                 try await dependencies.localTextureFileRepository.writeDataToDisk(
                     id: layerId,
                     data: data
                 )
-            },
-            updateThumbnail: { id, thumbnail in
-                onUpdateLayerThumbnail?(id, thumbnail)
+                onUpdateLayerThumbnail?(layerId, thumbnail)
             }
         )
         super.init(
@@ -66,15 +60,28 @@ import TextureLayerView
     }
 
     private func bindData() {
+        // When the user ends a stroke, CanvasView merges the realtime stroke into the layer's `currentTexture` on the GPU
+        // (not into `canvasTexture`). This fires after that command buffer completes.
         strokeSessionDidCommit
             .sink { [weak self] in
-                self?.completeDrawing()
+                guard
+                    let self,
+                    let texture = currentTexture,
+                    let layerId = dependencies.textureLayers.selectedLayer?.id
+                else { return }
+
+                // Mark the layer until Storage catches up, then save `currentTexture` (debounced).
+                drawingPersistence.saveToStorageWithDebouncing(
+                    layerId: layerId,
+                    texture: texture,
+                    device: renderer.device,
+                    commandQueue: renderer.commandQueue
+                )
             }
             .store(in: &cancellables)
     }
 
     override public func initializeCanvas(_ textureSize: CGSize) async throws {
-        liveStorage.resetActiveLayer()
         try await super.initializeCanvas(textureSize)
 
         try viewModel.initializeTextures(textureSize)
@@ -82,14 +89,8 @@ import TextureLayerView
         try await updateFullCanvas()
     }
 
-    private func completeDrawing() {
-        guard let texture = currentTexture else { return }
-
-        liveStorage.scheduleSaveAfterStroke(
-            texture: texture,
-            device: renderer.device,
-            commandQueue: renderer.commandQueue
-        )
+    public func throwIfUnsavedDrawing() throws {
+        try drawingPersistence.throwIfUnsavedDrawing()
     }
 
     public func updateFullCanvas() async throws {
@@ -108,7 +109,6 @@ import TextureLayerView
         try await newCommandBuffer.commitAndWaitAsync()
 
         try setCurrentTexture(currentTexture)
-        liveStorage.setActiveLayer(selectedLayer.id)
 
         updateCanvasDisplay()
     }

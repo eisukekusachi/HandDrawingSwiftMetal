@@ -342,6 +342,7 @@ extension HandDrawingViewController {
                 defer { self.showActivityIndicator(false) }
 
                 do {
+                    try self.canvasView.throwIfUnsavedDrawing()
                     try await self.viewModel.saveFile(
                         thumbnail: self.canvasView.thumbnail,
                         zipFileURL: self.viewModel.fileURL(
@@ -349,7 +350,7 @@ extension HandDrawingViewController {
                         )
                     )
                 } catch {
-                    self.showAlert(error)
+                    self.viewModel.showError(error)
                 }
             }
         }
@@ -677,12 +678,13 @@ extension HandDrawingViewController {
             defer { showActivityIndicator(false) }
 
             do {
+                try canvasView.throwIfUnsavedDrawing()
                 try await viewModel.clearCanvas(
                     device: sharedDevice,
                     commandQueue: canvasView.sharedCommandQueue
                 )
             } catch {
-                showAlert(error)
+                viewModel.showError(error)
             }
         }
     }

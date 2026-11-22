@@ -44,6 +44,7 @@ private extension HandDrawingViewController {
             defer { showActivityIndicator(false) }
 
             do {
+                try canvasView.throwIfUnsavedDrawing()
                 try await viewModel.createFile(
                     fileName: Calendar.currentDate,
                     device: sharedDevice,
@@ -51,7 +52,7 @@ private extension HandDrawingViewController {
                 )
                 presentedViewController?.dismiss(animated: true)
             } catch {
-                showAlert(error)
+                viewModel.showError(error)
             }
         }
     }
@@ -84,12 +85,13 @@ private extension HandDrawingViewController {
             defer { showActivityIndicator(false) }
 
             do {
+                try canvasView.throwIfUnsavedDrawing()
                 try await viewModel.loadFile(
                     zipFileURL: zipFileURL
                 )
                 presentedViewController?.dismiss(animated: true)
             } catch {
-                showAlert(error)
+                viewModel.showError(error)
             }
         }
     }

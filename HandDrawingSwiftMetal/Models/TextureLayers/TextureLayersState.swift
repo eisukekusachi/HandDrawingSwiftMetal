@@ -111,11 +111,17 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
     }
 
     func addLayer() async throws {
+        guard let canvasView else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Unable to load required data")
+            )
+        }
+        try canvasView.throwIfUnsavedDrawing()
         guard
             let repository,
             let device,
-            let commandQueue,
-            let canvasView
+            let commandQueue
         else {
             throw NSError(
                 title: String(localized: "Error"),
@@ -171,8 +177,9 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
     }
 
     func removeLayer(id: LayerId) async throws -> Bool {
+        guard let canvasView else { return false }
+        try canvasView.throwIfUnsavedDrawing()
         guard
-            canvasView != nil,
             let repository,
             layerModels.count > 1,
             let index = layerModels.firstIndex(where: { $0.id == id }),
@@ -208,6 +215,8 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
     }
 
     func moveLayers(from source: IndexSet, to destination: Int) throws {
+        guard let canvasView else { return }
+        try canvasView.throwIfUnsavedDrawing()
         moveLayer(
             indices: .init(
                 sourceIndexSet: source,
@@ -218,11 +227,15 @@ class TextureLayersState: ObservableObject, TextureLayersProtocol, TextureLayers
     }
 
     func selectLayer(id: LayerId) throws {
+        guard let canvasView else { return }
+        try canvasView.throwIfUnsavedDrawing()
         selectLayer(id)
         refreshCanvas()
     }
 
     func setVisibility(id: LayerId, isVisible: Bool) throws {
+        guard let canvasView else { return }
+        try canvasView.throwIfUnsavedDrawing()
         update(id, isVisible: isVisible)
         refreshCanvas()
     }

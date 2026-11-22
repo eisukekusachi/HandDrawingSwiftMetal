@@ -7,6 +7,17 @@
     "Delete" : {
       "extractionState" : "manual"
     },
+    "error.title" : {
+      "comment" : "Generic error alert or toast title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        }
+      }
+    },
     "Error" : {
       "extractionState" : "manual"
     },
@@ -25,6 +36,17 @@
     },
     "Invalid Value" : {
       "extractionState" : "manual"
+    },
+    "textureLayerCanvasDrawing.saveInProgress" : {
+      "comment" : "Toast when a layer action is blocked until the current stroke save completes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving is in progress. Please try again."
+          }
+        }
+      }
     },
     "Success" : {
       "comment" : "Title of a success toast message.",

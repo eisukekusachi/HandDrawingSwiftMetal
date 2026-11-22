@@ -201,6 +201,12 @@ extension HandDrawingViewModel {
     }
 
     func showError(_ error: Error) {
+        // A debounced stroke save is still running. The failure is transient—wait briefly and retry
+        // so show a toast instead of a blocking alert.
+        if TextureLayerCanvasDrawingPersistence.isSaveInProgressError(error) {
+            showToast(.init(error: error))
+            return
+        }
         alertSubject.send(error)
     }
 

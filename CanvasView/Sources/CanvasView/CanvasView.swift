@@ -19,7 +19,8 @@ open class CanvasView: UIView, CanvasUpdating {
         )
     }
 
-    /// Emits when a stroke session was committed.
+    /// Emits after the GPU finishes merging the ended stroke from the realtime texture into `currentTexture`.
+    /// Not emitted for cancelled strokes or when nothing was drawn.
     public var strokeSessionDidCommit: AnyPublisher<Void, Never> {
         viewModel.strokeSessionDidCommitSubject.eraseToAnyPublisher()
     }
