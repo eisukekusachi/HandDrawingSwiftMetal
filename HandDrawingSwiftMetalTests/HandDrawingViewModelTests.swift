@@ -2,6 +2,7 @@
 //  Created by Eisuke Kusachi
 //
 
+import Combine
 import Core
 import CoreGraphics
 @preconcurrency import CoreData
@@ -15,6 +16,68 @@ import TextureLayerView
 struct HandDrawingViewModelTests {
 
     private typealias Subject = HandDrawingViewModel
+
+    @MainActor
+    struct ShowError {
+
+        private func testDependencies() -> HandDrawingViewDependencies {
+            .init(
+                localTextureFileRepository: TextureRepositoryStub(),
+                projectCoreDataStorage: CoreDataStorage(
+                    inMemory: "ProjectStorage",
+                    bundle: Bundle(for: CoreDataProjectStorage.self)
+                ),
+                textureLayersCoreDataStorage: CoreDataStorage(
+                    inMemory: "TextureLayerStorage",
+                    bundle: Bundle(for: CoreDataTextureLayerStorage.self)
+                ),
+                drawingToolCoreDataStorage: CoreDataStorage(
+                    inMemory: "DrawingToolStorage",
+                    bundle: Bundle(for: CoreDataDrawingToolStorage.self)
+                )
+            )
+        }
+
+        @Test
+        func `When the error is an unsaved-drawing error, it publishes a toast`() {
+            let subject = Subject(dependencies: testDependencies())
+            var toasts: [ToastMessage] = []
+            var alertErrors: [Error] = []
+            let toastSubscription = subject.toast.sink { toasts.append($0) }
+            let alertSubscription = subject.alert.sink { alertErrors.append($0) }
+            defer {
+                _ = toastSubscription
+                _ = alertSubscription
+            }
+
+            let persistenceError = TextureLayerCanvasDrawingPersistence.saveInProgressError
+            subject.showError(persistenceError)
+
+            #expect(toasts.count == 1)
+            #expect(toasts[0].title == persistenceError.localizedFailureReason)
+            #expect(alertErrors.isEmpty)
+        }
+
+        @Test
+        func `When the error is a generic NSError, it publishes an alert`() {
+            let subject = Subject(dependencies: testDependencies())
+            var toasts: [ToastMessage] = []
+            var alertErrors: [Error] = []
+            let toastSubscription = subject.toast.sink { toasts.append($0) }
+            let alertSubscription = subject.alert.sink { alertErrors.append($0) }
+            defer {
+                _ = toastSubscription
+                _ = alertSubscription
+            }
+
+            let nsError = NSError(title: "Error", message: "Something failed")
+            subject.showError(nsError)
+
+            #expect(toasts.isEmpty)
+            #expect(alertErrors.count == 1)
+            #expect((alertErrors[0] as NSError).localizedFailureReason == "Something failed")
+        }
+    }
 
     @MainActor
     struct SetupTextureLayers {

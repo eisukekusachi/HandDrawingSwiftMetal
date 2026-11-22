@@ -1,8 +1,5 @@
 //
-//  ToastMessage.swift
-//  HandDrawingSwiftMetal
-//
-//  Created by Eisuke Kusachi on 2024/05/04.
+//  Created by Eisuke Kusachi
 //
 
 import UIKit

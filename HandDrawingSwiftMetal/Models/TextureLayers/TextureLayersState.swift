@@ -5,6 +5,7 @@
 import CanvasView
 import Combine
 import Core
+import SwiftUI
 import TextureLayerView
 import UIKit
 
