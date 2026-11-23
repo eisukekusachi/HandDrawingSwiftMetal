@@ -202,9 +202,6 @@ extension HandDrawingViewModel {
         )
     }
 
-    func showToast(_ model: ToastMessage) {
-        toast.send(model)
-    }
 }
 
 private extension HandDrawingViewModel {
