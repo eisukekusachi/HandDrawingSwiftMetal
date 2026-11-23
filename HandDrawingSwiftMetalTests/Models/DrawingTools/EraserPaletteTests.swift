@@ -5,6 +5,7 @@
 //  Created by Eisuke Kusachi on 2025/08/25.
 //
 
+import PaletteView
 import Testing
 import UIKit
 @testable import HandDrawingSwiftMetal

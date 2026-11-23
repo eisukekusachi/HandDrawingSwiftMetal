@@ -102,7 +102,7 @@ struct HandDrawingViewModelTests {
         }
 
         @Test
-        func `When Core Data has no layer metadata, it installs a blank layer`() async throws {
+        func `On first launch, it initializes layers with the fallback texture size`() async throws {
             let fallbackTextureSize = TestUtils.randomSize()
             let textureRepository = TextureRepositoryStub()
             let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
@@ -126,6 +126,39 @@ struct HandDrawingViewModelTests {
             #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
             #expect(subject.undoableTextureLayers.layerModels.count == 1)
             #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.isEmpty)
+        }
+
+        @Test
+        func `When the saved layer list is empty, it initializes with the fallback texture size`() async throws {
+            let (savedTextureSize, fallbackTextureSize) = (TestUtils.randomSize(), TestUtils.randomSize())
+            let textureLayersCoreDataStorage = makeInMemoryCoreDataStorage()
+            try makeTextureLayerArrayEntityInCoreData(
+                context: textureLayersCoreDataStorage.viewContext,
+                layers: [],
+                textureSize: savedTextureSize
+            )
+            let textureRepository = TextureRepositoryStub()
+            let (device, commandQueue) = try makeMetal()
+
+            let subject: Subject = .init(
+                dependencies: HandDrawingViewModelTests.dependencies(
+                    localTextureFileRepository: textureRepository,
+                    textureLayersCoreDataStorage: textureLayersCoreDataStorage
+                )
+            )
+
+            let size = try await subject.setupTextureLayers(
+                fallbackTextureSize: fallbackTextureSize,
+                device: device,
+                commandQueue: commandQueue
+            )
+
+            #expect(size == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.textureSize == fallbackTextureSize)
+            #expect(subject.undoableTextureLayers.layerModels.count == 1)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.count == 1)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.first?.ids.isEmpty == true)
+            #expect(textureRepository.validateTextureFilesInLocalDirectoryCalls.first?.textureSize == savedTextureSize)
         }
 
         @Test
