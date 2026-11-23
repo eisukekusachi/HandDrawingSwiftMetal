@@ -73,7 +73,9 @@ struct TextureLayerCanvasDrawingPersistenceTests {
         )
         #expect(subject.activeLayerId == layerId)
 
-        try await Task.sleep(nanoseconds: 600_000_000)
+        try await waitUntilSaveCompleted {
+            savedLayerIds == [layerId] && subject.activeLayerId == nil
+        }
 
         #expect(savedLayerIds == [layerId])
         // Cleared after saveLayerData succeeds.
@@ -105,10 +107,28 @@ struct TextureLayerCanvasDrawingPersistenceTests {
             commandQueue: commandQueue
         )
 
-        try await Task.sleep(nanoseconds: 600_000_000)
+        try await waitUntilSaveCompleted {
+            subject.activeLayerId == nil
+        }
 
         // Cleared after a failed attempt so layer actions are not left blocked (data may still be only on GPU).
         #expect(subject.activeLayerId == nil)
         try subject.throwIfUnsavedDrawing()
     }
+}
+
+@MainActor
+private func waitUntilSaveCompleted(
+    timeoutNanoseconds: UInt64 = 5_000_000_000,
+    pollIntervalNanoseconds: UInt64 = 50_000_000,
+    _ condition: @escaping () -> Bool
+) async throws {
+    let deadline = DispatchTime.now().uptimeNanoseconds + timeoutNanoseconds
+    while DispatchTime.now().uptimeNanoseconds < deadline {
+        if condition() {
+            return
+        }
+        try await Task.sleep(nanoseconds: pollIntervalNanoseconds)
+    }
+    Issue.record("Timed out waiting for debounced texture save to finish")
 }
