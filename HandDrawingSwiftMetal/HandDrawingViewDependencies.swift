@@ -9,8 +9,10 @@ import TextureLayerView
 @MainActor
 final class HandDrawingViewDependencies {
 
-    /// File operations for project zip files in the Documents directory.
     let fileManager: FileManaging
+
+    /// Zip-based project file I/O in Documents (save, open, delete, rename).
+    let documentsProjectFileStorage: DocumentsProjectFileStorage
 
     /// Local on-disk texture cache (Application Support). Kept so it remains after the app terminates.
     let localTextureFileRepository: MTLTextureDataRepositoryProtocol
@@ -39,6 +41,7 @@ final class HandDrawingViewDependencies {
 
     init(
         fileManager: FileManaging? = nil,
+        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         localTextureFileRepository: MTLTextureDataRepositoryProtocol? = nil,
         textureRepository: MTLTextureRepositoryProtocol? = nil,
         projectCoreDataStorage: CoreDataStorage = CoreDataStorage(xcdatamodeldName: "ProjectStorage"),
@@ -46,6 +49,9 @@ final class HandDrawingViewDependencies {
         drawingToolCoreDataStorage: CoreDataStorage = CoreDataStorage(xcdatamodeldName: "DrawingToolStorage")
     ) {
         self.fileManager = fileManager ?? FileManagerWrapper()
+        self.documentsProjectFileStorage = documentsProjectFileStorage ?? DocumentsProjectFileStorage(
+            fileManager: self.fileManager
+        )
         // `shared` is `@MainActor` / actor-isolated; default arguments are evaluated in a nonisolated context,
         // so defaults are applied here instead of in the parameter list.
         self.localTextureFileRepository = localTextureFileRepository ?? LocalTextureFileRepository.shared
