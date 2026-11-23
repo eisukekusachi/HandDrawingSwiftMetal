@@ -54,9 +54,6 @@ final class HandDrawingViewModel: ObservableObject {
     /// A publisher that emits a request to show an error alert
     let alert: PassthroughSubject<String, Never> = .init()
 
-    /// Zip-based project file I/O in Documents (save, open, delete, rename).
-    let documentsProjectFileStorage: DocumentsProjectFileStorage
-
     let dependencies: HandDrawingViewDependencies
 
     /// Updates the canvas and drawing components.
@@ -66,14 +63,12 @@ final class HandDrawingViewModel: ObservableObject {
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsProjectFileStorage = documentsProjectFileStorage ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange

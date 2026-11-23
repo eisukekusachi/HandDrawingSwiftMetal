@@ -33,8 +33,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                )
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
@@ -77,8 +79,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager)
+                )
             )
 
             subject.project.update(projectName: "first")
@@ -107,8 +111,10 @@ struct HandDrawingViewModelFileTests {
             let fileManager = MockFileManager()
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager)
+                )
             )
             subject.fileList.append(.init(fileURL: zipURL(named: "first", fileManager: fileManager)))
             subject.fileList.append(.init(fileURL: zipURL(named: "second", fileManager: fileManager)))
@@ -138,8 +144,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                )
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
@@ -174,9 +182,13 @@ fileprivate func zipURL(named name: String, fileManager: MockFileManager) -> URL
 }
 
 @MainActor
-fileprivate func dependencies(fileManager: MockFileManager = MockFileManager()) -> HandDrawingViewDependencies {
+fileprivate func dependencies(
+    fileManager: MockFileManager = MockFileManager(),
+    documentsProjectFileStorage: DocumentsProjectFileStorage? = nil
+) -> HandDrawingViewDependencies {
     .init(
         fileManager: fileManager,
+        documentsProjectFileStorage: documentsProjectFileStorage,
         localTextureFileRepository: TextureRepositoryStub(),
         projectCoreDataStorage: CoreDataStorage(
             inMemory: "ProjectStorage",

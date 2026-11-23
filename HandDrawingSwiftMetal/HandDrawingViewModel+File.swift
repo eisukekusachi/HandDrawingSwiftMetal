@@ -33,7 +33,7 @@ extension HandDrawingViewModel {
 
             do {
                 // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
+                return try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
                     let projectMetaData = try ProjectSnapshot(in: temporaryDirectoryURL)
                     let thumbnailData = try? Data(
                         contentsOf: temporaryDirectoryURL.appendingPathComponent(
@@ -85,7 +85,7 @@ extension HandDrawingViewModel {
             )
         }
 
-        try documentsProjectFileStorage.removeFile(at: item.fileURL)
+        try dependencies.documentsProjectFileStorage.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
     }
 
@@ -137,7 +137,7 @@ extension HandDrawingViewModel {
             return oldTitle
         }
 
-        try documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
+        try dependencies.documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
 
         if oldFileURL == fileURL(projectName: project.currentProjectName) {
             project.update(
