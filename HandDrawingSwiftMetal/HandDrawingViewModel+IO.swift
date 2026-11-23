@@ -105,7 +105,7 @@ extension HandDrawingViewModel {
     func readProject(
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
+        try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { temporaryDirectoryURL in
             let newTextureLayers = try TextureLayersSnapshot(in: temporaryDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(
@@ -116,7 +116,7 @@ extension HandDrawingViewModel {
                 throw error
             }
 
-            try await dependencies.localTextureFileRepository.restoreStorage(
+            try await self.dependencies.localTextureFileRepository.restoreStorage(
                 from: temporaryDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
                 textureSize: newTextureLayers.textureSize
