@@ -709,7 +709,7 @@ extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            showToast(.success)
+            viewModel.toast.send(.success)
         }
     }
 }
