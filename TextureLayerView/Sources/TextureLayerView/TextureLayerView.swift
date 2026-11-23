@@ -31,7 +31,9 @@ public struct TextureLayerView: View {
             ReversedTextureLayerListView(
                 viewModel: viewModel,
                 onMove: { source, destination in
-                    viewModel.onMoveLayer(source: source, destination: destination)
+                    Task {
+                        await viewModel.onMoveLayer(source: source, destination: destination)
+                    }
                 }
             )
 
@@ -103,13 +105,13 @@ final class PreviewTextureLayers: TextureLayersProtocol {
 
     func renameLayer(id: LayerId, title: String) throws {}
 
-    func moveLayers(from source: IndexSet, to destination: Int) throws {}
+    func moveLayers(from source: IndexSet, to destination: Int) async throws {}
 
-    func selectLayer(id: LayerId) throws {
+    func selectLayer(id: LayerId) async throws {
         selectedLayerId = id
     }
 
-    func setVisibility(id: LayerId, isVisible: Bool) throws {
+    func setVisibility(id: LayerId, isVisible: Bool) async throws {
         guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
         layers[index] = layers[index].updated(isVisible: isVisible)
     }

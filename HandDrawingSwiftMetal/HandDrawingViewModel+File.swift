@@ -69,7 +69,7 @@ extension HandDrawingViewModel {
             from: zipFileURL
         )
 
-        apply(loaded, projectName: zipFileURL.baseName)
+        try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
 
@@ -96,7 +96,7 @@ extension HandDrawingViewModel {
         let loaded = try await readProject(
             from: zipFileURL
         )
-        apply(loaded, projectName: zipFileURL.baseName)
+        try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
 
@@ -188,9 +188,9 @@ extension HandDrawingViewModel {
 }
 
 private extension HandDrawingViewModel {
-    func apply(_ loaded: ProjectContent, projectName: String) {
+    func apply(_ loaded: ProjectContent, projectName: String) throws {
         if let layers = loaded.textureLayers {
-            undoableTextureLayers.setLayers(layers)
+            try undoableTextureLayers.setLayers(layers)
         }
 
         project.update(

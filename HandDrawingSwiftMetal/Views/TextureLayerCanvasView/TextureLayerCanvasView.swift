@@ -4,14 +4,15 @@
 
 import CanvasView
 import Combine
+import Core
 import TextureLayerView
 
 @preconcurrency import MetalKit
 
 @objc public final class TextureLayerCanvasView: CanvasView, TextureLayerCanvasUpdating {
 
-    /// A debouncer used to prevent continuous input during drawing
-    private let drawingDebouncer: DrawingDebouncer = .init(delay: 0.25)
+    /// Persists the in-progress drawing on `currentTexture` to Storage.
+    private let drawingPersistence: TextureLayerCanvasDrawingPersistence
 
     private let dependencies: TextureLayerCanvasViewDependencies
 
@@ -37,6 +38,15 @@ import TextureLayerView
         self.dependencies = dependencies
         self.onUpdateLayerThumbnail = onUpdateLayerThumbnail
         self.configuration = configuration
+        self.drawingPersistence = .init(
+            saveLayerData: { layerId, data, thumbnail in
+                try await dependencies.localTextureFileRepository.writeDataToDisk(
+                    id: layerId,
+                    data: data
+                )
+                onUpdateLayerThumbnail?(layerId, thumbnail)
+            }
+        )
         super.init(
             device: device,
             configuration: configuration,
@@ -50,9 +60,23 @@ import TextureLayerView
     }
 
     private func bindData() {
+        // When the user ends a stroke, CanvasView merges the realtime stroke into the layer's `currentTexture` on the GPU
+        // (not into `canvasTexture`). This fires after that command buffer completes.
         strokeSessionDidCommit
             .sink { [weak self] in
-                self?.completeDrawing()
+                guard
+                    let self,
+                    let texture = currentTexture,
+                    let layerId = dependencies.textureLayers.selectedLayer?.id
+                else { return }
+
+                // Save `currentTexture` to Storage after a short delay.
+                drawingPersistence.saveToStorageWithDebouncing(
+                    layerId: layerId,
+                    texture: texture,
+                    device: renderer.device,
+                    commandQueue: renderer.commandQueue
+                )
             }
             .store(in: &cancellables)
     }
@@ -65,34 +89,8 @@ import TextureLayerView
         try await updateFullCanvas()
     }
 
-    private func completeDrawing() {
-        guard
-            let texture = currentTexture,
-            let layerId = dependencies.textureLayers.selectedLayer?.id
-        else { return }
-
-        let device = renderer.device
-        let commandQueue = renderer.commandQueue
-
-        drawingDebouncer.perform { [weak self] in
-            guard let `self` else { return }
-            do {
-                let textureData = try await texture.data(
-                    device: device,
-                    commandQueue: commandQueue
-                )
-                try await self.viewModel.saveTextureToLocal(
-                    layerId: layerId,
-                    textureData: textureData
-                )
-                let thumbnail = texture.makeThumbnail()
-                await MainActor.run {
-                    self.onUpdateLayerThumbnail?(layerId, thumbnail)
-                }
-            } catch {
-                Logger.error(error)
-            }
-        }
+    public func throwIfUnsavedDrawing() throws {
+        try drawingPersistence.throwIfUnsavedDrawing()
     }
 
     public func updateFullCanvas() async throws {

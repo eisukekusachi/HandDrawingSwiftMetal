@@ -24,15 +24,17 @@ struct ReversedTextureLayerListView: View {
                     layer: layer,
                     isSelected: isSelected,
                     didTapRow: { targetLayer in
-                        viewModel.onTapCell(
-                            targetLayer.id
-                        )
+                        Task {
+                            await viewModel.onTapCell(targetLayer.id)
+                        }
                     },
                     didTapVisibleButton: { targetLayer in
-                        viewModel.onTapVisibleButton(
-                            targetLayer.id,
-                            isVisible: !targetLayer.isVisible
-                        )
+                        Task {
+                            await viewModel.onTapVisibleButton(
+                                targetLayer.id,
+                                isVisible: !targetLayer.isVisible
+                            )
+                        }
                     }
                 )
                 .listRowBackground(

@@ -186,7 +186,7 @@ extension HandDrawingViewModel {
             commandQueue: commandQueue
         )
         // Replace layer list with this layer and set canvas size.
-        undoableTextureLayers.setLayers(
+        try undoableTextureLayers.setLayers(
             [layer],
             textureSize: textureSize
         )
@@ -201,6 +201,12 @@ extension HandDrawingViewModel {
     }
 
     func showError(_ error: Error) {
+        // A debounced stroke save is still running. The failure is transient—wait briefly and retry
+        // so show a toast instead of a blocking alert.
+        if TextureLayerCanvasDrawingPersistence.isSaveInProgressError(error) {
+            showToast(.init(error: error))
+            return
+        }
         alertSubject.send(error)
     }
 
@@ -223,7 +229,7 @@ private extension HandDrawingViewModel {
             ids: snapshot.layers.map(\.id),
             textureSize: snapshot.textureSize
         )
-        undoableTextureLayers.setLayers(snapshot)
+        try undoableTextureLayers.setLayers(snapshot)
         return snapshot.textureSize
     }
 
