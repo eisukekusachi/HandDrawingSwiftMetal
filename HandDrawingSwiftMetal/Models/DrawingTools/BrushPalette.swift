@@ -30,12 +30,13 @@ final class BrushPalette: ObservableObject, ColorPaletteDisplayProtocol, ColorPa
 
     public init(
         id: UUID = UUID(),
-        colors: [UIColor] = initializeColors,
+        colors: [UIColor]? = nil,
         selectedIndex: Int = 0
     ) {
         self.id = id
 
-        let newColors = colors.isEmpty ? [.black] : colors
+        let resolvedColors = colors ?? initializeColors
+        let newColors = resolvedColors.isEmpty ? [.black] : resolvedColors
         self.items = Self.makeItems(from: newColors)
         self.selectedIndex = max(0, min(selectedIndex, newColors.count - 1))
     }
