@@ -20,31 +20,13 @@ struct HandDrawingViewModelTests {
     @MainActor
     struct ShowError {
 
-        private func testDependencies() -> HandDrawingViewDependencies {
-            .init(
-                localTextureFileRepository: TextureRepositoryStub(),
-                projectCoreDataStorage: CoreDataStorage(
-                    inMemory: "ProjectStorage",
-                    bundle: Bundle(for: CoreDataProjectStorage.self)
-                ),
-                textureLayersCoreDataStorage: CoreDataStorage(
-                    inMemory: "TextureLayerStorage",
-                    bundle: Bundle(for: CoreDataTextureLayerStorage.self)
-                ),
-                drawingToolCoreDataStorage: CoreDataStorage(
-                    inMemory: "DrawingToolStorage",
-                    bundle: Bundle(for: CoreDataDrawingToolStorage.self)
-                )
-            )
-        }
-
         @Test
         func `When the error is an unsaved-drawing error, it publishes a toast`() {
-            let subject = Subject(dependencies: testDependencies())
+            let subject = Subject(dependencies: HandDrawingViewModelTests.dependencies())
             var toasts: [ToastMessage] = []
-            var alertErrors: [Error] = []
+            var alertMessages: [String] = []
             let toastSubscription = subject.toast.sink { toasts.append($0) }
-            let alertSubscription = subject.alert.sink { alertErrors.append($0) }
+            let alertSubscription = subject.alert.sink { alertMessages.append($0) }
             defer {
                 _ = toastSubscription
                 _ = alertSubscription
@@ -55,27 +37,25 @@ struct HandDrawingViewModelTests {
 
             #expect(toasts.count == 1)
             #expect(toasts[0].title == persistenceError.localizedFailureReason)
-            #expect(alertErrors.isEmpty)
+            #expect(alertMessages.isEmpty)
         }
 
         @Test
-        func `When the error is a generic NSError, it publishes an alert`() {
-            let subject = Subject(dependencies: testDependencies())
+        func `When the error is a generic NSError, it publishes an alert message`() {
+            let subject = Subject(dependencies: HandDrawingViewModelTests.dependencies())
             var toasts: [ToastMessage] = []
-            var alertErrors: [Error] = []
+            var alertMessages: [String] = []
             let toastSubscription = subject.toast.sink { toasts.append($0) }
-            let alertSubscription = subject.alert.sink { alertErrors.append($0) }
+            let alertSubscription = subject.alert.sink { alertMessages.append($0) }
             defer {
                 _ = toastSubscription
                 _ = alertSubscription
             }
 
-            let nsError = NSError(title: "Error", message: "Something failed")
-            subject.showError(nsError)
+            subject.showError(NSError(title: "Error", message: "Something failed"))
 
             #expect(toasts.isEmpty)
-            #expect(alertErrors.count == 1)
-            #expect((alertErrors[0] as NSError).localizedFailureReason == "Something failed")
+            #expect(alertMessages == ["Something failed"])
         }
     }
 
@@ -98,7 +78,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: dependencies(
+                dependencies: HandDrawingViewModelTests.dependencies(
                     localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -129,7 +109,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: dependencies(
+                dependencies: HandDrawingViewModelTests.dependencies(
                     localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -162,7 +142,7 @@ struct HandDrawingViewModelTests {
             let (device, commandQueue) = try makeMetal()
 
             let subject: Subject = .init(
-                dependencies: dependencies(
+                dependencies: HandDrawingViewModelTests.dependencies(
                     localTextureFileRepository: textureRepository,
                     textureLayersCoreDataStorage: textureLayersCoreDataStorage
                 )
@@ -184,12 +164,12 @@ struct HandDrawingViewModelTests {
     }
 }
 
-extension HandDrawingViewModelTests.SetupTextureLayers {
+extension HandDrawingViewModelTests {
 
     /// Test-only `HandDrawingViewDependencies` using in-memory Core Data stacks (no SQLite).
-    private func dependencies(
-        localTextureFileRepository: MTLTextureDataRepositoryProtocol,
-        textureLayersCoreDataStorage: CoreDataStorage
+    fileprivate static func dependencies(
+        localTextureFileRepository: MTLTextureDataRepositoryProtocol = TextureRepositoryStub(),
+        textureLayersCoreDataStorage: CoreDataStorage? = nil
     ) -> HandDrawingViewDependencies {
         .init(
             localTextureFileRepository: localTextureFileRepository,
@@ -197,13 +177,19 @@ extension HandDrawingViewModelTests.SetupTextureLayers {
                 inMemory: "ProjectStorage",
                 bundle: Bundle(for: CoreDataProjectStorage.self)
             ),
-            textureLayersCoreDataStorage: textureLayersCoreDataStorage,
+            textureLayersCoreDataStorage: textureLayersCoreDataStorage ?? CoreDataStorage(
+                inMemory: "TextureLayerStorage",
+                bundle: Bundle(for: CoreDataTextureLayerStorage.self)
+            ),
             drawingToolCoreDataStorage: CoreDataStorage(
                 inMemory: "DrawingToolStorage",
                 bundle: Bundle(for: CoreDataDrawingToolStorage.self)
             )
         )
     }
+}
+
+extension HandDrawingViewModelTests.SetupTextureLayers {
 
     private func makeMetal() throws -> (MTLDevice, MTLCommandQueue) {
         let device = try #require(MTLCreateSystemDefaultDevice())
