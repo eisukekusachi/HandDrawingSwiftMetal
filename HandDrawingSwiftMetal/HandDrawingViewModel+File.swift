@@ -9,10 +9,6 @@ import Metal
 import UIKit
 
 extension HandDrawingViewModel {
-    func isOpenFile(at index: Int) -> Bool {
-        guard let item = fileList.item(index) else { return false }
-        return item.fileURL == fileURL(projectName: project.currentProjectName)
-    }
 
     /// Scans the injected Documents directory and builds the file list.
     func setupFileListFromDocumentsDirectory() async {
