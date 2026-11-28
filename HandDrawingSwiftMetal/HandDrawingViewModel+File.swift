@@ -68,8 +68,6 @@ extension HandDrawingViewModel {
         try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
-
-        requestingShowToast.send(.success)
     }
 
     /// Deletes the saved file at `index` from disk and the file list.
@@ -95,8 +93,6 @@ extension HandDrawingViewModel {
         try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
-
-        requestingShowToast.send(.success)
     }
 
     /// Renames a saved file on disk and updates the file list.
@@ -169,8 +165,6 @@ extension HandDrawingViewModel {
         project.update(updatedAt: updatedAt)
         upsertFile(thumbnail: thumbnail)
         fileList.sortItems()
-
-        requestingShowToast.send(.success)
     }
 
     func upsertFile(thumbnail: UIImage?) {

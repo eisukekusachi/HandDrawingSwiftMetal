@@ -349,6 +349,7 @@ extension HandDrawingViewController {
                             projectName: self.viewModel.project.currentProjectName
                         )
                     )
+                    self.viewModel.showToast(.success)
                 } catch {
                     self.viewModel.showError(error)
                 }
@@ -709,7 +710,7 @@ extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            viewModel.requestingShowToast.send(.success)
+            viewModel.showToast(.success)
         }
     }
 }
