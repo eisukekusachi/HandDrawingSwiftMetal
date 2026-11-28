@@ -164,9 +164,8 @@ struct HandDrawingViewModelFileTests {
             subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 0), fileURL: thirdURL))
             subject.fileList.sortItems()
 
-            let textureSize = TestUtils.randomSize()
             try await subject.makeBlankLayer(
-                textureSize: textureSize,
+                textureSize: TestUtils.randomSize(),
                 device: device,
                 commandQueue: commandQueue
             )

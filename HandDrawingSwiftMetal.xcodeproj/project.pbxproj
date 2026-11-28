@@ -124,6 +124,7 @@
 		D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */; };
 		D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */; };
 		D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */; };
+		D4F6B0032FBE120000C55A4D /* ProjectSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */; };
 		D4F8B2052FD2010500C55A4E /* FileView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F8B2062FD2010600C55A4E /* FileView */; };
 /* End PBXBuildFile section */
 
@@ -266,6 +267,7 @@
 		D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelTests.swift; sourceTree = "<group>"; };
 		D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelFileTests.swift; sourceTree = "<group>"; };
+		D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSnapshotTests.swift; sourceTree = "<group>"; };
 		D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+CoreData.swift"; sourceTree = "<group>"; };
 		D4F8B2042FD2010400C55A4E /* FileView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FileView; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -391,9 +393,18 @@
 			isa = PBXGroup;
 			children = (
 				D426FC622E5C4B3000CC116D /* DrawingTools */,
+				D4F6B0052FBE120000C55A4D /* Project */,
 				D4C3A07C3069000100009F91 /* TextureLayers */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D4F6B0052FBE120000C55A4D /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */,
+			);
+			path = Project;
 			sourceTree = "<group>";
 		};
 		D47FD3E52E2B20C600F3F514 /* Extensions */ = {
@@ -1015,6 +1026,7 @@
 				D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */,
 				D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */,
 				D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */,
+				D4F6B0032FBE120000C55A4D /* ProjectSnapshotTests.swift in Sources */,
 				D4E395052F95000100C55A4C /* DocumentsProjectFileStorageTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
