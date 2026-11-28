@@ -56,7 +56,7 @@ final class TextureLayerCanvasDrawingPersistence {
                     try await saveLayerData(layerId, textureData, texture.makeThumbnail())
                     activeLayerId = nil
                 } catch {
-                    Logger.error(error)
+                    Core.Logger.error(error)
                     activeLayerId = nil
                 }
             }
