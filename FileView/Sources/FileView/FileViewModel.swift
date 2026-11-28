@@ -152,19 +152,18 @@ extension FileViewModel {
     func confirmRename() {
         guard
             let index = selectedIndex,
-            let item = fileList.item(index)
+            fileList.item(index) != nil
         else { return }
 
-        let isOpenFile = item.fileURL == currentOpenFileURL
+        let isOpenFile = fileList.item(index)?.fileURL == currentOpenFileURL
 
-        guard let newTitle = eventHandler?.onTapRename(index, draftName) else {
-            return
-        }
+        eventHandler?.onTapRename(index, draftName)
 
-        selectedIndex = fileList.index(title: newTitle)
+        guard let updatedItem = fileList.item(index) else { return }
+        selectedIndex = fileList.index(title: updatedItem.title)
 
         if isOpenFile {
-            currentOpenFileURL = item.fileURL
+            currentOpenFileURL = updatedItem.fileURL
         }
     }
 

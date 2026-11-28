@@ -315,7 +315,6 @@ struct FileViewModelTests {
                     onTapRename: { index, name in
                         renamed = (index, name)
                         fileList.renameItem(title: "a", newTitle: name)
-                        return name
                     },
                     onTapDelete: { _ in },
                     onSelectItem: { _ in }
@@ -353,7 +352,6 @@ struct FileViewModelTests {
                     onTapCreate: {},
                     onTapRename: { _, name in
                         fileList.renameItem(title: "a", newTitle: name)
-                        return name
                     },
                     onTapDelete: { _ in },
                     onSelectItem: { openedURL = $0 }

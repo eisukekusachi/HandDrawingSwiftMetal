@@ -13,11 +13,19 @@ extension HandDrawingViewController {
     func showFileView() {
         let fileView = FileView(
             fileList: viewModel.fileList,
-            eventHandler: .init(
-                onTapCreate: { [weak self] in self?.onTapCreate() },
-                onTapRename: { [weak self] index, newName in self?.onTapRename(index, newName) },
-                onTapDelete: { [weak self] index in self?.onTapDelete(index) },
-                onSelectItem: { [weak self] zipFileURL in self?.onSelectItem(zipFileURL) }
+            eventHandler: FileViewEventHandler(
+                onTapCreate: { [weak self] in
+                    self?.viewModel.onTapCreate()
+                },
+                onTapRename: { [weak self] index, newName in
+                    self?.viewModel.onTapRename(index, newName)
+                },
+                onTapDelete: { [weak self] index in
+                    self?.viewModel.onTapDeleteFile(index)
+                },
+                onSelectItem: { [weak self] zipFileURL in
+                    self?.viewModel.onSelectFile(zipFileURL)
+                }
             ),
             currentOpenFileURL: viewModel.fileURL(
                 projectName: viewModel.project.currentProjectName
@@ -34,67 +42,5 @@ extension HandDrawingViewController {
         }
 
         present(vc, animated: true)
-    }
-}
-
-private extension HandDrawingViewController {
-    func onTapCreate() {
-        Task {
-            showActivityIndicator(true)
-            defer { showActivityIndicator(false) }
-
-            do {
-                try canvasView.throwIfUnsavedDrawing()
-                try await viewModel.createFile(
-                    fileName: Calendar.currentDate,
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
-                presentedViewController?.dismiss(animated: true)
-                viewModel.showToast(.success)
-            } catch {
-                viewModel.showError(error)
-            }
-        }
-    }
-
-    func onTapRename(_ index: Int, _ newName: String) -> String? {
-        do {
-            return try viewModel.renameFile(index: index, newName: newName)
-        } catch {
-            showAlert(error)
-            return nil
-        }
-    }
-
-    func onTapDelete(_ index: Int) {
-        Task {
-            showActivityIndicator(true)
-            defer { showActivityIndicator(false) }
-
-            do {
-                try viewModel.deleteFile(index: index)
-            } catch {
-                showAlert(error)
-            }
-        }
-    }
-
-    func onSelectItem(_ zipFileURL: URL) {
-        Task {
-            showActivityIndicator(true)
-            defer { showActivityIndicator(false) }
-
-            do {
-                try canvasView.throwIfUnsavedDrawing()
-                try await viewModel.loadFile(
-                    zipFileURL: zipFileURL
-                )
-                presentedViewController?.dismiss(animated: true)
-                viewModel.showToast(.success)
-            } catch {
-                viewModel.showError(error)
-            }
-        }
     }
 }

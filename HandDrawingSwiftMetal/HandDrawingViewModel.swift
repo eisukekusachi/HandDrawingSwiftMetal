@@ -57,6 +57,21 @@ final class HandDrawingViewModel: ObservableObject {
     /// A publisher that emits a request to clear the open canvas in place
     let requestingClearCanvas: PassthroughSubject<Void, Never> = .init()
 
+    /// A publisher that emits a request to create a new project file
+    let requestingCreateFile: PassthroughSubject<Void, Never> = .init()
+
+    /// A publisher that emits a request to save the open project file
+    let requestingSaveFile: PassthroughSubject<Void, Never> = .init()
+
+    /// A publisher that emits a request to load a project from a zip file
+    let requestingLoadFile: PassthroughSubject<URL, Never> = .init()
+
+    /// A publisher that emits a request to delete a saved file at the given list index
+    let requestingDeleteFile: PassthroughSubject<Int, Never> = .init()
+
+    /// A publisher that emits a request to rename a saved file at the given list index
+    let requestingRenameFile: PassthroughSubject<(Int, String), Never> = .init()
+
     let dependencies: HandDrawingViewDependencies
 
     /// Updates the canvas and drawing components.
@@ -100,6 +115,28 @@ final class HandDrawingViewModel: ObservableObject {
         undoableTextureLayers.setUndo(undoRegister: undoRegister)
 
         fetchDataFromCoreDataIfAvailable()
+    }
+
+    // MARK: - File view actions
+
+    func onTapCreate() {
+        requestingCreateFile.send()
+    }
+
+    func onTapSave() {
+        requestingSaveFile.send()
+    }
+
+    func onTapRename(_ index: Int, _ newName: String) {
+        requestingRenameFile.send((index, newName))
+    }
+
+    func onTapDeleteFile(_ index: Int) {
+        requestingDeleteFile.send(index)
+    }
+
+    func onSelectFile(_ zipFileURL: URL) {
+        requestingLoadFile.send(zipFileURL)
     }
 }
 
