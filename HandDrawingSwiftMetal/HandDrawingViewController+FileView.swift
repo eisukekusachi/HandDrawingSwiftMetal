@@ -51,6 +51,7 @@ private extension HandDrawingViewController {
                     commandQueue: canvasView.sharedCommandQueue
                 )
                 presentedViewController?.dismiss(animated: true)
+                viewModel.showToast(.success)
             } catch {
                 viewModel.showError(error)
             }
@@ -90,6 +91,7 @@ private extension HandDrawingViewController {
                     zipFileURL: zipFileURL
                 )
                 presentedViewController?.dismiss(animated: true)
+                viewModel.showToast(.success)
             } catch {
                 viewModel.showError(error)
             }
