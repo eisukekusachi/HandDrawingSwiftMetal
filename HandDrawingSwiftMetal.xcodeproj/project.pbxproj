@@ -25,7 +25,6 @@
 		D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */; };
 		D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */; };
 		D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */; };
-		D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */; };
 		D442BD072F937F4D00C55A4C /* UndoCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */; };
 		D44624652F9C546B00BE4E8A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D44624642F9C546B00BE4E8A /* Localizable.xcstrings */; };
 		D44B52B52DB3928000EE213C /* HandDrawingContentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D44B52AD2DB3928000EE213C /* HandDrawingContentView.xib */; };
@@ -35,7 +34,6 @@
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */; };
-		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */; };
 		D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
@@ -126,6 +124,7 @@
 		D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */; };
 		D4F5A0662FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */; };
 		D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */; };
+		D4F6B0032FBE120000C55A4D /* ProjectSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */; };
 		D4F8B2052FD2010500C55A4E /* FileView in Frameworks */ = {isa = PBXBuildFile; productRef = D4F8B2062FD2010600C55A4E /* FileView */; };
 /* End PBXBuildFile section */
 
@@ -165,7 +164,6 @@
 		D426FC9A2E5C895A00CC116D /* DrawingToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingToolTests.swift; sourceTree = "<group>"; };
 		D42C64922E5AFDDF0028F8DD /* DrawingTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingTool.swift; sourceTree = "<group>"; };
 		D43726BC2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataDrawingToolStorage.swift; sourceTree = "<group>"; };
-		D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSErrorExtensions.swift; sourceTree = "<group>"; };
 		D442BD062F937F4D00C55A4C /* UndoCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoCoordinator.swift; sourceTree = "<group>"; };
 		D44624642F9C546B00BE4E8A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		D44B52AC2DB3928000EE213C /* HandDrawingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingContentView.swift; sourceTree = "<group>"; };
@@ -269,6 +267,7 @@
 		D4F5A0612FBE0D0500C55A4D /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		D4F5A0632FBE0D0500C55A4D /* HandDrawingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelTests.swift; sourceTree = "<group>"; };
 		D4F5A0672FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandDrawingViewModelFileTests.swift; sourceTree = "<group>"; };
+		D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSnapshotTests.swift; sourceTree = "<group>"; };
 		D4F5A0672FBE0D0600C55A4D /* HandDrawingViewModel+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HandDrawingViewModel+CoreData.swift"; sourceTree = "<group>"; };
 		D4F8B2042FD2010400C55A4E /* FileView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FileView; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -278,7 +277,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */,
 				D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */,
 				D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */,
 				D4F8B2052FD2010500C55A4E /* FileView in Frameworks */,
@@ -395,9 +393,18 @@
 			isa = PBXGroup;
 			children = (
 				D426FC622E5C4B3000CC116D /* DrawingTools */,
+				D4F6B0052FBE120000C55A4D /* Project */,
 				D4C3A07C3069000100009F91 /* TextureLayers */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D4F6B0052FBE120000C55A4D /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				D4F6B0042FBE120000C55A4D /* ProjectSnapshotTests.swift */,
+			);
+			path = Project;
 			sourceTree = "<group>";
 		};
 		D47FD3E52E2B20C600F3F514 /* Extensions */ = {
@@ -405,7 +412,6 @@
 			children = (
 				D4C4C10C2F94000100C55A4C /* Collection.swift */,
 				D4C4C10D2F94000100C55A4C /* MTLCommandBuffer.swift */,
-				D442BCFE2F932A2B00C55A4C /* NSErrorExtensions.swift */,
 				D4CF04FF2B9D4CAF00849A2C /* UIButtonExtensions.swift */,
 				D41CACE42B9C023900B8C7C5 /* UIViewExtensions.swift */,
 				D49833F82E4A028200B6E89D /* UIStackViewExtensions.swift */,
@@ -766,7 +772,6 @@
 			);
 			name = HandDrawingSwiftMetal;
 			packageProductDependencies = (
-				D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */,
 				D4F0BF052E38F79600C3E441 /* CanvasView */,
 				D4F8B2062FD2010600C55A4E /* FileView */,
 				D46A2CE42E424E8900D638AE /* TextureLayerView */,
@@ -848,7 +853,6 @@
 			);
 			mainGroup = D4E1ECD02752388C00D4A23D;
 			packageReferences = (
-				D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
 			projectDirPath = "";
@@ -968,7 +972,6 @@
 				D42C64932E5AFDDF0028F8DD /* DrawingTool.swift in Sources */,
 				D41C72192E6C47E200D524DE /* CoreDataBrushPaletteStorage.swift in Sources */,
 				D43726BD2E76D0D4006E6FCD /* CoreDataDrawingToolStorage.swift in Sources */,
-				D442BCFF2F932A2B00C55A4C /* NSErrorExtensions.swift in Sources */,
 				D4E1ECDD2752388C00D4A23D /* AppDelegate.swift in Sources */,
 				D4BF61122E4892A600CE94F4 /* HandDrawingViewModel.swift in Sources */,
 				D4F1A0092FBE010400C55A4D /* ProjectContent.swift in Sources */,
@@ -1023,6 +1026,7 @@
 				D4F5A0622FBE0D0500C55A4D /* TestUtils.swift in Sources */,
 				D4F5A0642FBE0D0500C55A4D /* HandDrawingViewModelTests.swift in Sources */,
 				D4F5A0682FBE0D0500C55A4D /* HandDrawingViewModelFileTests.swift in Sources */,
+				D4F6B0032FBE120000C55A4D /* ProjectSnapshotTests.swift in Sources */,
 				D4E395052F95000100C55A4C /* DocumentsProjectFileStorageTests.swift in Sources */,
 				D4E1ECF42752388E00D4A23D /* HandDrawingSwiftMetalTests.swift in Sources */,
 				D426FC9B2E5C895A00CC116D /* DrawingToolTests.swift in Sources */,
@@ -1389,26 +1393,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.19;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		D46A2CE42E424E8900D638AE /* TextureLayerView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TextureLayerView;
-		};
-		D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-			productName = ZIPFoundation;
 		};
 		D4B8E1032FBC010100C55A4D /* PaletteView */ = {
 			isa = XCSwiftPackageProductDependency;

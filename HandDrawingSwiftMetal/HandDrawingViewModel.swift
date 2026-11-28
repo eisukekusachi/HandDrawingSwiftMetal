@@ -46,41 +46,47 @@ final class HandDrawingViewModel: ObservableObject {
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicator: AnyPublisher<Bool, Never> {
-        activityIndicatorSubject.eraseToAnyPublisher()
-    }
-    let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
+    let requestingShowActivityIndicator: PassthroughSubject<Bool, Never> = .init()
 
-    var alert: AnyPublisher<any Error, Never> {
-        alertSubject.eraseToAnyPublisher()
-    }
-    let alertSubject = PassthroughSubject<any Error, Never>()
+    /// A publisher that emits a request to show a toast
+    let requestingShowToast: PassthroughSubject<ToastMessage, Never> = .init()
 
-    var toast: AnyPublisher<ToastMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
-    }
-    let toastSubject = PassthroughSubject<ToastMessage, Never>()
+    /// A publisher that emits a request to show an error alert
+    let requestingShowAlert: PassthroughSubject<String, Never> = .init()
+
+    /// A publisher that emits a request to clear the open canvas in place
+    let requestingClearCanvas: PassthroughSubject<Void, Never> = .init()
+
+    /// A publisher that emits a request to create a new project file
+    let requestingCreateFile: PassthroughSubject<Void, Never> = .init()
+
+    /// A publisher that emits a request to save the open project file
+    let requestingSaveFile: PassthroughSubject<Void, Never> = .init()
+
+    /// A publisher that emits a request to load a project from a zip file
+    let requestingLoadFile: PassthroughSubject<URL, Never> = .init()
+
+    /// A publisher that emits a request to delete a saved file at the given list index
+    let requestingDeleteFile: PassthroughSubject<Int, Never> = .init()
+
+    /// A publisher that emits a request to rename a saved file at the given list index
+    let requestingRenameFile: PassthroughSubject<(Int, String), Never> = .init()
+
+    let dependencies: HandDrawingViewDependencies
 
     /// Updates the canvas and drawing components.
     private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
-
-    /// Zip-based project file I/O in Documents (save, open, delete, rename).
-    let documentsProjectFileStorage: DocumentsProjectFileStorage
-
-    let dependencies: HandDrawingViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsProjectFileStorage = documentsProjectFileStorage ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange
@@ -110,26 +116,35 @@ final class HandDrawingViewModel: ObservableObject {
 
         fetchDataFromCoreDataIfAvailable()
     }
+
+    // MARK: - File view actions
+
+    func onTapCreate() {
+        requestingCreateFile.send()
+    }
+
+    func onTapSave() {
+        requestingSaveFile.send()
+    }
+
+    func onTapRename(_ index: Int, _ newName: String) {
+        requestingRenameFile.send((index, newName))
+    }
+
+    func onTapDeleteFile(_ index: Int) {
+        requestingDeleteFile.send(index)
+    }
+
+    func onSelectFile(_ zipFileURL: URL) {
+        requestingLoadFile.send(zipFileURL)
+    }
+
+    func onTapClearCanvas() {
+        requestingClearCanvas.send()
+    }
 }
 
 extension HandDrawingViewModel {
-    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
-    func clearCanvas(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        project.update(updatedAt: Date())
-        upsertFile(thumbnail: nil)
-        fileList.sortItems()
-
-        try await onCanvasUpdate?()
-    }
-
     /// Restores last-session layers, or makes a blank layer when there is no previous session or files are invalid.
     func setupTextureLayers(
         fallbackTextureSize: CGSize,
@@ -197,7 +212,11 @@ extension HandDrawingViewModel {
     }
 
     func showActivityIndicator(_ isShown: Bool) {
-        activityIndicatorSubject.send(isShown)
+        requestingShowActivityIndicator.send(isShown)
+    }
+
+    func showToast(_ message: ToastMessage) {
+        requestingShowToast.send(message)
     }
 
     func showError(_ error: Error) {
@@ -207,12 +226,13 @@ extension HandDrawingViewModel {
             showToast(.init(error: error))
             return
         }
-        alertSubject.send(error)
+
+        let nsError = error as NSError
+        requestingShowAlert.send(
+            nsError.localizedFailureReason ?? nsError.localizedDescription
+        )
     }
 
-    func showToast(_ model: ToastMessage) {
-        toastSubject.send(model)
-    }
 }
 
 private extension HandDrawingViewModel {

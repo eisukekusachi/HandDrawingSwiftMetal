@@ -8,12 +8,12 @@ import Foundation
 
 public struct FileViewEventHandler {
     let onTapCreate: () -> Void
-    let onTapRename: (Int, String) -> String?
+    let onTapRename: (Int, String) -> Void
     let onTapDelete: (Int) -> Void
     let onSelectItem: (URL) -> Void
     public init(
         onTapCreate: @escaping () -> Void,
-        onTapRename: @escaping (Int, String) -> String?,
+        onTapRename: @escaping (Int, String) -> Void,
         onTapDelete: @escaping (Int) -> Void,
         onSelectItem: @escaping (URL) -> Void
     ) {

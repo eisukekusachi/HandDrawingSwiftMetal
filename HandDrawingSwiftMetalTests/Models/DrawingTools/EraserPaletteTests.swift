@@ -1,10 +1,8 @@
 //
-//  EraserPaletteTests.swift
-//  HandDrawingSwiftMetalTests
-//
-//  Created by Eisuke Kusachi on 2025/08/25.
+//  Created by Eisuke Kusachi
 //
 
+import PaletteView
 import Testing
 import UIKit
 @testable import HandDrawingSwiftMetal

@@ -261,23 +261,130 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.activityIndicator
+        viewModel.requestingShowActivityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        viewModel.alert
+        viewModel.requestingShowAlert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.showAlert(error)
+            .sink { [weak self] message in
+                self?.showAlert(message: message)
             }
             .store(in: &cancellables)
 
-        viewModel.toast
+        viewModel.requestingShowToast
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingClearCanvas
+            .sink { [weak self] in
+                self?.viewModel.showActivityIndicator(true)
+                Task { @MainActor [weak self] in
+                    defer { self?.viewModel.showActivityIndicator(false) }
+
+                    guard let self else { return }
+                    do {
+                        try self.canvasView.throwIfUnsavedDrawing()
+                        try await self.viewModel.clearCanvas(
+                            device: self.sharedDevice,
+                            commandQueue: self.canvasView.sharedCommandQueue
+                        )
+                    } catch {
+                        self.viewModel.showError(error)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingCreateFile
+            .sink { [weak self] in
+                self?.viewModel.showActivityIndicator(true)
+                Task { @MainActor [weak self] in
+                    defer { self?.viewModel.showActivityIndicator(false) }
+
+                    guard let self else { return }
+                    do {
+                        try self.canvasView.throwIfUnsavedDrawing()
+                        try await self.viewModel.createFile(
+                            fileName: Calendar.currentDate,
+                            device: self.sharedDevice,
+                            commandQueue: self.canvasView.sharedCommandQueue
+                        )
+                        self.presentedViewController?.dismiss(animated: true)
+                        self.viewModel.showToast(.success)
+                    } catch {
+                        self.viewModel.showError(error)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingSaveFile
+            .sink { [weak self] in
+                self?.viewModel.showActivityIndicator(true)
+                Task { @MainActor [weak self] in
+                    defer { self?.viewModel.showActivityIndicator(false) }
+
+                    guard let self else { return }
+                    do {
+                        try self.canvasView.throwIfUnsavedDrawing()
+                        try await self.viewModel.saveFile(
+                            thumbnail: self.canvasView.thumbnail,
+                            zipFileURL: self.viewModel.fileURL(
+                                projectName: self.viewModel.project.currentProjectName
+                            )
+                        )
+                        self.viewModel.showToast(.success)
+                    } catch {
+                        self.viewModel.showError(error)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingRenameFile
+            .sink { @MainActor [weak self] index, newName in
+                guard let self else { return }
+                do {
+                    try self.viewModel.renameFile(index: index, newName: newName)
+                } catch {
+                    self.viewModel.showError(error)
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingDeleteFile
+            .sink { @MainActor [weak self] index in
+                guard let self else { return }
+                do {
+                    try self.viewModel.deleteFile(index: index)
+                } catch {
+                    self.viewModel.showError(error)
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.requestingLoadFile
+            .sink { [weak self] zipFileURL in
+                self?.viewModel.showActivityIndicator(true)
+                Task { @MainActor [weak self] in
+                    defer { self?.viewModel.showActivityIndicator(false) }
+
+                    guard let self else { return }
+                    do {
+                        try self.canvasView.throwIfUnsavedDrawing()
+                        try await self.viewModel.loadFile(zipFileURL: zipFileURL)
+                        self.presentedViewController?.dismiss(animated: true)
+                        self.viewModel.showToast(.success)
+                    } catch {
+                        self.viewModel.showError(error)
+                    }
+                }
             }
             .store(in: &cancellables)
 
@@ -336,23 +443,7 @@ extension HandDrawingViewController {
             self?.onTapClearCanvasButton()
         }
         contentView.tapSaveButton = { [weak self] in
-            guard let self else { return }
-            Task {
-                self.showActivityIndicator(true)
-                defer { self.showActivityIndicator(false) }
-
-                do {
-                    try self.canvasView.throwIfUnsavedDrawing()
-                    try await self.viewModel.saveFile(
-                        thumbnail: self.canvasView.thumbnail,
-                        zipFileURL: self.viewModel.fileURL(
-                            projectName: self.viewModel.project.currentProjectName
-                        )
-                    )
-                } catch {
-                    self.viewModel.showError(error)
-                }
-            }
+            self?.viewModel.onTapSave()
         }
         contentView.tapLoadButton = { [weak self] in
             self?.showFileView()
@@ -630,9 +721,16 @@ extension HandDrawingViewController {
     }
 
     func showAlert(_ error: Error) {
+        let nsError = error as NSError
+        showAlert(
+            message: nsError.localizedFailureReason ?? nsError.localizedDescription
+        )
+    }
+
+    func showAlert(message: String) {
         dialogPresenter.configuration = .init(
             title: "Error",
-            message: error.localizedDescription
+            message: message
         )
         dialogPresenter.presentAlert(on: self)
     }
@@ -666,27 +764,10 @@ extension HandDrawingViewController {
             buttonTitles: [strings.cancel, strings.clear],
             buttonActions: [
                 0: {},
-                1: { [weak self] in self?.clearCanvas() }
+                1: { [weak self] in self?.viewModel.onTapClearCanvas() }
             ]
         )
         dialogPresenter.presentAlert(on: self)
-    }
-
-    private func clearCanvas() {
-        Task {
-            showActivityIndicator(true)
-            defer { showActivityIndicator(false) }
-
-            do {
-                try canvasView.throwIfUnsavedDrawing()
-                try await viewModel.clearCanvas(
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
-            } catch {
-                viewModel.showError(error)
-            }
-        }
     }
 }
 
@@ -702,7 +783,7 @@ extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            showToast(.success)
+            viewModel.showToast(.success)
         }
     }
 }

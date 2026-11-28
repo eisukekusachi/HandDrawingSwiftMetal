@@ -2,10 +2,11 @@
 //  Created by Eisuke Kusachi
 //
 
+import CanvasView
+import Combine
 import Core
 import FileView
 import Metal
-import TextureLayerView
 import UIKit
 
 extension HandDrawingViewModel {
@@ -50,7 +51,7 @@ extension HandDrawingViewModel {
         projectCreatedAt: Date? = nil,
         projectUpdatedAt: Date? = nil
     ) async throws {
-        try await documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] temporaryDirectoryURL in
+        try await dependencies.documentsProjectFileStorage.withZippedContents(to: zipFileURL) { [self] temporaryDirectoryURL in
             do {
                 try content.thumbnail?.pngData()?.write(
                     to: temporaryDirectoryURL.appendingPathComponent(self.thumbnailFileName)
@@ -105,18 +106,18 @@ extension HandDrawingViewModel {
     func readProject(
         from zipFileURL: URL
     ) async throws -> ProjectContent {
-        try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
+        try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { temporaryDirectoryURL in
             let newTextureLayers = try TextureLayersSnapshot(in: temporaryDirectoryURL)
             if newTextureLayers.layers.isEmpty || newTextureLayers.textureSize == .zero {
                 let error = NSError(
                     title: String(localized: "Error"),
                     message: String(localized: "Unable to find texture layer files")
                 )
-                Logger.error(error)
+                Core.Logger.error(error)
                 throw error
             }
 
-            try await dependencies.localTextureFileRepository.restoreStorage(
+            try await self.dependencies.localTextureFileRepository.restoreStorage(
                 from: temporaryDirectoryURL,
                 ids: newTextureLayers.layers.map(\.id),
                 textureSize: newTextureLayers.textureSize
@@ -125,17 +126,33 @@ extension HandDrawingViewModel {
             return ProjectContent(
                 thumbnail: nil,
                 textureLayers: newTextureLayers,
-                project: try .init(in: temporaryDirectoryURL),
-                drawingTool: try? .init(in: temporaryDirectoryURL),
-                brushPalette: try? .init(in: temporaryDirectoryURL),
-                eraserPalette: try? .init(in: temporaryDirectoryURL)
+                project: try ProjectSnapshot(in: temporaryDirectoryURL),
+                drawingTool: try? DrawingToolSnapshot(in: temporaryDirectoryURL),
+                brushPalette: try? BrushPaletteSnapshot(in: temporaryDirectoryURL),
+                eraserPalette: try? EraserPaletteSnapshot(in: temporaryDirectoryURL)
             )
         }
+    }
+
+    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
+    func clearCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        project.update(updatedAt: Date())
+        upsertFile(thumbnail: nil)
+        fileList.sortItems()
+
+        try await onCanvasUpdate?()
     }
 }
 
 private extension HandDrawingViewModel {
-
     func saveBlankProject(
         to zipFileURL: URL,
         device: MTLDevice,

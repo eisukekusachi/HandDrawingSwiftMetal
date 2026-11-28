@@ -31,12 +31,13 @@ final class EraserPalette: ObservableObject, AlphaPaletteDisplayProtocol, AlphaP
 
     public init(
         id: UUID = UUID(),
-        alphas: [Int] = initializeAlphas,
+        alphas: [Int]? = nil,
         selectedIndex: Int = 0
     ) {
         self.id = id
 
-        let newAlphas = alphas.isEmpty ? [255] : alphas
+        let resolvedAlphas = alphas ?? initializeAlphas
+        let newAlphas = resolvedAlphas.isEmpty ? [255] : resolvedAlphas
         self.items = Self.makeItems(from: newAlphas)
         self.selectedIndex = max(0, min(selectedIndex, newAlphas.count - 1))
     }

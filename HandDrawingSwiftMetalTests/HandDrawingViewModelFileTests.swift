@@ -33,8 +33,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                )
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
@@ -46,6 +48,12 @@ struct HandDrawingViewModelFileTests {
             subject.fileList.sortItems()
 
             #expect(subject.fileList.items.map(\.title) == ["first", "second", "third"])
+
+            try await subject.makeBlankLayer(
+                textureSize: TestUtils.randomSize(),
+                device: device,
+                commandQueue: commandQueue
+            )
 
             try await subject.clearCanvas(
                 device: device,
@@ -77,8 +85,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager)
+                )
             )
 
             subject.project.update(projectName: "first")
@@ -107,8 +117,10 @@ struct HandDrawingViewModelFileTests {
             let fileManager = MockFileManager()
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager)
+                )
             )
             subject.fileList.append(.init(fileURL: zipURL(named: "first", fileManager: fileManager)))
             subject.fileList.append(.init(fileURL: zipURL(named: "second", fileManager: fileManager)))
@@ -138,8 +150,10 @@ struct HandDrawingViewModelFileTests {
             fileManager.appendFile(at: thirdURL)
 
             let subject: Subject = .init(
-                dependencies: dependencies(fileManager: fileManager),
-                documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                dependencies: dependencies(
+                    fileManager: fileManager,
+                    documentsProjectFileStorage: .init(fileManager: fileManager, zipHandler: zipHandler)
+                )
             )
 
             subject.project.update(projectName: "second", updatedAt: Date(timeIntervalSince1970: 1))
@@ -150,7 +164,8 @@ struct HandDrawingViewModelFileTests {
             subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 0), fileURL: thirdURL))
             subject.fileList.sortItems()
 
-            try await subject.makeBlankCanvas(
+            try await subject.makeBlankLayer(
+                textureSize: TestUtils.randomSize(),
                 device: device,
                 commandQueue: commandQueue
             )
@@ -174,10 +189,15 @@ fileprivate func zipURL(named name: String, fileManager: MockFileManager) -> URL
 }
 
 @MainActor
-fileprivate func dependencies(fileManager: MockFileManager = MockFileManager()) -> HandDrawingViewDependencies {
+fileprivate func dependencies(
+    fileManager: MockFileManager = MockFileManager(),
+    documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
+    localTextureFileRepository: MTLTextureDataRepositoryProtocol = TextureRepositoryStub()
+) -> HandDrawingViewDependencies {
     .init(
         fileManager: fileManager,
-        localTextureFileRepository: TextureRepositoryStub(),
+        documentsProjectFileStorage: documentsProjectFileStorage,
+        localTextureFileRepository: localTextureFileRepository,
         projectCoreDataStorage: CoreDataStorage(
             inMemory: "ProjectStorage",
             bundle: Bundle(for: CoreDataProjectStorage.self)

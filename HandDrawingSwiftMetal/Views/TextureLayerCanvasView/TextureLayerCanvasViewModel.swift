@@ -53,7 +53,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
                     textureSize.height
                 )
             )
-            Logger.error(error)
+            Core.Logger.error(error)
             throw error
         }
 
@@ -67,7 +67,7 @@ final class TextureLayerCanvasViewModel: ObservableObject {
                     localized: "Failed to create new texture"
                 )
             )
-            Logger.error(error)
+            Core.Logger.error(error)
             throw error
         }
         self.unselectedBottomTexture = unselectedBottomTexture

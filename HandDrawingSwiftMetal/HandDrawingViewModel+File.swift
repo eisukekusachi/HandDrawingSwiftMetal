@@ -3,16 +3,13 @@
 //
 
 import CanvasView
+import Combine
 import Core
 import FileView
 import Metal
 import UIKit
 
 extension HandDrawingViewModel {
-    func isOpenFile(at index: Int) -> Bool {
-        guard let item = fileList.item(index) else { return false }
-        return item.fileURL == fileURL(projectName: project.currentProjectName)
-    }
 
     /// Scans the injected Documents directory and builds the file list.
     func setupFileListFromDocumentsDirectory() async {
@@ -23,24 +20,20 @@ extension HandDrawingViewModel {
                 includingPropertiesForKeys: nil
             )
         } catch {
-            Logger.error(error)
+            Core.Logger.error(error)
             fileURLs = []
         }
 
-        // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
         await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
-
             do {
-                // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-                return try await documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
-                    let projectMetaData = try ProjectSnapshot(in: temporaryDirectoryURL)
+                return try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
                     let thumbnailData = try? Data(
-                        contentsOf: temporaryDirectoryURL.appendingPathComponent(
-                            self.thumbnailFileName
-                        )
+                        contentsOf: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
                     )
-                    return .init(
+
+                    return FileItem(
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
                         thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
@@ -48,7 +41,7 @@ extension HandDrawingViewModel {
                     )
                 }
             } catch {
-                Logger.error(error)
+                Core.Logger.error(error)
                 return nil
             }
         }
@@ -65,15 +58,11 @@ extension HandDrawingViewModel {
             device: device,
             commandQueue: commandQueue
         )
-        let loaded = try await readProject(
-            from: zipFileURL
-        )
+        let loaded = try await readProject(from: zipFileURL)
 
         try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
-
-        showToast(.success)
     }
 
     /// Deletes the saved file at `index` from disk and the file list.
@@ -85,7 +74,7 @@ extension HandDrawingViewModel {
             )
         }
 
-        try documentsProjectFileStorage.removeFile(at: item.fileURL)
+        try dependencies.documentsProjectFileStorage.removeFile(at: item.fileURL)
         fileList.deleteItem(title: item.title)
     }
 
@@ -93,20 +82,14 @@ extension HandDrawingViewModel {
     func loadFile(
         zipFileURL: URL
     ) async throws {
-        let loaded = try await readProject(
-            from: zipFileURL
-        )
+        let loaded = try await readProject(from: zipFileURL)
         try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
-
-        showToast(.success)
     }
 
     /// Renames a saved file on disk and updates the file list.
-    /// - Returns: The title stored in the file list after renaming.
-    @discardableResult
-    func renameFile(index: Int, newName: String) throws -> String {
+    func renameFile(index: Int, newName: String) throws {
         guard let item = fileList.item(index) else {
             throw NSError(
                 title: String(localized: "Error"),
@@ -122,7 +105,7 @@ extension HandDrawingViewModel {
         )
 
         guard normalizedName != oldTitle else {
-            return oldTitle
+            return
         }
 
         let newFileURL = try URL.uniqueFileURL(
@@ -134,10 +117,10 @@ extension HandDrawingViewModel {
         )
         let uniqueName = newFileURL.baseName
         guard uniqueName != oldTitle else {
-            return oldTitle
+            return
         }
 
-        try documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
+        try dependencies.documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
 
         if oldFileURL == fileURL(projectName: project.currentProjectName) {
             project.update(
@@ -146,8 +129,6 @@ extension HandDrawingViewModel {
             )
         }
         fileList.renameItem(title: oldTitle, newTitle: uniqueName)
-
-        return uniqueName
     }
 
     /// Saves the current canvas.
@@ -155,12 +136,19 @@ extension HandDrawingViewModel {
         thumbnail: UIImage?,
         zipFileURL: URL
     ) async throws {
+        let textureLayersSnapshot = undoableTextureLayers.snapshot
+        guard !textureLayersSnapshot.layers.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to save the texture layers")
+            )
+        }
         let updatedAt = Date()
 
         try await writeProject(
             content: .init(
                 thumbnail: thumbnail,
-                textureLayers: undoableTextureLayers.snapshot,
+                textureLayers: textureLayersSnapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),
@@ -173,8 +161,6 @@ extension HandDrawingViewModel {
         project.update(updatedAt: updatedAt)
         upsertFile(thumbnail: thumbnail)
         fileList.sortItems()
-
-        showToast(.success)
     }
 
     func upsertFile(thumbnail: UIImage?) {
@@ -183,6 +169,18 @@ extension HandDrawingViewModel {
             fileList.update(item)
         } else {
             fileList.append(item)
+        }
+    }
+
+    /// Updates layer-list thumbnails from the textures stored on disk.
+    func updateThumbnails(device: MTLDevice) async {
+        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
+            undoableTextureLayers.layers.map(\.id),
+            textureSize: undoableTextureLayers.textureSize,
+            device: device
+        )
+        textures?.forEach { id, texture in
+            undoableTextureLayers.updateLayerThumbnail(id, thumbnail: texture.makeThumbnail())
         }
     }
 }
@@ -200,7 +198,7 @@ private extension HandDrawingViewModel {
         )
 
         if let tool = loaded.drawingTool {
-            drawingTool.type = .init(rawValue: tool.type)
+            drawingTool.type = tool.drawingToolType
             drawingTool.brushDiameter = tool.brushDiameter
             drawingTool.eraserDiameter = tool.eraserDiameter
         }
@@ -215,19 +213,6 @@ private extension HandDrawingViewModel {
                 alphas: eraser.alphas,
                 selectedIndex: eraser.index
             )
-        }
-    }
-}
-
-extension HandDrawingViewModel {
-    func updateThumbnails(device: MTLDevice) async {
-        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
-            undoableTextureLayers.layers.map { $0.id },
-            textureSize: undoableTextureLayers.textureSize,
-            device: device
-        )
-        textures?.forEach { texture in
-            undoableTextureLayers.updateLayerThumbnail(texture.0, thumbnail: texture.1.makeThumbnail())
         }
     }
 }

@@ -25,6 +25,10 @@ struct DrawingToolSnapshot: Codable, Sendable {
             eraserDiameter: drawingTool.eraserDiameter
         )
     }
+
+    var drawingToolType: DrawingToolType {
+        DrawingToolType(rawValue: type)
+    }
 }
 
 extension DrawingToolSnapshot: LocalFileConvertible {
