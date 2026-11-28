@@ -51,7 +51,7 @@ final class TextureLayerCanvasRenderer {
                 )
             } else {
                 let message = "id: \(layer.id.uuidString)"
-                Logger.error(
+                Core.Logger.error(
                     String(format: String(localized: "Unable to find %@"), message)
                 )
             }
