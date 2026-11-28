@@ -133,6 +133,23 @@ extension HandDrawingViewModel {
             )
         }
     }
+
+    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
+    func clearCanvas(
+        device: MTLDevice,
+        commandQueue: MTLCommandQueue
+    ) async throws {
+        try await makeBlankCanvas(
+            device: device,
+            commandQueue: commandQueue
+        )
+
+        project.update(updatedAt: Date())
+        upsertFile(thumbnail: nil)
+        fileList.sortItems()
+
+        try await onCanvasUpdate?()
+    }
 }
 
 private extension HandDrawingViewModel {

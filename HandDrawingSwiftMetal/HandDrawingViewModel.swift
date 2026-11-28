@@ -54,6 +54,9 @@ final class HandDrawingViewModel: ObservableObject {
     /// A publisher that emits a request to show an error alert
     let requestingShowAlert: PassthroughSubject<String, Never> = .init()
 
+    /// A publisher that emits a request to clear the open canvas in place
+    let requestingClearCanvas: PassthroughSubject<Void, Never> = .init()
+
     let dependencies: HandDrawingViewDependencies
 
     /// Updates the canvas and drawing components.
@@ -101,23 +104,6 @@ final class HandDrawingViewModel: ObservableObject {
 }
 
 extension HandDrawingViewModel {
-    /// Clears the open canvas in memory and refreshes list metadata (no zip write until save).
-    func clearCanvas(
-        device: MTLDevice,
-        commandQueue: MTLCommandQueue
-    ) async throws {
-        try await makeBlankCanvas(
-            device: device,
-            commandQueue: commandQueue
-        )
-
-        project.update(updatedAt: Date())
-        upsertFile(thumbnail: nil)
-        fileList.sortItems()
-
-        try await onCanvasUpdate?()
-    }
-
     /// Restores last-session layers, or makes a blank layer when there is no previous session or files are invalid.
     func setupTextureLayers(
         fallbackTextureSize: CGSize,

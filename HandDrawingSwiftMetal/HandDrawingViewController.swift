@@ -281,6 +281,26 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
+        viewModel.requestingClearCanvas
+            .sink { [weak self] in
+                self?.viewModel.showActivityIndicator(true)
+                Task { @MainActor [weak self] in
+                    defer { self?.viewModel.showActivityIndicator(false) }
+
+                    guard let self else { return }
+                    do {
+                        try self.canvasView.throwIfUnsavedDrawing()
+                        try await self.viewModel.clearCanvas(
+                            device: self.sharedDevice,
+                            commandQueue: self.canvasView.sharedCommandQueue
+                        )
+                    } catch {
+                        self.viewModel.showError(error)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         viewModel.brushPalette.$selectedIndex
             .sink { [weak self] index in
                 guard let `self`, let newColor = viewModel.brushPalette.color(at: index) else { return }
@@ -674,27 +694,10 @@ extension HandDrawingViewController {
             buttonTitles: [strings.cancel, strings.clear],
             buttonActions: [
                 0: {},
-                1: { [weak self] in self?.clearCanvas() }
+                1: { [weak self] in self?.viewModel.requestingClearCanvas.send() }
             ]
         )
         dialogPresenter.presentAlert(on: self)
-    }
-
-    private func clearCanvas() {
-        Task {
-            showActivityIndicator(true)
-            defer { showActivityIndicator(false) }
-
-            do {
-                try canvasView.throwIfUnsavedDrawing()
-                try await viewModel.clearCanvas(
-                    device: sharedDevice,
-                    commandQueue: canvasView.sharedCommandQueue
-                )
-            } catch {
-                viewModel.showError(error)
-            }
-        }
     }
 }
 
