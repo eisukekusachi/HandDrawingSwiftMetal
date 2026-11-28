@@ -7,7 +7,7 @@ import Foundation
 public extension NSError {
 
     convenience init(
-        domain: String = "Core",
+        domain: String = NSErrorDomain.core,
         code: Int = -1,
         title: String,
         message: String
