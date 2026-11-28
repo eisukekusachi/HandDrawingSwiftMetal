@@ -48,7 +48,7 @@ extension TextureLayerModel {
         case textureName
     }
 
-    public init(from decoder: Decoder) throws {
+    nonisolated public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let id: LayerId
@@ -74,7 +74,7 @@ extension TextureLayerModel {
         self.init(id: id, title: title, alpha: alpha, isVisible: isVisible)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    nonisolated public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encode(title, forKey: .title)
@@ -82,7 +82,7 @@ extension TextureLayerModel {
         try container.encode(isVisible, forKey: .isVisible)
     }
 
-    public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
+    nonisolated public static func == (lhs: TextureLayerModel, rhs: TextureLayerModel) -> Bool {
         lhs.id == rhs.id &&
         lhs.title == rhs.title &&
         lhs.alpha == rhs.alpha &&

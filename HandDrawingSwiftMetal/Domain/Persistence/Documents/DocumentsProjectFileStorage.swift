@@ -23,7 +23,7 @@ final class DocumentsProjectFileStorage {
     init(
         fileManager: FileManaging,
         zipHandler: ZipHandling? = nil,
-        stagingRootName: String = DocumentsProjectFileStorageStaging.defaultRootName
+        stagingRootName: String = "TmpFolder"
     ) {
         self.fileManager = fileManager
         self.zipHandler = zipHandler ?? ZipHandler(fileManager: fileManager)

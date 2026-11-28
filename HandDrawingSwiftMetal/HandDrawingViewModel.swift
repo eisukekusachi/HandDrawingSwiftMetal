@@ -46,41 +46,29 @@ final class HandDrawingViewModel: ObservableObject {
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    var activityIndicator: AnyPublisher<Bool, Never> {
-        activityIndicatorSubject.eraseToAnyPublisher()
-    }
-    let activityIndicatorSubject: PassthroughSubject<Bool, Never> = .init()
+    let activityIndicator: PassthroughSubject<Bool, Never> = .init()
 
-    var alert: AnyPublisher<any Error, Never> {
-        alertSubject.eraseToAnyPublisher()
-    }
-    let alertSubject = PassthroughSubject<any Error, Never>()
+    /// A publisher that emits a request to show a toast
+    let toast: PassthroughSubject<ToastMessage, Never> = .init()
 
-    var toast: AnyPublisher<ToastMessage, Never> {
-        toastSubject.eraseToAnyPublisher()
-    }
-    let toastSubject = PassthroughSubject<ToastMessage, Never>()
+    /// A publisher that emits a request to show an error alert
+    let alert: PassthroughSubject<String, Never> = .init()
+
+    let dependencies: HandDrawingViewDependencies
 
     /// Updates the canvas and drawing components.
     private(set) var onCanvasUpdate: (@MainActor () async throws -> Void)?
-
-    /// Zip-based project file I/O in Documents (save, open, delete, rename).
-    let documentsProjectFileStorage: DocumentsProjectFileStorage
-
-    let dependencies: HandDrawingViewDependencies
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         dependencies: HandDrawingViewDependencies,
-        documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
         fileSuffix: String = "zip",
         thumbnailFileName: String = "thumbnail.png"
     ) {
         self.dependencies = dependencies
         self.thumbnailFileName = thumbnailFileName
         self.fileList = .init(fileSuffix: fileSuffix)
-        self.documentsProjectFileStorage = documentsProjectFileStorage ?? .init(fileManager: dependencies.fileManager)
         self.undoableTextureLayers = .init(repository: dependencies.localTextureFileRepository)
 
         self.fileList.objectWillChange
@@ -197,21 +185,25 @@ extension HandDrawingViewModel {
     }
 
     func showActivityIndicator(_ isShown: Bool) {
-        activityIndicatorSubject.send(isShown)
+        activityIndicator.send(isShown)
     }
 
     func showError(_ error: Error) {
         // A debounced stroke save is still running. The failure is transient—wait briefly and retry
         // so show a toast instead of a blocking alert.
         if TextureLayerCanvasDrawingPersistence.isSaveInProgressError(error) {
-            showToast(.init(error: error))
+            toast.send(.init(error: error))
             return
         }
-        alertSubject.send(error)
+
+        let nsError = error as NSError
+        alert.send(
+            nsError.localizedFailureReason ?? nsError.localizedDescription
+        )
     }
 
     func showToast(_ model: ToastMessage) {
-        toastSubject.send(model)
+        toast.send(model)
     }
 }
 

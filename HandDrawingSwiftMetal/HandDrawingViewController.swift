@@ -269,8 +269,8 @@ extension HandDrawingViewController {
 
         viewModel.alert
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] error in
-                self?.showAlert(error)
+            .sink { [weak self] message in
+                self?.showAlert(message: message)
             }
             .store(in: &cancellables)
 
@@ -630,9 +630,16 @@ extension HandDrawingViewController {
     }
 
     func showAlert(_ error: Error) {
+        let nsError = error as NSError
+        showAlert(
+            message: nsError.localizedFailureReason ?? nsError.localizedDescription
+        )
+    }
+
+    func showAlert(message: String) {
         dialogPresenter.configuration = .init(
             title: "Error",
-            message: error.localizedDescription
+            message: message
         )
         dialogPresenter.presentAlert(on: self)
     }
