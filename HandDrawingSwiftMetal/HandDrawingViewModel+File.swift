@@ -19,7 +19,7 @@ extension HandDrawingViewModel {
                 includingPropertiesForKeys: nil
             )
         } catch {
-            Logger.error(error)
+            Core.Logger.error(error)
             fileURLs = []
         }
 
@@ -44,7 +44,7 @@ extension HandDrawingViewModel {
                     )
                 }
             } catch {
-                Logger.error(error)
+                Core.Logger.error(error)
                 return nil
             }
         }
@@ -147,12 +147,19 @@ extension HandDrawingViewModel {
         thumbnail: UIImage?,
         zipFileURL: URL
     ) async throws {
+        let textureLayersSnapshot = undoableTextureLayers.snapshot
+        guard !textureLayersSnapshot.layers.isEmpty else {
+            throw NSError(
+                title: String(localized: "Error"),
+                message: String(localized: "Failed to save the texture layers")
+            )
+        }
         let updatedAt = Date()
 
         try await writeProject(
             content: .init(
                 thumbnail: thumbnail,
-                textureLayers: undoableTextureLayers.snapshot,
+                textureLayers: textureLayersSnapshot,
                 project: .init(project),
                 drawingTool: .init(drawingTool),
                 brushPalette: .init(brushPalette),

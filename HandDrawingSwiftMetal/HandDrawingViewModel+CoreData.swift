@@ -2,6 +2,8 @@
 //  Created by Eisuke Kusachi
 //
 
+import Core
+
 extension HandDrawingViewModel {
 
     /// Best-effort restore of palettes and project dates from Core Data.
@@ -15,7 +17,7 @@ extension HandDrawingViewModel {
             try dependencies.brushPaletteStorage.load(into: brushPalette)
             try dependencies.eraserPaletteStorage.load(into: eraserPalette)
         } catch {
-            Logger.error(error)
+            Core.Logger.error(error)
         }
     }
 }
