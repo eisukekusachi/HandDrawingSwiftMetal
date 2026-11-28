@@ -46,13 +46,13 @@ final class HandDrawingViewModel: ObservableObject {
     }
 
     /// A publisher that emits a request to show or hide the activity indicator
-    let activityIndicator: PassthroughSubject<Bool, Never> = .init()
+    let requestingShowActivityIndicator: PassthroughSubject<Bool, Never> = .init()
 
     /// A publisher that emits a request to show a toast
-    let toast: PassthroughSubject<ToastMessage, Never> = .init()
+    let requestingShowToast: PassthroughSubject<ToastMessage, Never> = .init()
 
     /// A publisher that emits a request to show an error alert
-    let alert: PassthroughSubject<String, Never> = .init()
+    let requestingShowAlert: PassthroughSubject<String, Never> = .init()
 
     let dependencies: HandDrawingViewDependencies
 
@@ -185,19 +185,19 @@ extension HandDrawingViewModel {
     }
 
     func showActivityIndicator(_ isShown: Bool) {
-        activityIndicator.send(isShown)
+        requestingShowActivityIndicator.send(isShown)
     }
 
     func showError(_ error: Error) {
         // A debounced stroke save is still running. The failure is transient—wait briefly and retry
         // so show a toast instead of a blocking alert.
         if TextureLayerCanvasDrawingPersistence.isSaveInProgressError(error) {
-            toast.send(.init(error: error))
+            requestingShowToast.send(.init(error: error))
             return
         }
 
         let nsError = error as NSError
-        alert.send(
+        requestingShowAlert.send(
             nsError.localizedFailureReason ?? nsError.localizedDescription
         )
     }

@@ -261,20 +261,20 @@ extension HandDrawingViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.activityIndicator
+        viewModel.requestingShowActivityIndicator
             .map { !$0 }
             .receive(on: DispatchQueue.main)
             .assign(to: \.isHidden, on: activityIndicatorView)
             .store(in: &cancellables)
 
-        viewModel.alert
+        viewModel.requestingShowAlert
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.showAlert(message: message)
             }
             .store(in: &cancellables)
 
-        viewModel.toast
+        viewModel.requestingShowToast
             .receive(on: DispatchQueue.main)
             .sink { [weak self] model in
                 self?.showToast(model)
@@ -709,7 +709,7 @@ extension HandDrawingViewController {
             Logger.error(error)
             showAlert(error)
         } else {
-            viewModel.toast.send(.success)
+            viewModel.requestingShowToast.send(.success)
         }
     }
 }
