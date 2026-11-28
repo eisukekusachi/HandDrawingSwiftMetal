@@ -54,7 +54,7 @@ final class CoreDataProjectStorage {
                     try context.save()
                 }
             } catch {
-                Logger.error(error)
+                Core.Logger.error(error)
             }
         }
     }

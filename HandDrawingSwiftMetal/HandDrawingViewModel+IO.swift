@@ -112,7 +112,7 @@ extension HandDrawingViewModel {
                     title: String(localized: "Error"),
                     message: String(localized: "Unable to find texture layer files")
                 )
-                Logger.error(error)
+                Core.Logger.error(error)
                 throw error
             }
 

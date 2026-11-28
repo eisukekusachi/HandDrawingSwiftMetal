@@ -44,7 +44,7 @@ final class CoreDataTextureLayerStorage {
                 try context.save()
             }
         } catch {
-            Logger.error("Failed to clear Core Data storage: \(error)")
+            Core.Logger.error("Failed to clear Core Data storage: \(error)")
             throw error
         }
     }
@@ -125,7 +125,7 @@ final class CoreDataTextureLayerStorage {
                     try context.save()
                 }
             } catch {
-                Logger.error(error)
+                Core.Logger.error(error)
             }
         }
     }

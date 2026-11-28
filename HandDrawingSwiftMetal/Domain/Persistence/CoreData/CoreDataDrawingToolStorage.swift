@@ -77,7 +77,7 @@ final class CoreDataDrawingToolStorage {
                     try context.save()
                 }
             } catch {
-                Logger.error(error)
+                Core.Logger.error(error)
             }
         }
     }
