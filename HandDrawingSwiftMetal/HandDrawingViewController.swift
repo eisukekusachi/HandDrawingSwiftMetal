@@ -351,7 +351,7 @@ extension HandDrawingViewController {
             .sink { @MainActor [weak self] index, newName in
                 guard let self else { return }
                 do {
-                    _ = try self.viewModel.renameFile(index: index, newName: newName)
+                    try self.viewModel.renameFile(index: index, newName: newName)
                 } catch {
                     self.viewModel.showError(error)
                 }
@@ -359,16 +359,12 @@ extension HandDrawingViewController {
             .store(in: &cancellables)
 
         viewModel.requestingDeleteFile
-            .sink { [weak self] index in
-                self?.viewModel.showActivityIndicator(true)
-                Task { @MainActor [weak self] in
-                    defer { self?.viewModel.showActivityIndicator(false) }
-
-                    do {
-                        try self?.viewModel.deleteFile(index: index)
-                    } catch {
-                        self?.viewModel.showError(error)
-                    }
+            .sink { @MainActor [weak self] index in
+                guard let self else { return }
+                do {
+                    try self.viewModel.deleteFile(index: index)
+                } catch {
+                    self.viewModel.showError(error)
                 }
             }
             .store(in: &cancellables)

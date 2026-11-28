@@ -249,9 +249,7 @@ struct FileViewModelTests {
                 ),
                 eventHandler: .init(
                     onTapCreate: {},
-                    onTapRename: { _, _ in
-                        "renamed"
-                    },
+                    onTapRename: { _, _ in },
                     onTapDelete: { _ in },
                     onSelectItem: { openedURL = $0 }
                 )
@@ -436,7 +434,7 @@ struct FileViewModelTests {
                 ),
                 eventHandler: .init(
                     onTapCreate: {},
-                    onTapRename: { _, _ in nil },
+                    onTapRename: { _, _ in },
                     onTapDelete: { deletedIndex = $0 },
                     onSelectItem: { _ in }
                 )
@@ -463,7 +461,7 @@ struct FileViewModelTests {
                 ),
                 eventHandler: .init(
                     onTapCreate: {},
-                    onTapRename: { _, _ in nil },
+                    onTapRename: { _, _ in },
                     onTapDelete: { deletedIndex = $0 },
                     onSelectItem: { _ in }
                 )

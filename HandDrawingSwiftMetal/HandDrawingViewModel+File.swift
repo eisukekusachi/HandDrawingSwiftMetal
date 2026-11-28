@@ -89,8 +89,7 @@ extension HandDrawingViewModel {
     }
 
     /// Renames a saved file on disk and updates the file list.
-    @discardableResult
-    func renameFile(index: Int, newName: String) throws -> String {
+    func renameFile(index: Int, newName: String) throws {
         guard let item = fileList.item(index) else {
             throw NSError(
                 title: String(localized: "Error"),
@@ -106,7 +105,7 @@ extension HandDrawingViewModel {
         )
 
         guard normalizedName != oldTitle else {
-            return oldTitle
+            return
         }
 
         let newFileURL = try URL.uniqueFileURL(
@@ -118,7 +117,7 @@ extension HandDrawingViewModel {
         )
         let uniqueName = newFileURL.baseName
         guard uniqueName != oldTitle else {
-            return oldTitle
+            return
         }
 
         try dependencies.documentsProjectFileStorage.renameFile(src: oldFileURL, dst: newFileURL)
@@ -130,8 +129,6 @@ extension HandDrawingViewModel {
             )
         }
         fileList.renameItem(title: oldTitle, newTitle: uniqueName)
-
-        return uniqueName
     }
 
     /// Saves the current canvas.
