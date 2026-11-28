@@ -2,10 +2,11 @@
 //  Created by Eisuke Kusachi
 //
 
+import CanvasView
+import Combine
 import Core
 import FileView
 import Metal
-import TextureLayerView
 import UIKit
 
 extension HandDrawingViewModel {
@@ -125,17 +126,16 @@ extension HandDrawingViewModel {
             return ProjectContent(
                 thumbnail: nil,
                 textureLayers: newTextureLayers,
-                project: try .init(in: temporaryDirectoryURL),
-                drawingTool: try? .init(in: temporaryDirectoryURL),
-                brushPalette: try? .init(in: temporaryDirectoryURL),
-                eraserPalette: try? .init(in: temporaryDirectoryURL)
+                project: try ProjectSnapshot(in: temporaryDirectoryURL),
+                drawingTool: try? DrawingToolSnapshot(in: temporaryDirectoryURL),
+                brushPalette: try? BrushPaletteSnapshot(in: temporaryDirectoryURL),
+                eraserPalette: try? EraserPaletteSnapshot(in: temporaryDirectoryURL)
             )
         }
     }
 }
 
 private extension HandDrawingViewModel {
-
     func saveBlankProject(
         to zipFileURL: URL,
         device: MTLDevice,

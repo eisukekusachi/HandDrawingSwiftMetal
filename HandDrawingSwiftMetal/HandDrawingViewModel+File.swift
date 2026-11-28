@@ -3,6 +3,7 @@
 //
 
 import CanvasView
+import Combine
 import Core
 import FileView
 import Metal
@@ -23,20 +24,16 @@ extension HandDrawingViewModel {
             fileURLs = []
         }
 
-        // `updateItems` keeps existing list rows and calls `makeItemFromDocuments` only for zips not yet in the list.
         await fileList.updateItems(from: fileURLs) { [weak self] zipFileURL in
             guard let self else { return nil }
-
             do {
-                // Unzip once to read project metadata and the list thumbnail (not the layer textures).
-                return try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] temporaryDirectoryURL in
-                    let projectMetaData = try ProjectSnapshot(in: temporaryDirectoryURL)
+                return try await dependencies.documentsProjectFileStorage.withUnzippedContents(from: zipFileURL) { [self] workingDirectoryURL in
+                    let projectMetaData = try ProjectSnapshot(in: workingDirectoryURL)
                     let thumbnailData = try? Data(
-                        contentsOf: temporaryDirectoryURL.appendingPathComponent(
-                            self.thumbnailFileName
-                        )
+                        contentsOf: workingDirectoryURL.appendingPathComponent(self.thumbnailFileName)
                     )
-                    return .init(
+
+                    return FileItem(
                         createdAt: projectMetaData.createdAt,
                         updatedAt: projectMetaData.updatedAt,
                         thumbnail: thumbnailData.flatMap(UIImage.init(data:)),
@@ -61,9 +58,7 @@ extension HandDrawingViewModel {
             device: device,
             commandQueue: commandQueue
         )
-        let loaded = try await readProject(
-            from: zipFileURL
-        )
+        let loaded = try await readProject(from: zipFileURL)
 
         try apply(loaded, projectName: zipFileURL.baseName)
 
@@ -87,16 +82,13 @@ extension HandDrawingViewModel {
     func loadFile(
         zipFileURL: URL
     ) async throws {
-        let loaded = try await readProject(
-            from: zipFileURL
-        )
+        let loaded = try await readProject(from: zipFileURL)
         try apply(loaded, projectName: zipFileURL.baseName)
 
         try await onCanvasUpdate?()
     }
 
     /// Renames a saved file on disk and updates the file list.
-    /// - Returns: The title stored in the file list after renaming.
     @discardableResult
     func renameFile(index: Int, newName: String) throws -> String {
         guard let item = fileList.item(index) else {
@@ -197,7 +189,7 @@ private extension HandDrawingViewModel {
         )
 
         if let tool = loaded.drawingTool {
-            drawingTool.type = .init(rawValue: tool.type)
+            drawingTool.type = tool.drawingToolType
             drawingTool.brushDiameter = tool.brushDiameter
             drawingTool.eraserDiameter = tool.eraserDiameter
         }
