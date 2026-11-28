@@ -764,7 +764,7 @@ extension HandDrawingViewController {
             buttonTitles: [strings.cancel, strings.clear],
             buttonActions: [
                 0: {},
-                1: { [weak self] in self?.viewModel.requestingClearCanvas.send() }
+                1: { [weak self] in self?.viewModel.onTapClearCanvas() }
             ]
         )
         dialogPresenter.presentAlert(on: self)

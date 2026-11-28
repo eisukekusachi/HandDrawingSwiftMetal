@@ -138,6 +138,10 @@ final class HandDrawingViewModel: ObservableObject {
     func onSelectFile(_ zipFileURL: URL) {
         requestingLoadFile.send(zipFileURL)
     }
+
+    func onTapClearCanvas() {
+        requestingClearCanvas.send()
+    }
 }
 
 extension HandDrawingViewModel {
