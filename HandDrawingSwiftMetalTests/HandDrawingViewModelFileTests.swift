@@ -49,6 +49,12 @@ struct HandDrawingViewModelFileTests {
 
             #expect(subject.fileList.items.map(\.title) == ["first", "second", "third"])
 
+            try await subject.makeBlankLayer(
+                textureSize: TestUtils.randomSize(),
+                device: device,
+                commandQueue: commandQueue
+            )
+
             try await subject.clearCanvas(
                 device: device,
                 commandQueue: commandQueue
@@ -158,7 +164,9 @@ struct HandDrawingViewModelFileTests {
             subject.fileList.append(.init(updatedAt: Date(timeIntervalSince1970: 0), fileURL: thirdURL))
             subject.fileList.sortItems()
 
-            try await subject.makeBlankCanvas(
+            let textureSize = TestUtils.randomSize()
+            try await subject.makeBlankLayer(
+                textureSize: textureSize,
                 device: device,
                 commandQueue: commandQueue
             )
@@ -184,12 +192,13 @@ fileprivate func zipURL(named name: String, fileManager: MockFileManager) -> URL
 @MainActor
 fileprivate func dependencies(
     fileManager: MockFileManager = MockFileManager(),
-    documentsProjectFileStorage: DocumentsProjectFileStorage? = nil
+    documentsProjectFileStorage: DocumentsProjectFileStorage? = nil,
+    localTextureFileRepository: MTLTextureDataRepositoryProtocol = TextureRepositoryStub()
 ) -> HandDrawingViewDependencies {
     .init(
         fileManager: fileManager,
         documentsProjectFileStorage: documentsProjectFileStorage,
-        localTextureFileRepository: TextureRepositoryStub(),
+        localTextureFileRepository: localTextureFileRepository,
         projectCoreDataStorage: CoreDataStorage(
             inMemory: "ProjectStorage",
             bundle: Bundle(for: CoreDataProjectStorage.self)

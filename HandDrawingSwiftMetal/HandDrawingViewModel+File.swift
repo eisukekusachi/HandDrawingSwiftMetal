@@ -171,6 +171,18 @@ extension HandDrawingViewModel {
             fileList.append(item)
         }
     }
+
+    /// Updates layer-list thumbnails from the textures stored on disk.
+    func updateThumbnails(device: MTLDevice) async {
+        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
+            undoableTextureLayers.layers.map(\.id),
+            textureSize: undoableTextureLayers.textureSize,
+            device: device
+        )
+        textures?.forEach { id, texture in
+            undoableTextureLayers.updateLayerThumbnail(id, thumbnail: texture.makeThumbnail())
+        }
+    }
 }
 
 private extension HandDrawingViewModel {
@@ -201,19 +213,6 @@ private extension HandDrawingViewModel {
                 alphas: eraser.alphas,
                 selectedIndex: eraser.index
             )
-        }
-    }
-}
-
-extension HandDrawingViewModel {
-    func updateThumbnails(device: MTLDevice) async {
-        let textures = try? await dependencies.localTextureFileRepository.duplicatedTextures(
-            undoableTextureLayers.layers.map { $0.id },
-            textureSize: undoableTextureLayers.textureSize,
-            device: device
-        )
-        textures?.forEach { texture in
-            undoableTextureLayers.updateLayerThumbnail(texture.0, thumbnail: texture.1.makeThumbnail())
         }
     }
 }

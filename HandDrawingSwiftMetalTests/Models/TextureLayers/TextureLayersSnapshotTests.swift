@@ -13,11 +13,9 @@ struct TextureLayersSnapshotTests {
 
     private typealias Subject = TextureLayersSnapshot
 
-    private let textureSize: CGSize = .init(width: 123, height: 456)
-
     @Test
-    func `Confirms the snapshot file name is texture_layers`() {
-        #expect(Subject.fileName == "texture_layers")
+    func `Confirms the snapshot file name is data`() {
+        #expect(Subject.fileName == "data")
     }
 
     @Test
@@ -25,7 +23,7 @@ struct TextureLayersSnapshotTests {
         let subject = Subject(
             layers: [],
             layerIndex: 0,
-            textureSize: textureSize
+            textureSize: TestUtils.randomSize()
         )
 
         #expect(subject.layers.isEmpty)
@@ -41,7 +39,7 @@ struct TextureLayersSnapshotTests {
         let subject = Subject(
             layers: layers,
             layerIndex: -3,
-            textureSize: textureSize
+            textureSize: TestUtils.randomSize()
         )
 
         #expect(subject.layers.count == 2)
@@ -58,7 +56,7 @@ struct TextureLayersSnapshotTests {
         let subject = Subject(
             layers: layers,
             layerIndex: 5,
-            textureSize: textureSize
+            textureSize: TestUtils.randomSize()
         )
 
         #expect(subject.layers.count == 2)
@@ -75,7 +73,7 @@ struct TextureLayersSnapshotTests {
         let subject = Subject(
             layers: layers,
             layerIndex: 1,
-            textureSize: textureSize
+            textureSize: TestUtils.randomSize()
         )
 
         let data = try JSONEncoder().encode(subject)
@@ -94,7 +92,7 @@ struct TextureLayersSnapshotTests {
         let subject = Subject(
             layers: layers,
             layerIndex: 1,
-            textureSize: textureSize
+            textureSize: TestUtils.randomSize()
         )
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
