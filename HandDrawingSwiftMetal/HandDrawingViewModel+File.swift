@@ -69,7 +69,7 @@ extension HandDrawingViewModel {
 
         try await onCanvasUpdate?()
 
-        toast.send(.success)
+        requestingShowToast.send(.success)
     }
 
     /// Deletes the saved file at `index` from disk and the file list.
@@ -96,7 +96,7 @@ extension HandDrawingViewModel {
 
         try await onCanvasUpdate?()
 
-        toast.send(.success)
+        requestingShowToast.send(.success)
     }
 
     /// Renames a saved file on disk and updates the file list.
@@ -170,7 +170,7 @@ extension HandDrawingViewModel {
         upsertFile(thumbnail: thumbnail)
         fileList.sortItems()
 
-        toast.send(.success)
+        requestingShowToast.send(.success)
     }
 
     func upsertFile(thumbnail: UIImage?) {

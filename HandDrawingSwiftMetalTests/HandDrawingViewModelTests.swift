@@ -25,8 +25,8 @@ struct HandDrawingViewModelTests {
             let subject = Subject(dependencies: HandDrawingViewModelTests.dependencies())
             var toasts: [ToastMessage] = []
             var alertMessages: [String] = []
-            let toastSubscription = subject.toast.sink { toasts.append($0) }
-            let alertSubscription = subject.alert.sink { alertMessages.append($0) }
+            let toastSubscription = subject.requestingShowToast.sink { toasts.append($0) }
+            let alertSubscription = subject.requestingShowAlert.sink { alertMessages.append($0) }
             defer {
                 _ = toastSubscription
                 _ = alertSubscription
@@ -45,8 +45,8 @@ struct HandDrawingViewModelTests {
             let subject = Subject(dependencies: HandDrawingViewModelTests.dependencies())
             var toasts: [ToastMessage] = []
             var alertMessages: [String] = []
-            let toastSubscription = subject.toast.sink { toasts.append($0) }
-            let alertSubscription = subject.alert.sink { alertMessages.append($0) }
+            let toastSubscription = subject.requestingShowToast.sink { toasts.append($0) }
+            let alertSubscription = subject.requestingShowAlert.sink { alertMessages.append($0) }
             defer {
                 _ = toastSubscription
                 _ = alertSubscription
