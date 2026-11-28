@@ -35,7 +35,6 @@
 		D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */ = {isa = PBXBuildFile; productRef = D46A2CE42E424E8900D638AE /* TextureLayerView */; };
 		D46AD0A82F49CC880051C0D7 /* CanvasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46AD0A72F49CC880051C0D7 /* CanvasError.swift */; };
 		D46EDFD32F80FDE9008A2A89 /* HandDrawingViewDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46EDFD22F80FDE9008A2A89 /* HandDrawingViewDependencies.swift */; };
-		D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */; };
 		D480E5E12FCB44FD006ABBC2 /* PassthroughHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E02FCB44F9006ABBC2 /* PassthroughHostingView.swift */; };
 		D480E5E32FCB5B5C006ABBC2 /* HandDrawingPopupOverlayContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D480E5E22FCB5B5A006ABBC2 /* HandDrawingPopupOverlayContentView.swift */; };
 		D48A7DD129DAB81800D235B1 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48A7DD029DAB81800D235B1 /* Toast.swift */; };
@@ -278,7 +277,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D47FD5C32E2D1CE100F3F514 /* ZIPFoundation in Frameworks */,
 				D46A2CE52E424E8900D638AE /* TextureLayerView in Frameworks */,
 				D4F0BF062E38F79600C3E441 /* CanvasView in Frameworks */,
 				D4F8B2052FD2010500C55A4E /* FileView in Frameworks */,
@@ -766,7 +764,6 @@
 			);
 			name = HandDrawingSwiftMetal;
 			packageProductDependencies = (
-				D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */,
 				D4F0BF052E38F79600C3E441 /* CanvasView */,
 				D4F8B2062FD2010600C55A4E /* FileView */,
 				D46A2CE42E424E8900D638AE /* TextureLayerView */,
@@ -848,7 +845,6 @@
 			);
 			mainGroup = D4E1ECD02752388C00D4A23D;
 			packageReferences = (
-				D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = D4E1ECDA2752388C00D4A23D /* Products */;
 			projectDirPath = "";
@@ -1389,26 +1385,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.19;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		D46A2CE42E424E8900D638AE /* TextureLayerView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TextureLayerView;
-		};
-		D47FD5C22E2D1CE100F3F514 /* ZIPFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D47FD5C02E2D1CD900F3F514 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-			productName = ZIPFoundation;
 		};
 		D4B8E1032FBC010100C55A4D /* PaletteView */ = {
 			isa = XCSwiftPackageProductDependency;
